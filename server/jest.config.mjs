@@ -86,7 +86,17 @@ const config = {
   // ],
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
-  // moduleNameMapper: {},
+  moduleNameMapper: {
+    '#src/(.*)\\.js$': '<rootDir>/src/$1',
+    '#config/(.*)\\.js$': '<rootDir>/src/config/$1',
+    '#controllers/(.*)\\.js$': '<rootDir>/src/controllers/$1',
+    '#models/(.*)\\.js$': '<rootDir>/src/models/$1',
+    '#routes/(.*)\\.js$': '<rootDir>/src/routes/$1',
+    '#services/(.*)\\.js$': '<rootDir>/src/services/$1',
+    '#middlewares/(.*)\\.js$': '<rootDir>/src/middlewares/$1',
+    '#utils/(.*)\\.js$': '<rootDir>/src/utils/$1',
+    '#validations/(.*)\\.js$': '<rootDir>/src/validations/$1',
+  },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
   // modulePathIgnorePatterns: [],
@@ -130,7 +140,7 @@ const config = {
   // runner: "jest-runner",
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
-  // setupFiles: [],
+  setupFiles: ['./tests/setup.js'],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
   // setupFilesAfterEnv: [],
@@ -171,7 +181,19 @@ const config = {
   // testRunner: "jest-circus/runner",
 
   // A map from regular expressions to paths to transformers
-  // transform: undefined,
+  transform: {
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        useESM: true,
+        diagnostics: {
+          ignoreCodes: [151002],
+        },
+      },
+    ],
+  },
+
+  extensionsToTreatAsEsm: ['.ts'],
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
   // transformIgnorePatterns: [
