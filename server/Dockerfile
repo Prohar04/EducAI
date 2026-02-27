@@ -6,7 +6,6 @@ COPY package.json package-lock.json ./
 # ---- Dependencies ----
 FROM base AS deps
 RUN npm ci --ignore-scripts
-RUN npx prisma generate
 
 # ---- Production ----
 FROM node:22-alpine AS runner
@@ -21,7 +20,7 @@ RUN addgroup --system --gid 1001 nodejs && \
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generate Prisma client in final stage
+# Generate Prisma client (needs schema + node_modules)
 RUN npx prisma generate
 
 USER appuser
