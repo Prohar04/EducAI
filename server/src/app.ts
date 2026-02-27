@@ -21,7 +21,7 @@ app.use(cookieParser());
 // Store sessions in PostgreSQL via Prisma
 app.use(
   session({
-    secret: 'cats',
+    secret: process.env.SESSION_SECRET || 'cats',
     resave: false,
     saveUninitialized: true,
     // store: new PrismaSessionStore(),
