@@ -14,6 +14,11 @@ COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Provide dummy build-time env vars so Next.js can collect page data
+# Real values are injected at runtime via docker-compose / k8s
+ARG SESSION_SECRET_KEY=build-time-placeholder
+ENV SESSION_SECRET_KEY=${SESSION_SECRET_KEY}
+
 RUN npm run build
 
 # ---- Production ----
