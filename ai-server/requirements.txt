@@ -10,11 +10,11 @@ archspec==0.2.5
 attrs==25.4.0
 boltons==25.0.0
 brotlicffi==1.2.0.0
-certifi==2025.11.12
+certifi==2026.1.4
 cffi==2.0.0
 charset-normalizer==3.4.4
 click==8.2.1
-conda==25.11.1
+conda==26.1.1
 conda-anaconda-telemetry==0.3.0
 conda-anaconda-tos==0.2.2
 conda-content-trust==0.2.0
@@ -74,6 +74,7 @@ pluggy==1.5.0
 propcache==0.4.1
 protobuf==6.33.5
 pyarrow==23.0.0
+pybind11==3.0.2
 pycosat==0.6.6
 pycparser==2.23
 pydantic==2.12.4
