@@ -13,10 +13,10 @@ BASE_DIR = Path(__file__).resolve().parent
 
 # Init FastAPI app
 app = FastAPI(
-    title="Tryora AI server",
+    title="EducAI AI server",
     description=(
         "A server for managing AI operations"
-        " for the Tryora platform"
+        " for the EducAI platform"
     ),
     version="1.0.0",
 )
