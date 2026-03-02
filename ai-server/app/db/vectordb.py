@@ -1,18 +1,26 @@
 import chromadb
 from typing import List, Dict, Any, Optional
 
+
 class VectorStore:
-    def __init__(self, host: str, port: int, collection_name: str = "my_embeddings"):
+    def __init__(
+        self,
+        host: str,
+        port: int,
+        collection_name: str = "my_embeddings"
+    ):
         """Initialize the ChromaDB client and get/create the collection."""
         self.client = chromadb.HttpClient(host=host, port=port)
         # We handle the collection once at initialization
-        self.collection = self.client.get_or_create_collection(name=collection_name)
+        self.collection = self.client.get_or_create_collection(
+            name=collection_name
+        )
 
     def add_document(
-        self, 
-        doc_id: str, 
-        embedding: List[float], 
-        document: str, 
+        self,
+        doc_id: str,
+        embedding: List[float],
+        document: str,
         metadata: Optional[Dict[str, Any]] = None
     ):
         """Add a single document and its embedding to the store."""
@@ -33,4 +41,3 @@ class VectorStore:
     def delete_document(self, doc_id: str):
         """Remove a document from the store."""
         self.collection.delete(ids=[doc_id])
-
