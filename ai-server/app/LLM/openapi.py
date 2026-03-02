@@ -26,7 +26,7 @@ class OpenAPI(AsyncOpenAI):
         response = await self.embeddings.create(
             extra_headers={
                 "HTTP-Referer": "http://localhost:8888",
-                "X-OpenRouter-Title": "Tryora AI Server",
+                "X-OpenRouter-Title": "EducAI AI Server",
             },
             input=text,
             model=model,

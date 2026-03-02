@@ -7,7 +7,7 @@ class WebScrapper:
         self.api_key = settings.APIFY_APIKEY or ""
         self.base_url = (
             "https://api.apify.com/v2/acts/"
-            "tryora~web-scraper/runs?token="
+            "educai~web-scraper/runs?token="
             + self.api_key
         )
         self.client = ApifyClient(self.api_key)

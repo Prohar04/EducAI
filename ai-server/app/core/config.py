@@ -40,7 +40,7 @@ class Settings(BaseSettings):
         default=None, validation_alias="APIFY_APIKEY"
     )
 
-    PROJECT_NAME: str = "TRYORA AI Server"
+    PROJECT_NAME: str = "EducAI AI Server"
     DEBUG: bool = False
 
     # Tell Pydantic to read from a .env file
