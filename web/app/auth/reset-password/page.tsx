@@ -8,10 +8,18 @@ import { AuthCard } from "@/components/auth/AuthCard";
 import { AuthHeader } from "@/components/auth/AuthHeader";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useActionState, useEffect } from "react";
+import { Suspense, useActionState, useEffect } from "react";
 import { AlertCircle, CheckCircle2, ArrowLeft } from "lucide-react";
 
 export default function ResetPasswordPage() {
+	return (
+		<Suspense fallback={<AuthCard><AuthHeader title="Loading…" description="" /></AuthCard>}>
+			<ResetPasswordContent />
+		</Suspense>
+	);
+}
+
+function ResetPasswordContent() {
 	const searchParams = useSearchParams();
 	const token = searchParams.get("token") || "";
 	const [state, action] = useActionState(resetPassword, undefined);
