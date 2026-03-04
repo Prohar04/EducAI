@@ -5,6 +5,7 @@ import {
 	FormState,
 	LoginFormSchema,
 	SignupFormSchema,
+	ForgotPasswordSchema,
 } from "@/types/auth.type";
 import { createSession } from "./session";
 import { BACKEND_URL } from "@/constants/constants";
@@ -128,3 +129,45 @@ export const refreshToken = async (oldRefreshToken: string) => {
 		return null;
 	}
 };
+
+export async function requestPasswordReset(
+	state: FormState,
+	formData: FormData,
+): Promise<FormState> {
+	const validatedFields = ForgotPasswordSchema.safeParse({
+		email: formData.get("email"),
+	});
+
+	if (!validatedFields.success) {
+		return {
+			error: validatedFields.error.flatten().fieldErrors,
+		};
+	}
+
+	try {
+		// TODO: Confirm the exact backend endpoint — using /auth/forgot-password for now.
+		const response = await fetch(`${BACKEND_URL}/auth/forgot-password`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(validatedFields.data),
+		});
+
+		// Always return a success-like message to avoid leaking whether the email exists.
+		if (response.ok || response.status === 404) {
+			return {
+				message:
+					"If an account exists for this email, we sent a password reset link.",
+			};
+		}
+
+		return {
+			message: "Something went wrong. Please try again later.",
+		};
+	} catch {
+		return {
+			message: "Unable to reach the server. Please try again later.",
+		};
+	}
+}
