@@ -1,22 +1,24 @@
 import React from "react";
 import SignInForm from "./signupInFrom";
-import { BACKEND_URL } from "@/constants/constants";
+import { AuthCard } from "@/components/auth/AuthCard";
+import { AuthHeader } from "@/components/auth/AuthHeader";
+import { AuthDivider } from "@/components/auth/AuthDivider";
+import { OAuthButton } from "@/components/auth/OAuthButton";
 
 const SignInPage = () => {
 	return (
-		<div className='bg-white p-8 rounded-lg shadow-lg w-96 flex flex-col justify-center items-center '>
-			<h1 className='text-center text-2xl font-bold mb-4'>Sign In Page</h1>
+		<AuthCard>
+			<AuthHeader
+				title="Welcome back"
+				description="Sign in to your EducAI account to continue learning."
+			/>
 
-			<SignInForm />
-			<hr />
-			<a
-				className='border px-4 py-2 rounded bg-sky-600 text-white'
-				href={`${BACKEND_URL}/auth/google`}
-			>
-				Sign In With Google
-			</a>
-			<div className=' flex flex-col gap-2'></div>
-		</div>
+			<div className="mt-8">
+				<OAuthButton />
+				<AuthDivider />
+				<SignInForm />
+			</div>
+		</AuthCard>
 	);
 };
 
