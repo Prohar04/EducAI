@@ -6,6 +6,8 @@ import {
 	LoginFormSchema,
 	SignupFormSchema,
 	ForgotPasswordSchema,
+	ResetPasswordSchema,
+	ResetPasswordFormState,
 } from "@/types/auth.type";
 import { createSession } from "./session";
 import { BACKEND_URL } from "@/constants/constants";
@@ -164,6 +166,52 @@ export async function requestPasswordReset(
 
 		return {
 			message: "Something went wrong. Please try again later.",
+		};
+	} catch {
+		return {
+			message: "Unable to reach the server. Please try again later.",
+		};
+	}
+}
+
+export async function resetPassword(
+	state: ResetPasswordFormState,
+	formData: FormData,
+): Promise<ResetPasswordFormState> {
+	const validatedFields = ResetPasswordSchema.safeParse({
+		token: formData.get("token"),
+		password: formData.get("password"),
+		confirmPassword: formData.get("confirmPassword"),
+	});
+
+	if (!validatedFields.success) {
+		return {
+			error: validatedFields.error.flatten().fieldErrors,
+		};
+	}
+
+	try {
+		const response = await fetch(`${BACKEND_URL}/auth/reset-password`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				token: validatedFields.data.token,
+				password: validatedFields.data.password,
+			}),
+		});
+
+		if (response.ok) {
+			return {
+				success: true,
+				message: "Password updated successfully. Redirecting to sign in...",
+			};
+		}
+
+		const data = await response.json().catch(() => null);
+		return {
+			message: data?.message || "Failed to reset password. The link may have expired.",
 		};
 	} catch {
 		return {

@@ -1,9 +1,11 @@
 import { Router } from 'express';
 import {
+  forgotPassword,
   googleAuth,
   googleAuthCallback,
   googleAuthFailure,
   refresh,
+  resetPassword,
   signin,
   signout,
   signup,
@@ -23,10 +25,17 @@ router.get('/google/failure', googleAuthFailure);
 router.post('/signup', signup);
 router.post('/signin', signin);
 
-// Get new access token using refresh token
+// Get new access token using refresh token (POST preferred, GET for backward compat)
+router.post('/refresh', refresh);
 router.get('/refresh', refresh);
 
-// Implement signout route
+// Signout (POST preferred, GET for backward compat)
+router.post('/signout', authMiddleware, signout);
 router.get('/signout', authMiddleware, signout);
+
+// Password reset flow
+// TODO: Add rate limiting to /forgot-password to prevent abuse
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 
 export default router;

@@ -66,3 +66,18 @@ export async function verifyUserEmail(userId: string) {
     throw err;
   }
 }
+
+export async function updateUserPassword(
+  userId: string,
+  passwordHash: string
+) {
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash },
+    });
+  } catch (err) {
+    console.error('Error updating user password:', err);
+    throw err;
+  }
+}

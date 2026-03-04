@@ -27,16 +27,17 @@ model User {
   oauthId       String? @map("oauth_id") @db.VarChar(255)
 
   // Relations
-  preferences       UserPreferences?
-  bodyImages        UserBodyImage[]
-  events            Event[]
-  garments          Garment[]
-  outfits           Outfit[]
-  tryonResults      TryonResult[]
-  processingJobs    ProcessingJob[]
-  recommendationLog RecommendationLog[]
-  refreshTokens     RefreshToken[]
-  sessions          UserSession[]
+  preferences         UserPreferences?
+  bodyImages          UserBodyImage[]
+  events              Event[]
+  garments            Garment[]
+  outfits             Outfit[]
+  tryonResults        TryonResult[]
+  processingJobs      ProcessingJob[]
+  recommendationLog   RecommendationLog[]
+  refreshTokens       RefreshToken[]
+  sessions            UserSession[]
+  passwordResetTokens PasswordResetToken[]
 
   @@index([email])
   @@index([oauthProvider, oauthId])
@@ -92,6 +93,21 @@ model RefreshToken {
   @@index([userId])
   @@index([expiresAt])
   @@map("refresh_tokens")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @unique @map("token_hash") @db.Text
+  expiresAt DateTime  @map("expires_at") @db.Timestamp
+  usedAt    DateTime? @map("used_at") @db.Timestamp
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
 }
 
 model UserSession {
