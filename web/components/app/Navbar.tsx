@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { GraduationCap, BookOpen, Search, Award, LogOut, User } from "lucide-react";
+import { GraduationCap, BookOpen, Sparkles, Bookmark, Award, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,7 +16,8 @@ import type { Session } from "@/types/auth.type";
 const NAV_LINKS = [
   { href: "/app", label: "Dashboard", icon: GraduationCap },
   { href: "/app/programs", label: "Programs", icon: BookOpen },
-  { href: "/app/search", label: "Search", icon: Search },
+  { href: "/app/match", label: "Match", icon: Sparkles },
+  { href: "/app/saved", label: "Saved", icon: Bookmark },
   { href: "/app/scholarships", label: "Scholarships", icon: Award },
 ] as const;
 
