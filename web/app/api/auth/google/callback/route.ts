@@ -64,5 +64,5 @@ export async function GET(req: NextRequest) {
 		refreshToken,
 	});
 
-	redirect("/");
+	redirect("/app");
 }
