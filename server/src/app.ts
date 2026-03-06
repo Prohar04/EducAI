@@ -51,9 +51,7 @@ app.use(
 );
 
 app.get('/', (req, res) => {
-  logger.info('Hello from Ai Shop!');
-
-  res.status(200).send('Hello from Ai Shop!');
+  res.status(200).json({ message: 'EducAI API', version: '1.0.0' });
 });
 
 app.get('/health', (req, res) => {
@@ -65,7 +63,7 @@ app.get('/health', (req, res) => {
 });
 
 app.get('/api', (req, res) => {
-  res.status(200).json({ message: 'Ai Shop API is running!' });
+  res.status(200).json({ message: 'EducAI API is running!' });
 });
 
 app.use('/auth', authRoutes);

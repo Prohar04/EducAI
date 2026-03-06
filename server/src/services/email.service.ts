@@ -1,5 +1,28 @@
 import transporter, { EMAIL_FROM } from '#src/config/nodemailer.config.ts';
 
+// EMAIL_PROVIDER=console  → print link to stdout (dev default when no creds configured)
+// EMAIL_PROVIDER=smtp|gmail → send via nodemailer
+const EMAIL_PROVIDER = process.env.EMAIL_PROVIDER || 'smtp';
+const IS_DEV = process.env.NODE_ENV !== 'production';
+
+async function sendMail(opts: { to: string; subject: string; html: string; text: string }): Promise<void> {
+  if (EMAIL_PROVIDER === 'console') {
+    console.log(`\n[EMAIL → ${opts.to}] ${opts.subject}\n${opts.text}\n`);
+    return;
+  }
+  try {
+    await transporter.sendMail({ from: EMAIL_FROM, ...opts });
+  } catch (err) {
+    if (IS_DEV) {
+      // In development, fall back to console so signup/reset never fail locally
+      console.error('[Email delivery failed — printing to console instead]', (err as Error).message);
+      console.log(`\n[EMAIL → ${opts.to}] ${opts.subject}\n${opts.text}\n`);
+    } else {
+      throw err; // re-throw in production so callers handle it
+    }
+  }
+}
+
 export async function sendVerificationEmail(
   toEmail: string,
   verifyUrl: string
@@ -29,13 +52,7 @@ export async function sendVerificationEmail(
 
   const text = `Verify your EducAI email\n\nClick the link below to verify your email (expires in 24 hours):\n${verifyUrl}\n\nIf you didn't create this account, you can safely ignore this email.`;
 
-  await transporter.sendMail({
-    from: EMAIL_FROM,
-    to: toEmail,
-    subject,
-    html,
-    text,
-  });
+  await sendMail({ to: toEmail, subject, html, text });
 }
 
 export async function sendPasswordResetEmail(
@@ -67,11 +84,5 @@ export async function sendPasswordResetEmail(
 
   const text = `Reset your EducAI password\n\nClick the link below to set a new password (expires in 30 minutes):\n${resetUrl}\n\nIf you didn't request this, you can safely ignore this email.`;
 
-  await transporter.sendMail({
-    from: EMAIL_FROM,
-    to: toEmail,
-    subject,
-    html,
-    text,
-  });
+  await sendMail({ to: toEmail, subject, html, text });
 }
