@@ -23,7 +23,7 @@
 ### Auth features
 
 | Feature | Details |
-|---|---|
+| --- | --- |
 | Email verification | New accounts must verify via email link (24 h TTL) before sign-in |
 | Account lockout | 5 failed passwords → 10-minute lockout (HTTP 423, `ACCOUNT_LOCKED`) |
 | Remember me | `rememberMe: true` → 30-day refresh token; default is 15 days |
@@ -46,6 +46,7 @@
 - [ ] Manual testing
 
 Run tests:
+
 ```bash
 npm test
 ```
