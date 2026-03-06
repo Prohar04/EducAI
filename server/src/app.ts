@@ -8,6 +8,7 @@ import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import passport from 'passport';
 
+import prisma from './config/database.ts';
 import authRoutes from './routes/auth.router.ts';
 import userRoutes from './routes/user.router.ts';
 import universityRoutes from './routes/university.router.ts';
@@ -65,6 +66,24 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
   });
+});
+
+app.get('/health/db', async (req, res) => {
+  try {
+    const userCount = await prisma.user.count();
+    res.status(200).json({
+      status: 'OK',
+      database: 'connected',
+      timestamp: new Date().toISOString(),
+      counts: { users: userCount },
+    });
+  } catch (err) {
+    res.status(503).json({
+      status: 'ERROR',
+      database: 'unreachable',
+      timestamp: new Date().toISOString(),
+    });
+  }
 });
 
 app.get('/api', (req, res) => {
