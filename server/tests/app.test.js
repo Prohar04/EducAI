@@ -18,7 +18,7 @@ describe('API Endpoints', () => {
 
       expect(response.body).toHaveProperty(
         'message',
-        'Ai Shop API is running!'
+        'EducAI API is running!'
       );
     });
   });

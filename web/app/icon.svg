@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Top face of mortarboard (rhombus) -->
+  <polygon points="50,8 88,28 50,48 12,28" fill="#F59E0B" stroke="#E07B00" stroke-width="3.5" stroke-linejoin="round"/>
+
+  <!-- Left face -->
+  <polygon points="12,28 12,62 50,82 50,48" fill="#D97706" stroke="#E07B00" stroke-width="3.5" stroke-linejoin="round"/>
+
+  <!-- Right face (with circuit board) -->
+  <polygon points="88,28 88,62 50,82 50,48" fill="#F59E0B" stroke="#E07B00" stroke-width="3.5" stroke-linejoin="round"/>
+
+  <!-- Circuit trace on right face -->
+  <line x1="62" y1="58" x2="76" y2="50" stroke="#E07B00" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Left node -->
+  <circle cx="62" cy="58" r="4" fill="#FDE68A" stroke="#E07B00" stroke-width="2"/>
+  <!-- Right node -->
+  <circle cx="76" cy="50" r="4" fill="#FDE68A" stroke="#E07B00" stroke-width="2"/>
+
+  <!-- Tassel cord (right side) -->
+  <line x1="88" y1="28" x2="92" y2="38" stroke="#D97706" stroke-width="3" stroke-linecap="round"/>
+  <!-- Tassel end -->
+  <circle cx="92" cy="42" r="4" fill="#D97706"/>
+</svg>
