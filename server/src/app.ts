@@ -10,6 +10,10 @@ import passport from 'passport';
 
 import authRoutes from './routes/auth.router.ts';
 import userRoutes from './routes/user.router.ts';
+import universityRoutes from './routes/university.router.ts';
+import programRoutes from './routes/program.router.ts';
+import matchRoutes from './routes/match.router.ts';
+import savedProgramRoutes from './routes/savedProgram.router.ts';
 // import { PrismaSessionStore } from './services/session.service.ts';
 
 const app = express();
@@ -69,6 +73,10 @@ app.get('/api', (req, res) => {
 
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
+app.use('/universities', universityRoutes);
+app.use('/programs', programRoutes);
+app.use('/match', matchRoutes);
+app.use('/saved-programs', savedProgramRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
