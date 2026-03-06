@@ -73,7 +73,6 @@ All destructive commands (`migrate dev`, `migrate reset`, `db push`) are wrapped
 - Blocks unless `PRISMA_MIGRATE_ENV=production` is explicitly set
 - Prints clear remediation steps
 
-
 Always use `npm run db:migrate:deploy` for cloud deployments.
 
 ### Health check
