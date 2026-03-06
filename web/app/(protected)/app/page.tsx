@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getUserProfile } from "@/lib/auth/action";
 import Link from "next/link";
-import { GraduationCap, BookOpen, Search, Award } from "lucide-react";
+import { GraduationCap, BookOpen, Sparkles, Bookmark } from "lucide-react";
 
 export default async function AppDashboard() {
   const profile = await getUserProfile();
@@ -27,16 +27,16 @@ export default async function AppDashboard() {
           description="Browse university programmes matched to your profile."
         />
         <DashboardCard
-          href="/app/search"
-          icon={<Search className="size-5" />}
-          title="Search"
-          description="Search universities, courses, and requirements."
+          href="/app/match"
+          icon={<Sparkles className="size-5" />}
+          title="Match"
+          description="Score and rank programmes based on your preferences."
         />
         <DashboardCard
-          href="/app/scholarships"
-          icon={<Award className="size-5" />}
-          title="Scholarships"
-          description="Discover scholarships you may be eligible for."
+          href="/app/saved"
+          icon={<Bookmark className="size-5" />}
+          title="Saved"
+          description="Your bookmarked programmes, ready to review."
         />
       </div>
 
