@@ -44,6 +44,15 @@ import { hashing, verifyHash } from '#src/utils/auth/hash.ts';
 import { AuthRequest } from '#src/types/authRequest.type.ts';
 import prisma from '#src/config/database.ts';
 
+// ── One-time code store for Google OAuth cross-origin handoff ──────
+const oauthCodeStore = new Map<string, { accessToken: string; refreshToken: string; expiry: number }>();
+setInterval(() => {
+  const now = Date.now();
+  for (const [code, val] of oauthCodeStore) {
+    if (val.expiry < now) oauthCodeStore.delete(code);
+  }
+}, 60_000);
+
 // ── helpers ────────────────────────────────────────────────────────
 
 const LOCKOUT_THRESHOLD = 5;
@@ -139,8 +148,10 @@ export const signup = async (req: Request, res: Response) => {
       if (existingUser.emailVerified) {
         return res.status(409).json({ message: 'Email already in use' });
       }
-      // Unverified — resend verification
-      await sendVerification(existingUser.id, existingUser.email);
+      // Unverified — resend verification (email failure must not block the response)
+      sendVerification(existingUser.id, existingUser.email).catch((e) =>
+        console.error('Resend verification email failed:', e),
+      );
       return res
         .status(200)
         .json({ message: 'Account created. Please check your email to verify.' });
@@ -155,7 +166,10 @@ export const signup = async (req: Request, res: Response) => {
       passwordHash: hashedPassword,
     });
 
-    await sendVerification(newUser.id, newUser.email);
+    // Fire-and-forget: email failures must not roll back account creation
+    sendVerification(newUser.id, newUser.email).catch((e) =>
+      console.error('Signup verification email failed (account created):', e),
+    );
 
     res
       .status(201)
@@ -368,12 +382,14 @@ export const googleAuthCallback = [
       const hashedRefreshToken = hashTokenCrypto(refreshToken);
       await saveRefreshToken(user.id, hashedRefreshToken);
 
-      // Set tokens as secure httpOnly cookies instead of query params
-      await saveToCookie(res, refreshToken, accessToken);
+      // Store tokens in a short-lived one-time code to hand off across origins.
+      // Cookies set here (localhost:8000) are not readable by the frontend (localhost:3000).
+      const oauthCode = crypto.randomBytes(32).toString('hex');
+      oauthCodeStore.set(oauthCode, { accessToken, refreshToken, expiry: Date.now() + 60_000 });
 
       const frontend = process.env.FRONTEND_URL || 'http://localhost:3000';
 
-      return res.redirect(`${frontend}/api/auth/google/callback`);
+      return res.redirect(`${frontend}/api/auth/google/callback?code=${oauthCode}`);
     } catch (error) {
       console.error('Error in Google auth callback:', error);
       const frontend = process.env.FRONTEND_URL || 'http://localhost:3000';
@@ -381,6 +397,21 @@ export const googleAuthCallback = [
     }
   },
 ];
+
+// ── GOOGLE EXCHANGE (one-time code → tokens) ──────────────────────
+export const googleExchange = async (req: Request, res: Response) => {
+  const { code } = req.query;
+  if (!code || typeof code !== 'string') {
+    return res.status(400).json({ message: 'Missing code' });
+  }
+  const entry = oauthCodeStore.get(code);
+  if (!entry || entry.expiry < Date.now()) {
+    oauthCodeStore.delete(code);
+    return res.status(401).json({ message: 'Invalid or expired code' });
+  }
+  oauthCodeStore.delete(code); // single-use
+  return res.status(200).json({ accessToken: entry.accessToken, refreshToken: entry.refreshToken });
+};
 
 export const googleAuthFailure = async (req: Request, res: Response) => {
   const frontend = process.env.FRONTEND_URL || 'http://localhost:3000';

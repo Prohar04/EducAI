@@ -4,6 +4,7 @@ import {
   googleAuth,
   googleAuthCallback,
   googleAuthFailure,
+  googleExchange,
   me,
   refresh,
   resendVerification,
@@ -20,6 +21,7 @@ const router = Router();
 // Google OAuth2 routes
 router.get('/google', googleAuth);
 router.get('/google/callback', googleAuthCallback);
+router.get('/google/exchange', googleExchange);
 router.get('/google/failure', googleAuthFailure);
 
 // Local auth routes

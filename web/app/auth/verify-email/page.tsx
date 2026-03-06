@@ -1,58 +1,27 @@
-"use client";
-
-import { Suspense, useActionState, use } from "react";
-import { useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { verifyEmail } from "@/lib/auth/auth";
 import { AuthCard } from "@/components/auth/AuthCard";
 import { AuthHeader } from "@/components/auth/AuthHeader";
-import { Input } from "@/components/ui/input";
-import SubmitButton from "@/components/ui/submitButton";
-import { verifyEmail, resendVerification } from "@/lib/auth/auth";
+import Link from "next/link";
 import {
 	CheckCircle2,
 	AlertCircle,
 	ArrowLeft,
 	Mail,
 } from "lucide-react";
-import type { VerifyEmailFormState } from "@/types/auth.type";
+import ResendForm from "./ResendForm";
 
-export default function VerifyEmailPage() {
-	return (
-		<Suspense
-			fallback={
-				<AuthCard>
-					<AuthHeader title="Verifying…" description="Please wait while we verify your email." />
-				</AuthCard>
-			}
-		>
-			<VerifyEmailContent />
-		</Suspense>
-	);
-}
+export default async function VerifyEmailPage({
+	searchParams,
+}: {
+	searchParams: Promise<{ token?: string; pending?: string }>;
+}) {
+	const { token, pending: pendingParam } = await searchParams;
+	const pending = pendingParam === "true";
 
-// Cache verification promises so React `use()` can suspend properly.
-const verifyCache = new Map<string, Promise<VerifyEmailFormState>>();
-function getVerifyPromise(token: string) {
-	if (!verifyCache.has(token)) {
-		verifyCache.set(token, verifyEmail(token));
+	let result = undefined;
+	if (token) {
+		result = await verifyEmail(token);
 	}
-	return verifyCache.get(token)!;
-}
-
-function VerifyEmailContent() {
-	const searchParams = useSearchParams();
-	const token = searchParams.get("token");
-	const pending = searchParams.get("pending") === "true";
-
-	// If there is a token, verify eagerly via React 19 `use()`
-	const result: VerifyEmailFormState = token
-		? use(getVerifyPromise(token))
-		: undefined;
-
-	const [resendState, resendAction] = useActionState(
-		resendVerification,
-		undefined,
-	);
 
 	// ── Pending state — user just signed up ──────────────────────────
 	if (pending && !token) {
@@ -71,23 +40,7 @@ function VerifyEmailContent() {
 						</span>
 					</div>
 
-					{resendState?.message && (
-						<div className="flex items-center gap-2 rounded-lg border border-green-500/50 bg-green-500/10 px-3 py-2 text-sm text-green-600 dark:text-green-400">
-							<CheckCircle2 className="size-4 shrink-0" />
-							{resendState.message}
-						</div>
-					)}
-
-					<form action={resendAction} className="grid gap-3">
-						<Input
-							type="email"
-							name="email"
-							placeholder="you@example.com"
-							autoComplete="email"
-							required
-						/>
-						<SubmitButton>Resend Verification Email</SubmitButton>
-					</form>
+					<ResendForm />
 
 					<div className="text-center">
 						<Link
@@ -148,23 +101,7 @@ function VerifyEmailContent() {
 					Enter your email to receive a new verification link.
 				</p>
 
-				{resendState?.message && (
-					<div className="flex items-center gap-2 rounded-lg border border-green-500/50 bg-green-500/10 px-3 py-2 text-sm text-green-600 dark:text-green-400">
-						<CheckCircle2 className="size-4 shrink-0" />
-						{resendState.message}
-					</div>
-				)}
-
-				<form action={resendAction} className="grid gap-3">
-					<Input
-						type="email"
-						name="email"
-						placeholder="you@example.com"
-						autoComplete="email"
-						required
-					/>
-					<SubmitButton>Resend Verification Email</SubmitButton>
-				</form>
+				<ResendForm />
 
 				<div className="text-center">
 					<Link
