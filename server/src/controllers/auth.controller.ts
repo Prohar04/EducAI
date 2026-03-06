@@ -7,6 +7,8 @@ import {
   findUserByEmail,
   findUserById,
   updateUserPassword,
+  incrementFailedLogin,
+  resetFailedLogin,
 } from '#src/services/user.service.ts';
 
 import { ReturnUserDto } from '#src/services/dto/createUser.dto.ts';
@@ -28,14 +30,43 @@ import {
   findPasswordResetToken,
   markPasswordResetTokenUsed,
 } from '#src/services/passwordReset.service.ts';
-import { sendPasswordResetEmail } from '#src/services/email.service.ts';
-// todo: implement session management and session store
+import {
+  sendPasswordResetEmail,
+  sendVerificationEmail,
+} from '#src/services/email.service.ts';
+import {
+  createEmailVerificationToken,
+  findEmailVerificationToken,
+  markEmailVerificationTokenUsed,
+} from '#src/services/emailVerification.service.ts';
 import { saveUserSession } from '#src/services/session.service.ts';
 import { hashing, verifyHash } from '#src/utils/auth/hash.ts';
 import { AuthRequest } from '#src/types/authRequest.type.ts';
+import prisma from '#src/config/database.ts';
+
+// ── helpers ────────────────────────────────────────────────────────
+
+const LOCKOUT_THRESHOLD = 5;
+const LOCKOUT_DURATION_MS = 10 * 60 * 1000; // 10 minutes
+const DEFAULT_REFRESH_TTL_DAYS = 15;
+const REMEMBER_ME_TTL_DAYS = 30;
+
+async function sendVerification(userId: string, email: string) {
+  const rawToken = crypto.randomBytes(32).toString('hex');
+  const tokenHash = hashTokenCrypto(rawToken);
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+  await createEmailVerificationToken(userId, tokenHash, expiresAt);
+
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+  const verifyUrl = `${frontendUrl}/auth/verify-email?token=${rawToken}`;
+
+  await sendVerificationEmail(email, verifyUrl);
+}
+
+// ── REFRESH ────────────────────────────────────────────────────────
 
 export const refresh = async (req: Request, res: Response) => {
-  // Accept refresh token from body (POST) or cookie (GET fallback)
   const token = req.body?.refresh || req.cookies?.refreshToken;
 
   if (!token) {
@@ -54,29 +85,30 @@ export const refresh = async (req: Request, res: Response) => {
     return res.status(401).json({ message: 'Refresh token not found' });
   }
 
-  // Check expiry from DB
   if (new Date() > storedToken.expiresAt) {
     await deleteRefreshToken(hashRT);
     return res.status(401).json({ message: 'Refresh token expired' });
   }
 
-  // Delete old token (rotation)
+  // Preserve remember-me TTL on rotation
+  const ttlDays = storedToken.ttlDays || DEFAULT_REFRESH_TTL_DAYS;
+
   await deleteRefreshToken(hashRT);
 
   const { accessToken, refreshToken: newRefreshToken } =
-    await generateTokens(userId);
+    await generateTokens(userId, { refreshTtlDays: ttlDays });
 
   const hashedRefreshToken = hashTokenCrypto(newRefreshToken);
-  await saveRefreshToken(userId, hashedRefreshToken);
+  await saveRefreshToken(userId, hashedRefreshToken, ttlDays);
 
-  // Also set cookies for backward compat
   await saveToCookie(res, newRefreshToken, accessToken);
 
-  // Return JSON so the frontend can use the tokens directly
   res
     .status(200)
     .json({ accessToken, refreshToken: newRefreshToken, message: 'Token refreshed' });
 };
+
+// ── SIGNUP ─────────────────────────────────────────────────────────
 
 export const signup = async (req: Request, res: Response) => {
   try {
@@ -88,9 +120,16 @@ export const signup = async (req: Request, res: Response) => {
         .json({ message: 'Email, password and name are required' });
     }
 
-    const user = await findUserByEmail(email);
-    if (user) {
-      return res.status(409).json({ message: 'User already exists' });
+    const existingUser = await findUserByEmail(email);
+    if (existingUser) {
+      if (existingUser.emailVerified) {
+        return res.status(409).json({ message: 'Email already in use' });
+      }
+      // Unverified — resend verification
+      await sendVerification(existingUser.id, existingUser.email);
+      return res
+        .status(200)
+        .json({ message: 'Account created. Please check your email to verify.' });
     }
 
     const hashedPassword = await hashing(password);
@@ -102,68 +141,158 @@ export const signup = async (req: Request, res: Response) => {
       passwordHash: hashedPassword,
     });
 
-    // TODO: Send verification email here
+    await sendVerification(newUser.id, newUser.email);
 
     res
       .status(201)
-      .json({ message: 'User registered successfully', user: newUser });
+      .json({ message: 'Account created. Please check your email to verify.' });
   } catch (error) {
     console.error('Error in signup:', error);
-    res.status(500).json({ message: 'user creation failed' });
+    res.status(500).json({ message: 'User creation failed' });
   }
 };
+
+// ── VERIFY EMAIL ───────────────────────────────────────────────────
+
+export const verifyEmail = async (req: Request, res: Response) => {
+  try {
+    const { token } = req.body;
+
+    if (!token || typeof token !== 'string') {
+      return res.status(400).json({ message: 'Verification token is required' });
+    }
+
+    const tokenHash = hashTokenCrypto(token);
+    const record = await findEmailVerificationToken(tokenHash);
+
+    if (!record || record.usedAt || new Date() > record.expiresAt) {
+      return res.status(400).json({ message: 'Invalid or expired verification link' });
+    }
+
+    // Mark user as verified
+    await prisma.user.update({
+      where: { id: record.userId },
+      data: { emailVerified: true, isActive: true },
+    });
+
+    await markEmailVerificationTokenUsed(record.id);
+
+    res.status(200).json({ message: 'Email verified successfully' });
+  } catch (error) {
+    console.error('Error in verifyEmail:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// ── RESEND VERIFICATION ────────────────────────────────────────────
+
+export const resendVerification = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+
+    // Always return 200 generic regardless
+    const genericMessage =
+      'If an account exists, we sent a verification email.';
+
+    if (!email || typeof email !== 'string') {
+      return res.status(200).json({ message: genericMessage });
+    }
+
+    const user = await findUserByEmail(email);
+    if (user && !user.emailVerified) {
+      await sendVerification(user.id, user.email);
+    }
+
+    // TODO: rate limit per IP/email
+    res.status(200).json({ message: genericMessage });
+  } catch (error) {
+    console.error('Error in resendVerification:', error);
+    res.status(200).json({ message: 'If an account exists, we sent a verification email.' });
+  }
+};
+
+// ── SIGNIN (with lockout + email-verified check + remember me) ─────
 
 export const signin = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
-  const user = await findUserByEmail(email);
+  try {
+    const { email, password, rememberMe } = req.body;
+    const user = await findUserByEmail(email);
 
-  if (!user) {
-    return res.status(400).json({ message: 'Invalid email or password' });
+    if (!user || !user.passwordHash) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    // Check lockout
+    if (user.lockoutUntil && user.lockoutUntil > new Date()) {
+      const retryAfterSeconds = Math.ceil(
+        (user.lockoutUntil.getTime() - Date.now()) / 1000
+      );
+      return res.status(423).json({
+        code: 'ACCOUNT_LOCKED',
+        message: 'Too many failed attempts. Try again later.',
+        retryAfterSeconds,
+      });
+    }
+
+    const isPasswordValid = await verifyHash(user.passwordHash, password);
+    if (!isPasswordValid) {
+      await incrementFailedLogin(user.id);
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    // Check email verified
+    if (!user.emailVerified) {
+      return res.status(403).json({
+        code: 'EMAIL_NOT_VERIFIED',
+        message: 'Please verify your email before signing in.',
+      });
+    }
+
+    // Reset failed login counters on success
+    await resetFailedLogin(user.id);
+
+    const ttlDays = rememberMe ? REMEMBER_ME_TTL_DAYS : DEFAULT_REFRESH_TTL_DAYS;
+
+    const { accessToken, refreshToken } = await generateTokens(user.id, {
+      refreshTtlDays: ttlDays,
+    });
+    const hashedRefreshToken = hashTokenCrypto(refreshToken);
+    await saveRefreshToken(user.id, hashedRefreshToken, ttlDays);
+
+    await saveToCookie(res, refreshToken, accessToken);
+
+    const secureUser: ReturnUserDto = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      avatar: user.avatarUrl || undefined,
+      emailVerified: user.emailVerified,
+      isActive: user.isActive,
+    };
+
+    res.status(200).json({
+      message: 'Signin successful',
+      user: secureUser,
+      accessToken,
+      refreshToken,
+    });
+  } catch (error) {
+    console.error('Error in signin:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
-
-  const isPasswordValid = await verifyHash(
-    user.passwordHash as string,
-    password
-  );
-  if (!isPasswordValid) {
-    return res.status(400).json({ message: 'Invalid email or password' });
-  }
-
-  const { accessToken, refreshToken } = await generateTokens(user.id);
-  const hashedRefreshToken = hashTokenCrypto(refreshToken);
-
-  await saveRefreshToken(user.id, hashedRefreshToken);
-
-  // TODO: Save session info (user agent, IP) in the database for active session management
-  // ? Save session info in the database for active session management
-  // await saveUserSession(user.id, req.sessionID, req.get('user-agent'), req.ip);
-
-  await saveToCookie(res, refreshToken, accessToken);
-
-  const secureUser: ReturnUserDto = {
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    avatar: user.avatarUrl || undefined,
-    emailVerified: user.emailVerified,
-    isActive: user.isActive,
-  };
-
-  res.status(200).json({ message: 'Signin successful', user: secureUser });
 };
 
-// @desc    Signout user and invalidate refresh token
-// @route   GET|POST /auth/signout
+// ── SIGNOUT ────────────────────────────────────────────────────────
+
 export const signout = async (req: AuthRequest, res: Response) => {
   const { userId } = req;
   if (!userId) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
-  await deleteUserRefreshTokens(userId); // Invalidate all refresh tokens for the user
-  await clearTokens(res); // Clear cookies
+  await deleteUserRefreshTokens(userId);
+  await clearTokens(res);
 
-  // Passport/session logout — gracefully handle if not initialized
   if (typeof req.logout === 'function') {
     req.logout(err => {
       if (err) console.error('Logout error:', err);
@@ -176,22 +305,20 @@ export const signout = async (req: AuthRequest, res: Response) => {
   res.status(200).json({ message: 'Signed out' });
 };
 
-// @desc    Initiate Google OAuth2 login
-// @route   GET /auth/google
+// ── GOOGLE OAUTH ───────────────────────────────────────────────────
+
 export const googleAuth = passport.authenticate('google', {
   scope: ['email', 'profile'],
 });
 
-// @desc    Handle Google OAuth2 callback
-// @route   GET /auth/google/callback
 export const googleAuthCallback = [
   passport.authenticate('google', {
-    session: false, // important if you're using JWT instead of sessions
+    session: false,
     failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/failure`,
   }),
   async (req: Request, res: Response) => {
     try {
-      const user = req.user as ReturnUserDto; // Type assertion for user object returned by passport
+      const user = req.user as ReturnUserDto;
 
       if (!user) {
         return res.status(401).json({ message: 'Authentication failed' });
@@ -215,17 +342,13 @@ export const googleAuthCallback = [
   },
 ];
 
-// @desc    Google OAuth2 failure route
-// @route   GET /auth/google/failure
-// todo: keep one failior route
 export const googleAuthFailure = async (req: Request, res: Response) => {
   const frontend = process.env.FRONTEND_URL || 'http://localhost:3000';
   res.redirect(`${frontend}/auth/failure`);
 };
 
-// @desc    Request a password reset link
-// @route   POST /auth/forgot-password
-// TODO: Add rate limiting to prevent abuse
+// ── FORGOT PASSWORD ────────────────────────────────────────────────
+
 export const forgotPassword = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
@@ -234,7 +357,6 @@ export const forgotPassword = async (req: Request, res: Response) => {
       return res.status(422).json({ message: 'Email is required' });
     }
 
-    // Always return 200 to avoid leaking whether the email exists
     const genericMessage =
       'If an account exists for this email, a password reset link has been sent.';
 
@@ -243,19 +365,18 @@ export const forgotPassword = async (req: Request, res: Response) => {
       return res.status(200).json({ message: genericMessage });
     }
 
-    // Generate raw token and hash it for storage
     const rawToken = crypto.randomBytes(32).toString('hex');
     const tokenHash = hashTokenCrypto(rawToken);
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
 
     await createPasswordResetToken(user.id, tokenHash, expiresAt);
 
-    // Build reset link and send email
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     const resetUrl = `${frontendUrl}/auth/reset-password?token=${rawToken}`;
 
     await sendPasswordResetEmail(email, resetUrl);
 
+    // TODO: rate limit per IP/email
     res.status(200).json({ message: genericMessage });
   } catch (error) {
     console.error('Error in forgotPassword:', error);
@@ -263,8 +384,8 @@ export const forgotPassword = async (req: Request, res: Response) => {
   }
 };
 
-// @desc    Reset password with a valid token
-// @route   POST /auth/reset-password
+// ── RESET PASSWORD ─────────────────────────────────────────────────
+
 export const resetPassword = async (req: Request, res: Response) => {
   try {
     const { token, password } = req.body;
@@ -279,7 +400,6 @@ export const resetPassword = async (req: Request, res: Response) => {
         .json({ message: 'Password must be at least 8 characters long' });
     }
 
-    // Validate password complexity (match frontend rules)
     if (!/[a-zA-Z]/.test(password)) {
       return res
         .status(422)
@@ -313,14 +433,11 @@ export const resetPassword = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Reset token has expired' });
     }
 
-    // Hash new password and update user
     const hashedPassword = await hashing(password);
     await updateUserPassword(resetToken.userId, hashedPassword);
 
-    // Mark token as used
     await markPasswordResetTokenUsed(resetToken.id);
 
-    // Revoke all refresh tokens for security
     await deleteUserRefreshTokens(resetToken.userId);
 
     res.status(200).json({ message: 'Password updated successfully' });

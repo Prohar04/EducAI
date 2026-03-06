@@ -81,3 +81,33 @@ export async function updateUserPassword(
     throw err;
   }
 }
+
+export async function incrementFailedLogin(userId: string) {
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      failedLoginCount: { increment: 1 },
+      lastFailedLoginAt: new Date(),
+    },
+  });
+  // Lock account after 5 failed attempts (10-minute cooldown)
+  if (user.failedLoginCount >= 5) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        lockoutUntil: new Date(Date.now() + 10 * 60 * 1000),
+        failedLoginCount: 0,
+      },
+    });
+  }
+}
+
+export async function resetFailedLogin(userId: string) {
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      failedLoginCount: 0,
+      lockoutUntil: null,
+    },
+  });
+}

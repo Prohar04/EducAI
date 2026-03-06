@@ -5,10 +5,12 @@ import {
   googleAuthCallback,
   googleAuthFailure,
   refresh,
+  resendVerification,
   resetPassword,
   signin,
   signout,
   signup,
+  verifyEmail,
 } from '#src/controllers/auth.controller.ts';
 import { authMiddleware } from '#src/middlewares/authenticate.ts';
 
@@ -19,11 +21,13 @@ router.get('/google', googleAuth);
 router.get('/google/callback', googleAuthCallback);
 router.get('/google/failure', googleAuthFailure);
 
-// TODO: Implement facebook and github auth routes
-
 // Local auth routes
 router.post('/signup', signup);
 router.post('/signin', signin);
+
+// Email verification
+router.post('/verify-email', verifyEmail);
+router.post('/resend-verification', resendVerification);
 
 // Get new access token using refresh token (POST preferred, GET for backward compat)
 router.post('/refresh', refresh);
