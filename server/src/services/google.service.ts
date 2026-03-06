@@ -7,8 +7,7 @@ export async function CreateGoogleUser(profile: any) {
         email: profile.emails[0].value,
         name: profile.displayName,
         avatarUrl: profile.photos[0].value,
-        // TODO: handle password for google users
-        passwordHash: ' ',
+        passwordHash: null,
         isActive: true,
         emailVerified: true,
         oauthProvider: 'google',

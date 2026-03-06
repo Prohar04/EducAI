@@ -24,15 +24,20 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Store sessions in PostgreSQL via Prisma
+const sessionSecret = process.env.SESSION_SECRET;
+if (!sessionSecret && process.env.NODE_ENV === 'production') {
+  throw new Error('SESSION_SECRET must be set in production');
+}
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'cats',
+    secret: sessionSecret || 'dev-only-secret',
     resave: false,
-    saveUninitialized: true,
-    // store: new PrismaSessionStore(),
+    saveUninitialized: false,
     cookie: {
       secure: process.env.NODE_ENV === 'production',
       maxAge: 15 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      sameSite: 'lax',
     },
   })
 );

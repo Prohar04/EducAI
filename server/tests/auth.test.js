@@ -441,7 +441,7 @@ describe('Auth Endpoints', () => {
 
       const res = await request(app)
         .post('/auth/refresh')
-        .send({ refresh: 'old' });
+        .set('Cookie', 'refreshToken=old');
 
       expect(res.status).toBe(200);
       expect(mockGenerateTokens).toHaveBeenCalledWith(baseUser.id, {
@@ -465,7 +465,7 @@ describe('Auth Endpoints', () => {
 
       const res = await request(app)
         .post('/auth/refresh')
-        .send({ refresh: 'old' });
+        .set('Cookie', 'refreshToken=old');
 
       expect(res.status).toBe(200);
       expect(mockGenerateTokens).toHaveBeenCalledWith(baseUser.id, {
@@ -474,7 +474,7 @@ describe('Auth Endpoints', () => {
     });
 
     it('returns 401 when no refresh token is provided', async () => {
-      const res = await request(app).post('/auth/refresh').send({});
+      const res = await request(app).post('/auth/refresh');
       expect(res.status).toBe(401);
     });
 
@@ -483,7 +483,7 @@ describe('Auth Endpoints', () => {
 
       const res = await request(app)
         .post('/auth/refresh')
-        .send({ refresh: 'invalid' });
+        .set('Cookie', 'refreshToken=invalid');
 
       expect(res.status).toBe(401);
     });
@@ -494,7 +494,7 @@ describe('Auth Endpoints', () => {
 
       const res = await request(app)
         .post('/auth/refresh')
-        .send({ refresh: 'orphan' });
+        .set('Cookie', 'refreshToken=orphan');
 
       expect(res.status).toBe(401);
     });
@@ -510,7 +510,7 @@ describe('Auth Endpoints', () => {
 
       const res = await request(app)
         .post('/auth/refresh')
-        .send({ refresh: 'old' });
+        .set('Cookie', 'refreshToken=old');
 
       expect(res.status).toBe(401);
       expect(mockDeleteRefreshToken).toHaveBeenCalled();
