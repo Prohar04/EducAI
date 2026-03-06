@@ -87,14 +87,23 @@ const config = {
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
   moduleNameMapper: {
+    '#src/(.*)\\.ts$': '<rootDir>/src/$1',
     '#src/(.*)\\.js$': '<rootDir>/src/$1',
+    '#config/(.*)\\.ts$': '<rootDir>/src/config/$1',
     '#config/(.*)\\.js$': '<rootDir>/src/config/$1',
+    '#controllers/(.*)\\.ts$': '<rootDir>/src/controllers/$1',
     '#controllers/(.*)\\.js$': '<rootDir>/src/controllers/$1',
+    '#models/(.*)\\.ts$': '<rootDir>/src/models/$1',
     '#models/(.*)\\.js$': '<rootDir>/src/models/$1',
+    '#routes/(.*)\\.ts$': '<rootDir>/src/routes/$1',
     '#routes/(.*)\\.js$': '<rootDir>/src/routes/$1',
+    '#services/(.*)\\.ts$': '<rootDir>/src/services/$1',
     '#services/(.*)\\.js$': '<rootDir>/src/services/$1',
+    '#middlewares/(.*)\\.ts$': '<rootDir>/src/middlewares/$1',
     '#middlewares/(.*)\\.js$': '<rootDir>/src/middlewares/$1',
+    '#utils/(.*)\\.ts$': '<rootDir>/src/utils/$1',
     '#utils/(.*)\\.js$': '<rootDir>/src/utils/$1',
+    '#validations/(.*)\\.ts$': '<rootDir>/src/validations/$1',
     '#validations/(.*)\\.js$': '<rootDir>/src/validations/$1',
   },
 
