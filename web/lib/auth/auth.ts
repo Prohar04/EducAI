@@ -105,7 +105,7 @@ export async function signIn(
 				accessToken: result.accessToken,
 				refreshToken: result.refreshToken,
 			});
-			redirect("/");
+			redirect("/app");
 		}
 
 		const data = await response.json().catch(() => null);
