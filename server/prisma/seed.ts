@@ -805,40 +805,70 @@ const UNIVERSITIES: UniInput[] = [
 // Main
 // ---------------------------------------------------------------------------
 async function main() {
-  console.log('🌱  Cleaning existing module1 seed data...');
-  await prisma.savedProgram.deleteMany();
-  await prisma.programDeadline.deleteMany();
-  await prisma.programRequirement.deleteMany();
-  await prisma.program.deleteMany();
-  await prisma.university.deleteMany();
-  await prisma.country.deleteMany();
+  // ── Guard: only run if SEED_ENABLED=true ──────────────────────────────────
+  if (process.env.SEED_ENABLED !== 'true') {
+    console.log('⏭️   Seed skipped: SEED_ENABLED is not "true". Set SEED_ENABLED=true to run.');
+    return;
+  }
 
-  console.log('🌍  Seeding countries...');
+  console.log('🌱  Starting idempotent seed (no data will be deleted)...\n');
+
+  // ── Countries (upsert by unique code) ─────────────────────────────────────
+  console.log('🌍  Upserting countries...');
   const countryMap: Record<string, string> = {};
-  const countryRecords = await Promise.all(
-    [
-      { code: 'US', name: 'United States' },
-      { code: 'GB', name: 'United Kingdom' },
-      { code: 'CA', name: 'Canada' },
-      { code: 'DE', name: 'Germany' },
-      { code: 'AU', name: 'Australia' },
-    ].map((c) => prisma.country.create({ data: c })),
-  );
-  for (const c of countryRecords) countryMap[c.code] = c.id;
-
-  let programCount = 0;
-  console.log('🏫  Seeding universities and programs...');
-  for (const uni of UNIVERSITIES) {
-    const university = await prisma.university.create({
-      data: {
-        name: uni.name,
-        city: uni.city,
-        website: uni.website,
-        description: uni.description,
-        countryId: countryMap[uni.countryCode],
-      },
+  const countryDefs = [
+    { code: 'US', name: 'United States' },
+    { code: 'GB', name: 'United Kingdom' },
+    { code: 'CA', name: 'Canada' },
+    { code: 'DE', name: 'Germany' },
+    { code: 'AU', name: 'Australia' },
+  ];
+  for (const c of countryDefs) {
+    const country = await prisma.country.upsert({
+      where: { code: c.code },
+      update: { name: c.name },
+      create: c,
     });
+    countryMap[country.code] = country.id;
+  }
+
+  // ── Universities & Programs ───────────────────────────────────────────────
+  let newUniversities = 0;
+  let newPrograms = 0;
+  let skippedPrograms = 0;
+
+  console.log('🏫  Seeding universities and programs...');
+
+  for (const uni of UNIVERSITIES) {
+    // Find or create university (no unique constraint; match by name + country)
+    let university = await prisma.university.findFirst({
+      where: { name: uni.name, countryId: countryMap[uni.countryCode] },
+    });
+
+    if (!university) {
+      university = await prisma.university.create({
+        data: {
+          name: uni.name,
+          city: uni.city,
+          website: uni.website,
+          description: uni.description,
+          countryId: countryMap[uni.countryCode],
+        },
+      });
+      newUniversities++;
+    }
+
+    // Programs: find by universityId + title + level; create only if missing
     for (const prog of uni.programs) {
+      const existing = await prisma.program.findFirst({
+        where: { universityId: university.id, title: prog.title, level: prog.level },
+      });
+
+      if (existing) {
+        skippedPrograms++;
+        continue;
+      }
+
       await prisma.program.create({
         data: {
           universityId: university.id,
@@ -853,13 +883,31 @@ async function main() {
           deadlines: { create: prog.deadlines },
         },
       });
-      programCount++;
+      newPrograms++;
     }
-    console.log(`  ✓ ${university.name} (${uni.programs.length} programs)`);
+
+    console.log(
+      `  ✓ ${university.name} — ${uni.programs.length - skippedPrograms} new, ${skippedPrograms} already existed`,
+    );
+    // reset per-university skip counter for next log line
+    skippedPrograms = 0;
   }
-  console.log(
-    `\n✅  Done: ${UNIVERSITIES.length} universities, ${programCount} programs across 5 countries.`,
-  );
+
+  // ── Final summary ─────────────────────────────────────────────────────────
+  const [totalCountries, totalUniversities, totalPrograms] = await Promise.all([
+    prisma.country.count(),
+    prisma.university.count(),
+    prisma.program.count(),
+  ]);
+
+  console.log('\n📊  Seed summary:');
+  console.log(`   New universities inserted : ${newUniversities}`);
+  console.log(`   New programs inserted     : ${newPrograms}`);
+  console.log('\n   Database totals:');
+  console.log(`   Countries    : ${totalCountries}`);
+  console.log(`   Universities : ${totalUniversities}`);
+  console.log(`   Programs     : ${totalPrograms}`);
+  console.log('\n✅  Done.\n');
 }
 
 main()

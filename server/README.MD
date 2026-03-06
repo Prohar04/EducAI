@@ -1,4 +1,4 @@
-# MagiShop Server - Checklist
+# EducAI Server
 
 ## Setup
 
@@ -6,6 +6,85 @@
 - [x] Configure environment variables
 - [x] Set up database
 - [x] Run migrations
+
+## Neon PostgreSQL (Cloud Database)
+
+The server uses [Neon](https://neon.tech) as its cloud Postgres database.  
+`DATABASE_URL_CLOUD` is used in production; `DATABASE_URL_LOCAL` is used in development.
+
+### Environment variables
+
+```env
+DATABASE_URL_CLOUD=postgresql://...@...neon.tech/neondb?sslmode=require  # DO NOT COMMIT
+DATABASE_URL_LOCAL=postgresql://educai:educai@localhost:5432/educai
+PRISMA_MIGRATE_ENV=   # set to 'production' only when running migrate dev/reset on cloud
+SEED_ENABLED=         # set to 'true' to allow db:seed:safe
+```
+
+### Database scripts
+
+| Command | Description |
+|---|---|
+| `npm run db:generate` | Re-generate Prisma client after schema changes |
+| `npm run db:migrate:dev` | Create + apply a new migration (local only — blocked on remote) |
+| `npm run db:migrate:deploy` | Apply pending migrations to Neon/cloud (safe, no data loss) |
+| `npm run db:status` | Show migration status |
+| `npm run db:studio` | Open Prisma Studio |
+| `npm run db:seed:safe` | Run seed with safety guard (needs `SEED_ENABLED=true`) |
+
+### Migrate Neon (deployment)
+
+```bash
+cd server
+
+# 1. Regenerate Prisma client (run after any schema changes)
+npm run db:generate
+
+# 2. Apply all pending migrations to Neon (never resets data)
+NODE_ENV=production npm run db:migrate:deploy
+
+# 3. Confirm migration state
+npm run db:status
+```
+
+### Seed demo data (Module 1)
+
+Seeding is **idempotent** — safe to re-run; existing rows are skipped, nothing is deleted.
+
+```bash
+# Local dev (no remote guard needed)
+SEED_ENABLED=true tsx prisma/seed.ts
+
+# Or via npm script with full guard
+SEED_ENABLED=true npm run db:seed:safe
+```
+
+To seed against Neon (cloud), both flags are required:
+
+```bash
+SEED_ENABLED=true PRISMA_MIGRATE_ENV=production npm run db:seed:safe
+```
+
+### Safety guard (`scripts/assert-safe-db.ts`)
+
+All destructive commands (`migrate dev`, `migrate reset`, `db push`) are wrapped with a guard that:
+- Detects remote hosts (`neon.tech`, RDS, Supabase, etc.)
+- Blocks unless `PRISMA_MIGRATE_ENV=production` is explicitly set
+- Prints clear remediation steps
+
+Always use `npm run db:migrate:deploy` for cloud deployments.
+
+### Health check
+
+```
+GET /health/db
+```
+
+Returns Prisma connection status and live user count:
+
+```json
+{ "status": "OK", "database": "connected", "counts": { "users": 0 } }
+```
 
 ## Authentication
 

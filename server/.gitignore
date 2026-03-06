@@ -5,6 +5,6 @@ node_modules
 .neon_local/
 /src/generated/prisma
 /logs
-/prisma/migrations
+# /prisma/migrations  <-- intentionally tracked so CI can run prisma migrate deploy
 /prisma/generated
 /src/generated
