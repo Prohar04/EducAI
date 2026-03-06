@@ -1,43 +1,63 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { AuthRequest } from '#src/types/authRequest.type.ts';
+import prisma from '#src/config/database.ts';
 
-export const getProfile = async (req: Request, res: Response) => {
-  return 'get profile';
-
-  res.status(200).json({ message: 'User profile data' });
+export const getUserProfile = async (req: AuthRequest, res: Response) => {
+  try {
+    const profile = await prisma.userProfile.findUnique({
+      where: { userId: req.userId! },
+    });
+    res.status(200).json({ profile: profile ?? null });
+  } catch {
+    res.status(500).json({ message: 'Failed to fetch profile' });
+  }
 };
 
-export const updateProfile = async (req: Request, res: Response) => {
-  return 'update profile';
+export const upsertUserProfile = async (req: AuthRequest, res: Response) => {
+  try {
+    const {
+      targetCountry,
+      level,
+      budgetRange,
+      intendedMajor,
+      gpa,
+      testScores,
+      onboardingDone,
+    } = req.body as {
+      targetCountry?: string;
+      level?: string;
+      budgetRange?: string;
+      intendedMajor?: string;
+      gpa?: number;
+      testScores?: Record<string, number>;
+      onboardingDone?: boolean;
+    };
 
-  res.status(200).json({ message: 'User profile updated' });
-};
+    const profile = await prisma.userProfile.upsert({
+      where: { userId: req.userId! },
+      update: {
+        targetCountry,
+        level,
+        budgetRange,
+        intendedMajor,
+        gpa,
+        testScores,
+        onboardingDone,
+      },
+      create: {
+        userId: req.userId!,
+        targetCountry,
+        level,
+        budgetRange,
+        intendedMajor,
+        gpa,
+        testScores,
+        onboardingDone: onboardingDone ?? false,
+      },
+    });
 
-export const changePassword = async (req: Request, res: Response) => {
-  return 'change password';
-
-  res.status(200).json({ message: 'Password changed successfully' });
-};
-
-export const resetPassword = async (req: Request, res: Response) => {
-  return 'reset password';
-
-  res.status(200).json({ message: 'Password reset successfully' });
-};
-
-export const verifyEmail = async (req: Request, res: Response) => {
-  return 'verify email';
-
-  res.status(200).json({ message: 'Email verified successfully' });
-};
-
-export const resendVerificationEmail = async (req: Request, res: Response) => {
-  return 'resend verification email';
-
-  res.status(200).json({ message: 'Verification email resent' });
-};
-
-export const deleteAccount = async (req: Request, res: Response) => {
-  return 'delete account';
-
-  res.status(200).json({ message: 'Account deleted successfully' });
+    res.status(200).json({ profile });
+  } catch {
+    res.status(500).json({ message: 'Failed to save profile' });
+  }
 };

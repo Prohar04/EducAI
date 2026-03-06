@@ -107,3 +107,22 @@ export type Session = {
 	accessToken: string;
 	refreshToken: string;
 };
+
+export type UserProfile = {
+	userId: string;
+	targetCountry?: string | null;
+	level?: string | null;
+	budgetRange?: string | null;
+	intendedMajor?: string | null;
+	gpa?: number | null;
+	testScores?: Record<string, number> | null;
+	onboardingDone: boolean;
+};
+
+export type OnboardingFormState =
+	| {
+			message?: string;
+			success?: boolean;
+			errors?: Partial<Record<keyof UserProfile, string[]>>;
+	  }
+	| undefined;
