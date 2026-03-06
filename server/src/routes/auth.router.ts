@@ -4,6 +4,7 @@ import {
   googleAuth,
   googleAuthCallback,
   googleAuthFailure,
+  me,
   refresh,
   resendVerification,
   resetPassword,
@@ -36,6 +37,9 @@ router.get('/refresh', refresh);
 // Signout (POST preferred, GET for backward compat)
 router.post('/signout', authMiddleware, signout);
 router.get('/signout', authMiddleware, signout);
+
+// Current user profile
+router.get('/me', authMiddleware, me);
 
 // Password reset flow
 // TODO: Add rate limiting to /forgot-password to prevent abuse

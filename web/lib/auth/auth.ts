@@ -213,10 +213,8 @@ export const refreshToken = async (oldRefreshToken: string) => {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
+				Cookie: `refreshToken=${oldRefreshToken}`,
 			},
-			body: JSON.stringify({
-				refresh: oldRefreshToken,
-			}),
 		});
 
 		if (!response.ok) {
@@ -229,6 +227,7 @@ export const refreshToken = async (oldRefreshToken: string) => {
 
 		const updateRes = await fetch(`${FRONTEND_URL}/api/auth/update`, {
 			method: "POST",
+			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({
 				accessToken,
 				refreshToken,

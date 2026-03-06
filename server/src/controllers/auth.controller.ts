@@ -67,7 +67,7 @@ async function sendVerification(userId: string, email: string) {
 // ── REFRESH ────────────────────────────────────────────────────────
 
 export const refresh = async (req: Request, res: Response) => {
-  const token = req.body?.refresh || req.cookies?.refreshToken;
+  const token = req.cookies?.refreshToken;
 
   if (!token) {
     return res.status(401).json({ message: 'Refresh token missing' });
@@ -118,6 +118,20 @@ export const signup = async (req: Request, res: Response) => {
       return res
         .status(400)
         .json({ message: 'Email, password and name are required' });
+    }
+
+    // Validate password strength (same rules as resetPassword)
+    if (typeof password !== 'string' || password.length < 8) {
+      return res.status(422).json({ message: 'Password must be at least 8 characters long' });
+    }
+    if (!/[a-zA-Z]/.test(password)) {
+      return res.status(422).json({ message: 'Password must contain at least one letter' });
+    }
+    if (!/[0-9]/.test(password)) {
+      return res.status(422).json({ message: 'Password must contain at least one number' });
+    }
+    if (!/[^a-zA-Z0-9]/.test(password)) {
+      return res.status(422).json({ message: 'Password must contain at least one special character' });
     }
 
     const existingUser = await findUserByEmail(email);
@@ -282,6 +296,31 @@ export const signin = async (req: Request, res: Response) => {
   }
 };
 
+// ── ME (current user profile) ──────────────────────────────────────
+
+export const me = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    const user = await findUserById(req.userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      avatarUrl: user.avatarUrl || undefined,
+      emailVerified: user.emailVerified,
+      isActive: user.isActive,
+    });
+  } catch (error) {
+    console.error('Error in me:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 // ── SIGNOUT ────────────────────────────────────────────────────────
 
 export const signout = async (req: AuthRequest, res: Response) => {
@@ -329,11 +368,12 @@ export const googleAuthCallback = [
       const hashedRefreshToken = hashTokenCrypto(refreshToken);
       await saveRefreshToken(user.id, hashedRefreshToken);
 
+      // Set tokens as secure httpOnly cookies instead of query params
+      await saveToCookie(res, refreshToken, accessToken);
+
       const frontend = process.env.FRONTEND_URL || 'http://localhost:3000';
 
-      return res.redirect(
-        `${frontend}/api/auth/google/callback?id=${user.id}&email=${user.email}&name=${user.name}&avatar=${user.avatar || ''}&emailVerified=${user.emailVerified}&isActive=${user.isActive}&accessToken=${accessToken}&refreshToken=${refreshToken}`
-      );
+      return res.redirect(`${frontend}/api/auth/google/callback`);
     } catch (error) {
       console.error('Error in Google auth callback:', error);
       const frontend = process.env.FRONTEND_URL || 'http://localhost:3000';

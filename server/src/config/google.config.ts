@@ -34,8 +34,16 @@ passport.use(
       try {
         let user = await findUserByEmail(profile.emails[0].value);
 
-        if (!user) {
-          user = await CreateGoogleUser(profile); // Create user if not found, you can also return the created user here
+        if (user) {
+          // Reject if existing account was created with email/password (not OAuth)
+          if (!user.oauthProvider) {
+            return done(
+              new Error('An account with this email already exists. Please sign in with your password.'),
+              null
+            );
+          }
+        } else {
+          user = await CreateGoogleUser(profile);
         }
         return done(null, user);
       } catch (err) {
