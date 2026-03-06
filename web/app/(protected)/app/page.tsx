@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { getUserProfile } from "@/lib/auth/action";
 import Link from "next/link";
 import { GraduationCap, BookOpen, Search, Award } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 export default async function AppDashboard() {
   const profile = await getUserProfile();
