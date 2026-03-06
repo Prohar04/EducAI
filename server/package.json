@@ -15,6 +15,7 @@
     "db:migrate": "prisma migrate",
     "db:studio": "prisma studio",
     "db:seed": "prisma db seed",
+    "prisma:seed": "tsx prisma/seed.ts",
     "dev:docker": "sh ./scripts/dev.sh",
     "prod:docker": "sh ./scripts/prod.sh",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
