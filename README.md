@@ -5,7 +5,7 @@ AI-powered learning platform.
 ## Architecture
 
 | Service | Stack | Port |
-|---|---|---|
+| --- | --- | --- |
 | **server** | Express 5 · Prisma · PostgreSQL | 8000 |
 | **web** | Next.js 16 · React 19 · Tailwind | 3000 |
 | **ai-server** | FastAPI · Python | — |
@@ -33,6 +33,7 @@ cd web && npm i && npm run dev
 See [server/README.MD](server/README.MD) for the full endpoint list.
 
 Key flows:
+
 - **Sign up** → verification email → confirm → sign in
 - **Sign in** → optional "Remember me" (30-day token) · account lockout after 5 failures
 - **Forgot password** → reset email → new password
