@@ -9,15 +9,27 @@ const ACCESS_SECRET = new TextEncoder().encode(
 );
 
 export async function GET(req: NextRequest) {
-	// Tokens are now set as httpOnly cookies by the backend
-	const accessToken = req.cookies.get("accessToken")?.value;
-	const refreshToken = req.cookies.get("refreshToken")?.value;
-
-	if (!accessToken || !refreshToken) {
+	// Backend passes a short-lived one-time code to avoid cross-origin cookie issues.
+	// Exchange it server-to-server for the actual tokens.
+	const code = req.nextUrl.searchParams.get("code");
+	if (!code) {
 		redirect("/auth/signin?error=oauth_failed");
 	}
 
-	// Extract user info from the verified JWT instead of trusting query params
+	const exchangeRes = await fetch(`${BACKEND_URL}/auth/google/exchange?code=${code}`, {
+		cache: "no-store",
+	});
+
+	if (!exchangeRes.ok) {
+		redirect("/auth/signin?error=oauth_failed");
+	}
+
+	const { accessToken, refreshToken } = await exchangeRes.json() as {
+		accessToken: string;
+		refreshToken: string;
+	};
+
+	// Verify the access token so we can extract userId without trusting external input
 	let userId: string;
 	try {
 		const { payload } = await jwtVerify(accessToken, ACCESS_SECRET);
@@ -27,9 +39,10 @@ export async function GET(req: NextRequest) {
 		redirect("/auth/signin?error=invalid_token");
 	}
 
-	// Fetch user profile from backend using the access token
+	// Fetch full profile from backend using the verified access token
 	const profileRes = await fetch(`${BACKEND_URL}/auth/me`, {
 		headers: { Authorization: `Bearer ${accessToken}` },
+		cache: "no-store",
 	});
 
 	if (!profileRes.ok) {
