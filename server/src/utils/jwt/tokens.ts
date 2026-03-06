@@ -12,10 +12,16 @@ if (!ACCESS_SECRET || !REFRESH_SECRET) {
 const ACCESS_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '5m';
 const REFRESH_EXPIRES_IN = process.env.REFRESH_JWT_EXPIRES_IN || '15d';
 
-export const generateTokens = async (userId: string) => {
+export const generateTokens = async (
+  userId: string,
+  opts?: { refreshTtlDays?: number }
+) => {
+  const refreshExpiry = opts?.refreshTtlDays
+    ? `${opts.refreshTtlDays}d`
+    : REFRESH_EXPIRES_IN;
   const [accessToken, refreshToken] = await Promise.all([
     generateAccessToken(userId),
-    generateRefreshToken(userId),
+    generateRefreshToken(userId, refreshExpiry),
   ]);
   return { accessToken, refreshToken };
 };
@@ -39,11 +45,14 @@ export const verifyAccessToken = async (token: string) => {
   }
 };
 
-export const generateRefreshToken = (userId: string) => {
+export const generateRefreshToken = (
+  userId: string,
+  expiresIn: string = REFRESH_EXPIRES_IN
+) => {
   return new SignJWT({ userId })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
-    .setExpirationTime(REFRESH_EXPIRES_IN)
+    .setExpirationTime(expiresIn)
     .sign(REFRESH_SECRET);
 };
 

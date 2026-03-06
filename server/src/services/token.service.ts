@@ -1,12 +1,19 @@
 import prisma from '#src/config/database.ts';
 
-export async function saveRefreshToken(userId: string, refreshToken: string) {
+const DEFAULT_REFRESH_TTL_DAYS = 15;
+
+export async function saveRefreshToken(
+  userId: string,
+  refreshToken: string,
+  ttlDays: number = DEFAULT_REFRESH_TTL_DAYS
+) {
   try {
     await prisma.refreshToken.create({
       data: {
         userId,
         token: refreshToken,
-        expiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15 days
+        expiresAt: new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000),
+        ttlDays,
       },
     });
   } catch (err) {

@@ -8,6 +8,7 @@ export type FormState =
 				password?: string[];
 			};
 			message?: string;
+			code?: string;
 	  }
 	| undefined;
 
@@ -75,6 +76,20 @@ export type ResetPasswordFormState =
 				confirmPassword?: string[];
 				token?: string[];
 			};
+			message?: string;
+			success?: boolean;
+	  }
+	| undefined;
+
+export type VerifyEmailFormState =
+	| {
+			message?: string;
+			success?: boolean;
+	  }
+	| undefined;
+
+export type GenericFormState =
+	| {
 			message?: string;
 			success?: boolean;
 	  }
