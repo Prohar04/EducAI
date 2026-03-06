@@ -38,6 +38,7 @@ model User {
   passwordResetTokens      PasswordResetToken[]
   emailVerificationTokens  EmailVerificationToken[]
   emailChangeTokens        EmailChangeToken[]
+  savedPrograms            SavedProgram[]
 
   @@index([email])
   @@index([oauthProvider, oauthId])
@@ -163,5 +164,112 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([action, timestamp(sort: Desc)])
   @@map("audit_logs")
+}
+
+// ============================================================
+// MODULE 1: University & Program Matching
+// ============================================================
+
+model Country {
+  id           String       @id @default(cuid())
+  code         String       @unique @db.VarChar(10)
+  name         String       @db.VarChar(100)
+  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamp
+  updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamp
+  universities University[]
+
+  @@map("countries")
+}
+
+model University {
+  id          String    @id @default(cuid())
+  name        String    @db.VarChar(200)
+  countryId   String    @map("country_id")
+  city        String?   @db.VarChar(100)
+  website     String?   @db.Text
+  description String?   @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamp
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamp
+
+  country  Country   @relation(fields: [countryId], references: [id], onDelete: Restrict)
+  programs Program[]
+
+  @@index([countryId])
+  @@index([name])
+  @@map("universities")
+  // TODO(scraping): add fields: externalSource, sourceUrl, lastCrawledAt, rawHtmlHash
+}
+
+enum ProgramLevel {
+  BSC
+  MSC
+  PHD
+}
+
+model Program {
+  id             String       @id @default(cuid())
+  universityId   String       @map("university_id")
+  title          String       @db.VarChar(200)
+  field          String       @db.VarChar(100)
+  level          ProgramLevel
+  durationMonths Int?         @map("duration_months")
+  tuitionMinUSD  Int?         @map("tuition_min_usd")
+  tuitionMaxUSD  Int?         @map("tuition_max_usd")
+  description    String?      @db.Text
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamp
+  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamp
+
+  university   University           @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  requirements ProgramRequirement[]
+  deadlines    ProgramDeadline[]
+  savedBy      SavedProgram[]
+
+  @@index([universityId])
+  @@index([field])
+  @@index([level])
+  @@index([title])
+  @@map("programs")
+  // TODO(scraping): add fields: sourceUrl, lastUpdatedFromSourceAt
+}
+
+model ProgramRequirement {
+  id        String   @id @default(cuid())
+  programId String   @map("program_id")
+  key       String   @db.VarChar(50)
+  value     String   @db.VarChar(200)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp
+
+  program Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  @@index([programId])
+  @@map("program_requirements")
+}
+
+model ProgramDeadline {
+  id        String   @id @default(cuid())
+  programId String   @map("program_id")
+  term      String   @db.VarChar(50)
+  deadline  DateTime @db.Timestamp
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp
+
+  program Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  @@index([programId])
+  @@map("program_deadlines")
+}
+
+model SavedProgram {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id") @db.Uuid
+  programId String   @map("program_id")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  program Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, programId])
+  @@index([userId])
+  @@index([programId])
+  @@map("saved_programs")
 }
 
