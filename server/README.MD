@@ -24,7 +24,7 @@ SEED_ENABLED=         # set to 'true' to allow db:seed:safe
 ### Database scripts
 
 | Command | Description |
-|---|---|
+| --- | --- |
 | `npm run db:generate` | Re-generate Prisma client after schema changes |
 | `npm run db:migrate:dev` | Create + apply a new migration (local only — blocked on remote) |
 | `npm run db:migrate:deploy` | Apply pending migrations to Neon/cloud (safe, no data loss) |
@@ -68,15 +68,17 @@ SEED_ENABLED=true PRISMA_MIGRATE_ENV=production npm run db:seed:safe
 ### Safety guard (`scripts/assert-safe-db.ts`)
 
 All destructive commands (`migrate dev`, `migrate reset`, `db push`) are wrapped with a guard that:
+
 - Detects remote hosts (`neon.tech`, RDS, Supabase, etc.)
 - Blocks unless `PRISMA_MIGRATE_ENV=production` is explicitly set
 - Prints clear remediation steps
+
 
 Always use `npm run db:migrate:deploy` for cloud deployments.
 
 ### Health check
 
-```
+```http
 GET /health/db
 ```
 
