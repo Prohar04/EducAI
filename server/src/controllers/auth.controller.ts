@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import passport from 'passport';
 import '../config/google.config.ts';
@@ -365,10 +365,20 @@ export const googleAuth = passport.authenticate('google', {
 });
 
 export const googleAuthCallback = [
-  passport.authenticate('google', {
-    session: false,
-    failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/signin?error=oauth_failed`,
-  }),
+  (req: Request, res: Response, next: NextFunction) => {
+    passport.authenticate('google', { session: false }, (err: any, user: any, info: any) => {
+      if (err) {
+        console.error('[google callback] passport error:', err);
+      }
+      if (!user) {
+        console.warn('[google callback] no user returned, info:', info);
+        const frontend = process.env.FRONTEND_URL || 'http://localhost:3000';
+        return res.redirect(`${frontend}/auth/signin?error=oauth_failed`);
+      }
+      req.user = user;
+      next();
+    })(req, res, next);
+  },
   async (req: Request, res: Response) => {
     try {
       const user = req.user as ReturnUserDto;
