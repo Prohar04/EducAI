@@ -11,7 +11,7 @@ import {
 	VerifyEmailFormState,
 	GenericFormState,
 } from "@/types/auth.type";
-import { createSession } from "./session";
+import { createSession, updateTokens } from "./session";
 import { BACKEND_URL } from "@/constants/constants";
 
 // ── SIGN UP ────────────────────────────────────────────────────────
@@ -222,18 +222,8 @@ export const refreshToken = async (oldRefreshToken: string) => {
 		}
 
 		const { accessToken, refreshToken } = await response.json();
-		const FRONTEND_URL =
-			process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000";
 
-		const updateRes = await fetch(`${FRONTEND_URL}/api/auth/update`, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				accessToken,
-				refreshToken,
-			}),
-		});
-		if (!updateRes.ok) throw new Error("Failed to update the tokens");
+		await updateTokens({ accessToken, refreshToken });
 
 		return accessToken;
 	} catch (err) {
