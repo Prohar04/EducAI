@@ -1,16 +1,18 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
-  BookOpen,
-  Brain,
+  Search,
+  Globe,
   Sparkles,
-  Target,
-  Users,
+  Award,
+  FileText,
   ArrowRight,
   GraduationCap,
-  Lightbulb,
+  MapPin,
   BarChart3,
   CheckCircle2,
+  BookOpen,
+  Compass,
 } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
@@ -62,10 +64,10 @@ function Navbar() {
           </li>
           <li>
             <a
-              href="#stats"
+              href="#destinations"
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
-              Why EducAI
+              Destinations
             </a>
           </li>
         </ul>
@@ -76,7 +78,7 @@ function Navbar() {
             <Link href="/auth/signin">Sign in</Link>
           </Button>
           <Button size="sm" asChild>
-            <Link href="/auth/signup">Sign up</Link>
+            <Link href="/auth/signup">Get Started Free</Link>
           </Button>
         </div>
       </nav>
@@ -87,6 +89,16 @@ function Navbar() {
 /* ------------------------------------------------------------------ */
 /*  Hero                                                               */
 /* ------------------------------------------------------------------ */
+
+const DESTINATION_FLAGS = [
+  { flag: "🇺🇸", label: "USA" },
+  { flag: "🇬🇧", label: "UK" },
+  { flag: "🇨🇦", label: "Canada" },
+  { flag: "🇩🇪", label: "Germany" },
+  { flag: "🇦🇺", label: "Australia" },
+  { flag: "🇳🇱", label: "Netherlands" },
+  { flag: "🇸🇬", label: "Singapore" },
+];
 
 function Hero() {
   return (
@@ -102,29 +114,44 @@ function Hero() {
       <div className="mx-auto max-w-7xl px-4 pb-24 pt-20 text-center sm:px-6 sm:pt-32 lg:px-8">
         <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 px-4 py-1.5 text-xs font-medium text-muted-foreground">
           <Sparkles className="size-3.5 text-primary" />
-          AI-Powered Learning Platform
+          AI Study-Abroad Advisor for International Students
         </div>
 
         <h1 className="mx-auto max-w-4xl text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-          Learn Smarter with{" "}
-          <span className="text-primary">Artificial Intelligence</span>
+          Find Your{" "}
+          <span className="text-primary">Perfect University</span>
+          {" "}Abroad — Powered by AI
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
-          EducAI personalizes your study experience using cutting-edge AI. Get
-          tailored content, instant feedback, and insights that help you master
-          any subject faster.
+          EducAI matches your academic profile, budget, and goals to thousands
+          of programs worldwide. Discover scholarships, compare universities,
+          and build your application — all in one personalised workspace.
         </p>
+
+        {/* Destination bubbles */}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
+          {DESTINATION_FLAGS.map(({ flag, label }) => (
+            <span
+              key={label}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-sm font-medium shadow-sm"
+            >
+              <span>{flag}</span>
+              {label}
+            </span>
+          ))}
+          <span className="text-sm text-muted-foreground">+ more</span>
+        </div>
 
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Button size="lg" asChild>
             <Link href="/auth/signup">
-              Get Started Free
+              Start Your Journey Free
               <ArrowRight className="ml-2 size-4" />
             </Link>
           </Button>
           <Button variant="outline" size="lg" asChild>
-            <a href="#features">See Features</a>
+            <a href="#features">See How It Works</a>
           </Button>
         </div>
       </div>
@@ -138,40 +165,40 @@ function Hero() {
 
 const features = [
   {
-    icon: Brain,
-    title: "AI-Powered Tutoring",
+    icon: Search,
+    title: "AI Programme Matching",
     description:
-      "Ask questions in natural language and get detailed, context-aware explanations powered by advanced AI models.",
+      "Enter your GPA, test scores, and goals — get ranked programme suggestions from universities worldwide, scored against your profile.",
   },
   {
-    icon: Target,
-    title: "Personalized Learning Paths",
+    icon: Award,
+    title: "Scholarship Finder",
     description:
-      "EducAI adapts to your skill level and learning pace, creating a unique roadmap tailored just for you.",
+      "Surface merit-based and need-based scholarships relevant to your nationality, field, and destination country.",
   },
   {
-    icon: BookOpen,
-    title: "Smart Study Materials",
+    icon: FileText,
+    title: "Application Tracker",
     description:
-      "Automatically generate flashcards, summaries, and quizzes from any content to reinforce your knowledge.",
+      "Track every university, deadline, and document in one place. Get reminders before application windows close.",
   },
   {
-    icon: Lightbulb,
-    title: "Instant Feedback",
+    icon: Globe,
+    title: "Country & Visa Guide",
     description:
-      "Submit answers and get immediate, constructive feedback with step-by-step reasoning to deepen understanding.",
+      "Compare post-study work rights, PR pathways, cost of living, and visa processing times across destinations.",
   },
   {
     icon: BarChart3,
-    title: "Progress Analytics",
+    title: "Profile Strength Score",
     description:
-      "Track your growth over time with intuitive charts and insights so you know exactly where to focus next.",
+      "EducAI analyses your academic profile and suggests targeted improvements — extra courses, certifications, or test retakes.",
   },
   {
-    icon: Users,
-    title: "Collaborative Learning",
+    icon: BookOpen,
+    title: "Document Hub",
     description:
-      "Study together in shared sessions, compare notes, and benefit from peer explanations enhanced by AI.",
+      "AI-assisted SOP drafting, LOR request templates, and CV checkers tailored for international graduate applications.",
   },
 ];
 
@@ -185,10 +212,10 @@ function Features() {
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Everything You Need to{" "}
-            <span className="text-primary">Excel</span>
+            <span className="text-primary">Study Abroad</span>
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Powerful AI features designed to transform the way you learn.
+            From discovering your best-fit university to submitting your final application — EducAI guides every step.
           </p>
         </div>
 
@@ -220,27 +247,31 @@ function Features() {
 const steps = [
   {
     step: "01",
-    title: "Create Your Account",
+    icon: GraduationCap,
+    title: "Build Your Profile",
     description:
-      "Sign up in seconds \u2014 no credit card required. Start your AI learning journey instantly.",
+      "Complete our 4-step onboarding — academic history, test scores, budget, and destination preferences.",
   },
   {
     step: "02",
-    title: "Set Your Goals",
+    icon: Search,
+    title: "Get AI Matches",
     description:
-      "Tell EducAI what you want to learn, and we\u2019ll build a personalized study plan for you.",
+      "EducAI cross-references your profile against thousands of programmes and ranks them by your chance of admission.",
   },
   {
     step: "03",
-    title: "Learn & Practice",
+    icon: Compass,
+    title: "Explore & Compare",
     description:
-      "Engage with AI-generated lessons, quizzes, and explanations crafted to match your level.",
+      "Deep-dive into curricula, scholarships, tuition, and post-study work rights side-by-side.",
   },
   {
     step: "04",
-    title: "Track & Improve",
+    icon: FileText,
+    title: "Apply with Confidence",
     description:
-      "Monitor progress with analytics, identify weak areas, and keep leveling up your knowledge.",
+      "Track deadlines, draft documents, and submit stronger applications — all from your personalised workspace.",
   },
 ];
 
@@ -250,16 +281,20 @@ function HowItWorks() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            How <span className="text-primary">EducAI</span> Works
+            Your Study-Abroad Journey{" "}
+            <span className="text-primary">in 4 Steps</span>
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Four simple steps to unlock your full learning potential.
+            From first search to acceptance letter — EducAI is with you the whole way.
           </p>
         </div>
 
         <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((s) => (
             <div key={s.step} className="relative text-center">
+              <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-primary/10">
+                <s.icon className="size-7 text-primary" />
+              </div>
               <span className="text-5xl font-bold text-primary/20">
                 {s.step}
               </span>
@@ -276,14 +311,59 @@ function HowItWorks() {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Destinations Strip                                                 */
+/* ------------------------------------------------------------------ */
+
+const destinations = [
+  { flag: "🇺🇸", name: "United States", programs: "15,000+ programmes" },
+  { flag: "🇬🇧", name: "United Kingdom", programs: "8,000+ programmes" },
+  { flag: "🇨🇦", name: "Canada", programs: "6,500+ programmes" },
+  { flag: "🇩🇪", name: "Germany", programs: "5,000+ programmes" },
+  { flag: "🇦🇺", name: "Australia", programs: "7,000+ programmes" },
+  { flag: "🇳🇱", name: "Netherlands", programs: "2,000+ programmes" },
+];
+
+function Destinations() {
+  return (
+    <section id="destinations" className="border-t border-border/40 bg-muted/30 py-24">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Top <span className="text-primary">Study Destinations</span>
+          </h2>
+          <p className="mt-4 text-muted-foreground">
+            Search across the world&apos;s leading higher-education systems in one place.
+          </p>
+        </div>
+        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {destinations.map((d) => (
+            <div
+              key={d.name}
+              className="flex items-center gap-4 rounded-xl border border-border/60 bg-card p-5 shadow-sm"
+            >
+              <span className="text-4xl">{d.flag}</span>
+              <div>
+                <p className="font-semibold">{d.name}</p>
+                <p className="text-sm text-muted-foreground">{d.programs}</p>
+              </div>
+              <MapPin className="ml-auto size-4 shrink-0 text-muted-foreground/40" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Trust / Stats Strip                                                */
 /* ------------------------------------------------------------------ */
 
 const stats = [
-  { value: "50K+", label: "Active Learners" },
-  { value: "1M+", label: "Questions Answered" },
-  { value: "98%", label: "Satisfaction Rate" },
-  { value: "200+", label: "Subjects Covered" },
+  { value: "40K+", label: "Programmes Indexed" },
+  { value: "120+", label: "Countries Served" },
+  { value: "12K+", label: "Scholarships Listed" },
+  { value: "94%", label: "Match Accuracy" },
 ];
 
 function Stats() {
@@ -318,11 +398,11 @@ function CtaBanner() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="relative overflow-hidden rounded-2xl bg-primary px-6 py-16 text-center shadow-lg sm:px-16">
           <h2 className="text-3xl font-bold tracking-tight text-primary-foreground sm:text-4xl">
-            Ready to Transform Your Learning?
+            Ready to Find Your Dream University Abroad?
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-primary-foreground/80">
-            Join thousands of students who are already learning smarter with
-            EducAI. No credit card needed.
+            Join thousands of international students who discovered their best-fit
+            programmes with EducAI. Free, forever.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Button
@@ -332,7 +412,7 @@ function CtaBanner() {
               asChild
             >
               <Link href="/auth/signup">
-                Create Free Account
+                Start My Search Free
                 <ArrowRight className="ml-2 size-4" />
               </Link>
             </Button>
@@ -385,6 +465,14 @@ function Footer() {
                 </a>
               </li>
               <li>
+                <a
+                  href="#destinations"
+                  className="transition-colors hover:text-foreground"
+                >
+                  Destinations
+                </a>
+              </li>
+              <li>
                 <Link
                   href="/auth/signin"
                   className="transition-colors hover:text-foreground"
@@ -400,7 +488,7 @@ function Footer() {
           <p>&copy; {new Date().getFullYear()} EducAI. All rights reserved.</p>
           <div className="flex items-center gap-1">
             <CheckCircle2 className="size-3.5 text-primary" />
-            <span>AI-powered education for everyone</span>
+            <span>AI-powered study-abroad advisor for every student</span>
           </div>
         </div>
       </div>
@@ -420,6 +508,7 @@ export default function Home() {
         <Hero />
         <Features />
         <HowItWorks />
+        <Destinations />
         <Stats />
         <CtaBanner />
       </main>
