@@ -48,7 +48,7 @@ export default function OnboardingPage() {
 
   // Redirect on success
   if (state?.success) {
-    router.push("/app");
+    router.push("/app/home");
   }
 
   const steps = [
