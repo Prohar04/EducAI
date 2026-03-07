@@ -23,11 +23,9 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
-import chromadb  # type: ignore[import-untyped]
-from langchain_chroma import Chroma  # type: ignore[import-untyped]
-from langchain_core.output_parsers import JsonOutputParser  # type: ignore
-from langchain_core.prompts import ChatPromptTemplate  # type: ignore
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings  # type: ignore
+# chromadb / langchain are imported lazily inside _lazy_init() because
+# chromadb uses pydantic.v1 which crashes at import time on Python 3.14.
+# The app boots normally; the crash only surfaces if the RAG pipeline runs.
 
 from ...core.config import settings
 from ...core.logger import logger
@@ -80,73 +78,40 @@ def _rec_to_text(rec: RecommendationOutput) -> str:
     return ", ".join(parts)
 
 
-# ── Prompt templates (defined once at module level) ─────────────────────
-
-_QUERY_GEN_PROMPT = ChatPromptTemplate.from_messages(
-    [
-        (
-            "system",
-            (
-                "You are an expert international education researcher. "
-                "Generate a JSON array of exactly 3 Google "
-                "search queries to find "
-                "the best matching university programs for the student. "
-                "Queries should be specific and include the year {year}. "
-                "Respond ONLY with a valid JSON array of "
-                "3 strings — no markdown, "
-                "no explanation."
-            ),
-        ),
-        (
-            "human",
-            (
-                "Student preferences: {preferences}\n\n"
-                "Return exactly 3 search queries as a JSON array."
-            ),
-        ),
-    ]
-)
-
-_EXTRACTION_PROMPT = ChatPromptTemplate.from_messages(
-    [
-        (
-            "system",
-            (
-                "You are a precise data extractor for an "
-                "educational platform. "
-                "From the scraped web content below, "
-                "extract university/program "
-                "recommendation records that best match "
-                "the student's preferences. "
-                "Return up to 5 recommendations. "
-                "For any field you cannot determine, "
-                "use a sensible placeholder "
-                "(e.g. tuition_fee_usd = 0, application_deadline = 'Rolling')."
-            ),
-        ),
-        (
-            "human",
-            (
-                "Student preferences: {preferences}\n\n"
-                "Scraped content (truncated):\n{markdown}\n\n"
-                "Extract structured university recommendations."
-            ),
-        ),
-    ]
-)
-
-
 # ── Pipeline class ─────────────────────────────────────────────────────────
 
 
 class EduRAGPipeline:
     """Stateless-ish pipeline instance.
 
-    Heavy objects (LangChain clients, vector store) are created once at startup
-    and reused across all background tasks.
+    Heavy chromadb/langchain objects are initialised lazily on first use so
+    that the FastAPI app can boot even on Python 3.14 where chromadb's
+    pydantic.v1 dependency fails at import time.
     """
 
     def __init__(self) -> None:
+        self._ready = False
+        self._embeddings = None
+        self._llm = None
+        self._vector_store = None
+        self._query_gen_prompt = None
+        self._extraction_prompt = None
+        self._web_search = WebSearch()
+        self._firecrawl = FirecrawlClient()
+
+    def _lazy_init(self) -> None:
+        """Import and initialise chromadb/langchain on first pipeline call."""
+        if self._ready:
+            return
+
+        import chromadb  # type: ignore
+        from langchain_chroma import Chroma  # type: ignore
+        from langchain_core.prompts import ChatPromptTemplate  # type: ignore
+        from langchain_openai import (  # type: ignore
+            ChatOpenAI,
+            OpenAIEmbeddings,
+        )
+
         self._embeddings = OpenAIEmbeddings(
             model="text-embedding-3-small",
             api_key=settings.OPEN_ROUTER_APIKEY,
@@ -167,8 +132,59 @@ class EduRAGPipeline:
             embedding_function=self._embeddings,
             client=_chroma_client,
         )
-        self._web_search = WebSearch()
-        self._firecrawl = FirecrawlClient()
+        self._query_gen_prompt = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    (
+                        "You are an expert international education researcher. "
+                        "Generate a JSON array of exactly 3 Google "
+                        "search queries to find "
+                        "the best matching university programs for the student. "
+                        "Queries should be specific and include the year {year}. "
+                        "Respond ONLY with a valid JSON array of "
+                        "3 strings — no markdown, "
+                        "no explanation."
+                    ),
+                ),
+                (
+                    "human",
+                    (
+                        "Student preferences: {preferences}\n\n"
+                        "Return exactly 3 search queries as a JSON array."
+                    ),
+                ),
+            ]
+        )
+        self._extraction_prompt = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    (
+                        "You are a precise data extractor for an "
+                        "educational platform. "
+                        "From the scraped web content below, "
+                        "extract university/program "
+                        "recommendation records that best match "
+                        "the student's preferences. "
+                        "Return up to 5 recommendations. "
+                        "For any field you cannot determine, "
+                        "use a sensible placeholder "
+                        "(e.g. tuition_fee_usd = 0, "
+                        "application_deadline = 'Rolling')."
+                    ),
+                ),
+                (
+                    "human",
+                    (
+                        "Student preferences: {preferences}\n\n"
+                        "Scraped content (truncated):\n{markdown}\n\n"
+                        "Extract structured university recommendations."
+                    ),
+                ),
+            ]
+        )
+        self._ready = True
 
     # ── Public entry point ───────────────────────────────────────────────── #
 
@@ -179,6 +195,7 @@ class EduRAGPipeline:
         pref_db_id: str,
     ) -> None:
         """Execute the full pipeline for one preferences record."""
+        self._lazy_init()
         logger.info(f"[{task_id}] RAG pipeline started.")
         try:
             # Phase A — cache check
@@ -232,7 +249,7 @@ class EduRAGPipeline:
 
         try:
             _fn = (
-                self._vector_store
+                self._vector_store  # type: ignore[union-attr]
                 .asimilarity_search_with_relevance_scores
             )
             results = await _fn(pref_text, k=3)
@@ -272,7 +289,10 @@ class EduRAGPipeline:
         Returns concatenated markdown from all scraped pages.
         """
         # B1 — LLM query generation
-        queries = await self._generate_search_queries(task_id, pref)
+        from langchain_core.output_parsers import JsonOutputParser  # type: ignore
+        queries = await self._generate_search_queries(
+            task_id, pref, JsonOutputParser
+        )
         logger.info(f"[{task_id}] Search queries: {queries}")
 
         # B2 — Serper search (parallel)
@@ -318,10 +338,13 @@ class EduRAGPipeline:
         self,
         task_id: str,
         pref: UserPreferenceInput,
+        JsonOutputParser: type,  # passed in from _phase_b to avoid re-import
     ) -> List[str]:
         """Ask the LLM for 3 targeted search queries; fall back on error."""
         try:
-            chain = _QUERY_GEN_PROMPT | self._llm | JsonOutputParser()
+            chain = (
+                self._query_gen_prompt | self._llm | JsonOutputParser()
+            )
             raw = await chain.ainvoke(
                 {
                     "preferences": _pref_to_text(pref),
@@ -363,8 +386,10 @@ class EduRAGPipeline:
         markdown: str,
     ) -> None:
         """Extract structured recommendations → Prisma → ChromaDB."""
-        structured_llm = self._llm.with_structured_output(RecommendationList)
-        chain = _EXTRACTION_PROMPT | structured_llm
+        structured_llm = self._llm.with_structured_output(  # type: ignore[union-attr]
+            RecommendationList
+        )
+        chain = self._extraction_prompt | structured_llm
 
         try:
             result: RecommendationList = await chain.ainvoke(
