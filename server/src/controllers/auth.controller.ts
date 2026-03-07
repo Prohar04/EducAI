@@ -387,7 +387,7 @@ export const googleAuthCallback = [
       // Cookies set here (localhost:8000) are not readable by the frontend (localhost:3000).
       const rawCode = crypto.randomBytes(32).toString('hex');
       const codeHash = hashTokenCrypto(rawCode);
-      const expiresAt = new Date(Date.now() + 300_000); // 5 minutes
+      const expiresAt = new Date(Date.now() + 120_000); // 2 minutes
 
       await prisma.oAuthCode.create({
         data: { codeHash, userId: user.id, accessToken, refreshToken, expiresAt },
