@@ -160,7 +160,7 @@ export const signup = async (req: Request, res: Response) => {
     const hashedPassword = await hashing(password);
 
     const newUser: ReturnUserDto = await createUser({
-      email,
+      email: email.toLowerCase(),
       name,
       avatarUrl,
       passwordHash: hashedPassword,
@@ -244,7 +244,7 @@ export const resendVerification = async (req: Request, res: Response) => {
 export const signin = async (req: Request, res: Response) => {
   try {
     const { email, password, rememberMe } = req.body;
-    const user = await findUserByEmail(email);
+    const user = await findUserByEmail(email?.toLowerCase());
 
     if (!user || !user.passwordHash) {
       return res.status(401).json({ message: 'Invalid credentials' });

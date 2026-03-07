@@ -4,7 +4,7 @@ export async function CreateGoogleUser(profile: any) {
   try {
     const user = await prisma.user.create({
       data: {
-        email: profile.emails[0].value,
+        email: profile.emails[0].value.toLowerCase(),
         name: profile.displayName,
         avatarUrl: profile.photos[0].value,
         passwordHash: null,
