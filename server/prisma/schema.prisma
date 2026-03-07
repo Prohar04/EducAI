@@ -39,6 +39,7 @@ model User {
   emailVerificationTokens  EmailVerificationToken[]
   emailChangeTokens        EmailChangeToken[]
   savedPrograms            SavedProgram[]
+  oauthCodes               OAuthCode[]
 
   @@index([email])
   @@index([oauthProvider, oauthId])
@@ -302,5 +303,21 @@ model SavedProgram {
   @@index([userId])
   @@index([programId])
   @@map("saved_programs")
+}
+
+// ── GOOGLE OAUTH ONE-TIME CODES ────────────────────────────────────
+model OAuthCode {
+  id           String   @id @default(cuid())
+  codeHash     String   @unique @map("code_hash") @db.Text
+  userId       String   @map("user_id") @db.Uuid
+  accessToken  String   @map("access_token") @db.Text
+  refreshToken String   @map("refresh_token") @db.Text
+  expiresAt    DateTime @map("expires_at") @db.Timestamp
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("oauth_codes")
 }
 

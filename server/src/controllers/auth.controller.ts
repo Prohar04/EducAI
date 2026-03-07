@@ -44,15 +44,6 @@ import { hashing, verifyHash } from '#src/utils/auth/hash.ts';
 import { AuthRequest } from '#src/types/authRequest.type.ts';
 import prisma from '#src/config/database.ts';
 
-// ── One-time code store for Google OAuth cross-origin handoff ──────
-const oauthCodeStore = new Map<string, { accessToken: string; refreshToken: string; userId: string; expiry: number }>();
-setInterval(() => {
-  const now = Date.now();
-  for (const [code, val] of oauthCodeStore) {
-    if (val.expiry < now) oauthCodeStore.delete(code);
-  }
-}, 60_000);
-
 // ── helpers ────────────────────────────────────────────────────────
 
 const LOCKOUT_THRESHOLD = 5;
@@ -392,14 +383,20 @@ export const googleAuthCallback = [
       const hashedRefreshToken = hashTokenCrypto(refreshToken);
       await saveRefreshToken(user.id, hashedRefreshToken);
 
-      // Store tokens in a short-lived one-time code to hand off across origins.
+      // Store tokens as a short-lived one-time code in DB (survives restarts, works in multi-instance).
       // Cookies set here (localhost:8000) are not readable by the frontend (localhost:3000).
-      const oauthCode = crypto.randomBytes(32).toString('hex');
-      oauthCodeStore.set(oauthCode, { accessToken, refreshToken, userId: user.id, expiry: Date.now() + 60_000 });
+      const rawCode = crypto.randomBytes(32).toString('hex');
+      const codeHash = hashTokenCrypto(rawCode);
+      const expiresAt = new Date(Date.now() + 120_000); // 2 minutes
+
+      await prisma.oAuthCode.create({
+        data: { codeHash, userId: user.id, accessToken, refreshToken, expiresAt },
+      });
 
       const frontend = process.env.FRONTEND_URL || 'http://localhost:3000';
+      console.log(`[google callback] code issued for user ${user.id}, expires ${expiresAt.toISOString()}`);
 
-      return res.redirect(`${frontend}/api/auth/google/callback?code=${oauthCode}`);
+      return res.redirect(`${frontend}/api/auth/google/callback?code=${rawCode}`);
     } catch (error) {
       console.error('Error in Google auth callback:', error);
       const frontend = process.env.FRONTEND_URL || 'http://localhost:3000';
@@ -414,17 +411,30 @@ export const googleExchange = async (req: Request, res: Response) => {
   if (!code || typeof code !== 'string') {
     return res.status(400).json({ message: 'Missing code' });
   }
-  const entry = oauthCodeStore.get(code);
-  if (!entry || entry.expiry < Date.now()) {
-    oauthCodeStore.delete(code);
+
+  const codeHash = hashTokenCrypto(code);
+  const entry = await prisma.oAuthCode.findUnique({ where: { codeHash } });
+
+  if (!entry) {
+    console.warn('[google exchange] code not found (hash:', codeHash.slice(0, 8), '...)');
     return res.status(401).json({ message: 'Invalid or expired code' });
   }
-  oauthCodeStore.delete(code); // single-use
+
+  if (entry.expiresAt < new Date()) {
+    await prisma.oAuthCode.delete({ where: { codeHash } });
+    console.warn('[google exchange] code expired for user', entry.userId);
+    return res.status(401).json({ message: 'Invalid or expired code' });
+  }
+
+  // Single-use: delete immediately
+  await prisma.oAuthCode.delete({ where: { codeHash } });
 
   const user = await findUserById(entry.userId);
   if (!user) {
     return res.status(404).json({ message: 'User not found' });
   }
+
+  console.log(`[google exchange] tokens issued for user ${user.id} (${user.email})`);
 
   return res.status(200).json({
     accessToken: entry.accessToken,
