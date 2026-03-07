@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { GraduationCap, BookOpen, Sparkles, Bookmark, Award, LogOut, User } from "lucide-react";
+import { GraduationCap, Home, BookOpen, Sparkles, Bookmark, Award, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +14,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { Session } from "@/types/auth.type";
 
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
 const NAV_LINKS = [
+  { href: "/app/home", label: "Home", icon: Home },
   { href: "/app", label: "Dashboard", icon: GraduationCap },
   { href: "/app/programs", label: "Programs", icon: BookOpen },
   { href: "/app/match", label: "Match", icon: Sparkles },
@@ -37,7 +48,7 @@ export function Navbar({ user }: { user: Session["user"] }) {
         aria-label="App navigation"
       >
         {/* Logo */}
-        <Link href="/app" className="flex items-center gap-2 shrink-0">
+        <Link href="/app/home" className="flex items-center gap-2 shrink-0">
           <GraduationCap className="size-7 text-primary" />
           <span className="text-lg font-bold tracking-tight">
             Educ<span className="text-primary">AI</span>
@@ -62,18 +73,10 @@ export function Navbar({ user }: { user: Session["user"] }) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="gap-2">
-              {user.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={user.avatarUrl}
-                  alt={user.name}
-                  className="size-7 rounded-full object-cover"
-                />
-              ) : (
-                <span className="flex size-7 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                  {user.name.charAt(0).toUpperCase()}
-                </span>
-              )}
+              <Avatar className="size-7">
+                <AvatarImage src={user.avatarUrl?.trim() || undefined} alt={user.name} />
+                <AvatarFallback>{getInitials(user.name || user.email || "U")}</AvatarFallback>
+              </Avatar>
               <span className="hidden max-w-[120px] truncate text-sm sm:block">
                 {user.name}
               </span>
