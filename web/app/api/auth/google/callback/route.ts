@@ -3,6 +3,13 @@ import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
 import { BACKEND_URL } from "@/constants/constants";
 
+// Guard: server mounts OAuth at /auth, not /api/v1/auth
+if (BACKEND_URL.includes("/api/v1")) {
+	console.warn(
+		`[oauth] BACKEND_URL "${BACKEND_URL}" contains "/api/v1" — OAuth routes are at /auth, not /api/v1/auth. Update BACKEND_URL to omit the path prefix.`,
+	);
+}
+
 export async function GET(req: NextRequest) {
 	// Backend passes a short-lived one-time code to avoid cross-origin cookie issues.
 	// Exchange it server-to-server for the actual tokens + user profile.
@@ -11,13 +18,22 @@ export async function GET(req: NextRequest) {
 		redirect("/auth/signin?error=oauth_failed");
 	}
 
-	const exchangeRes = await fetch(
-		`${BACKEND_URL}/auth/google/exchange?code=${code}`,
-		{ cache: "no-store" },
-	);
+	let exchangeRes: Response;
+	try {
+		exchangeRes = await fetch(
+			`${BACKEND_URL}/auth/google/exchange?code=${code}`,
+			{ cache: "no-store" },
+		);
+	} catch {
+		redirect("/auth/signin?error=oauth_server");
+	}
+
+	if (exchangeRes.status === 401) {
+		redirect("/auth/signin?error=oauth_expired");
+	}
 
 	if (!exchangeRes.ok) {
-		redirect("/auth/signin?error=oauth_failed");
+		redirect("/auth/signin?error=oauth_server");
 	}
 
 	const { accessToken, refreshToken, user } = await exchangeRes.json() as {
