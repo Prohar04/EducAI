@@ -32,20 +32,56 @@ passport.use(
       done: any
     ) => {
       try {
-        let user = await findUserByEmail(profile.emails[0].value);
+        const email = profile.emails?.[0]?.value?.toLowerCase();
+        if (!email) {
+          return done(new Error('No email returned from Google.'), null);
+        }
+
+        let user = await findUserByEmail(email);
 
         if (user) {
-          // Reject if existing account was created with email/password (not OAuth)
-          if (!user.oauthProvider) {
+          if (user.oauthProvider === 'google') {
+            // A) Already a Google account — ensure oauthId is populated
+            if (!user.oauthId) {
+              user = await prisma.user.update({
+                where: { id: user.id },
+                data: { oauthId: profile.id },
+              });
+            } else if (user.oauthId !== profile.id) {
+              // oauthId mismatch — keep existing, log but do not crash
+              console.warn(
+                `[google.config] oauthId mismatch for user ${user.id}: ` +
+                  `stored="${user.oauthId}" vs profile="${profile.id}". Keeping stored value.`
+              );
+            }
+            return done(null, user);
+          } else if (!user.oauthProvider) {
+            // B) Password account — link to Google
+            const updatedUser = await prisma.user.update({
+              where: { id: user.id },
+              data: {
+                oauthProvider: 'google',
+                oauthId: profile.id,
+                emailVerified: true,
+                avatarUrl: user.avatarUrl || profile.photos?.[0]?.value || null,
+                name: user.name || profile.displayName || null,
+              },
+            });
+            return done(null, updatedUser);
+          } else {
+            // C) Account exists with a different OAuth provider
             return done(
-              new Error('An account with this email already exists. Please sign in with your password.'),
+              new Error(
+                'Account exists with another provider. Use that method.'
+              ),
               null
             );
           }
         } else {
+          // New user — create via Google
           user = await CreateGoogleUser(profile);
+          return done(null, user);
         }
-        return done(null, user);
       } catch (err) {
         return done(err, null);
       }

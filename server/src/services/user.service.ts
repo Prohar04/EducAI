@@ -4,7 +4,7 @@ import { CreateUserDto, ReturnUserDto } from './dto/createUser.dto.ts';
 export async function findUserByEmail(email: string) {
   try {
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: email.toLowerCase() },
     });
     
     return user;
@@ -31,7 +31,7 @@ export async function createUser(data: CreateUserDto): Promise<ReturnUserDto> {
     const { email, name, passwordHash, avatarUrl } = data;
     const user = await prisma.user.create({
       data: {
-        email,
+        email: email.toLowerCase(),
         name,
         passwordHash,
         avatarUrl,
@@ -110,4 +110,34 @@ export async function resetFailedLogin(userId: string) {
       lockoutUntil: null,
     },
   });
+}
+
+/**
+ * Links an existing password-based account to Google OAuth.
+ * Preserves existing name/avatarUrl unless they are empty.
+ */
+export async function linkGoogleAccount(
+  email: string,
+  googleId: string,
+  displayName: string,
+  avatarUrl: string | null
+) {
+  const normalizedEmail = email.toLowerCase();
+  const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+  if (!user) {
+    throw new Error(`No user found with email: ${normalizedEmail}`);
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      oauthProvider: 'google',
+      oauthId: googleId,
+      emailVerified: true,
+      avatarUrl: user.avatarUrl || avatarUrl || null,
+      ...(!(user.name) && displayName ? { name: displayName } : {}),
+    },
+  });
+
+  return updatedUser;
 }
