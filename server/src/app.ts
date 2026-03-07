@@ -71,12 +71,19 @@ app.get('/health', (req, res) => {
 
 app.get('/health/db', async (req, res) => {
   try {
-    const userCount = await prisma.user.count();
+    const [users, countries, universities, programs, requirements, deadlines] = await Promise.all([
+      prisma.user.count(),
+      prisma.country.count().catch(() => -1),
+      prisma.university.count().catch(() => -1),
+      prisma.program.count().catch(() => -1),
+      prisma.programRequirement.count().catch(() => -1),
+      prisma.programDeadline.count().catch(() => -1),
+    ]);
     res.status(200).json({
       status: 'OK',
       database: 'connected',
       timestamp: new Date().toISOString(),
-      counts: { users: userCount },
+      counts: { users, countries, universities, programs, requirements, deadlines },
     });
   } catch (err) {
     res.status(503).json({

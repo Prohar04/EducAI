@@ -36,7 +36,8 @@ export const searchPrograms = async (req: Request, res: Response) => {
       prisma.program.count({ where }),
     ]);
 
-    res.status(200).json({ items, page: pageNum, limit: limitNum, total });
+    const noDataMessage = total === 0 ? 'No data available yet. Run sync.' : undefined;
+    res.status(200).json({ items, page: pageNum, limit: limitNum, total, ...(noDataMessage && { noDataMessage }) });
   } catch {
     res.status(500).json({ message: 'Failed to search programs' });
   }
