@@ -45,7 +45,7 @@ import { AuthRequest } from '#src/types/authRequest.type.ts';
 import prisma from '#src/config/database.ts';
 
 // ── One-time code store for Google OAuth cross-origin handoff ──────
-const oauthCodeStore = new Map<string, { accessToken: string; refreshToken: string; expiry: number }>();
+const oauthCodeStore = new Map<string, { accessToken: string; refreshToken: string; userId: string; expiry: number }>();
 setInterval(() => {
   const now = Date.now();
   for (const [code, val] of oauthCodeStore) {
@@ -385,7 +385,7 @@ export const googleAuthCallback = [
       // Store tokens in a short-lived one-time code to hand off across origins.
       // Cookies set here (localhost:8000) are not readable by the frontend (localhost:3000).
       const oauthCode = crypto.randomBytes(32).toString('hex');
-      oauthCodeStore.set(oauthCode, { accessToken, refreshToken, expiry: Date.now() + 60_000 });
+      oauthCodeStore.set(oauthCode, { accessToken, refreshToken, userId: user.id, expiry: Date.now() + 60_000 });
 
       const frontend = process.env.FRONTEND_URL || 'http://localhost:3000';
 
@@ -410,7 +410,24 @@ export const googleExchange = async (req: Request, res: Response) => {
     return res.status(401).json({ message: 'Invalid or expired code' });
   }
   oauthCodeStore.delete(code); // single-use
-  return res.status(200).json({ accessToken: entry.accessToken, refreshToken: entry.refreshToken });
+
+  const user = await findUserById(entry.userId);
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+
+  return res.status(200).json({
+    accessToken: entry.accessToken,
+    refreshToken: entry.refreshToken,
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      avatarUrl: user.avatarUrl ?? null,
+      emailVerified: user.emailVerified,
+      isActive: user.isActive,
+    },
+  });
 };
 
 export const googleAuthFailure = async (req: Request, res: Response) => {
