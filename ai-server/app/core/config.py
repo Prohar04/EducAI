@@ -2,45 +2,38 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 from typing import Optional
 
-
 class Settings(BaseSettings):
 
-    # Master API key for internal use
-    MASTER_APIKEY: str = Field(
-        ..., validation_alias="MASTER_APIKEY"
-    )
+    # Master API key for internal use, not exposed to clients
+    MASTER_APIKEY: str = Field(..., validation_alias="MASTER_APIKEY")
 
     # Serper.dev configuration
-    SERPER_APIKEY: Optional[str] = Field(
-        default=None, validation_alias="SERPER_APIKEY"
-    )
-    SERPER_BASE_URL: str = Field(
-        default="https://google.serper.dev",
-        validation_alias="SERPER_BASE_URL",
-    )
+    SERPER_APIKEY: str = Field(..., validation_alias="SERPER_API_KEY")
+    SERPER_BASE_URL: str = Field(..., validation_alias="SERPER_BASE_URL")
 
     # OpenRouter configuration
-    OPEN_ROUTER_APIKEY: Optional[str] = Field(
-        default=None,
-        validation_alias="OPEN_ROUTER_APIKEY",
-    )
+    OPEN_ROUTER_APIKEY: str = Field(..., validation_alias="OPEN_ROUTER_APIKEY")
+
+    # XAI configuration
+    XAI_API_KEY: Optional[str] = Field(default=None, validation_alias="XAI_API_KEY")
 
     # Chromadb configuration
-    CHROMADB_HOST: str = Field(
-        default="localhost",
-        validation_alias="CHROMADB_HOST",
-    )
-    CHROMADB_PORT: int = Field(
-        default=8881,
-        validation_alias="CHROMADB_PORT",
-    )
+    CHROMADB_HOST: str = Field(..., validation_alias="CHROMADB_HOST")
+    CHROMADB_PORT: int = Field(..., 
+    validation_alias="CHROMADB_PORT")
+
+    # Firecrawl configuration
+    FIRECRAWL_API_KEY: Optional[str] = Field(default=None, validation_alias="FIRECRAWL_API_KEY")
 
     # Apify configuration
-    APIFY_APIKEY: Optional[str] = Field(
-        default=None, validation_alias="APIFY_APIKEY"
-    )
+    APIFY_APIKEY: str = Field(..., validation_alias="APIFY_APIKEY")
 
-    PROJECT_NAME: str = "EducAI AI Server"
+    # Database configuration
+    DATABASE_URL: str = Field(..., validation_alias="DATABASE_URL")
+
+    
+
+    PROJECT_NAME: str = "Educai AI Server"
     DEBUG: bool = False
 
     # Tell Pydantic to read from a .env file
@@ -50,8 +43,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-
-settings = Settings()  # type: ignore
+settings = Settings() #type: ignore
 
 if __name__ == "__main__":
     print(settings.MASTER_APIKEY)

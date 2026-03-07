@@ -4,6 +4,7 @@ import { getUserProfile, getSavedPrograms } from "@/lib/auth/action";
 import { COUNTRIES, COUNTRY_TESTS } from "@/lib/data/countries";
 import { STAGES } from "@/lib/data/stages";
 import HomeAnimations, { type SerializedSuggestion } from "./_components/HomeAnimations";
+import { log } from "console";
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -94,6 +95,8 @@ export default async function HomePage() {
   const prof = profile.status === "fulfilled" ? profile.value : null;
   if (!prof?.onboardingDone) redirect("/onboarding");
 
+  console.log("[HomePage] userProfile:", JSON.stringify(prof, null, 2));
+
   const saved = savedResult.status === "fulfilled" ? savedResult.value : [];
 
   const firstName = sess.user.name?.split(" ")[0] ?? "there";
@@ -101,6 +104,8 @@ export default async function HomePage() {
   const stage = STAGES.find((s) => s.value === prof?.currentStage);
   const suggestions = buildSuggestions(prof, saved.length);
   const profileComplete = !!prof?.majorOrTrack && !!prof?.gpa && !!prof?.englishTestType;
+  console.log("Profile complete?", profileComplete);
+  log("major", prof?.majorOrTrack, "gpa", prof?.gpa, "englishTestType", prof?.englishTestType);
 
   return (
     <HomeAnimations

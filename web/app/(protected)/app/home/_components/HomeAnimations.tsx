@@ -8,6 +8,7 @@ import {
   ChevronRight, Target, Calendar, TrendingUp,
 } from "lucide-react";
 import type { UserProfile } from "@/types/auth.type";
+import QuickEditProfile from "./QuickEditProfile";
 
 // ─── Serialisable types (plain JSON — safe to pass from Server Component) ─────
 
@@ -270,6 +271,15 @@ export default function HomeAnimations({
                 </Link>
               </p>
             )}
+          </div>
+
+          {/* Quick edit: major & English test */}
+          <div className="rounded-xl border border-border bg-card p-5">
+            <h3 className="mb-4 text-sm font-semibold">Quick Update</h3>
+            <QuickEditProfile
+              majorOrTrack={prof?.majorOrTrack}
+              englishTestType={prof?.englishTestType}
+            />
           </div>
 
           {/* Mini stats */}
