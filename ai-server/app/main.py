@@ -1,8 +1,5 @@
 # BASE
-import re
-
 from fastapi import FastAPI, Depends, APIRouter
-from pathlib import Path
 
 # Prisma DB
 from .db.prisma_connect import lifespan
@@ -14,17 +11,24 @@ from .api.v1.recommendations import router as recommendations_router
 from .middleware.audit_log import AuditLogMiddleware
 
 # Init FastAPI app
-app = FastAPI(title="Educai AI server", description="A server for managing AI operations for the Educai platform", version="1.0.0", lifespan=lifespan)
+app = FastAPI(
+    title="Educai AI server",
+    description="A server for managing AI operations for the Educai platform",
+    version="1.0.0",
+    lifespan=lifespan,
+)
 
 app.add_middleware(AuditLogMiddleware)
 
 app.include_router(health_router, prefix="/api/v1")
+
 
 @app.get("/data")
 async def get_data(server_name: str = Depends(checkApiKey)):
     return {"message": f"Hello {server_name}, here is your data."}
 
 app.include_router(recommendations_router, prefix="/api/v1/edu")
+
 
 @app.get("/")
 async def get():
