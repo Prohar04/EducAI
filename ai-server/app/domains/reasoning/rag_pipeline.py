@@ -40,6 +40,7 @@ from ...schemas.education import (
 )
 from ..scrapping.firecrawl_client import FirecrawlClient
 from ..searching.webSearch import WebSearch
+from ..ingestion.server_client import server_ingestion_client
 
 # ── Configuration ─────────────────────────────────────────────────────────── #
 _CHROMA_COLLECTION = "edu_recommendations"
@@ -342,6 +343,21 @@ class EduRAGPipeline:
 
         for rec in recs:
             await self._persist_recommendation(task_id, pref_db_id, rec, scraped_at)
+
+        # Push normalized data to server Module 1 tables
+        if recs:
+            try:
+                await server_ingestion_client.push_module1(
+                    run_id=task_id,
+                    recommendations=recs,
+                    target_degree=pref.target_degree,
+                    major=pref.major,
+                )
+            except Exception:
+                logger.warning(
+                    f"[{task_id}] Module 1 server push failed (non-fatal); "
+                    "check logs/failed_ingest_*.json for retry payload."
+                )
 
     async def _persist_recommendation(
         self,

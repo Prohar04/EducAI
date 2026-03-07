@@ -217,16 +217,17 @@ model University {
   city        String?   @db.VarChar(100)
   website     String?   @db.Text
   description String?   @db.Text
+  sourceUrl   String?   @map("source_url") @db.Text
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamp
   updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamp
 
   country  Country   @relation(fields: [countryId], references: [id], onDelete: Restrict)
   programs Program[]
 
+  @@unique([countryId, name])
   @@index([countryId])
   @@index([name])
   @@map("universities")
-  // TODO(scraping): add fields: externalSource, sourceUrl, lastCrawledAt, rawHtmlHash
 }
 
 enum ProgramLevel {
@@ -245,6 +246,7 @@ model Program {
   tuitionMinUSD  Int?         @map("tuition_min_usd")
   tuitionMaxUSD  Int?         @map("tuition_max_usd")
   description    String?      @db.Text
+  sourceUrl      String?      @map("source_url") @db.Text
   createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamp
   updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamp
 
@@ -253,12 +255,12 @@ model Program {
   deadlines    ProgramDeadline[]
   savedBy      SavedProgram[]
 
+  @@unique([universityId, title, level])
   @@index([universityId])
   @@index([field])
   @@index([level])
   @@index([title])
   @@map("programs")
-  // TODO(scraping): add fields: sourceUrl, lastUpdatedFromSourceAt
 }
 
 model ProgramRequirement {
