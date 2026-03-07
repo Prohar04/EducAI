@@ -29,21 +29,51 @@ export const upsertUserProfile = async (
 	formData: FormData,
 ) => {
 	const body: Partial<UserProfile> = {
+		// Legacy
 		targetCountry: (formData.get("targetCountry") as string) || undefined,
 		level: (formData.get("level") as string) || undefined,
 		budgetRange: (formData.get("budgetRange") as string) || undefined,
 		intendedMajor: (formData.get("intendedMajor") as string) || undefined,
 		gpa: formData.get("gpa") ? Number(formData.get("gpa")) : undefined,
-		onboardingDone: true,
+		onboardingDone: formData.get("onboardingDone") === "true" ? true : undefined,
+		// Step 1
+		currentStage: (formData.get("currentStage") as string) || undefined,
+		targetIntake: (formData.get("targetIntake") as string) || undefined,
+		intendedLevel: (formData.get("intendedLevel") as string) || undefined,
+		// Step 2
+		currentInstitution: (formData.get("currentInstitution") as string) || undefined,
+		majorOrTrack: (formData.get("majorOrTrack") as string) || undefined,
+		gpaScale: (formData.get("gpaScale") as string) || undefined,
+		graduationYear: formData.get("graduationYear") ? Number(formData.get("graduationYear")) : undefined,
+		backlogs: formData.get("backlogs") ? Number(formData.get("backlogs")) : undefined,
+		workExperienceMonths: formData.get("workExperienceMonths") ? Number(formData.get("workExperienceMonths")) : undefined,
+		// Step 3
+		englishTestType: (formData.get("englishTestType") as string) || undefined,
+		englishScore: formData.get("englishScore") ? Number(formData.get("englishScore")) : undefined,
+		gre: formData.get("gre") ? Number(formData.get("gre")) : undefined,
+		gmat: formData.get("gmat") ? Number(formData.get("gmat")) : undefined,
+		// Step 4
+		budgetCurrency: (formData.get("budgetCurrency") as string) || undefined,
+		budgetMax: formData.get("budgetMax") ? Number(formData.get("budgetMax")) : undefined,
+		fundingNeed: formData.get("fundingNeed") !== null ? formData.get("fundingNeed") === "true" : undefined,
 	};
 
+	// JSON array fields
+	const targetCountriesRaw = formData.get("targetCountries") as string;
+	if (targetCountriesRaw) {
+		try { body.targetCountries = JSON.parse(targetCountriesRaw); } catch { /* ignore */ }
+	}
+	const preferredCitiesRaw = formData.get("preferredCities") as string;
+	if (preferredCitiesRaw) {
+		try { body.preferredCities = JSON.parse(preferredCitiesRaw); } catch { /* ignore */ }
+	}
+	const prioritiesRaw = formData.get("priorities") as string;
+	if (prioritiesRaw) {
+		try { body.priorities = JSON.parse(prioritiesRaw); } catch { /* ignore */ }
+	}
 	const rawTestScores = formData.get("testScores") as string;
 	if (rawTestScores) {
-		try {
-			body.testScores = JSON.parse(rawTestScores);
-		} catch {
-			// ignore malformed JSON
-		}
+		try { body.testScores = JSON.parse(rawTestScores); } catch { /* ignore */ }
 	}
 
 	const response = await authFetch(`${BACKEND_URL}/users/me/profile`, {
