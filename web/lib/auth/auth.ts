@@ -105,7 +105,7 @@ export async function signIn(
 				accessToken: result.accessToken,
 				refreshToken: result.refreshToken,
 			});
-			redirect("/app");
+			redirect("/onboarding-check");
 		}
 
 		const data = await response.json().catch(() => null);

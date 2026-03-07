@@ -50,5 +50,5 @@ export async function GET(req: NextRequest) {
 		refreshToken,
 	});
 
-	redirect("/app");
+	redirect("/onboarding-check");
 }
