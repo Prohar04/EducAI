@@ -367,7 +367,7 @@ export const googleAuth = passport.authenticate('google', {
 export const googleAuthCallback = [
   passport.authenticate('google', {
     session: false,
-    failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/failure`,
+    failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/signin?error=oauth_failed`,
   }),
   async (req: Request, res: Response) => {
     try {
@@ -393,7 +393,7 @@ export const googleAuthCallback = [
     } catch (error) {
       console.error('Error in Google auth callback:', error);
       const frontend = process.env.FRONTEND_URL || 'http://localhost:3000';
-      return res.redirect(`${frontend}/auth/failure`);
+      return res.redirect(`${frontend}/auth/signin?error=oauth_failed`);
     }
   },
 ];
@@ -432,7 +432,7 @@ export const googleExchange = async (req: Request, res: Response) => {
 
 export const googleAuthFailure = async (req: Request, res: Response) => {
   const frontend = process.env.FRONTEND_URL || 'http://localhost:3000';
-  res.redirect(`${frontend}/auth/failure`);
+  res.redirect(`${frontend}/auth/signin?error=oauth_failed`);
 };
 
 // ── FORGOT PASSWORD ────────────────────────────────────────────────
