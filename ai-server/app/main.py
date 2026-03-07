@@ -8,6 +8,7 @@ from .db.prisma_connect import lifespan
 from .middleware.secure_keys import checkApiKey
 from .api.v1.health import router as health_router
 from .api.v1.recommendations import router as recommendations_router
+from .api.v1.module1_sync import router as module1_sync_router
 from .middleware.audit_log import AuditLogMiddleware
 
 # Init FastAPI app
@@ -28,6 +29,7 @@ async def get_data(server_name: str = Depends(checkApiKey)):
     return {"message": f"Hello {server_name}, here is your data."}
 
 app.include_router(recommendations_router, prefix="/api/v1/edu")
+app.include_router(module1_sync_router, prefix="/api/v1/module1")
 
 
 @app.get("/")
