@@ -20,15 +20,14 @@ Four phases, run as a FastAPI BackgroundTask:
 """
 
 import asyncio
-import uuid
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
-import chromadb
-from langchain_chroma import Chroma
-from langchain_core.output_parsers import JsonOutputParser
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+import chromadb  # type: ignore[import-untyped]
+from langchain_chroma import Chroma  # type: ignore[import-untyped]
+from langchain_core.output_parsers import JsonOutputParser  # type: ignore
+from langchain_core.prompts import ChatPromptTemplate  # type: ignore
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings  # type: ignore
 
 from ...core.config import settings
 from ...core.logger import logger
@@ -42,7 +41,7 @@ from ..scrapping.firecrawl_client import FirecrawlClient
 from ..searching.webSearch import WebSearch
 from ..ingestion.server_client import server_ingestion_client
 
-# ── Configuration ─────────────────────────────────────────────────────────── #
+# ── Configuration ─────────────────────────────────────────────────────────
 _CHROMA_COLLECTION = "edu_recommendations"
 _SIMILARITY_THRESHOLD = 0.85
 _CACHE_TTL_DAYS = 180       # 6 months
@@ -51,7 +50,8 @@ _MAX_MARKDOWN_CHARS = 50_000
 _OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 _LLM_MODEL = "openai/gpt-4o-mini"
 
-# ── Small pure helpers ─────────────────────────────────────────────────────── #
+# ── Small pure helpers ───────────────────────────────────────────────────
+
 
 def _pref_to_text(pref: UserPreferenceInput) -> str:
     return (
@@ -70,13 +70,17 @@ def _rec_to_text(rec: RecommendationOutput) -> str:
         f"${rec.tuition_fee_usd} tuition",
     ]
     if rec.scholarship_name:
-        amt = f"${rec.scholarship_amount_usd}" if rec.scholarship_amount_usd else "amount TBD"
+        amt = (
+            f"${rec.scholarship_amount_usd}"
+            if rec.scholarship_amount_usd
+            else "amount TBD"
+        )
         parts.append(f"{rec.scholarship_name} ({amt})")
     parts.append(f"deadline: {rec.application_deadline}")
     return ", ".join(parts)
 
 
-# ── Prompt templates (defined once at module level) ────────────────────────── #
+# ── Prompt templates (defined once at module level) ─────────────────────
 
 _QUERY_GEN_PROMPT = ChatPromptTemplate.from_messages(
     [
@@ -84,16 +88,21 @@ _QUERY_GEN_PROMPT = ChatPromptTemplate.from_messages(
             "system",
             (
                 "You are an expert international education researcher. "
-                "Generate a JSON array of exactly 3 Google search queries to find "
+                "Generate a JSON array of exactly 3 Google "
+                "search queries to find "
                 "the best matching university programs for the student. "
                 "Queries should be specific and include the year {year}. "
-                "Respond ONLY with a valid JSON array of 3 strings — no markdown, "
+                "Respond ONLY with a valid JSON array of "
+                "3 strings — no markdown, "
                 "no explanation."
             ),
         ),
         (
             "human",
-            "Student preferences: {preferences}\n\nReturn exactly 3 search queries as a JSON array.",
+            (
+                "Student preferences: {preferences}\n\n"
+                "Return exactly 3 search queries as a JSON array."
+            ),
         ),
     ]
 )
@@ -103,11 +112,15 @@ _EXTRACTION_PROMPT = ChatPromptTemplate.from_messages(
         (
             "system",
             (
-                "You are a precise data extractor for an educational platform. "
-                "From the scraped web content below, extract university/program "
-                "recommendation records that best match the student's preferences. "
+                "You are a precise data extractor for an "
+                "educational platform. "
+                "From the scraped web content below, "
+                "extract university/program "
+                "recommendation records that best match "
+                "the student's preferences. "
                 "Return up to 5 recommendations. "
-                "For any field you cannot determine, use a sensible placeholder "
+                "For any field you cannot determine, "
+                "use a sensible placeholder "
                 "(e.g. tuition_fee_usd = 0, application_deadline = 'Rolling')."
             ),
         ),
@@ -123,7 +136,8 @@ _EXTRACTION_PROMPT = ChatPromptTemplate.from_messages(
 )
 
 
-# ── Pipeline class ─────────────────────────────────────────────────────────── #
+# ── Pipeline class ─────────────────────────────────────────────────────────
+
 
 class EduRAGPipeline:
     """Stateless-ish pipeline instance.
@@ -170,22 +184,31 @@ class EduRAGPipeline:
             # Phase A — cache check
             cached_ids = await self._phase_a_cache_check(task_id, pref)
             if cached_ids:
-                await self._link_recommendations(task_id, pref_db_id, cached_ids)
+                await self._link_recommendations(
+                    task_id, pref_db_id, cached_ids
+                )
                 logger.info(
-                    f"[{task_id}] Cache HIT — linked {len(cached_ids)} existing records."
+                    f"[{task_id}] Cache HIT — linked "
+                    f"{len(cached_ids)} existing records."
                 )
                 return
 
-            logger.info(f"[{task_id}] Cache MISS — proceeding to search & scrape.")
+            logger.info(
+                f"[{task_id}] Cache MISS — proceeding to search & scrape."
+            )
 
             # Phase B — search & scrape
             markdown = await self._phase_b_search_scrape(task_id, pref)
             if not markdown:
-                logger.warning(f"[{task_id}] No content scraped. Aborting pipeline.")
+                logger.warning(
+                    f"[{task_id}] No content scraped. Aborting pipeline."
+                )
                 return
 
             # Phase C — structure & save
-            await self._phase_c_structure_save(task_id, pref, pref_db_id, markdown)
+            await self._phase_c_structure_save(
+                task_id, pref, pref_db_id, markdown
+            )
             logger.info(f"[{task_id}] RAG pipeline completed.")
 
         except Exception:
@@ -198,14 +221,21 @@ class EduRAGPipeline:
         task_id: str,
         pref: UserPreferenceInput,
     ) -> List[str]:
-        """Return Prisma IDs of fresh cached recommendations, or an empty list."""
+        """Return Prisma IDs of fresh cached recommendations.
+
+        Returns an empty list on cache miss.
+        """
         pref_text = _pref_to_text(pref)
-        cutoff = datetime.now(tz=timezone.utc) - timedelta(days=_CACHE_TTL_DAYS)
+        cutoff = (
+            datetime.now(tz=timezone.utc) - timedelta(days=_CACHE_TTL_DAYS)
+        )
 
         try:
-            results = await self._vector_store.asimilarity_search_with_relevance_scores(
-                pref_text, k=3
+            _fn = (
+                self._vector_store
+                .asimilarity_search_with_relevance_scores
             )
+            results = await _fn(pref_text, k=3)
         except Exception as e:
             logger.error(f"[{task_id}] ChromaDB query failed: {e}")
             return []
@@ -246,7 +276,9 @@ class EduRAGPipeline:
         logger.info(f"[{task_id}] Search queries: {queries}")
 
         # B2 — Serper search (parallel)
-        search_tasks = [self._web_search.search(q, num_results=3) for q in queries]
+        search_tasks = [
+            self._web_search.search(q, num_results=3) for q in queries
+        ]
         try:
             search_results_list = await asyncio.gather(
                 *search_tasks, return_exceptions=True
@@ -269,7 +301,9 @@ class EduRAGPipeline:
             logger.warning(f"[{task_id}] No URLs found from Serper.")
             return ""
 
-        logger.info(f"[{task_id}] Scraping {len(all_urls)} URLs via Firecrawl.")
+        logger.info(
+            f"[{task_id}] Scraping {len(all_urls)} URLs via Firecrawl."
+        )
 
         # B3 — Firecrawl scrape (parallel inside FirecrawlClient.scrape_urls)
         try:
@@ -305,9 +339,18 @@ class EduRAGPipeline:
         # Fallback: construct a basic query from preferences
         countries = " ".join(pref.preferred_countries[:2])
         return [
-            f"{pref.target_degree} programs {pref.major} {countries} {datetime.now().year}",
-            f"fully funded {pref.major} {pref.target_degree} scholarship {countries}",
-            f"best universities {pref.major} {countries} admission requirements",
+            (
+                f"{pref.target_degree} programs {pref.major}"
+                f" {countries} {datetime.now().year}"
+            ),
+            (
+                f"fully funded {pref.major} {pref.target_degree}"
+                f" scholarship {countries}"
+            ),
+            (
+                f"best universities {pref.major}"
+                f" {countries} admission requirements"
+            ),
         ]
 
     # ── Phase C ──────────────────────────────────────────────────────────── #
@@ -342,7 +385,9 @@ class EduRAGPipeline:
         scraped_at = datetime.now(tz=timezone.utc)
 
         for rec in recs:
-            await self._persist_recommendation(task_id, pref_db_id, rec, scraped_at)
+            await self._persist_recommendation(
+                task_id, pref_db_id, rec, scraped_at
+            )
 
         # Push normalized data to server Module 1 tables
         if recs:
@@ -366,7 +411,7 @@ class EduRAGPipeline:
         rec: RecommendationOutput,
         scraped_at: datetime,
     ) -> None:
-        """Save one recommendation to Prisma, link it, and index it in ChromaDB."""
+        """Save one recommendation to Prisma and index it in ChromaDB."""
         try:
             # 1 — Prisma create
             db_rec = await db.edurecommendation.create(
@@ -406,14 +451,15 @@ class EduRAGPipeline:
                 ids=[vector_id],
             )
 
-            # 4 — Back-fill the chroma_vector_id so the record is self-describing
+            # 4 — Back-fill chroma_vector_id (self-describing record)
             await db.edurecommendation.update(
                 where={"id": db_rec.id},
                 data={"chromaVectorId": vector_id},
             )
 
             logger.info(
-                f"[{task_id}] Saved: {rec.university_name} / {rec.program_name}"
+                f"[{task_id}] Saved: "
+                f"{rec.university_name} / {rec.program_name}"
             )
 
         except Exception as e:
@@ -440,7 +486,8 @@ class EduRAGPipeline:
                 )
             except Exception as e:
                 logger.error(
-                    f"[{task_id}] Failed to link rec {rec_id} to pref {pref_db_id}: {e}"
+                    f"[{task_id}] Failed to link rec "
+                    f"{rec_id} to pref {pref_db_id}: {e}"
                 )
 
 
