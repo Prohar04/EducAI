@@ -49,6 +49,10 @@ npm run db:status
 
 ### Seed demo data (Module 1)
 
+> ⚠️  **The seed file is for local development only.**
+> Real data comes from the scraper ingestion pipeline (ai-server → `/internal/module1/ingest`).
+> **Never run seed against the production Neon database** — it will overwrite real scraped records.
+
 Seeding is **idempotent** — safe to re-run; existing rows are skipped, nothing is deleted.
 
 ```bash

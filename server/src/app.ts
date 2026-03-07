@@ -15,6 +15,7 @@ import universityRoutes from './routes/university.router.ts';
 import programRoutes from './routes/program.router.ts';
 import matchRoutes from './routes/match.router.ts';
 import savedProgramRoutes from './routes/savedProgram.router.ts';
+import ingestRoutes from './routes/ingest.router.ts';
 // import { PrismaSessionStore } from './services/session.service.ts';
 
 const app = express();
@@ -86,6 +87,19 @@ app.get('/health/db', async (req, res) => {
   }
 });
 
+app.get('/health/schema', async (_req, res) => {
+  const tables: Record<string, boolean> = {};
+  try { await prisma.country.count();     tables.countries     = true; } catch { tables.countries     = false; }
+  try { await prisma.university.count();  tables.universities  = true; } catch { tables.universities  = false; }
+  try { await prisma.program.count();     tables.programs      = true; } catch { tables.programs      = false; }
+  const ok = Object.values(tables).every(Boolean);
+  res.status(ok ? 200 : 503).json(
+    ok
+      ? { ok: true,  tables }
+      : { ok: false, error: 'Migrations not applied — run: NODE_ENV=production npm run db:migrate:deploy', tables },
+  );
+});
+
 app.get('/api', (req, res) => {
   res.status(200).json({ message: 'EducAI API is running!' });
 });
@@ -96,6 +110,7 @@ app.use('/universities', universityRoutes);
 app.use('/programs', programRoutes);
 app.use('/match', matchRoutes);
 app.use('/saved-programs', savedProgramRoutes);
+app.use('/internal', ingestRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
