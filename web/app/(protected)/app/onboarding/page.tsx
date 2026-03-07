@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { GraduationCap, ChevronRight, ChevronLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import type { OnboardingFormState } from "@/types/auth.type";
 // ─── Step definitions ────────────────────────────────────────────────────────
 
 const LEVELS = ["BSc", "MSc", "PhD", "MBA", "Diploma"];
+const ENGLISH_TEST_OPTIONS = ["None", "IELTS", "TOEFL", "PTE", "Duolingo", "TestDaF"];
 const BUDGET_RANGES = [
   "< $10,000",
   "$10,000 – $20,000",
@@ -25,7 +26,8 @@ const BUDGET_RANGES = [
 export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const [state, formAction, pending] = useActionState<OnboardingFormState, FormData>(
+  const [isPending, startTransition] = useTransition();
+  const [state, formAction] = useActionState<OnboardingFormState, FormData>(
     upsertUserProfile,
     undefined,
   );
@@ -36,7 +38,9 @@ export default function OnboardingPage() {
     level: "",
     budgetRange: "",
     intendedMajor: "",
+    majorOrTrack: "",
     gpa: "",
+    englishTestType: "",
     ielts: "",
     gre: "",
     toefl: "",
@@ -69,7 +73,9 @@ export default function OnboardingPage() {
     fd.append("level", values.level);
     if (values.budgetRange) fd.append("budgetRange", values.budgetRange);
     if (values.intendedMajor) fd.append("intendedMajor", values.intendedMajor);
+    if (values.majorOrTrack) fd.append("majorOrTrack", values.majorOrTrack);
     if (values.gpa) fd.append("gpa", values.gpa);
+    if (values.englishTestType) fd.append("englishTestType", values.englishTestType);
 
     const scores: Record<string, number> = {};
     if (values.ielts) scores["IELTS"] = Number(values.ielts);
@@ -123,7 +129,7 @@ export default function OnboardingPage() {
             type="button"
             variant="ghost"
             size="sm"
-            disabled={step === 0 || pending}
+            disabled={step === 0 || isPending}
             onClick={() => setStep((s) => s - 1)}
           >
             <ChevronLeft className="mr-1 size-4" />
@@ -133,10 +139,10 @@ export default function OnboardingPage() {
           {isLast ? (
             <Button
               type="button"
-              disabled={pending}
-              onClick={() => formAction(buildFormData())}
+              disabled={isPending}
+              onClick={() => startTransition(() => formAction(buildFormData()))}
             >
-              {pending ? (
+              {isPending ? (
                 <>
                   <Loader2 className="mr-2 size-4 animate-spin" />
                   Saving…
@@ -164,7 +170,9 @@ type FormValues = {
   level: string;
   budgetRange: string;
   intendedMajor: string;
+  majorOrTrack: string;
   gpa: string;
+  englishTestType: string;
   ielts: string;
   gre: string;
   toefl: string;
@@ -254,6 +262,16 @@ function StepAcademic({
       </div>
 
       <div className="space-y-2">
+        <Label htmlFor="majorOrTrack">Major / Track (for programme matching)</Label>
+        <Input
+          id="majorOrTrack"
+          placeholder="e.g. Machine Learning, Corporate Finance…"
+          value={values.majorOrTrack}
+          onChange={(e) => set("majorOrTrack", e.target.value)}
+        />
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="gpa">Current GPA (0 – 4.0 scale)</Label>
         <Input
           id="gpa"
@@ -289,6 +307,26 @@ function StepScores({
       <p className="text-sm text-muted-foreground">
         Enter only the tests you&apos;ve taken or plan to take. Leave others blank.
       </p>
+
+      <div className="space-y-2">
+        <Label htmlFor="englishTestType">English proficiency test</Label>
+        <div className="flex flex-wrap gap-2">
+          {ENGLISH_TEST_OPTIONS.map((opt) => (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => set("englishTestType", opt)}
+              className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
+                values.englishTestType === opt
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border hover:border-primary/50"
+              }`}
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {SCORE_FIELDS.map(({ id, label, placeholder }) => (
         <div key={id} className="space-y-2">
