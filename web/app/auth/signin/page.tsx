@@ -10,8 +10,7 @@ const OAUTH_ERROR_MESSAGES: Record<string, string> = {
 	invalid_token: "Google sign-in failed. Please try again.",
 	oauth_failed: "Google sign-in could not complete. Please try again.",
 	oauth_expired: "Google sign-in timed out. Please try again.",
-	oauth_bad_request: "Google sign-in could not complete. Please try again.",
-	oauth_server: "Server error. Try again in a moment.",
+	oauth_server: "Server error during sign-in. Please try again shortly.",
 };
 
 type SignInPageProps = {

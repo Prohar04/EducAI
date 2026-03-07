@@ -28,20 +28,12 @@ export async function GET(req: NextRequest) {
 		redirect("/auth/signin?error=oauth_server");
 	}
 
+	if (exchangeRes.status === 401) {
+		redirect("/auth/signin?error=oauth_expired");
+	}
+
 	if (!exchangeRes.ok) {
-		if (process.env.NODE_ENV === "development") {
-			console.error("[google exchange] failed with status", exchangeRes.status);
-		}
-		if (exchangeRes.status === 401) {
-			redirect("/auth/signin?error=oauth_expired");
-		}
-		if (exchangeRes.status === 400) {
-			redirect("/auth/signin?error=oauth_bad_request");
-		}
-		if (exchangeRes.status >= 500) {
-			redirect("/auth/signin?error=oauth_server");
-		}
-		redirect("/auth/signin?error=oauth_failed");
+		redirect("/auth/signin?error=oauth_server");
 	}
 
 	const { accessToken, refreshToken, user } = await exchangeRes.json() as {
