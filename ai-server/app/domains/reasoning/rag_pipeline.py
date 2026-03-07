@@ -29,7 +29,7 @@ from typing import List, Optional
 
 from ...core.config import settings
 from ...core.logger import logger
-from ...db.prisma_connect import db
+from ...db.prisma_connect import db, ensure_connected
 from ...schemas.education import (
     RecommendationList,
     RecommendationOutput,
@@ -137,13 +137,13 @@ class EduRAGPipeline:
                 (
                     "system",
                     (
-                        "You are an expert international education researcher. "
-                        "Generate a JSON array of exactly 3 Google "
-                        "search queries to find "
-                        "the best matching university programs for the student. "
-                        "Queries should be specific and include the year {year}. "
-                        "Respond ONLY with a valid JSON array of "
-                        "3 strings — no markdown, "
+                        "You are an expert international education "
+                        "researcher. Generate a JSON array of exactly "
+                        "3 Google search queries to find the best "
+                        "matching university programs for the student. "
+                        "Queries should be specific and include the "
+                        "year {year}. Respond ONLY with a valid JSON "
+                        "array of 3 strings — no markdown, "
                         "no explanation."
                     ),
                 ),
@@ -196,6 +196,7 @@ class EduRAGPipeline:
     ) -> None:
         """Execute the full pipeline for one preferences record."""
         self._lazy_init()
+        await ensure_connected()
         logger.info(f"[{task_id}] RAG pipeline started.")
         try:
             # Phase A — cache check
@@ -289,7 +290,9 @@ class EduRAGPipeline:
         Returns concatenated markdown from all scraped pages.
         """
         # B1 — LLM query generation
-        from langchain_core.output_parsers import JsonOutputParser  # type: ignore
+        from langchain_core.output_parsers import (  # type: ignore
+            JsonOutputParser,
+        )
         queries = await self._generate_search_queries(
             task_id, pref, JsonOutputParser
         )
@@ -386,8 +389,8 @@ class EduRAGPipeline:
         markdown: str,
     ) -> None:
         """Extract structured recommendations → Prisma → ChromaDB."""
-        structured_llm = self._llm.with_structured_output(  # type: ignore[union-attr]
-            RecommendationList
+        structured_llm = (  # type: ignore[union-attr]
+            self._llm.with_structured_output(RecommendationList)
         )
         chain = self._extraction_prompt | structured_llm
 
