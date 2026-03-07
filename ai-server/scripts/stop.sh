@@ -1,0 +1,1 @@
+docker stop Educai-redis Educai-postgres
