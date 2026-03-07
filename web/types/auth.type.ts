@@ -110,6 +110,7 @@ export type Session = {
 
 export type UserProfile = {
 	userId: string;
+	// Legacy
 	targetCountry?: string | null;
 	level?: string | null;
 	budgetRange?: string | null;
@@ -117,6 +118,29 @@ export type UserProfile = {
 	gpa?: number | null;
 	testScores?: Record<string, number> | null;
 	onboardingDone: boolean;
+	// Step 1: Student Stage
+	currentStage?: string | null;
+	targetIntake?: string | null;
+	targetCountries?: string[] | null;
+	intendedLevel?: string | null;
+	// Step 2: Academic Profile
+	currentInstitution?: string | null;
+	majorOrTrack?: string | null;
+	gpaScale?: string | null;
+	graduationYear?: number | null;
+	backlogs?: number | null;
+	workExperienceMonths?: number | null;
+	// Step 3: Tests & Language
+	englishTestType?: string | null;
+	englishScore?: number | null;
+	gre?: number | null;
+	gmat?: number | null;
+	// Step 4: Budget & Preferences
+	budgetCurrency?: string | null;
+	budgetMax?: number | null;
+	fundingNeed?: boolean | null;
+	preferredCities?: string[] | null;
+	priorities?: string[] | null;
 };
 
 export type OnboardingFormState =

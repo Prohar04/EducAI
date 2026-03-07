@@ -47,13 +47,42 @@ model User {
 
 model UserProfile {
   userId         String   @id @map("user_id") @db.Uuid
+  // ── Legacy fields (kept for backward compat) ──
   targetCountry  String?  @map("target_country") @db.VarChar(100)
   level          String?  @db.VarChar(20)   // "BSc" | "MSc" | "PhD"
-  budgetRange    String?  @map("budget_range") @db.VarChar(50) // e.g. "10000-20000"
+  budgetRange    String?  @map("budget_range") @db.VarChar(50)
   intendedMajor  String?  @map("intended_major") @db.VarChar(100)
   gpa            Float?   @db.Real
   testScores     Json?    @map("test_scores") // {"IELTS": 7.5, "GRE": 320}
   onboardingDone Boolean  @default(false) @map("onboarding_done")
+
+  // ── Step 1: Student Stage ──────────────────
+  currentStage     String? @map("current_stage") @db.VarChar(50)
+  targetIntake     String? @map("target_intake") @db.VarChar(30)
+  targetCountries  Json?   @map("target_countries") // string[]
+  intendedLevel    String? @map("intended_level") @db.VarChar(20)
+
+  // ── Step 2: Academic Profile ───────────────
+  currentInstitution    String? @map("current_institution") @db.VarChar(200)
+  majorOrTrack          String? @map("major_or_track") @db.VarChar(100)
+  gpaScale              String? @map("gpa_scale") @db.VarChar(10) // "4.0"|"10"|"5"|"%"
+  graduationYear        Int?    @map("graduation_year")
+  backlogs              Int?
+  workExperienceMonths  Int?    @map("work_experience_months")
+
+  // ── Step 3: Tests & Language ───────────────
+  englishTestType  String? @map("english_test_type") @db.VarChar(20)
+  englishScore     Float?  @map("english_score") @db.Real
+  gre              Float?  @db.Real
+  gmat             Float?  @db.Real
+
+  // ── Step 4: Budget & Preferences ──────────
+  budgetCurrency  String?  @map("budget_currency") @db.VarChar(10) @default("USD")
+  budgetMax       Float?   @map("budget_max") @db.Real
+  fundingNeed     Boolean? @map("funding_need")
+  preferredCities Json?    @map("preferred_cities") // string[]
+  priorities      Json?    // string[]
+
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamp
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamp
 
