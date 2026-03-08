@@ -1,4 +1,29 @@
 {
   "css.lint.unknownAtRules": "ignore",
-  "scss.lint.unknownAtRules": "ignore"
+  "scss.lint.unknownAtRules": "ignore",
+
+  // ── Python linting ──────────────────────────────────────────────────────
+  // Use ruff (already in ai-server/.venv) for linting + formatting.
+  // Disable legacy linters that enforce the 79-char default.
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    }
+  },
+  "python.linting.enabled": false,
+  "python.linting.flake8Enabled": false,
+  "python.linting.pylintEnabled": false,
+  "python.linting.pycodestyleEnabled": false,
+  "ruff.lineLength": 120,
+  "ruff.enable": true,
+
+  // Exclude temp folder from Python analysis
+  "python.analysis.exclude": ["/tmp/**"],
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true
+  }
 }
