@@ -3,7 +3,21 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { GraduationCap, LayoutDashboard, BookOpen, Sparkles, Bookmark, Award, FileText, ClipboardList, Users, Bot, LogOut, User } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import {
+  GraduationCap,
+  LayoutDashboard,
+  BookOpen,
+  Sparkles,
+  Bookmark,
+  Award,
+  FileText,
+  ClipboardList,
+  Users,
+  LogOut,
+  User,
+  ChevronDown,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -24,11 +38,7 @@ function getInitials(name: string): string {
     .slice(0, 2);
 }
 
-/** MD5 via SubtleCrypto — returns hex string.  Works in browser only. */
 async function md5Hex(str: string): Promise<string> {
-  // Use the Web Crypto subtle digest trick (SHA-256) as MD5 is not in SubtleCrypto.
-  // Fall back to a simple but sufficient deterministic hash for Gravatar.
-  // Gravatar still works with any stable hex; we use SHA-256 truncated.
   const encoder = new TextEncoder();
   const data = encoder.encode(str.trim().toLowerCase());
   const hashBuffer = await crypto.subtle.digest("SHA-256", data);
@@ -40,21 +50,27 @@ function gravatarUrl(email: string, hash: string): string {
   return `https://www.gravatar.com/avatar/${hash}?s=64&d=mp&r=g`;
 }
 
+// Top-level navigation links
 const NAV_LINKS = [
   { href: "/app", label: "Dashboard", icon: LayoutDashboard },
   { href: "/app/programs", label: "Programs", icon: BookOpen },
   { href: "/app/match", label: "Match", icon: Sparkles },
   { href: "/app/saved", label: "Saved", icon: Bookmark },
-  { href: "/app/scholarships", label: "Scholarships", icon: Award },
-  { href: "/app/sop", label: "SOP", icon: FileText },
-  { href: "/app/cv", label: "CV", icon: ClipboardList },
-  { href: "/app/professors", label: "Professors", icon: Users },
-  { href: "/app/agent", label: "AI Agent", icon: Bot },
+] as const;
+
+// Module dropdown items — AI Agent is surfaced via the floating widget
+const MODULES = [
+  { href: "/app/scholarships", label: "Scholarships", icon: Award, soon: false },
+  { href: "/app/sop", label: "SOP Builder", icon: FileText, soon: true },
+  { href: "/app/cv", label: "CV Builder", icon: ClipboardList, soon: true },
+  { href: "/app/professors", label: "Professors", icon: Users, soon: true },
 ] as const;
 
 export function Navbar({ user }: { user: Session["user"] }) {
   const router = useRouter();
   const pathname = usePathname();
+  const reduced = useReducedMotion();
+  const [modulesOpen, setModulesOpen] = useState(false);
 
   const handleSignOut = async () => {
     await fetch("/api/signout", { method: "POST" });
@@ -67,6 +83,8 @@ export function Navbar({ user }: { user: Session["user"] }) {
     return pathname === href || pathname.startsWith(href + "/");
   };
 
+  const isModulesActive = MODULES.some((m) => isActive(m.href));
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-md">
       <nav
@@ -74,15 +92,15 @@ export function Navbar({ user }: { user: Session["user"] }) {
         aria-label="App navigation"
       >
         {/* Logo */}
-        <Link href="/app" className="flex items-center gap-2 shrink-0">
-          <GraduationCap className="size-7 text-primary" />
+        <Link href="/app" className="group flex items-center gap-2 shrink-0">
+          <GraduationCap className="size-7 text-primary transition-transform duration-200 group-hover:scale-110" />
           <span className="text-lg font-bold tracking-tight">
             Educ<span className="text-primary">AI</span>
           </span>
         </Link>
 
         {/* Desktop nav */}
-        <ul className="hidden items-center gap-1 lg:flex overflow-x-auto scrollbar-none" role="list">
+        <ul className="hidden items-center gap-0.5 lg:flex" role="list">
           {NAV_LINKS.map(({ href, label }) => {
             const active = isActive(href);
             return (
@@ -90,17 +108,77 @@ export function Navbar({ user }: { user: Session["user"] }) {
                 <Link
                   href={href}
                   aria-current={active ? "page" : undefined}
-                  className={`px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap rounded-md ${
+                  className={`relative px-3 py-2 text-sm font-medium transition-colors rounded-md ${
                     active
                       ? "text-primary"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {label}
+                  {active && (
+                    <motion.span
+                      layoutId="nav-underline"
+                      className="absolute inset-x-2 -bottom-px h-[2px] rounded-full bg-primary"
+                      initial={reduced ? false : { opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.2 }}
+                    />
+                  )}
                 </Link>
               </li>
             );
           })}
+
+          {/* Modules dropdown */}
+          <li>
+            <DropdownMenu open={modulesOpen} onOpenChange={setModulesOpen}>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className={`flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                    isModulesActive
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Modules
+                  <motion.span
+                    animate={{ rotate: modulesOpen ? 180 : 0 }}
+                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                    style={{ display: "flex" }}
+                  >
+                    <ChevronDown className="size-3.5" />
+                  </motion.span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                className="w-52 p-1"
+                sideOffset={6}
+              >
+                {MODULES.map(({ href, label, icon: Icon, soon }) => {
+                  const active = isActive(href);
+                  return (
+                    <DropdownMenuItem key={href} asChild>
+                      <Link
+                        href={href}
+                        className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm ${
+                          active ? "text-primary" : ""
+                        }`}
+                      >
+                        <Icon className="size-4 shrink-0 text-muted-foreground" />
+                        <span className="flex-1">{label}</span>
+                        {soon && (
+                          <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-primary">
+                            Soon
+                          </span>
+                        )}
+                      </Link>
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </li>
         </ul>
 
         {/* User menu */}
@@ -146,7 +224,6 @@ function NavAvatar({ user }: { user: Session["user"] }) {
   const [src, setSrc] = useState<string | null>(user.avatarUrl?.trim() || null);
 
   useEffect(() => {
-    // If no Google photo, derive Gravatar
     if (!user.avatarUrl?.trim() && user.email) {
       md5Hex(user.email).then((hash) => {
         setSrc(gravatarUrl(user.email, hash));
