@@ -1,6 +1,12 @@
 import 'dotenv/config';
 import prisma from '../src/config/database.ts';
 
+// Guard: only run if explicitly enabled (prevents accidental data injection)
+if (process.env.SEED_ENABLED !== 'true') {
+  console.log('[seed] Skipped — set SEED_ENABLED=true to run.');
+  process.exit(0);
+}
+
 // ---------------------------------------------------------------------------
 // Seed helpers
 // ---------------------------------------------------------------------------

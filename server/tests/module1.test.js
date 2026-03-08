@@ -46,38 +46,27 @@ describe('Module 1 — Programs API', () => {
 });
 
 describe('Module 1 — Match API', () => {
-  it('POST /match/programs route is registered and returns JSON', async () => {
+  it('POST /match/run route is registered and requires auth', async () => {
     const res = await request(app)
-      .post('/match/programs')
+      .post('/match/run')
       .send({})
       .set('Content-Type', 'application/json');
+    // Route exists → must return 401 (auth required), never 404
     expect(res.status).not.toBe(404);
+    expect(res.status).toBe(401);
     expect(res.headers['content-type']).toMatch(/json/);
   });
 
-  it('POST /match/programs returns array or error, never route-not-found', async () => {
-    const body = {
-      targetCountry: 'US',
-      level: 'MSC',
-      intendedField: 'Computer Science',
-      gpa: 3.5,
-      ielts: 7.0,
-      budgetMaxUSD: 60000,
-    };
-    const res = await request(app)
-      .post('/match/programs')
-      .send(body)
-      .set('Content-Type', 'application/json');
-    expect([200, 500]).toContain(res.status);
-    if (res.status === 200) {
-      expect(Array.isArray(res.body)).toBe(true);
-      if (res.body.length > 0) {
-        expect(res.body[0]).toHaveProperty('programId');
-        expect(res.body[0]).toHaveProperty('score');
-        expect(res.body[0]).toHaveProperty('reasons');
-        expect(res.body[0]).toHaveProperty('programSummary');
-      }
-    }
+  it('GET /match/latest route is registered and requires auth', async () => {
+    const res = await request(app).get('/match/latest');
+    expect(res.status).not.toBe(404);
+    expect(res.status).toBe(401);
+  });
+
+  it('GET /match/run/:runId/status route is registered and requires auth', async () => {
+    const res = await request(app).get('/match/run/some-run-id/status');
+    expect(res.status).not.toBe(404);
+    expect(res.status).toBe(401);
   });
 });
 
