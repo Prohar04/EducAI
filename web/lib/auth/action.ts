@@ -7,11 +7,21 @@ import {
 	UserProfile,
 	Program,
 	ProgramListResult,
-	MatchFormState,
 	SavedProgramItem,
 	MatchLatestResponse,
 	MatchRunFormState,
 } from "@/types/auth.type";
+
+const HTTP_STATUS_TEXT: Record<number, string> = {
+	400: "Bad request",
+	401: "Unauthorised — please sign in again",
+	403: "Forbidden",
+	404: "Endpoint not found",
+	429: "Too many requests — please wait a moment",
+	500: "Server error",
+	502: "Server unavailable",
+	503: "Service unavailable",
+};
 
 export const getProfile = async () => {
 	const response = await authFetch(`${BACKEND_URL}/auth/me`);
@@ -109,38 +119,8 @@ export const getProgramById = async (id: string): Promise<Program | null> => {
 	return response.json();
 };
 
-export const matchPrograms = async (
-	_prev: MatchFormState,
-	formData: FormData,
-): Promise<MatchFormState> => {
-	const body: Record<string, unknown> = {};
-	const str = (k: string) => (formData.get(k) as string) || undefined;
-	const num = (k: string) => {
-		const v = formData.get(k);
-		return v ? Number(v) : undefined;
-	};
-	body.targetCountry = str("targetCountry");
-	body.level = str("level");
-	body.intendedField = str("intendedField");
-	body.gpa = num("gpa");
-	body.ielts = num("ielts");
-	body.toefl = num("toefl");
-	body.gre = num("gre");
-	body.budgetMaxUSD = num("budgetMaxUSD");
-
-	const response = await authFetch(`${BACKEND_URL}/match/programs`, {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify(body),
-	});
-
-	if (!response.ok) {
-		return { success: false, message: "Matching failed. Please try again.", results: [] };
-	}
-
-	const data = await response.json();
-	return { success: true, results: data.results ?? [] };
-};
+// matchPrograms removed — use triggerMatchRun() + getMatchLatest() for the
+// background AI scrape-and-rank flow (POST /match/run → GET /match/latest).
 
 // ─── Module 1: Saved Programs ─────────────────────────────────────────────────
 
@@ -180,8 +160,12 @@ export const triggerMatchRun = async (): Promise<MatchRunFormState> => {
 	});
 
 	if (!response.ok) {
-		const data = await response.json().catch(() => null);
-		return { success: false, message: data?.message ?? "Failed to trigger match run." };
+		const errData = await response.json().catch(() => null);
+		const statusText = HTTP_STATUS_TEXT[response.status] ?? "Unexpected error";
+		const msg =
+			errData?.message ??
+			`Match failed (${response.status}). ${statusText}.`;
+		return { success: false, message: msg };
 	}
 
 	const data = await response.json();
