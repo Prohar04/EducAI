@@ -160,6 +160,8 @@ function Step1({ values, set }: StepProps) {
 // ─── Step 2: Academic Profile ─────────────────────────────────────────────────
 
 function Step2({ values, set }: StepProps) {
+	const [showMajorSuggestions, setShowMajorSuggestions] = useState(false);
+
 	const gpa4Estimate = () => {
 		if (!values.gpa || !values.gpaScale) return null;
 		const n = parseFloat(values.gpa);
@@ -172,9 +174,11 @@ function Step2({ values, set }: StepProps) {
 	};
 	const estimate = gpa4Estimate();
 
-	const majorSuggestions = MAJORS.filter((m) =>
-		values.majorOrTrack && m.label.toLowerCase().includes(values.majorOrTrack.toLowerCase()),
-	).slice(0, 5);
+	const majorSuggestions = showMajorSuggestions
+		? MAJORS.filter((m) =>
+				values.majorOrTrack && m.label.toLowerCase().includes(values.majorOrTrack.toLowerCase()),
+		  ).slice(0, 5)
+		: [];
 
 	return (
 		<div className="space-y-5">
@@ -194,17 +198,23 @@ function Step2({ values, set }: StepProps) {
 					id="major"
 					placeholder="e.g. Computer Science, Economics…"
 					value={values.majorOrTrack}
-					onChange={(e) => set("majorOrTrack", e.target.value)}
+					onChange={(e) => {
+						set("majorOrTrack", e.target.value);
+						setShowMajorSuggestions(true);
+					}}
 					autoComplete="off"
 				/>
-				{majorSuggestions.length > 0 && values.majorOrTrack && (
+				{majorSuggestions.length > 0 && values.majorOrTrack && showMajorSuggestions && (
 					<div className="mt-1 overflow-hidden rounded-md border border-border bg-popover shadow-md">
 						{majorSuggestions.map((m) => (
 							<button
 								key={m.value}
 								type="button"
 								className="w-full px-3 py-2 text-left text-sm hover:bg-accent"
-								onClick={() => set("majorOrTrack", m.label)}
+								onClick={() => {
+									set("majorOrTrack", m.label);
+									setShowMajorSuggestions(false);
+								}}
 							>
 								<span className="font-medium">{m.label}</span>
 								<span className="ml-2 text-xs text-muted-foreground">{m.field}</span>
@@ -415,7 +425,10 @@ function Step4({ values, set }: StepProps) {
 				<div className="flex gap-2">
 					<select
 						value={values.budgetCurrency}
-						onChange={(e) => set("budgetCurrency", e.target.value)}
+						onChange={(e) => {
+							set("budgetCurrency", e.target.value);
+							set("budgetMax", "");
+						}}
 						className="rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
 					>
 						{CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}

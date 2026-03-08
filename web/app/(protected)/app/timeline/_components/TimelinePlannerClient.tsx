@@ -1,0 +1,294 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import {
+	Calendar, ChevronDown, ChevronRight, RefreshCw,
+	BookOpen, Award, Plane, AlertCircle, CheckCircle2,
+	Clock, MapPin, Loader2,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { generateTimeline, getLatestTimeline } from "@/lib/auth/action";
+import { FadeIn } from "@/components/motion/FadeIn";
+import { Reveal } from "@/components/motion/Reveal";
+import { COUNTRIES } from "@/lib/data/countries";
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type RoadmapItemType = "preparation" | "application" | "scholarship" | "visa" | "deadline";
+
+interface RoadmapItem {
+	type: RoadmapItemType;
+	title: string;
+	description: string;
+	date?: string;
+	sourceId?: string;
+}
+
+interface RoadmapMonth {
+	month: string;
+	label: string;
+	items: RoadmapItem[];
+}
+
+interface UserRoadmap {
+	id: string;
+	countryCode: string;
+	intake?: string;
+	startMonth: string;
+	endMonth: string;
+	plan: RoadmapMonth[];
+	createdAt: string;
+}
+
+// ── Constants ─────────────────────────────────────────────────────────────────
+
+const ITEM_ICONS: Record<RoadmapItemType, React.ElementType> = {
+	preparation: BookOpen,
+	application: CheckCircle2,
+	scholarship: Award,
+	visa: Plane,
+	deadline: Clock,
+};
+
+const ITEM_COLOURS: Record<RoadmapItemType, string> = {
+	preparation: "text-blue-500 bg-blue-500/10 border-blue-500/30",
+	application: "text-primary bg-primary/10 border-primary/30",
+	scholarship: "text-amber-500 bg-amber-500/10 border-amber-500/30",
+	visa: "text-purple-500 bg-purple-500/10 border-purple-500/30",
+	deadline: "text-red-500 bg-red-500/10 border-red-500/30",
+};
+
+const INTAKES = [
+	"Fall 2025", "Spring 2026", "Fall 2026", "Spring 2027", "Fall 2027", "Spring 2028",
+];
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+function MonthCard({ month, defaultOpen = false }: { month: RoadmapMonth; defaultOpen?: boolean }) {
+	const [open, setOpen] = useState(defaultOpen);
+
+	return (
+		<div className="rounded-xl border border-border bg-card overflow-hidden">
+			<button
+				type="button"
+				onClick={() => setOpen((o) => !o)}
+				className="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-muted/30 transition-colors"
+			>
+				<div className="flex items-center gap-3">
+					<Calendar className="size-4 text-primary shrink-0" />
+					<span className="font-semibold">{month.label}</span>
+					<span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+						{month.items.length} task{month.items.length !== 1 ? "s" : ""}
+					</span>
+				</div>
+				{open ? (
+					<ChevronDown className="size-4 text-muted-foreground" />
+				) : (
+					<ChevronRight className="size-4 text-muted-foreground" />
+				)}
+			</button>
+
+			{open && (
+				<div className="divide-y divide-border border-t border-border">
+					{month.items.map((item, i) => {
+						const Icon = ITEM_ICONS[item.type] ?? BookOpen;
+						const colourClass = ITEM_COLOURS[item.type] ?? "text-muted-foreground bg-muted border-muted";
+						return (
+							<div key={i} className="flex gap-3 px-5 py-3.5">
+								<div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border ${colourClass}`}>
+									<Icon className="size-3.5" />
+								</div>
+								<div className="flex-1 min-w-0">
+									<p className="text-sm font-medium leading-snug">{item.title}</p>
+									{item.description && (
+										<p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">{item.description}</p>
+									)}
+									{item.date && (
+										<p className="mt-1 text-xs text-muted-foreground/70">
+											{new Date(item.date).toLocaleDateString("en-US", {
+												day: "numeric", month: "short", year: "numeric",
+											})}
+										</p>
+									)}
+								</div>
+								<span className={`mt-0.5 shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${colourClass}`}>
+									{item.type}
+								</span>
+							</div>
+						);
+					})}
+				</div>
+			)}
+		</div>
+	);
+}
+
+function SkeletonCard() {
+	return (
+		<div className="rounded-xl border border-border bg-card p-5 animate-pulse">
+			<div className="flex items-center gap-3 mb-3">
+				<div className="h-4 w-4 rounded bg-muted" />
+				<div className="h-4 w-40 rounded bg-muted" />
+				<div className="h-5 w-12 rounded-full bg-muted" />
+			</div>
+			<div className="space-y-2 pl-7">
+				<div className="h-3 w-2/3 rounded bg-muted" />
+				<div className="h-3 w-1/2 rounded bg-muted" />
+			</div>
+		</div>
+	);
+}
+
+// ── Main component ───────────────────────────────────────────────────────────
+
+export default function TimelinePlannerClient({
+	initialRoadmap,
+	defaultCountry,
+}: {
+	initialRoadmap: UserRoadmap | null;
+	defaultCountry: string;
+}) {
+	const [roadmap, setRoadmap] = useState<UserRoadmap | null>(initialRoadmap);
+	const [countryCode, setCountryCode] = useState(defaultCountry || "US");
+	const [intake, setIntake] = useState(initialRoadmap?.intake ?? "");
+	const [error, setError] = useState<string | null>(null);
+	const [isPending, startTransition] = useTransition();
+
+	const handleGenerate = () => {
+		setError(null);
+		startTransition(async () => {
+			const result = await generateTimeline(countryCode, intake || undefined);
+			if (!result.success) {
+				setError(result.message ?? "Unknown error");
+				return;
+			}
+			const latest = await getLatestTimeline(countryCode);
+			if (latest) setRoadmap(latest as UserRoadmap);
+		});
+	};
+
+	const handleCountryChange = (code: string) => {
+		setCountryCode(code);
+		setRoadmap(null);
+		startTransition(async () => {
+			const latest = await getLatestTimeline(code);
+			if (latest) setRoadmap(latest as UserRoadmap);
+		});
+	};
+
+	const plan = roadmap?.plan ?? [];
+	const countryName = COUNTRIES.find((c) => c.code === countryCode)?.name ?? countryCode;
+
+	return (
+		<div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
+			{/* Header */}
+			<FadeIn className="mb-8">
+				<div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+					<div>
+						<h1 className="text-3xl font-bold tracking-tight">Application Timeline</h1>
+						<p className="mt-1 text-muted-foreground">
+							Your personalised month-by-month roadmap to studying abroad.
+						</p>
+					</div>
+					{roadmap && (
+						<p className="text-xs text-muted-foreground mt-1 sm:mt-2 shrink-0">
+							Updated {new Date(roadmap.createdAt).toLocaleDateString("en-US", {
+								day: "numeric", month: "short", year: "numeric",
+							})}
+						</p>
+					)}
+				</div>
+			</FadeIn>
+
+			{/* Filters */}
+			<Reveal>
+				<div className="mb-6 flex flex-wrap gap-3 rounded-xl border border-border bg-card px-5 py-4">
+					<div className="flex flex-col gap-1 flex-1 min-w-[160px]">
+						<label className="text-xs font-medium text-muted-foreground">Target Country</label>
+						<select
+							value={countryCode}
+							onChange={(e) => handleCountryChange(e.target.value)}
+							className="rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+						>
+							{COUNTRIES.map((c) => (
+								<option key={c.code} value={c.code}>{c.flag} {c.name}</option>
+							))}
+						</select>
+					</div>
+					<div className="flex flex-col gap-1 flex-1 min-w-[160px]">
+						<label className="text-xs font-medium text-muted-foreground">Target Intake</label>
+						<select
+							value={intake}
+							onChange={(e) => setIntake(e.target.value)}
+							className="rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+						>
+							<option value="">Auto-detect from profile</option>
+							{INTAKES.map((i) => <option key={i} value={i}>{i}</option>)}
+						</select>
+					</div>
+					<div className="flex items-end">
+						<Button
+							onClick={handleGenerate}
+							disabled={isPending}
+							className="gap-2 whitespace-nowrap"
+						>
+							{isPending ? (
+								<><Loader2 className="size-4 animate-spin" /> Generating...</>
+							) : (
+								<><RefreshCw className="size-4" /> Generate Roadmap</>
+							)}
+						</Button>
+					</div>
+				</div>
+			</Reveal>
+
+			{/* Error */}
+			{error && (
+				<div className="mb-4 flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+					<AlertCircle className="size-4 shrink-0" />
+					{error}
+				</div>
+			)}
+
+			{/* Empty state */}
+			{!isPending && !error && plan.length === 0 && (
+				<Reveal>
+					<div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20 text-center">
+						<Calendar className="mb-4 size-12 text-muted-foreground/40" />
+						<h2 className="text-lg font-semibold">No roadmap yet</h2>
+						<p className="mt-1 max-w-xs text-sm text-muted-foreground">
+							Save at least one program and click <strong>Generate Roadmap</strong> to build your personalised plan.
+						</p>
+						<div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+							<MapPin className="size-3.5" />
+							Showing plan for <strong>{countryName}</strong>
+						</div>
+					</div>
+				</Reveal>
+			)}
+
+			{/* Loading skeletons */}
+			{isPending && (
+				<div className="space-y-3">
+					{Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
+				</div>
+			)}
+
+			{/* Roadmap months */}
+			{!isPending && plan.length > 0 && (
+				<>
+					<div className="mb-4 flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-2.5 text-sm text-primary">
+						<MapPin className="size-4 shrink-0" />
+						Roadmap for <strong>{countryName}</strong>
+						{roadmap?.intake && <> · Intake: <strong>{roadmap.intake}</strong></>}
+					</div>
+					<div className="space-y-3">
+						{plan.map((month, i) => (
+							<MonthCard key={month.month} month={month} defaultOpen={i === 0} />
+						))}
+					</div>
+				</>
+			)}
+		</div>
+	);
+}

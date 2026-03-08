@@ -10,6 +10,7 @@ from .api.v1.health import router as health_router
 from .api.v1.recommendations import router as recommendations_router
 from .api.v1.module1_sync import router as module1_sync_router
 from .api.v1.scrape_match import router as scrape_match_router
+from .api.v1.strategy import router as strategy_router
 from .middleware.audit_log import AuditLogMiddleware
 
 # Init FastAPI app
@@ -33,6 +34,7 @@ async def get_data(server_name: str = Depends(checkApiKey)):
 app.include_router(recommendations_router, prefix="/api/v1/edu")
 app.include_router(module1_sync_router, prefix="/api/v1/module1")
 app.include_router(scrape_match_router, prefix="/api/v1/module1")
+app.include_router(strategy_router, prefix="/api/v1/module1")
 
 
 @app.get("/")

@@ -41,6 +41,8 @@ model User {
   savedPrograms            SavedProgram[]
   oauthCodes               OAuthCode[]
   matchRuns                MatchRun[]
+  roadmaps                 UserRoadmap[]
+  strategyReports          StrategyReport[]
 
   @@index([email])
   @@index([oauthProvider, oauthId])
@@ -355,6 +357,90 @@ model MatchResult {
   @@index([runId])
   @@index([programId])
   @@map("match_results")
+}
+
+// ============================================================
+// MODULE 1: Timeline Planner & Strategy Generator
+// ============================================================
+
+model Scholarship {
+  id          String        @id @default(cuid())
+  title       String        @db.VarChar(300)
+  provider    String?       @db.VarChar(200)
+  countryCode String?       @map("country_code") @db.VarChar(10)
+  level       ProgramLevel?
+  field       String?       @db.VarChar(100)
+  url         String?       @db.Text
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamp
+  updatedAt   DateTime      @updatedAt @map("updated_at") @db.Timestamp
+
+  deadlines ScholarshipDeadline[]
+
+  @@index([countryCode])
+  @@map("scholarships")
+}
+
+model ScholarshipDeadline {
+  id            String   @id @default(cuid())
+  scholarshipId String   @map("scholarship_id")
+  term          String?  @db.VarChar(50)
+  deadline      DateTime @db.Timestamp
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamp
+
+  scholarship Scholarship @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+
+  @@index([scholarshipId])
+  @@index([deadline])
+  @@map("scholarship_deadlines")
+}
+
+model VisaTimelineTemplate {
+  id          String   @id @default(cuid())
+  countryCode String   @unique @map("country_code") @db.VarChar(10)
+  title       String   @db.VarChar(200)
+  milestones  Json     // [{key,label,offsetDays,notes}]
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamp
+
+  @@map("visa_timeline_templates")
+}
+
+model UserRoadmap {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id") @db.Uuid
+  countryCode String   @map("country_code") @db.VarChar(10)
+  intake      String?  @db.VarChar(30)
+  startMonth  String   @map("start_month") @db.VarChar(7)  // "YYYY-MM"
+  endMonth    String   @map("end_month") @db.VarChar(7)
+  plan        Json     // [{month,label,items:[{type,title,description,date?}]}]
+  sources     Json?    // {programIds,scholarshipIds,visaTemplateId}
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamp
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([countryCode])
+  @@map("user_roadmaps")
+}
+
+model StrategyReport {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id") @db.Uuid
+  countryCode String   @map("country_code") @db.VarChar(10)
+  intake      String?  @db.VarChar(30)
+  programIds  Json?    @map("program_ids")
+  cacheKey    String   @map("cache_key") @db.VarChar(600)
+  report      Json     // structured {summary,whyThisCountryFits,admissionChances,riskAssessment,...}
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamp
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([countryCode])
+  @@index([cacheKey])
+  @@map("strategy_reports")
 }
 
 // ── GOOGLE OAUTH ONE-TIME CODES ────────────────────────────────────
