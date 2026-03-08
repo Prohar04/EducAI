@@ -5,6 +5,8 @@ import {
 	FormState,
 	LoginFormSchema,
 	SignupFormSchema,
+	SignupFullSchema,
+	SignupFullFormState,
 	ForgotPasswordSchema,
 	ResetPasswordSchema,
 	ResetPasswordFormState,
@@ -14,7 +16,7 @@ import {
 import { createSession, updateTokens } from "./session";
 import { BACKEND_URL } from "@/constants/constants";
 
-// ── SIGN UP ────────────────────────────────────────────────────────
+// ── SIGN UP (legacy simple form) ───────────────────────────────────
 
 export async function signUp(
 	state: FormState,
@@ -55,6 +57,77 @@ export async function signUp(
 		};
 	} catch (err) {
 		// redirect() throws a special error — rethrow it
+		throw err;
+	}
+}
+
+// ── SIGN UP FULL (multi-step: account + profile in one) ────────────
+
+export async function signUpFull(
+	state: SignupFullFormState,
+	formData: FormData,
+): Promise<SignupFullFormState> {
+	const raw = {
+		name: formData.get("name"),
+		email: formData.get("email"),
+		password: formData.get("password"),
+		currentStage: formData.get("currentStage"),
+		targetIntake: formData.get("targetIntake"),
+		targetCountries: (() => {
+			try { return JSON.parse(formData.get("targetCountries") as string); } catch { return []; }
+		})(),
+		intendedLevel: formData.get("intendedLevel"),
+		intendedMajor: formData.get("intendedMajor"),
+		gpa: formData.get("gpa") ? Number(formData.get("gpa")) : undefined,
+		gpaScale: formData.get("gpaScale") || undefined,
+		englishTestType: formData.get("englishTestType") || undefined,
+		englishScore: formData.get("englishScore") ? Number(formData.get("englishScore")) : undefined,
+		budgetMax: formData.get("budgetMax") ? Number(formData.get("budgetMax")) : undefined,
+		budgetCurrency: formData.get("budgetCurrency") || undefined,
+		workExpMonths: formData.get("workExpMonths") ? Number(formData.get("workExpMonths")) : undefined,
+	};
+
+	const validation = SignupFullSchema.safeParse(raw);
+	if (!validation.success) {
+		return { error: validation.error.flatten().fieldErrors as NonNullable<SignupFullFormState>["error"] };
+	}
+
+	try {
+		const response = await fetch(`${BACKEND_URL}/auth/signup`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				name: validation.data.name,
+				email: validation.data.email,
+				password: validation.data.password,
+				profile: {
+					currentStage: validation.data.currentStage,
+					targetIntake: validation.data.targetIntake,
+					targetCountries: validation.data.targetCountries,
+					intendedLevel: validation.data.intendedLevel,
+					intendedMajor: validation.data.intendedMajor,
+					gpa: validation.data.gpa,
+					gpaScale: validation.data.gpaScale,
+					englishTestType: validation.data.englishTestType,
+					englishScore: validation.data.englishScore,
+					budgetMax: validation.data.budgetMax,
+					budgetCurrency: validation.data.budgetCurrency ?? "USD",
+					workExperienceMonths: validation.data.workExpMonths,
+				},
+			}),
+		});
+
+		if (response.ok || response.status === 201) {
+			redirect("/auth/verify-email?pending=true");
+		}
+
+		if (response.status === 409) {
+			return { message: "Email already in use." };
+		}
+
+		const data = await response.json().catch(() => null);
+		return { message: data?.message ?? "Something went wrong. Please try again later." };
+	} catch (err) {
 		throw err;
 	}
 }
@@ -104,6 +177,7 @@ export async function signIn(
 				},
 				accessToken: result.accessToken,
 				refreshToken: result.refreshToken,
+				rememberMe,
 			});
 			redirect("/onboarding-check");
 		}

@@ -4,7 +4,6 @@ from typing import Optional
 
 
 class Settings(BaseSettings):
-
     # Master API key for internal use, not exposed to clients
     MASTER_APIKEY: str = Field(..., validation_alias="MASTER_APIKEY")
 
@@ -16,19 +15,14 @@ class Settings(BaseSettings):
     OPEN_ROUTER_APIKEY: str = Field(..., validation_alias="OPEN_ROUTER_APIKEY")
 
     # XAI configuration
-    XAI_API_KEY: Optional[str] = Field(
-        default=None, validation_alias="XAI_API_KEY"
-    )
+    XAI_API_KEY: Optional[str] = Field(default=None, validation_alias="XAI_API_KEY")
 
     # Chromadb configuration
     CHROMADB_HOST: str = Field(..., validation_alias="CHROMADB_HOST")
-    CHROMADB_PORT: int = Field(...,
-                               validation_alias="CHROMADB_PORT")
+    CHROMADB_PORT: int = Field(..., validation_alias="CHROMADB_PORT")
 
     # Firecrawl configuration
-    FIRECRAWL_API_KEY: Optional[str] = Field(
-        default=None, validation_alias="FIRECRAWL_API_KEY"
-    )
+    FIRECRAWL_API_KEY: Optional[str] = Field(default=None, validation_alias="FIRECRAWL_API_KEY")
 
     # Apify configuration
     APIFY_APIKEY: str = Field(..., validation_alias="APIFY_APIKEY")
@@ -41,9 +35,7 @@ class Settings(BaseSettings):
         default="http://localhost:8000",
         validation_alias="SERVER_BASE_URL",
     )
-    INGEST_API_KEY: Optional[str] = Field(
-        default=None, validation_alias="INGEST_API_KEY"
-    )
+    INGEST_API_KEY: Optional[str] = Field(default=None, validation_alias="INGEST_API_KEY")
 
     PROJECT_NAME: str = "Educai AI Server"
     DEBUG: bool = False

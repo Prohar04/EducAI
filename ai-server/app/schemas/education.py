@@ -19,9 +19,7 @@ class RecommendationOutput(BaseModel):
     tuition_fee_usd: int
     scholarship_name: Optional[str] = None
     scholarship_amount_usd: Optional[int] = None
-    application_deadline: str = Field(
-        ..., description='ISO date string or "Rolling"'
-    )
+    application_deadline: str = Field(..., description='ISO date string or "Rolling"')
     source_url: str
 
 
@@ -39,6 +37,7 @@ class TaskResponse(BaseModel):
 # ---------------------------------------------------------------------------
 # Debug / inspection schemas
 # ---------------------------------------------------------------------------
+
 
 class EduPreferenceRecord(BaseModel):
     id: str

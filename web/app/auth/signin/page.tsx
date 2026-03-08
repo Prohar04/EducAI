@@ -4,7 +4,7 @@ import { AuthCard } from "@/components/auth/AuthCard";
 import { AuthHeader } from "@/components/auth/AuthHeader";
 import { AuthDivider } from "@/components/auth/AuthDivider";
 import { OAuthButton } from "@/components/auth/OAuthButton";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Clock } from "lucide-react";
 
 const OAUTH_ERROR_MESSAGES: Record<string, string> = {
 	invalid_token: "Google sign-in failed. Please try again.",
@@ -14,12 +14,13 @@ const OAUTH_ERROR_MESSAGES: Record<string, string> = {
 };
 
 type SignInPageProps = {
-	searchParams: Promise<{ error?: string }>;
+	searchParams: Promise<{ error?: string; reason?: string }>;
 };
 
 const SignInPage = async ({ searchParams }: SignInPageProps) => {
-	const { error } = await searchParams;
+	const { error, reason } = await searchParams;
 	const errorMessage = error ? (OAUTH_ERROR_MESSAGES[error] ?? "An error occurred. Please try again.") : null;
+	const sessionExpired = reason === "session_expired";
 
 	return (
 		<AuthCard>
@@ -29,6 +30,15 @@ const SignInPage = async ({ searchParams }: SignInPageProps) => {
 			/>
 
 			<div className="mt-8">
+				{sessionExpired && (
+					<div
+						role="alert"
+						className="mb-4 flex items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400"
+					>
+						<Clock className="size-4 shrink-0" />
+						Session expired. Please sign in again.
+					</div>
+				)}
 				{errorMessage && (
 					<div
 						role="alert"

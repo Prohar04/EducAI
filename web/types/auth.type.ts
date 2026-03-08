@@ -35,6 +35,49 @@ export const SignupFormSchema = z.object({
 		.trim(),
 });
 
+// Full signup schema used by the multi-step form
+export const SignupFullSchema = z.object({
+	// Step 1: Account
+	name: z.string().min(2, { message: "Name must be at least 2 characters." }).trim(),
+	email: z.string().email({ message: "Please enter a valid email." }).trim(),
+	password: z
+		.string()
+		.min(8, { message: "Be at least 8 characters long" })
+		.regex(/[a-zA-Z]/, { message: "Contain at least one letter." })
+		.regex(/[0-9]/, { message: "Contain at least one number." })
+		.regex(/[^a-zA-Z0-9]/, { message: "Contain at least one special character." })
+		.trim(),
+	// Step 2: Student profile
+	currentStage: z.enum([
+		"High School/A-Levels",
+		"Undergraduate",
+		"Graduate",
+		"Working Professional",
+		"Gap Year",
+	], { error: "Please select your current stage." }),
+	targetIntake: z.string().min(1, { message: "Please select your target intake." }),
+	targetCountries: z.array(z.string()).min(1, { message: "Select at least one target country." }),
+	intendedLevel: z.enum(["BSC", "MSC", "PHD"], { error: "Please select an intended degree level." }),
+	intendedMajor: z.string().min(1, { message: "Please enter your intended major." }).trim(),
+	gpa: z.number().min(0).max(100).optional(),
+	gpaScale: z.string().optional(),
+	// Step 3: Optional extras
+	englishTestType: z.string().optional(),
+	englishScore: z.number().optional(),
+	budgetMax: z.number().optional(),
+	budgetCurrency: z.string().optional(),
+	workExpMonths: z.number().optional(),
+});
+
+export type SignupFullData = z.infer<typeof SignupFullSchema>;
+
+export type SignupFullFormState =
+	| {
+			error?: Partial<Record<keyof SignupFullData | "general", string[]>>;
+			message?: string;
+	  }
+	| undefined;
+
 export const LoginFormSchema = z.object({
 	email: z.string().email({ message: "Please enter a valid email." }).trim(),
 	password: z.string().min(1, {
@@ -106,42 +149,83 @@ export type Session = {
 	};
 	accessToken: string;
 	refreshToken: string;
+        rememberMe?: boolean;
+        lastActiveAt?: number; // unix ms timestamp
 };
 
-export type UserProfile = {
-	userId: string;
-	// Legacy
-	targetCountry?: string | null;
-	level?: string | null;
-	budgetRange?: string | null;
-	intendedMajor?: string | null;
-	gpa?: number | null;
-	testScores?: Record<string, number> | null;
-	onboardingDone: boolean;
-	// Step 1: Student Stage
-	currentStage?: string | null;
-	targetIntake?: string | null;
-	targetCountries?: string[] | null;
-	intendedLevel?: string | null;
-	// Step 2: Academic Profile
-	currentInstitution?: string | null;
-	majorOrTrack?: string | null;
-	gpaScale?: string | null;
-	graduationYear?: number | null;
-	backlogs?: number | null;
-	workExperienceMonths?: number | null;
-	// Step 3: Tests & Language
-	englishTestType?: string | null;
-	englishScore?: number | null;
-	gre?: number | null;
-	gmat?: number | null;
-	// Step 4: Budget & Preferences
-	budgetCurrency?: string | null;
-	budgetMax?: number | null;
-	fundingNeed?: boolean | null;
-	preferredCities?: string[] | null;
-	priorities?: string[] | null;
-};
+export interface UserProfile {
+        userId: string;
+        // Legacy fields
+        targetCountry?: string | null;
+        level?: string | null;
+        budgetRange?: string | null;
+        intendedMajor?: string | null;
+        gpa?: number | null;
+        testScores?: Record<string, number> | null;
+        onboardingDone: boolean;
+        // Step 1: Student Stage
+        currentStage?: string | null;
+        targetIntake?: string | null;
+        targetCountries?: string[] | null;
+        intendedLevel?: string | null;
+        // Step 2: Academic Profile
+        currentInstitution?: string | null;
+        majorOrTrack?: string | null;
+        gpaScale?: string | null;
+        graduationYear?: number | null;
+        backlogs?: number | null;
+        workExperienceMonths?: number | null;
+        // Step 3: Tests & Language
+        englishTestType?: string | null;
+        englishScore?: number | null;
+        gre?: number | null;
+        gmat?: number | null;
+        // Step 4: Budget & Preferences
+        budgetCurrency?: string | null;
+        budgetMax?: number | null;
+        fundingNeed?: boolean | null;
+        preferredCities?: string[] | null;
+        priorities?: string[] | null;
+        createdAt?: string;
+        updatedAt?: string;
+}
+
+export interface MatchRun {
+        id: string;
+        userId: string;
+        status: "pending" | "running" | "done" | "error";
+        progress: number;
+        createdAt: string;
+        updatedAt: string;
+        error?: string | null;
+        results?: MatchResultItem[];
+}
+
+export interface MatchRunStatus {
+        id: string;
+        status: "pending" | "running" | "done" | "error";
+        progress: number;
+        error?: string | null;
+        updatedAt: string;
+}
+
+export interface MatchResultItem {
+        id: string;
+        runId: string;
+        programId: string | null;
+        score: number;
+        reasons: unknown; // JSON array of strings from DB
+        rawData: Record<string, unknown> | null;
+        createdAt: string;
+}
+
+export interface MatchLatestResponse {
+        run: MatchRun | null;
+}
+
+export type MatchRunFormState =
+        | { success?: boolean; message?: string; runId?: string }
+        | undefined;
 
 export type OnboardingFormState =
 	| {

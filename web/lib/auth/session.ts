@@ -16,12 +16,20 @@ if (!secretKey || secretKey.length === 0) {
 const encodedKey = new TextEncoder().encode(secretKey);
 
 export async function createSession(payload: Session) {
-	const expiredAt = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000); // 15 days
+	const rememberMe = payload.rememberMe ?? false;
+	const ttlDays = rememberMe ? 30 : 15;
+	const expiredAt = new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000);
 
-	const session = await new SignJWT(payload)
+	const fullPayload: Session = {
+		...payload,
+		lastActiveAt: Date.now(),
+		rememberMe,
+	};
+
+	const session = await new SignJWT(fullPayload as unknown as Record<string, unknown>)
 		.setProtectedHeader({ alg: "HS256" })
 		.setIssuedAt()
-		.setExpirationTime("15d")
+		.setExpirationTime(rememberMe ? "30d" : "15d")
 		.sign(encodedKey);
 
 	(await cookies()).set("session", session, {

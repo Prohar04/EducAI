@@ -1,231 +1,417 @@
 "use client";
 
-import { useActionState } from "react";
+import { useState, useEffect, useTransition, useCallback } from "react";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
-import { matchPrograms } from "@/lib/auth/action";
-import type { MatchFormState, MatchResult } from "@/types/auth.type";
+import {
+  Loader2,
+  Sparkles,
+  RefreshCw,
+  CheckCircle2,
+  AlertCircle,
+  Bookmark,
+  BookmarkCheck,
+  ExternalLink,
+} from "lucide-react";
+import { triggerMatchRun, getMatchLatest, getMatchRunStatus, saveProgram } from "@/lib/auth/action";
+import type { MatchLatestResponse } from "@/types/auth.type";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-
-const LEVELS = [
-	{ value: "", label: "Any level" },
-	{ value: "BSC", label: "Bachelor's" },
-	{ value: "MSC", label: "Master's" },
-	{ value: "PHD", label: "PhD" },
-	{ value: "MBA", label: "MBA" },
-	{ value: "DIPLOMA", label: "Diploma" },
-];
 
 const LEVEL_LABELS: Record<string, string> = {
-	BSC: "Bachelor's",
-	MSC: "Master's",
-	PHD: "PhD",
-	MBA: "MBA",
-	DIPLOMA: "Diploma",
+  BSC: "Bachelor's",
+  MSC: "Master's",
+  PHD: "PhD",
+  MBA: "MBA",
+  DIPLOMA: "Diploma",
 };
 
 function ScoreBadge({ score }: { score: number }) {
-	const color =
-		score >= 80
-			? "bg-green-500/10 text-green-600 dark:text-green-400"
-			: score >= 50
-				? "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400"
-				: "bg-muted text-muted-foreground";
-	return (
-		<span className={`rounded-full px-2.5 py-0.5 text-sm font-semibold ${color}`}>
-			{score}%
-		</span>
-	);
+  const color =
+    score >= 80
+      ? "bg-green-500/10 text-green-600 dark:text-green-400"
+      : score >= 50
+        ? "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400"
+        : "bg-muted text-muted-foreground";
+  return (
+    <span className={`rounded-full px-2.5 py-0.5 text-sm font-semibold ${color}`}>
+      {score}%
+    </span>
+  );
 }
 
-function ResultCard({ result }: { result: MatchResult }) {
-	const s = result.programSummary;
-	return (
-		<div className="rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/30">
-			<div className="mb-2 flex items-start justify-between gap-3">
-				<span className="inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
-					{LEVEL_LABELS[s.level] ?? s.level}
-				</span>
-				<ScoreBadge score={result.score} />
-			</div>
-			<h3 className="font-semibold leading-snug">{s.title}</h3>
-			<p className="mt-0.5 text-sm text-muted-foreground">{s.universityName}</p>
-			<p className="text-xs text-muted-foreground">
-				{s.country} · {s.field} · {s.tuitionRange}
-			</p>
-			{result.reasons.length > 0 && (
-				<ul className="mt-3 space-y-1">
-					{result.reasons.map((r, i) => (
-						<li key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-							<span className="size-1.5 shrink-0 rounded-full bg-primary/60" />
-							{r}
-						</li>
-					))}
-				</ul>
-			)}
-			<Link
-				href={`/app/programs/${result.programId}`}
-				className="mt-4 inline-block text-xs font-medium text-primary hover:underline"
-			>
-				View details →
-			</Link>
-		</div>
-	);
+// ─ Individual program card ─────────────────────────────────────────────────
+
+function ResultCard({
+  result,
+  onSave,
+  saved,
+}: {
+  result: {
+    id: string;
+    score: number;
+    reasons: string[];
+    programId: string | null;
+    rawData: Record<string, unknown> | null;
+  };
+  onSave: (id: string) => void;
+  saved: boolean;
+}) {
+  const [saving, setSaving] = useState(false);
+
+  // Prefer DB program data; fall back to rawData from scrape
+  const raw = result.rawData ?? {};
+  const title =
+    (raw.program_title as string) ??
+    (raw.title as string) ??
+    "Unnamed Programme";
+  const university =
+    (raw.university_name as string) ??
+    (raw.universityName as string) ??
+    "Unknown University";
+  const country = (raw.country as string) ?? "";
+  const level =
+    (raw.level as string) ?? "";
+  const field =
+    (raw.field as string) ??
+    (raw.program_title as string) ??
+    "";
+  const tuitionRaw = raw.tuition_usd_per_year as number | null;
+  const tuition = tuitionRaw != null ? `$${tuitionRaw.toLocaleString()}/yr` : null;
+  const applicationUrl = (raw.application_url as string) ?? null;
+  const description = (raw.description as string) ?? null;
+
+  const handleSave = async () => {
+    if (!result.programId || saved) return;
+    setSaving(true);
+    try {
+      await saveProgram(result.programId);
+      onSave(result.programId);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/30">
+      <div className="mb-2 flex items-start justify-between gap-3">
+        <div className="flex flex-wrap gap-1.5">
+          {level && (
+            <span className="inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+              {LEVEL_LABELS[level.toUpperCase()] ?? level}
+            </span>
+          )}
+          {country && (
+            <span className="inline-block rounded-full bg-secondary/60 px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
+              {country}
+            </span>
+          )}
+        </div>
+        <ScoreBadge score={result.score} />
+      </div>
+
+      <h3 className="font-semibold leading-snug">{title}</h3>
+      <p className="mt-0.5 text-sm text-muted-foreground">{university}</p>
+      {(field || tuition) && (
+        <p className="text-xs text-muted-foreground mt-0.5">
+          {[field, tuition].filter(Boolean).join(" · ")}
+        </p>
+      )}
+      {description && (
+        <p className="mt-2 text-xs text-muted-foreground line-clamp-2">{description}</p>
+      )}
+
+      {result.reasons.length > 0 && (
+        <ul className="mt-3 space-y-1">
+          {result.reasons.map((r, i) => (
+            <li key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <span className="size-1.5 shrink-0 rounded-full bg-primary/60" />
+              {r}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="mt-4 flex items-center gap-3">
+        {applicationUrl && (
+          <a
+            href={applicationUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+          >
+            <ExternalLink className="size-3" />
+            Open program
+          </a>
+        )}
+        {result.programId && (
+          <button
+            onClick={handleSave}
+            disabled={saved || saving}
+            className={`inline-flex items-center gap-1 text-xs font-medium transition-colors ${
+              saved
+                ? "text-green-600 dark:text-green-400 cursor-default"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {saving ? (
+              <Loader2 className="size-3 animate-spin" />
+            ) : saved ? (
+              <BookmarkCheck className="size-3" />
+            ) : (
+              <Bookmark className="size-3" />
+            )}
+            {saved ? "Saved" : "Save"}
+          </button>
+        )}
+      </div>
+    </div>
+  );
 }
+
+// ─── Page ──────────────────────────────────────────────────────────────────────
 
 export default function MatchPage() {
-	const [state, formAction, pending] = useActionState<MatchFormState, FormData>(
-		matchPrograms,
-		undefined,
-	);
+  const [latestMatch, setLatestMatch] = useState<MatchLatestResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  const [isPending, startTransition] = useTransition();
 
-	return (
-		<div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
-			<div className="mb-8">
-				<h1 className="text-3xl font-bold tracking-tight">Match Programs</h1>
-				<p className="mt-1 text-muted-foreground">
-					Tell us your preferences and we&apos;ll score every programme for you.
-				</p>
-			</div>
+  const loadLatest = useCallback(async () => {
+    try {
+      const data = await getMatchLatest();
+      setLatestMatch(data);
+      if (data?.run?.progress != null) setProgress(data.run.progress);
+    } catch {
+      // silent
+    }
+  }, []);
 
-			<form
-				action={formAction}
-				className="rounded-xl border border-border bg-card p-6 space-y-5"
-			>
-				<div className="grid gap-5 sm:grid-cols-2">
-					<div className="space-y-1.5">
-						<Label htmlFor="targetCountry">Target Country (code)</Label>
-						<Input
-							id="targetCountry"
-							name="targetCountry"
-							placeholder="US, GB, CA…"
-							className="uppercase"
-						/>
-					</div>
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      try {
+        const data = await getMatchLatest();
+        if (!cancelled) {
+          setLatestMatch(data);
+          if (data?.run?.progress != null) setProgress(data.run.progress);
+        }
+      } catch {
+        // ignore
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
-					<div className="space-y-1.5">
-						<Label htmlFor="level">Degree Level</Label>
-						<select
-							id="level"
-							name="level"
-							className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
-						>
-							{LEVELS.map((l) => (
-								<option key={l.value} value={l.value}>
-									{l.label}
-								</option>
-							))}
-						</select>
-					</div>
+  // Efficient polling while run is pending/running:
+  // Use lightweight status endpoint (no full DB join) every 1.5s.
+  // Only fetch full results once status transitions to "done".
+  useEffect(() => {
+    const runId = latestMatch?.run?.id;
+    const status = latestMatch?.run?.status;
+    if (!runId || (status !== "running" && status !== "pending")) return;
 
-					<div className="space-y-1.5">
-						<Label htmlFor="intendedField">Intended Field</Label>
-						<Input
-							id="intendedField"
-							name="intendedField"
-							placeholder="Computer Science, Finance…"
-						/>
-					</div>
+    let cancelled = false;
+    const interval = setInterval(async () => {
+      if (cancelled) return;
+      try {
+        const s = await getMatchRunStatus(runId);
+        if (!s || cancelled) return;
+        setProgress(s.progress ?? 0);
+        if (s.status === "done" || s.status === "error") {
+          clearInterval(interval);
+          await loadLatest();
+        } else {
+          // Keep local run status in sync without full re-fetch
+          setLatestMatch((prev) =>
+            prev?.run
+              ? { ...prev, run: { ...prev.run, status: s.status, progress: s.progress } }
+              : prev,
+          );
+        }
+      } catch {
+        // silent — keep polling
+      }
+    }, 1500);
 
-					<div className="space-y-1.5">
-						<Label htmlFor="budgetMaxUSD">Max Annual Tuition (USD)</Label>
-						<Input
-							id="budgetMaxUSD"
-							name="budgetMaxUSD"
-							type="number"
-							min="0"
-							step="1000"
-							placeholder="e.g. 30000"
-						/>
-					</div>
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [latestMatch?.run?.id, latestMatch?.run?.status, loadLatest]);
 
-					<div className="space-y-1.5">
-						<Label htmlFor="gpa">GPA (4.0 scale)</Label>
-						<Input
-							id="gpa"
-							name="gpa"
-							type="number"
-							min="0"
-							max="4"
-							step="0.01"
-							placeholder="e.g. 3.5"
-						/>
-					</div>
+  const handleRunMatch = () => {
+    setError(null);
+    setProgress(0);
+    startTransition(async () => {
+      const result = await triggerMatchRun();
+      if (!result?.success) {
+        setError(result?.message ?? "Failed to start match run.");
+        return;
+      }
+      // Seed state with the returned runId so polling starts immediately
+      if (result.runId) {
+        setLatestMatch((prev) => ({
+          run: {
+            id: result.runId!,
+            userId: "",
+            status: "pending",
+            progress: 0,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            results: prev?.run?.results ?? [],
+          },
+        }));
+      } else {
+        await loadLatest();
+      }
+    });
+  };
 
-					<div className="space-y-1.5">
-						<Label htmlFor="ielts">IELTS Score</Label>
-						<Input
-							id="ielts"
-							name="ielts"
-							type="number"
-							min="0"
-							max="9"
-							step="0.5"
-							placeholder="e.g. 7.0"
-						/>
-					</div>
+  const handleSaved = (programId: string) => {
+    setSavedIds((prev) => new Set([...prev, programId]));
+  };
 
-					<div className="space-y-1.5">
-						<Label htmlFor="toefl">TOEFL Score</Label>
-						<Input
-							id="toefl"
-							name="toefl"
-							type="number"
-							min="0"
-							max="120"
-							placeholder="e.g. 100"
-						/>
-					</div>
+  const run = latestMatch?.run;
+  const results = run?.results ?? [];
+  const isRunning = run?.status === "running" || run?.status === "pending" || isPending;
 
-					<div className="space-y-1.5">
-						<Label htmlFor="gre">GRE Score</Label>
-						<Input
-							id="gre"
-							name="gre"
-							type="number"
-							min="260"
-							max="340"
-							placeholder="e.g. 320"
-						/>
-					</div>
-				</div>
+  return (
+    <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8 space-y-8">
 
-				{state?.success === false && state.message && (
-					<p className="text-sm text-destructive">{state.message}</p>
-				)}
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+            <Sparkles className="size-7 text-primary" />
+            AI Match
+          </h1>
+          <p className="mt-1 text-muted-foreground">
+            Programmes scraped and ranked live against your profile.
+          </p>
+        </div>
+        <Button
+          onClick={handleRunMatch}
+          disabled={isRunning}
+          className="shrink-0"
+        >
+          {isRunning ? (
+            <>
+              <Loader2 className="mr-2 size-4 animate-spin" />
+              Running…
+            </>
+          ) : (
+            <>
+              <RefreshCw className="mr-2 size-4" />
+              {run ? "Re-run Match" : "Run Match"}
+            </>
+          )}
+        </Button>
+      </div>
 
-				<Button type="submit" disabled={pending} className="w-full sm:w-auto">
-					{pending ? (
-						<>
-							<Loader2 className="size-4 animate-spin" />
-							Matching…
-						</>
-					) : (
-						"Find Matches"
-					)}
-				</Button>
-			</form>
+      {/* Error banner */}
+      {error && (
+        <div className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          <AlertCircle className="mt-0.5 size-4 shrink-0" />
+          {error}
+        </div>
+      )}
 
-			{state?.success && state.results != null && (
-				<div className="mt-10">
-					<h2 className="mb-1 text-xl font-semibold">
-						{state.results.length} Match{state.results.length !== 1 ? "es" : ""} Found
-					</h2>
-					{state.results.length === 0 ? (
-						<p className="mt-4 text-muted-foreground">
-							No programs matched your criteria. Try relaxing the filters.
-						</p>
-					) : (
-						<div className="mt-4 grid gap-4 sm:grid-cols-2">
-							{state.results.map((r) => (
-								<ResultCard key={r.programId} result={r} />
-							))}
-						</div>
-					)}
-				</div>
-			)}
-		</div>
-	);
+      {/* Run status banner */}
+      {run && (
+        <div
+          className={`flex items-center gap-2 rounded-lg px-4 py-3 text-sm ${
+            run.status === "done"
+              ? "bg-green-500/5 border border-green-500/20 text-green-700 dark:text-green-400"
+              : run.status === "error"
+                ? "bg-destructive/5 border border-destructive/20 text-destructive"
+                : "bg-blue-500/5 border border-blue-500/20 text-blue-700 dark:text-blue-400"
+          }`}
+        >
+          {run.status === "done" ? (
+            <CheckCircle2 className="size-4 shrink-0" />
+          ) : run.status === "error" ? (
+            <AlertCircle className="size-4 shrink-0" />
+          ) : (
+            <Loader2 className="size-4 shrink-0 animate-spin" />
+          )}
+          <span>
+            {run.status === "done"
+              ? `${results.length} programme${results.length !== 1 ? "s" : ""} found · Last run: ${new Date(run.createdAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}`
+              : run.status === "error"
+                ? `Match run failed${run.error ? `: ${run.error}` : ""}. Try again.`
+                : `Scraping and ranking programmes… this may take a minute. (${progress}%)`}
+          </span>
+        </div>
+      )}
+
+      {/* Progress bar (visible while running) */}
+      {(run?.status === "running" || run?.status === "pending") && (
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+          <div
+            className="h-full rounded-full bg-primary transition-all duration-700 ease-out"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      )}
+
+      {/* Loading skeleton */}
+      {loading && (
+        <div className="flex flex-col items-center justify-center py-20 gap-3 text-muted-foreground">
+          <Loader2 className="size-8 animate-spin" />
+          <p className="text-sm">Loading results…</p>
+        </div>
+      )}
+
+      {/* No run yet */}
+      {!loading && !run && (
+        <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
+          <Sparkles className="mx-auto mb-3 size-10 text-muted-foreground/40" />
+          <p className="text-muted-foreground">
+            No match results yet. Click <strong>Run Match</strong> to scrape live programmes tailored to your profile.
+          </p>
+          <p className="mt-2 text-xs text-muted-foreground/70">
+            Go to{" "}
+            <Link href="/app/profile" className="text-primary hover:underline">
+              your profile
+            </Link>{" "}
+            first to make sure all your preferences are set.
+          </p>
+        </div>
+      )}
+
+      {/* Results grid */}
+      {!loading && run?.status === "done" && results.length > 0 && (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {results.map((r) => (
+            <ResultCard
+              key={r.id}
+              result={{
+                id: r.id,
+                score: r.score,
+                reasons: Array.isArray(r.reasons) ? (r.reasons as string[]) : [],
+                programId: r.programId ?? null,
+                rawData: r.rawData as Record<string, unknown> | null,
+              }}
+              onSave={handleSaved}
+              saved={!!r.programId && savedIds.has(r.programId)}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Done but empty */}
+      {!loading && run?.status === "done" && results.length === 0 && (
+        <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
+          <p className="text-muted-foreground">
+            The scrape completed but found no matching programmes. Try updating your profile or re-running.
+          </p>
+        </div>
+      )}
+    </div>
+  );
 }
+

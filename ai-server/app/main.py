@@ -9,6 +9,7 @@ from .middleware.secure_keys import checkApiKey
 from .api.v1.health import router as health_router
 from .api.v1.recommendations import router as recommendations_router
 from .api.v1.module1_sync import router as module1_sync_router
+from .api.v1.scrape_match import router as scrape_match_router
 from .middleware.audit_log import AuditLogMiddleware
 
 # Init FastAPI app
@@ -28,13 +29,16 @@ app.include_router(health_router, prefix="/api/v1")
 async def get_data(server_name: str = Depends(checkApiKey)):
     return {"message": f"Hello {server_name}, here is your data."}
 
+
 app.include_router(recommendations_router, prefix="/api/v1/edu")
 app.include_router(module1_sync_router, prefix="/api/v1/module1")
+app.include_router(scrape_match_router, prefix="/api/v1/module1")
 
 
 @app.get("/")
 async def get():
     return {"message": "Hello, here is your data."}
+
 
 # ---------------------------------------------------------------------------
 # All routes and routers registered below this line require a valid API key.

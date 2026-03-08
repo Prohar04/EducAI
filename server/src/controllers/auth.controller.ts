@@ -112,7 +112,7 @@ export const refresh = async (req: Request, res: Response) => {
 
 export const signup = async (req: Request, res: Response) => {
   try {
-    const { email, password, name, avatarUrl } = req.body;
+    const { email, password, name, avatarUrl, profile } = req.body;
 
     if (!email || !password || !name) {
       return res
@@ -156,6 +156,44 @@ export const signup = async (req: Request, res: Response) => {
       avatarUrl,
       passwordHash: hashedPassword,
     });
+
+    // If profile data provided at signup, create UserProfile in one go
+    if (profile && typeof profile === 'object') {
+      await prisma.userProfile.upsert({
+        where: { userId: newUser.id },
+        update: {
+          currentStage: profile.currentStage ?? undefined,
+          targetIntake: profile.targetIntake ?? undefined,
+          targetCountries: profile.targetCountries ?? undefined,
+          intendedLevel: profile.intendedLevel ?? undefined,
+          intendedMajor: profile.intendedMajor ?? undefined,
+          gpa: profile.gpa ?? undefined,
+          gpaScale: profile.gpaScale ?? undefined,
+          englishTestType: profile.englishTestType ?? undefined,
+          englishScore: profile.englishScore ?? undefined,
+          budgetMax: profile.budgetMax ?? undefined,
+          budgetCurrency: profile.budgetCurrency ?? 'USD',
+          workExperienceMonths: profile.workExperienceMonths ?? undefined,
+          onboardingDone: true,
+        },
+        create: {
+          userId: newUser.id,
+          currentStage: profile.currentStage ?? undefined,
+          targetIntake: profile.targetIntake ?? undefined,
+          targetCountries: profile.targetCountries ?? undefined,
+          intendedLevel: profile.intendedLevel ?? undefined,
+          intendedMajor: profile.intendedMajor ?? undefined,
+          gpa: profile.gpa ?? undefined,
+          gpaScale: profile.gpaScale ?? undefined,
+          englishTestType: profile.englishTestType ?? undefined,
+          englishScore: profile.englishScore ?? undefined,
+          budgetMax: profile.budgetMax ?? undefined,
+          budgetCurrency: profile.budgetCurrency ?? 'USD',
+          workExperienceMonths: profile.workExperienceMonths ?? undefined,
+          onboardingDone: true,
+        },
+      }).catch((e) => console.error('Profile creation at signup failed (non-fatal):', e));
+    }
 
     // Fire-and-forget: email failures must not roll back account creation
     sendVerification(newUser.id, newUser.email).catch((e) =>
