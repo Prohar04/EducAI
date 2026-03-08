@@ -16,6 +16,7 @@ import { triggerMatchRun, getMatchLatest, getMatchRunStatus, saveProgram } from 
 import type { MatchLatestResponse } from "@/types/auth.type";
 import { Button } from "@/components/ui/button";
 import { MatchIllustration } from "@/components/illustrations";
+import { StaggerChildren, StaggerItem } from "@/components/motion/FadeIn";
 
 const LEVEL_LABELS: Record<string, string> = {
   BSC: "Bachelor's",
@@ -361,9 +362,22 @@ export default function MatchPage() {
 
       {/* Loading skeleton */}
       {loading && (
-        <div className="flex flex-col items-center justify-center py-20 gap-3 text-muted-foreground">
-          <Loader2 className="size-8 animate-spin" />
-          <p className="text-sm">Loading results…</p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="rounded-xl border border-border bg-card p-5 space-y-3 animate-pulse">
+              <div className="flex items-center justify-between">
+                <div className="h-5 w-12 rounded-full bg-muted" />
+                <div className="h-5 w-20 rounded-full bg-muted" />
+              </div>
+              <div className="h-4 w-3/4 rounded bg-muted" />
+              <div className="h-3 w-1/2 rounded bg-muted" />
+              <div className="h-3 w-2/3 rounded bg-muted" />
+              <div className="mt-2 flex gap-2">
+                <div className="h-3 w-20 rounded bg-muted" />
+                <div className="h-3 w-24 rounded bg-muted" />
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -386,22 +400,23 @@ export default function MatchPage() {
 
       {/* Results grid */}
       {!loading && run?.status === "done" && results.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <StaggerChildren stagger={0.07} className="grid gap-4 sm:grid-cols-2">
           {results.map((r) => (
-            <ResultCard
-              key={r.id}
-              result={{
-                id: r.id,
-                score: r.score,
-                reasons: Array.isArray(r.reasons) ? (r.reasons as string[]) : [],
-                programId: r.programId ?? null,
-                rawData: r.rawData as Record<string, unknown> | null,
-              }}
-              onSave={handleSaved}
-              saved={!!r.programId && savedIds.has(r.programId)}
-            />
+            <StaggerItem key={r.id}>
+              <ResultCard
+                result={{
+                  id: r.id,
+                  score: r.score,
+                  reasons: Array.isArray(r.reasons) ? (r.reasons as string[]) : [],
+                  programId: r.programId ?? null,
+                  rawData: r.rawData as Record<string, unknown> | null,
+                }}
+                onSave={handleSaved}
+                saved={!!r.programId && savedIds.has(r.programId)}
+              />
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerChildren>
       )}
 
       {/* Done but empty */}

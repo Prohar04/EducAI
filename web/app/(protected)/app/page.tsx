@@ -15,6 +15,9 @@ import {
   Loader2,
 } from "lucide-react";
 import type { SavedProgramItem, MatchLatestResponse } from "@/types/auth.type";
+import { FadeIn } from "@/components/motion/FadeIn";
+import { StaggerChildren, StaggerItem } from "@/components/motion/FadeIn";
+import { AcademiaIllustration } from "@/components/illustrations";
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -133,15 +136,20 @@ export default async function AppDashboard() {
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 space-y-10">
 
       {/* ── Header ── */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="mt-1 text-muted-foreground">Your personalised overview.</p>
-      </div>
+      <FadeIn>
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+            <p className="mt-1 text-muted-foreground">Your personalised overview.</p>
+          </div>
+          <AcademiaIllustration className="hidden sm:block h-20 w-auto text-primary opacity-60 shrink-0" />
+        </div>
+      </FadeIn>
 
-      <div className="grid gap-8 lg:grid-cols-3">
+      <StaggerChildren stagger={0.12} className="grid gap-8 lg:grid-cols-3">
 
         {/* ── Profile summary ── */}
-        <section className="rounded-xl border border-border bg-card p-6 lg:col-span-1 space-y-4">
+        <StaggerItem className="rounded-xl border border-border bg-card p-6 lg:col-span-1 space-y-4 hover:-translate-y-0.5 hover:shadow-md transition-[transform,box-shadow]">
           <div className="flex items-center justify-between">
             <h2 className="font-semibold">Profile</h2>
             <Link
@@ -188,10 +196,10 @@ export default async function AppDashboard() {
               />
             )}
           </dl>
-        </section>
+        </StaggerItem>
 
         {/* ── Right column ── */}
-        <div className="space-y-8 lg:col-span-2">
+        <StaggerItem className="space-y-8 lg:col-span-2">
 
           {/* Match status widget */}
           <section className="rounded-xl border border-border bg-card p-6">
@@ -274,8 +282,9 @@ export default async function AppDashboard() {
             )}
           </section>
 
-        </div>
-      </div>
+        </StaggerItem>
+
+      </StaggerChildren>
     </div>
   );
 }

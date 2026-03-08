@@ -4,6 +4,8 @@ import ProgramFilters from "./_components/ProgramFilters";
 import SaveButton from "./_components/SaveButton";
 import type { Program } from "@/types/auth.type";
 import { ProgramsIllustration } from "@/components/illustrations";
+import { FadeIn } from "@/components/motion/FadeIn";
+import { StaggerChildren, StaggerItem } from "@/components/motion/FadeIn";
 
 function levelLabel(level: string) {
 	const map: Record<string, string> = {
@@ -43,12 +45,12 @@ export default async function ProgramsPage({
 
 	return (
 		<div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-			<div className="mb-8">
+			<FadeIn className="mb-8">
 				<h1 className="text-3xl font-bold tracking-tight">Programs</h1>
 				<p className="mt-1 text-muted-foreground">
 					Search university programmes worldwide.
 				</p>
-			</div>
+			</FadeIn>
 
 			<ProgramFilters current={params} />
 
@@ -68,12 +70,12 @@ export default async function ProgramsPage({
 						{result.total.toLocaleString()} program
 						{result.total !== 1 ? "s" : ""} found
 					</p>
-					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+					<StaggerChildren stagger={0.06} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 						{result.items.map((program) => (
-							<div
-								key={program.id}
-								className="flex flex-col rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/30"
-							>
+							<StaggerItem key={program.id}>
+								<div
+									className="flex flex-col rounded-xl border border-border bg-card p-5 transition-all hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md h-full"
+								>
 								<div className="mb-2 flex items-start justify-between gap-2">
 									<span className="inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
 										{levelLabel(program.level)}
@@ -103,8 +105,9 @@ export default async function ProgramsPage({
 									</div>
 								</Link>
 							</div>
-						))}
-					</div>
+						</StaggerItem>
+					))}
+					</StaggerChildren>
 
 					{result.total > result.limit && (
 						<div className="mt-8 flex items-center justify-center gap-3">
