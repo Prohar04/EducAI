@@ -1,20 +1,9 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
 import { Quote } from "lucide-react";
-import quotes from "@/lib/data/quotes.json";
 
-function getDailyQuote(): string {
-  const dayOfYear = Math.floor(
-    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86_400_000,
-  );
-  return quotes[dayOfYear % quotes.length];
-}
-
-export default function QuoteStrip() {
-  const [quote] = useState<string>(() => getDailyQuote());
-
+export default function QuoteStrip({ quote }: { quote: string }) {
   return (
     <section className="relative overflow-hidden border-y border-border bg-primary/5 py-14">
       {/* decorative blur */}
