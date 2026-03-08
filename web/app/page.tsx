@@ -9,6 +9,24 @@ import RoadmapCards from "@/components/home/RoadmapCards";
 import HowItWorks from "@/components/home/HowItWorks";
 import QuoteStrip from "@/components/home/QuoteStrip";
 import HeroIllustration from "@/components/home/HeroIllustration";
+import { fetchEducationPulse } from "@/lib/data/fetchEducationPulse";
+import quotesData from "@/lib/data/quotes.json";
+
+// Revalidate the page every 24 hours so quote and feed both update daily
+export const revalidate = 86_400;
+
+// ─────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────
+
+function getQuoteForToday(): string {
+  // Use the calendar date string as a stable, day-scoped seed
+  const dateKey = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+  const idx =
+    dateKey.split("").reduce((a, c) => a + c.charCodeAt(0), 0) %
+    (quotesData as string[]).length;
+  return (quotesData as string[])[idx];
+}
 
 // ─────────────────────────────────────────────
 // Logo
@@ -286,15 +304,21 @@ async function HeroSection() {
 // Page
 // ─────────────────────────────────────────────
 
+async function TrendingFeedSection() {
+  const items = await fetchEducationPulse();
+  return <TrendingFeed initialItems={items} />;
+}
+
 export default function HomePage() {
+  const dailyQuote = getQuoteForToday();
   return (
     <div className="min-h-screen flex flex-col">
       <PublicNavbar />
       <main className="flex-1">
         <HeroSection />
         <StatsStrip />
-        <TrendingFeed />
-        <QuoteStrip />
+        <TrendingFeedSection />
+        <QuoteStrip quote={dailyQuote} />
         <FeaturesSection />
         <HowItWorks />
         <RoadmapCards />
