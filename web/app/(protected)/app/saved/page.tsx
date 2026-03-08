@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { BookOpen } from "lucide-react";
 import { getSavedPrograms } from "@/lib/auth/action";
 import SaveButton from "../programs/_components/SaveButton";
+import { SavedIllustration } from "@/components/illustrations";
 
 const LEVEL_LABELS: Record<string, string> = {
 	BSC: "Bachelor's",
@@ -25,7 +25,7 @@ export default async function SavedProgramsPage() {
 
 			{saved.length === 0 ? (
 				<div className="flex flex-col items-center justify-center py-20 text-center">
-					<BookOpen className="mb-4 size-12 text-muted-foreground/40" />
+				<SavedIllustration className="mb-3 h-32 w-auto text-primary opacity-75" />
 					<h2 className="text-lg font-semibold">Nothing saved yet</h2>
 					<p className="mt-1 text-sm text-muted-foreground">
 						Browse programmes and click &quot;Save&quot; to bookmark them here.

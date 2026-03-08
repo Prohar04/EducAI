@@ -15,6 +15,7 @@ import {
 import { triggerMatchRun, getMatchLatest, getMatchRunStatus, saveProgram } from "@/lib/auth/action";
 import type { MatchLatestResponse } from "@/types/auth.type";
 import { Button } from "@/components/ui/button";
+import { MatchIllustration } from "@/components/illustrations";
 
 const LEVEL_LABELS: Record<string, string> = {
   BSC: "Bachelor's",
@@ -368,8 +369,8 @@ export default function MatchPage() {
 
       {/* No run yet */}
       {!loading && !run && (
-        <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
-          <Sparkles className="mx-auto mb-3 size-10 text-muted-foreground/40" />
+        <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center flex flex-col items-center">
+          <MatchIllustration className="mb-4 h-32 w-auto text-primary opacity-75" />
           <p className="text-muted-foreground">
             No match results yet. Click <strong>Run Match</strong> to scrape live programmes tailored to your profile.
           </p>
@@ -405,7 +406,8 @@ export default function MatchPage() {
 
       {/* Done but empty */}
       {!loading && run?.status === "done" && results.length === 0 && (
-        <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
+        <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center flex flex-col items-center">
+          <MatchIllustration className="mb-4 h-28 w-auto text-primary opacity-60" />
           <p className="text-muted-foreground">
             The scrape completed but found no matching programmes. Try updating your profile or re-running.
           </p>

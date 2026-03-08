@@ -3,6 +3,7 @@ import { searchPrograms, getSavedPrograms } from "@/lib/auth/action";
 import ProgramFilters from "./_components/ProgramFilters";
 import SaveButton from "./_components/SaveButton";
 import type { Program } from "@/types/auth.type";
+import { ProgramsIllustration } from "@/components/illustrations";
 
 function levelLabel(level: string) {
 	const map: Record<string, string> = {
@@ -56,8 +57,10 @@ export default async function ProgramsPage({
 					Failed to load programs. Please try again.
 				</p>
 			) : result.items.length === 0 ? (
-				<div className="mt-12 text-center">
-					<p className="text-muted-foreground">No programs found matching your filters.</p>
+				<div className="mt-12 flex flex-col items-center text-center">
+					<ProgramsIllustration className="mb-3 h-32 w-auto text-primary opacity-75" />
+					<p className="font-medium">No programs found</p>
+					<p className="mt-1 text-sm text-muted-foreground">Try adjusting your filters.</p>
 				</div>
 			) : (
 				<>
