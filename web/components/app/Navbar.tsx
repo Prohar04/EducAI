@@ -17,6 +17,8 @@ import {
   LogOut,
   User,
   ChevronDown,
+  CalendarDays,
+  Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -61,6 +63,8 @@ const NAV_LINKS = [
 // Module dropdown items — AI Agent is surfaced via the floating widget
 const MODULES = [
   { href: "/app/scholarships", label: "Scholarships", icon: Award, soon: false },
+  { href: "/app/timeline", label: "Timeline", icon: CalendarDays, soon: false },
+  { href: "/app/strategy", label: "Strategy", icon: Target, soon: false },
   { href: "/app/sop", label: "SOP Builder", icon: FileText, soon: true },
   { href: "/app/cv", label: "CV Builder", icon: ClipboardList, soon: true },
   { href: "/app/professors", label: "Professors", icon: Users, soon: true },
@@ -92,7 +96,7 @@ export function Navbar({ user }: { user: Session["user"] }) {
         aria-label="App navigation"
       >
         {/* Logo */}
-        <Link href="/app" className="group flex items-center gap-2 shrink-0">
+        <Link href="/" className="group flex items-center gap-2 shrink-0">
           <GraduationCap className="size-7 text-primary transition-transform duration-200 group-hover:scale-110" />
           <span className="text-lg font-bold tracking-tight">
             Educ<span className="text-primary">AI</span>

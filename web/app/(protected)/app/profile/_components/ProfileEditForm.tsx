@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { upsertUserProfile } from "@/lib/auth/action";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -79,6 +79,9 @@ export default function ProfileEditForm({ initialProfile }: Props) {
 		undefined,
 	);
 
+	const [budgetCurrency, setBudgetCurrency] = useState<string>(p?.budgetCurrency ?? "USD");
+	const [budgetMax, setBudgetMax] = useState<string>(p?.budgetMax?.toString() ?? "");
+
 	// Current target countries as comma-separated string for the hidden input
 	const defaultCountries = (() => {
 		try {
@@ -151,6 +154,7 @@ export default function ProfileEditForm({ initialProfile }: Props) {
 							name="majorOrTrack"
 							defaultValue={p?.majorOrTrack ?? ""}
 							placeholder="e.g. Computer Engineering"
+							autoComplete="off"
 						/>
 					</Field>
 					<Field label="GPA">
@@ -243,17 +247,26 @@ export default function ProfileEditForm({ initialProfile }: Props) {
 				<h2 className="font-semibold text-base">Budget &amp; Preferences</h2>
 				<div className="grid gap-5 sm:grid-cols-2">
 					<Field label="Currency">
-						<Select
+						<select
 							name="budgetCurrency"
-							defaultValue={p?.budgetCurrency ?? "USD"}
-							options={CURRENCIES}
-						/>
+							value={budgetCurrency}
+							onChange={(e) => {
+								setBudgetCurrency(e.target.value);
+								setBudgetMax("");
+							}}
+							className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+						>
+							{CURRENCIES.map((c) => (
+								<option key={c} value={c}>{c}</option>
+							))}
+						</select>
 					</Field>
 					<Field label="Max budget per year">
 						<Input
 							type="number"
 							name="budgetMax"
-							defaultValue={p?.budgetMax?.toString() ?? ""}
+							value={budgetMax}
+							onChange={(e) => setBudgetMax(e.target.value)}
 							placeholder="e.g. 30000"
 							min="0"
 						/>

@@ -213,3 +213,65 @@ export const updateUserProfile = async (
 	return { success: true, message: "Profile updated. Refreshing matches…" };
 };
 
+// ─── Timeline ─────────────────────────────────────────────────────────────────
+
+export const getTimelineInputs = async (countryCode?: string) => {
+	const qs = countryCode ? `?countryCode=${encodeURIComponent(countryCode)}` : "";
+	const response = await authFetch(`${BACKEND_URL}/timeline/inputs${qs}`);
+	if (!response.ok) return null;
+	return response.json();
+};
+
+export const generateTimeline = async (
+	countryCode: string,
+	intake?: string,
+): Promise<{ success: boolean; data?: unknown; message?: string }> => {
+	const response = await authFetch(`${BACKEND_URL}/timeline/generate`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ countryCode, intake }),
+	});
+	if (!response.ok) {
+		const err = await response.json().catch(() => null);
+		return { success: false, message: err?.message ?? "Failed to generate timeline" };
+	}
+	const data = await response.json();
+	revalidatePath("/app/timeline");
+	return { success: true, data };
+};
+
+export const getLatestTimeline = async (countryCode?: string) => {
+	const qs = countryCode ? `?countryCode=${encodeURIComponent(countryCode)}` : "";
+	const response = await authFetch(`${BACKEND_URL}/timeline/latest${qs}`);
+	if (!response.ok) return null;
+	return response.json();
+};
+
+// ─── Strategy ─────────────────────────────────────────────────────────────────
+
+export const generateStrategy = async (
+	countryCode: string,
+	intake?: string,
+	focusProgramIds?: string[],
+): Promise<{ success: boolean; data?: unknown; message?: string }> => {
+	const response = await authFetch(`${BACKEND_URL}/strategy/generate`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ countryCode, intake, focusProgramIds }),
+	});
+	if (!response.ok) {
+		const err = await response.json().catch(() => null);
+		return { success: false, message: err?.message ?? "Failed to generate strategy" };
+	}
+	const data = await response.json();
+	revalidatePath("/app/strategy");
+	return { success: true, data };
+};
+
+export const getLatestStrategy = async (countryCode?: string) => {
+	const qs = countryCode ? `?countryCode=${encodeURIComponent(countryCode)}` : "";
+	const response = await authFetch(`${BACKEND_URL}/strategy/latest${qs}`);
+	if (!response.ok) return null;
+	return response.json();
+};
+
