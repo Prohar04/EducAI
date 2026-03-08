@@ -2,6 +2,8 @@ import Link from "next/link";
 import { getSavedPrograms } from "@/lib/auth/action";
 import SaveButton from "../programs/_components/SaveButton";
 import { SavedIllustration } from "@/components/illustrations";
+import { FadeIn } from "@/components/motion/FadeIn";
+import { StaggerChildren, StaggerItem } from "@/components/motion/FadeIn";
 
 const LEVEL_LABELS: Record<string, string> = {
 	BSC: "Bachelor's",
@@ -16,12 +18,12 @@ export default async function SavedProgramsPage() {
 
 	return (
 		<div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-			<div className="mb-8">
+			<FadeIn className="mb-8">
 				<h1 className="text-3xl font-bold tracking-tight">Saved Programs</h1>
 				<p className="mt-1 text-muted-foreground">
 					Your bookmarked programmes.
 				</p>
-			</div>
+			</FadeIn>
 
 			{saved.length === 0 ? (
 				<div className="flex flex-col items-center justify-center py-20 text-center">
@@ -38,7 +40,7 @@ export default async function SavedProgramsPage() {
 					</Link>
 				</div>
 			) : (
-				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+				<StaggerChildren stagger={0.07} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 					{saved.map((item) => {
 						const { program } = item;
 						const tuition =
@@ -49,10 +51,8 @@ export default async function SavedProgramsPage() {
 								: "Tuition N/A";
 
 						return (
-							<div
-								key={item.id}
-								className="flex flex-col rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/30"
-							>
+							<StaggerItem key={item.id}>
+								<div className="flex flex-col rounded-xl border border-border bg-card p-5 transition-all hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md h-full">
 								<div className="mb-2 flex items-start justify-between gap-2">
 									<span className="inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
 										{LEVEL_LABELS[program.level] ?? program.level}
@@ -78,10 +78,11 @@ export default async function SavedProgramsPage() {
 										<span>{tuition}</span>
 									</div>
 								</Link>
-							</div>
+								</div>
+							</StaggerItem>
 						);
 					})}
-				</div>
+				</StaggerChildren>
 			)}
 		</div>
 	);
