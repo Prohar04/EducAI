@@ -92,8 +92,24 @@ export default async function AppDashboard() {
 
   if (!session) redirect("/auth/signin");
 
-  if (!profile || !profile.onboardingDone) {
-    redirect("/app/onboarding");
+  // If no profile yet, show a clean "get started" prompt instead of crashing
+  if (!profile) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 space-y-6">
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center space-y-4">
+          <GraduationCap className="mx-auto size-10 text-muted-foreground" />
+          <p className="font-medium">Your profile isn&apos;t set up yet.</p>
+          <p className="text-sm text-muted-foreground">Complete your profile to unlock AI-powered matching and personalised recommendations.</p>
+          <Link
+            href="/app/profile"
+            className="inline-flex h-9 items-center rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          >
+            Set up profile →
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   const saved = Array.isArray(savedResult) ? savedResult : [];
