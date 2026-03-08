@@ -48,7 +48,10 @@ async def trigger_module1_sync(
     if not settings.INGEST_API_KEY:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=("INGEST_API_KEY is not configured — cannot push data to server."),
+            detail=(
+                "INGEST_API_KEY is not configured"
+                " — cannot push data to server."
+            ),
         )
 
     resolved_countries = countries or ["US", "UK", "CA", "AU", "DE"]
@@ -64,6 +67,9 @@ async def trigger_module1_sync(
 
     task_id = uuid.uuid4().hex
     background_tasks.add_task(edu_rag_pipeline.run, task_id, pref, None)
-    logger.info(f"module1/sync task_id={task_id} major={major} degree={degree} countries={resolved_countries}")
+    logger.info(
+        f"module1/sync task_id={task_id} major={major}"
+        f" degree={degree} countries={resolved_countries}"
+    )
 
     return TaskResponse(status="processing", task_id=task_id)
