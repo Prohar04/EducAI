@@ -15,7 +15,7 @@ export default async function OnboardingCheckPage() {
 	const profile = await getUserProfile();
 
 	if (profile?.onboardingDone) {
-		redirect("/app/home");
+		redirect("/app");
 	} else {
 		redirect("/onboarding");
 	}
