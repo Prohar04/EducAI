@@ -64,6 +64,7 @@ export async function GET(req: NextRequest) {
 		},
 		accessToken,
 		refreshToken,
+		rememberMe: false,
 	});
 
 	redirect("/onboarding-check");

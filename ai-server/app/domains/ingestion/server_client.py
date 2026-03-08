@@ -29,8 +29,13 @@ _FAILED_DIR = Path(__file__).resolve().parent.parent.parent.parent / "logs"
 # ── Country name → ISO 3166-1 alpha-2 code ─────────────────────────────── #
 
 _COUNTRY_MAP: dict[str, str] = {
-    "united states": "US", "usa": "US", "u.s.a.": "US", "us": "US",
-    "united kingdom": "GB", "uk": "GB", "great britain": "GB",
+    "united states": "US",
+    "usa": "US",
+    "u.s.a.": "US",
+    "us": "US",
+    "united kingdom": "GB",
+    "uk": "GB",
+    "great britain": "GB",
     "canada": "CA",
     "australia": "AU",
     "germany": "DE",
@@ -81,19 +86,18 @@ def _to_level(target_degree: str) -> str:
         return "MSC"
     if d in ("PHD", "DOCTORATE", "DOCTORAL"):
         return "PHD"
-    return "MSC"      # sensible default
+    return "MSC"  # sensible default
 
 
 # ── Client ──────────────────────────────────────────────────────────────── #
+
 
 class ServerIngestionClient:
     """Transforms RAG recommendations into the canonical Module 1 payload
     and POSTs it to the Node server's /internal/module1/ingest endpoint."""
 
     def __init__(self) -> None:
-        self._base_url: str = (
-            settings.SERVER_BASE_URL or "http://localhost:8000"
-        ).rstrip("/")
+        self._base_url: str = (settings.SERVER_BASE_URL or "http://localhost:8000").rstrip("/")
         self._key: Optional[str] = settings.INGEST_API_KEY
 
     async def push_module1(
@@ -110,15 +114,10 @@ class ServerIngestionClient:
         logs/failed_ingest_<run_id>.json for manual retry.
         """
         if not self._key:
-            logger.warning(
-                f"[ingest:{run_id}] INGEST_API_KEY not set"
-                " — skipping Module 1 server push."
-            )
+            logger.warning(f"[ingest:{run_id}] INGEST_API_KEY not set — skipping Module 1 server push.")
             return {}
 
-        payload = self._build_payload(
-            run_id, recommendations, target_degree, major
-        )
+        payload = self._build_payload(run_id, recommendations, target_degree, major)
 
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
@@ -132,10 +131,7 @@ class ServerIngestionClient:
                 )
                 resp.raise_for_status()
                 result: dict = resp.json()
-                logger.info(
-                    f"[ingest:{run_id}] ✓ pushed {len(recommendations)} recs "
-                    f"→ {result.get('upserted', {})}"
-                )
+                logger.info(f"[ingest:{run_id}] ✓ pushed {len(recommendations)} recs → {result.get('upserted', {})}")
                 return result
         except Exception as exc:
             logger.error(f"[ingest:{run_id}] Server push failed: {exc}")
@@ -169,39 +165,39 @@ class ServerIngestionClient:
 
             if rec.university_name not in univs:
                 univs[rec.university_name] = {
-                    "name":        rec.university_name,
-                    "city":        None,
-                    "website":     None,
+                    "name": rec.university_name,
+                    "city": None,
+                    "website": None,
                     "description": None,
-                    "sourceUrl":   rec.source_url,
-                    "programs":    [],
+                    "sourceUrl": rec.source_url,
+                    "programs": [],
                 }
 
             # Build deadline entry (skip "Rolling" / unparseable)
             deadlines: List[dict] = []
             dl = rec.application_deadline or ""
             if dl and dl.lower() != "rolling":
-                deadlines.append(
-                    {"term": "Application Deadline", "deadline": dl}
-                )
+                deadlines.append({"term": "Application Deadline", "deadline": dl})
 
-            univs[rec.university_name]["programs"].append({
-                "title":          rec.program_name,
-                "field":          major,
-                "level":          _to_level(target_degree),
-                "durationMonths": None,
-                "tuitionMinUSD":  rec.tuition_fee_usd or None,
-                "tuitionMaxUSD":  rec.tuition_fee_usd or None,
-                "description":    None,
-                "sourceUrl":      rec.source_url,
-                "requirements":   [],
-                "deadlines":      deadlines,
-            })
+            univs[rec.university_name]["programs"].append(
+                {
+                    "title": rec.program_name,
+                    "field": major,
+                    "level": _to_level(target_degree),
+                    "durationMonths": None,
+                    "tuitionMinUSD": rec.tuition_fee_usd or None,
+                    "tuitionMaxUSD": rec.tuition_fee_usd or None,
+                    "description": None,
+                    "sourceUrl": rec.source_url,
+                    "requirements": [],
+                    "deadlines": deadlines,
+                }
+            )
 
         countries = [
             {
-                "code":         c["code"],
-                "name":         c["name"],
+                "code": c["code"],
+                "name": c["name"],
                 "universities": list(c["universities"].values()),
             }
             for c in by_country.values()
@@ -222,9 +218,7 @@ class ServerIngestionClient:
                 json.dump(payload, fh, indent=2, default=str)
             logger.info(f"[ingest:{run_id}] Failed payload saved → {path}")
         except Exception as save_exc:
-            logger.error(
-                f"[ingest:{run_id}] Could not save failed payload: {save_exc}"
-            )
+            logger.error(f"[ingest:{run_id}] Could not save failed payload: {save_exc}")
 
 
 # Module-level singleton (created lazily to allow tests to patch settings)

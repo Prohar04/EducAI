@@ -1,0 +1,115 @@
+[
+  {
+    "id": "1",
+    "title": "UK Universities Increase International Intakes for 2026 Entry",
+    "snippet": "Russell Group institutions report a 12% rise in offers to international applicants, driven by demand in STEM and Business programmes.",
+    "region": "UK",
+    "topic": "Admissions",
+    "publishedAt": "2026-03-07",
+    "readTime": 3,
+    "sourceName": "Times Higher Education"
+  },
+  {
+    "id": "2",
+    "title": "Chevening Scholarships 2026 — Now Open for Applications",
+    "snippet": "The UK government's flagship scholarship programme opens applications across 160+ countries. Deadline: November 4, 2026.",
+    "region": "Global",
+    "topic": "Scholarship",
+    "publishedAt": "2026-03-06",
+    "readTime": 2,
+    "sourceName": "Chevening.org"
+  },
+  {
+    "id": "3",
+    "title": "Australia Tightens Student Visa Requirements Post-2025 Review",
+    "snippet": "The Department of Home Affairs has updated GTE criteria and financial evidence thresholds for student visa subclass 500.",
+    "region": "Australia",
+    "topic": "Visa",
+    "publishedAt": "2026-03-05",
+    "readTime": 4,
+    "sourceName": "DAHA Official"
+  },
+  {
+    "id": "4",
+    "title": "QS World Rankings 2026 — Full Results Released",
+    "snippet": "MIT retains top spot; Asian universities gain 18 new top-100 entries. Indian IITs see biggest collective jump in history.",
+    "region": "Global",
+    "topic": "Ranking",
+    "publishedAt": "2026-03-04",
+    "readTime": 5,
+    "sourceName": "QS Quacquarelli"
+  },
+  {
+    "id": "5",
+    "title": "Germany Extends Job-Seeker Visa to 18 Months for Graduates",
+    "snippet": "The Federal Employment Agency now grants extended residence permits for international graduates seeking work placements in Germany.",
+    "region": "Germany",
+    "topic": "Visa",
+    "publishedAt": "2026-03-03",
+    "readTime": 3,
+    "sourceName": "DAAD Germany"
+  },
+  {
+    "id": "6",
+    "title": "Canada PGWP Changes 2026 — What Students Must Know",
+    "snippet": "IRCC updates Post-Graduate Work Permit eligibility rules; major changes for college diploma holders effective September 2026.",
+    "region": "Canada",
+    "topic": "Visa",
+    "publishedAt": "2026-03-02",
+    "readTime": 4,
+    "sourceName": "IRCC Canada"
+  },
+  {
+    "id": "7",
+    "title": "Harvard, MIT, Stanford Accept Record Diversity in Class of 2030",
+    "snippet": "First-generation and international enrolments hit an all-time high across the three Ivy+ institutions in Fall 2026 admissions.",
+    "region": "USA",
+    "topic": "Admissions",
+    "publishedAt": "2026-03-01",
+    "readTime": 3,
+    "sourceName": "Inside Higher Ed"
+  },
+  {
+    "id": "8",
+    "title": "AI Research Grants for Emerging Economies — €40M Fund Opens",
+    "snippet": "The European Research Council launches a dedicated fund for AI-research collaborations between EU universities and Global South institutions.",
+    "region": "Europe",
+    "topic": "Research",
+    "publishedAt": "2026-02-28",
+    "readTime": 3,
+    "sourceName": "ERC Europa"
+  },
+  {
+    "id": "d1",
+    "title": "Weekly Digest: Scholarship Deadlines — March 2026",
+    "snippet": "Fulbright (USA), Gates Cambridge, DAAD, and Commonwealth — deadlines you must track this month.",
+    "region": "Global",
+    "topic": "Scholarship",
+    "publishedAt": "2026-03-07",
+    "readTime": 5,
+    "sourceName": "EducAI Digest",
+    "isDigest": true
+  },
+  {
+    "id": "d2",
+    "title": "Visa Tracker: Countries with Fastest Student Visa Processing",
+    "snippet": "Germany leads with 7-day average; UK average is 21 days. Full country-by-country data inside.",
+    "region": "Global",
+    "topic": "Visa",
+    "publishedAt": "2026-03-05",
+    "readTime": 6,
+    "sourceName": "EducAI Digest",
+    "isDigest": true
+  },
+  {
+    "id": "d3",
+    "title": "Rankings Recap: What Moved and Why in QS 2026",
+    "snippet": "A deeper analysis of the methodology changes that pushed Asian and African institutions into new territory this year.",
+    "region": "Global",
+    "topic": "Ranking",
+    "publishedAt": "2026-03-04",
+    "readTime": 7,
+    "sourceName": "EducAI Digest",
+    "isDigest": true
+  }
+]

@@ -1,4 +1,3 @@
-import os
 import re
 import uuid
 import asyncio
@@ -41,10 +40,10 @@ class WebScrapperAPIFY:
         self.client = ApifyClient(self.api_key)
 
     async def scrape(self, url: str):
-        run_input = { "profileUrls": [url] }
-        run = self.client.actor("2SyF0bVxmgGr8IVCZ").call(run_input=run_input) 
+        run_input = {"profileUrls": [url]}
+        run = self.client.actor("2SyF0bVxmgGr8IVCZ").call(run_input=run_input)
         results = []
-        for item in self.client.dataset(run["defaultDatasetId"]).iterate_items(): #type: ignore
+        for item in self.client.dataset(run["defaultDatasetId"]).iterate_items():  # type: ignore
             results.append(item)
         return results
 
@@ -52,6 +51,7 @@ class WebScrapperAPIFY:
 # ---------------------------------------------------------------------------
 # Helper utilities
 # ---------------------------------------------------------------------------
+
 
 def _slug_from_url(url: str) -> str:
     """Return a filesystem-safe slug derived from a URL."""
@@ -84,6 +84,7 @@ def _extract_title(markdown: str) -> str:
 # ---------------------------------------------------------------------------
 # Main scraper class
 # ---------------------------------------------------------------------------
+
 
 class WebScrapperSerper:
     """
@@ -171,10 +172,7 @@ class WebScrapperSerper:
             "scraped_at": scraped_at,
         }
 
-        logger.info(
-            f"[WebScrapperSerper] Done – {chunks_embedded} chunk(s) stored, "
-            f"md file: {md_file_path}"
-        )
+        logger.info(f"[WebScrapperSerper] Done – {chunks_embedded} chunk(s) stored, md file: {md_file_path}")
         return result
 
     # ------------------------------------------------------------------
@@ -198,9 +196,9 @@ class WebScrapperSerper:
 
         front_matter = (
             "---\n"
-            f"title: \"{title}\"\n"
-            f"source: \"{url}\"\n"
-            f"scraped_at: \"{scraped_at}\"\n"
+            f'title: "{title}"\n'
+            f'source: "{url}"\n'
+            f'scraped_at: "{scraped_at}"\n'
             f"word_count: {len(content.split())}\n"
             "---\n\n"
         )
@@ -265,4 +263,3 @@ class WebScrapperSerper:
         tasks = [_embed_chunk(i, chunk) for i, chunk in enumerate(chunks)]
         await asyncio.gather(*tasks)
         return len(chunks)
-

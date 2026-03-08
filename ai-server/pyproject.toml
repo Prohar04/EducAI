@@ -25,3 +25,12 @@ dependencies = [
     "sqlmodel>=0.0.35",
     "xai-sdk>=1.8.0",
 ]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+# E501 line-too-long is suppressed by line-length above.
+# Keep standard rules otherwise.
+select = ["E", "F", "W"]
+ignore = ["E501"]

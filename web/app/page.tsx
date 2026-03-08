@@ -1,41 +1,38 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import {
-  Search,
-  Globe,
-  Sparkles,
-  Award,
-  FileText,
-  ArrowRight,
-  GraduationCap,
-  MapPin,
-  BarChart3,
-  CheckCircle2,
-  BookOpen,
-  Compass,
-} from "lucide-react";
+import { getSession } from "@/lib/auth/session";
+import { GraduationCap, ArrowRight, Globe, Sparkles, BookOpen, Users, ExternalLink } from "lucide-react";
+import { FadeIn } from "@/components/motion/FadeIn";
+import { Reveal } from "@/components/motion/Reveal";
+import TrendingFeed from "@/components/home/TrendingFeed";
+import RoadmapCards from "@/components/home/RoadmapCards";
+import HowItWorks from "@/components/home/HowItWorks";
+import QuoteStrip from "@/components/home/QuoteStrip";
+import HeroIllustration from "@/components/home/HeroIllustration";
 
-/* ------------------------------------------------------------------ */
-/*  Logo component                                                     */
-/* ------------------------------------------------------------------ */
+// ─────────────────────────────────────────────
+// Logo
+// ─────────────────────────────────────────────
 
-// TODO: Replace with exported Figma logo in /public
 function Logo({ className = "" }: { className?: string }) {
   return (
-    <Link href="/" className={`flex items-center gap-2 ${className}`}>
-      <GraduationCap className="size-8 text-primary" />
-      <span className="text-xl font-bold tracking-tight">
+    <Link href="/" className={`flex items-center gap-2 ${className}`} aria-label="EducAI home">
+      <GraduationCap className="size-7 text-primary" />
+      <span className="text-lg font-bold tracking-tight">
         Educ<span className="text-primary">AI</span>
       </span>
     </Link>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Navbar                                                             */
-/* ------------------------------------------------------------------ */
+// ─────────────────────────────────────────────
+// Public Navbar
+// ─────────────────────────────────────────────
 
-function Navbar() {
+async function PublicNavbar() {
+  const session = await getSession().catch(() => null);
+  const isLoggedIn = !!session;
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md">
       <nav
@@ -43,474 +40,264 @@ function Navbar() {
         aria-label="Main navigation"
       >
         <Logo />
-
-        {/* Desktop nav links */}
-        <ul className="hidden items-center gap-8 md:flex" role="list">
-          <li>
-            <a
-              href="#features"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Features
-            </a>
-          </li>
-          <li>
-            <a
-              href="#how-it-works"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              How It Works
-            </a>
-          </li>
-          <li>
-            <a
-              href="#destinations"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Destinations
-            </a>
-          </li>
+        <ul className="hidden items-center gap-7 md:flex" role="list">
+          {[
+            { label: "Home", href: "/" },
+            { label: "Features", href: "#features" },
+            { label: "How it works", href: "#how-it-works" },
+            { label: "Modules", href: "#roadmap" },
+          ].map((item) => (
+            <li key={item.label}>
+              <a
+                href={item.href}
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:text-primary focus-visible:outline-none"
+              >
+                {item.label}
+              </a>
+            </li>
+          ))}
         </ul>
-
-        {/* Auth CTA */}
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/auth/signin">Sign in</Link>
-          </Button>
-          <Button size="sm" asChild>
-            <Link href="/auth/signup">Get Started Free</Link>
-          </Button>
+          {isLoggedIn ? (
+            <Button size="sm" asChild>
+              <Link href="/app">Dashboard</Link>
+            </Button>
+          ) : (
+            <>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/auth/signin">Sign in</Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link href="/auth/signup">Get started</Link>
+              </Button>
+            </>
+          )}
         </div>
       </nav>
     </header>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Hero                                                               */
-/* ------------------------------------------------------------------ */
+// ─────────────────────────────────────────────
+// Stats strip
+// ─────────────────────────────────────────────
 
-const DESTINATION_FLAGS = [
-  { flag: "🇺🇸", label: "USA" },
-  { flag: "🇬🇧", label: "UK" },
-  { flag: "🇨🇦", label: "Canada" },
-  { flag: "🇩🇪", label: "Germany" },
-  { flag: "🇦🇺", label: "Australia" },
-  { flag: "🇳🇱", label: "Netherlands" },
-  { flag: "🇸🇬", label: "Singapore" },
-];
+const STATS = [
+  { value: "300+", label: "Universities tracked" },
+  { value: "40+", label: "Countries covered" },
+  { value: "12k+", label: "Scholarships indexed" },
+  { value: "94%", label: "Avg. match accuracy" },
+] as const;
 
-function Hero() {
+function StatsStrip() {
   return (
-    <section className="relative isolate overflow-hidden">
-      {/* Decorative gradient blobs */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-40 left-1/2 -z-10 -translate-x-1/2"
-      >
-        <div className="h-[600px] w-[900px] rounded-full bg-primary/20 blur-[128px]" />
-      </div>
-
-      <div className="mx-auto max-w-7xl px-4 pb-24 pt-20 text-center sm:px-6 sm:pt-32 lg:px-8">
-        <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 px-4 py-1.5 text-xs font-medium text-muted-foreground">
-          <Sparkles className="size-3.5 text-primary" />
-          AI Study-Abroad Advisor for International Students
-        </div>
-
-        <h1 className="mx-auto max-w-4xl text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-          Find Your{" "}
-          <span className="text-primary">Perfect University</span>
-          {" "}Abroad — Powered by AI
-        </h1>
-
-        <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
-          EducAI matches your academic profile, budget, and goals to thousands
-          of programs worldwide. Discover scholarships, compare universities,
-          and build your application — all in one personalised workspace.
-        </p>
-
-        {/* Destination bubbles */}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
-          {DESTINATION_FLAGS.map(({ flag, label }) => (
-            <span
-              key={label}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-sm font-medium shadow-sm"
-            >
-              <span>{flag}</span>
-              {label}
-            </span>
-          ))}
-          <span className="text-sm text-muted-foreground">+ more</span>
-        </div>
-
-        <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Button size="lg" asChild>
-            <Link href="/auth/signup">
-              Start Your Journey Free
-              <ArrowRight className="ml-2 size-4" />
-            </Link>
-          </Button>
-          <Button variant="outline" size="lg" asChild>
-            <a href="#features">See How It Works</a>
-          </Button>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Features                                                           */
-/* ------------------------------------------------------------------ */
-
-const features = [
-  {
-    icon: Search,
-    title: "AI Programme Matching",
-    description:
-      "Enter your GPA, test scores, and goals — get ranked programme suggestions from universities worldwide, scored against your profile.",
-  },
-  {
-    icon: Award,
-    title: "Scholarship Finder",
-    description:
-      "Surface merit-based and need-based scholarships relevant to your nationality, field, and destination country.",
-  },
-  {
-    icon: FileText,
-    title: "Application Tracker",
-    description:
-      "Track every university, deadline, and document in one place. Get reminders before application windows close.",
-  },
-  {
-    icon: Globe,
-    title: "Country & Visa Guide",
-    description:
-      "Compare post-study work rights, PR pathways, cost of living, and visa processing times across destinations.",
-  },
-  {
-    icon: BarChart3,
-    title: "Profile Strength Score",
-    description:
-      "EducAI analyses your academic profile and suggests targeted improvements — extra courses, certifications, or test retakes.",
-  },
-  {
-    icon: BookOpen,
-    title: "Document Hub",
-    description:
-      "AI-assisted SOP drafting, LOR request templates, and CV checkers tailored for international graduate applications.",
-  },
-];
-
-function Features() {
-  return (
-    <section
-      id="features"
-      className="border-t border-border/40 bg-muted/30 py-24"
-    >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Everything You Need to{" "}
-            <span className="text-primary">Study Abroad</span>
-          </h2>
-          <p className="mt-4 text-muted-foreground">
-            From discovering your best-fit university to submitting your final application — EducAI guides every step.
-          </p>
-        </div>
-
-        <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((f) => (
-            <article
-              key={f.title}
-              className="group rounded-xl border border-border/60 bg-card p-6 shadow-sm transition-shadow hover:shadow-md"
-            >
-              <div className="mb-4 inline-flex rounded-lg bg-primary/10 p-2.5">
-                <f.icon className="size-5 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold">{f.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                {f.description}
-              </p>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  How It Works                                                       */
-/* ------------------------------------------------------------------ */
-
-const steps = [
-  {
-    step: "01",
-    icon: GraduationCap,
-    title: "Build Your Profile",
-    description:
-      "Complete our 4-step onboarding — academic history, test scores, budget, and destination preferences.",
-  },
-  {
-    step: "02",
-    icon: Search,
-    title: "Get AI Matches",
-    description:
-      "EducAI cross-references your profile against thousands of programmes and ranks them by your chance of admission.",
-  },
-  {
-    step: "03",
-    icon: Compass,
-    title: "Explore & Compare",
-    description:
-      "Deep-dive into curricula, scholarships, tuition, and post-study work rights side-by-side.",
-  },
-  {
-    step: "04",
-    icon: FileText,
-    title: "Apply with Confidence",
-    description:
-      "Track deadlines, draft documents, and submit stronger applications — all from your personalised workspace.",
-  },
-];
-
-function HowItWorks() {
-  return (
-    <section id="how-it-works" className="py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Your Study-Abroad Journey{" "}
-            <span className="text-primary">in 4 Steps</span>
-          </h2>
-          <p className="mt-4 text-muted-foreground">
-            From first search to acceptance letter — EducAI is with you the whole way.
-          </p>
-        </div>
-
-        <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {steps.map((s) => (
-            <div key={s.step} className="relative text-center">
-              <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-primary/10">
-                <s.icon className="size-7 text-primary" />
-              </div>
-              <span className="text-5xl font-bold text-primary/20">
-                {s.step}
-              </span>
-              <h3 className="mt-2 text-lg font-semibold">{s.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {s.description}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Destinations Strip                                                 */
-/* ------------------------------------------------------------------ */
-
-const destinations = [
-  { flag: "🇺🇸", name: "United States", programs: "15,000+ programmes" },
-  { flag: "🇬🇧", name: "United Kingdom", programs: "8,000+ programmes" },
-  { flag: "🇨🇦", name: "Canada", programs: "6,500+ programmes" },
-  { flag: "🇩🇪", name: "Germany", programs: "5,000+ programmes" },
-  { flag: "🇦🇺", name: "Australia", programs: "7,000+ programmes" },
-  { flag: "🇳🇱", name: "Netherlands", programs: "2,000+ programmes" },
-];
-
-function Destinations() {
-  return (
-    <section id="destinations" className="border-t border-border/40 bg-muted/30 py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Top <span className="text-primary">Study Destinations</span>
-          </h2>
-          <p className="mt-4 text-muted-foreground">
-            Search across the world&apos;s leading higher-education systems in one place.
-          </p>
-        </div>
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {destinations.map((d) => (
-            <div
-              key={d.name}
-              className="flex items-center gap-4 rounded-xl border border-border/60 bg-card p-5 shadow-sm"
-            >
-              <span className="text-4xl">{d.flag}</span>
-              <div>
-                <p className="font-semibold">{d.name}</p>
-                <p className="text-sm text-muted-foreground">{d.programs}</p>
-              </div>
-              <MapPin className="ml-auto size-4 shrink-0 text-muted-foreground/40" />
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Trust / Stats Strip                                                */
-/* ------------------------------------------------------------------ */
-
-const stats = [
-  { value: "40K+", label: "Programmes Indexed" },
-  { value: "120+", label: "Countries Served" },
-  { value: "12K+", label: "Scholarships Listed" },
-  { value: "94%", label: "Match Accuracy" },
-];
-
-function Stats() {
-  return (
-    <section
-      id="stats"
-      className="border-y border-border/40 bg-primary/5 py-16"
-    >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-          {stats.map((s) => (
-            <div key={s.label} className="text-center">
-              <p className="text-3xl font-bold text-primary sm:text-4xl">
-                {s.value}
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">{s.label}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  CTA Banner                                                         */
-/* ------------------------------------------------------------------ */
-
-function CtaBanner() {
-  return (
-    <section className="py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="relative overflow-hidden rounded-2xl bg-primary px-6 py-16 text-center shadow-lg sm:px-16">
-          <h2 className="text-3xl font-bold tracking-tight text-primary-foreground sm:text-4xl">
-            Ready to Find Your Dream University Abroad?
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-primary-foreground/80">
-            Join thousands of international students who discovered their best-fit
-            programmes with EducAI. Free, forever.
-          </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button
-              size="lg"
-              variant="secondary"
-              className="font-semibold text-primary"
-              asChild
-            >
-              <Link href="/auth/signup">
-                Start My Search Free
-                <ArrowRight className="ml-2 size-4" />
-              </Link>
-            </Button>
+    <div className="border-y border-border/50 bg-muted/20">
+      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px px-4 sm:grid-cols-4 sm:px-6 lg:px-8">
+        {STATS.map((s) => (
+          <div key={s.label} className="flex flex-col items-center justify-center py-6 text-center">
+            <span className="text-2xl font-bold text-primary">{s.value}</span>
+            <span className="mt-1 text-xs text-muted-foreground">{s.label}</span>
           </div>
-          {/* Decorative circles */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -left-12 -top-12 size-64 rounded-full bg-white/10"
-          />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -bottom-16 -right-16 size-80 rounded-full bg-white/10"
-          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Features grid
+// ─────────────────────────────────────────────
+
+const FEATURES = [
+  {
+    icon: "Globe",
+    title: "Global coverage",
+    description:
+      "Real-time data from universities across the UK, USA, Canada, Germany, Australia, and more.",
+  },
+  {
+    icon: "Sparkles",
+    title: "AI-powered matching",
+    description:
+      "Programs are scored against your exact profile — GPA, budget, language, and career goals.",
+  },
+  {
+    icon: "BookOpen",
+    title: "Scholarship discovery",
+    description:
+      "Country-specific scholarships with deadline tracking and eligibility pre-screening.",
+  },
+  {
+    icon: "Users",
+    title: "Community insights",
+    description:
+      "See where students with similar profiles applied and what worked for them.",
+  },
+] as const;
+
+type FeatureIconName = "Globe" | "Sparkles" | "BookOpen" | "Users";
+
+const ICON_MAP: Record<FeatureIconName, React.ComponentType<{ className?: string }>> = {
+  Globe,
+  Sparkles,
+  BookOpen,
+  Users,
+};
+
+function FeaturesSection() {
+  return (
+    <section id="features" className="py-20 bg-muted/20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <Reveal>
+          <div className="mb-14 text-center">
+            <p className="text-sm font-semibold uppercase tracking-widest text-primary">Platform</p>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-foreground">
+              Everything you need to study abroad
+            </h2>
+            <p className="mt-3 max-w-2xl mx-auto text-muted-foreground">
+              EducAI combines live university data, AI matching, and scholarship intelligence into one coherent workflow.
+            </p>
+          </div>
+        </Reveal>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {FEATURES.map((f, i) => {
+            const Icon = ICON_MAP[f.icon as FeatureIconName];
+            return (
+              <Reveal key={f.title} delay={i * 0.1}>
+                <div className="rounded-xl border border-border bg-card p-6 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all h-full">
+                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10">
+                    <Icon className="size-5 text-primary" />
+                  </div>
+                  <h3 className="font-semibold text-foreground">{f.title}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{f.description}</p>
+                </div>
+              </Reveal>
+            );
+          })}
         </div>
       </div>
     </section>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Footer                                                             */
-/* ------------------------------------------------------------------ */
+// ─────────────────────────────────────────────
+// Footer
+// ─────────────────────────────────────────────
 
 function Footer() {
   return (
-    <footer className="border-t border-border/40 bg-muted/30">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
+    <footer className="border-t border-border bg-background py-10">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-center gap-6 md:flex-row md:justify-between">
           <Logo />
-
-          <nav aria-label="Footer navigation">
-            <ul
-              className="flex gap-6 text-sm text-muted-foreground"
-              role="list"
-            >
-              <li>
-                <a
-                  href="#features"
-                  className="transition-colors hover:text-foreground"
-                >
-                  Features
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#how-it-works"
-                  className="transition-colors hover:text-foreground"
-                >
-                  How It Works
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#destinations"
-                  className="transition-colors hover:text-foreground"
-                >
-                  Destinations
-                </a>
-              </li>
-              <li>
-                <Link
-                  href="/auth/signin"
-                  className="transition-colors hover:text-foreground"
-                >
-                  Sign In
-                </Link>
-              </li>
+          <nav aria-label="Footer links">
+            <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+              {[
+                { label: "About", href: "#" },
+                { label: "Privacy", href: "#" },
+                { label: "Terms", href: "#" },
+                { label: "Contact", href: "mailto:hello@educai.app" },
+                {
+                  label: "GitHub",
+                  href: "https://github.com/Prohar04/EducAI",
+                  external: true,
+                },
+              ].map((item) => (
+                <li key={item.label}>
+                  <a
+                    href={item.href}
+                    target={item.external ? "_blank" : undefined}
+                    rel={item.external ? "noopener noreferrer" : undefined}
+                    className="hover:text-foreground transition-colors focus-visible:text-primary focus-visible:outline-none inline-flex items-center gap-1"
+                  >
+                    {item.label}
+                    {item.external && <ExternalLink className="size-3" />}
+                  </a>
+                </li>
+              ))}
             </ul>
           </nav>
-        </div>
-
-        <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-border/40 pt-8 text-xs text-muted-foreground sm:flex-row">
-          <p>&copy; {new Date().getFullYear()} EducAI. All rights reserved.</p>
-          <div className="flex items-center gap-1">
-            <CheckCircle2 className="size-3.5 text-primary" />
-            <span>AI-powered study-abroad advisor for every student</span>
-          </div>
+          <p className="text-xs text-muted-foreground">
+            &copy; {new Date().getFullYear()} EducAI. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Page                                                               */
-/* ------------------------------------------------------------------ */
+// ─────────────────────────────────────────────
+// Hero
+// ─────────────────────────────────────────────
 
-export default function Home() {
+async function HeroSection() {
+  const session = await getSession().catch(() => null);
+  const isLoggedIn = !!session;
+
   return (
-    <div className="flex min-h-screen flex-col">
-      <Navbar />
+    <section className="relative overflow-hidden bg-background">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[500px] w-[800px] rounded-full bg-primary/5 blur-3xl" />
+      </div>
+      <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+          <div>
+            <FadeIn delay={0}>
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-4 py-1.5 text-xs font-semibold text-primary">
+                <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                Live &middot; Program data updated daily
+              </div>
+            </FadeIn>
+            <FadeIn delay={0.1}>
+              <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-6xl leading-tight">
+                Smart Decisions.{" "}
+                <span className="text-primary">Global</span>{" "}
+                Destination.
+              </h1>
+            </FadeIn>
+            <FadeIn delay={0.2}>
+              <p className="mt-5 max-w-lg text-lg text-muted-foreground leading-relaxed">
+                Find programs, scholarships, and a clear application plan &mdash; powered by data and AI.
+                Built for ambitious students navigating the world&apos;s best universities.
+              </p>
+            </FadeIn>
+            <FadeIn delay={0.3}>
+              <div className="mt-8 flex flex-wrap gap-4">
+                <Button size="lg" asChild className="gap-2 font-semibold">
+                  <Link href={isLoggedIn ? "/app/programs" : "/auth/signin"}>
+                    Explore Programs
+                    <ArrowRight className="size-4" />
+                  </Link>
+                </Button>
+                <Button size="lg" variant="outline" asChild>
+                  <a href="#how-it-works">See how it works</a>
+                </Button>
+              </div>
+            </FadeIn>
+          </div>
+          <HeroIllustration />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Page
+// ─────────────────────────────────────────────
+
+export default function HomePage() {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <PublicNavbar />
       <main className="flex-1">
-        <Hero />
-        <Features />
+        <HeroSection />
+        <StatsStrip />
+        <TrendingFeed />
+        <QuoteStrip />
+        <FeaturesSection />
         <HowItWorks />
-        <Destinations />
-        <Stats />
-        <CtaBanner />
+        <RoadmapCards />
       </main>
       <Footer />
     </div>

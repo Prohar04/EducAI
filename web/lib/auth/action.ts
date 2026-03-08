@@ -9,6 +9,8 @@ import {
 	ProgramListResult,
 	MatchFormState,
 	SavedProgramItem,
+	MatchLatestResponse,
+	MatchRunFormState,
 } from "@/types/auth.type";
 
 export const getProfile = async () => {
@@ -166,5 +168,64 @@ export const unsaveProgram = async (programId: string): Promise<boolean> => {
 	);
 	revalidatePath("/app/saved");
 	return response.ok;
+};
+
+// ─── Match Run ────────────────────────────────────────────────────────────────
+
+export const triggerMatchRun = async (): Promise<MatchRunFormState> => {
+	const response = await authFetch(`${BACKEND_URL}/match/run`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({}),
+	});
+
+	if (!response.ok) {
+		const data = await response.json().catch(() => null);
+		return { success: false, message: data?.message ?? "Failed to trigger match run." };
+	}
+
+	const data = await response.json();
+	return { success: true, runId: data.runId };
+};
+
+export const getMatchLatest = async (): Promise<MatchLatestResponse | null> => {
+	const response = await authFetch(`${BACKEND_URL}/match/latest`);
+	if (!response.ok) return null;
+	return response.json();
+};
+
+export const getMatchRunStatus = async (
+	runId: string,
+): Promise<import("@/types/auth.type").MatchRunStatus | null> => {
+	const response = await authFetch(
+		`${BACKEND_URL}/match/run/${encodeURIComponent(runId)}/status`,
+	);
+	if (!response.ok) return null;
+	return response.json();
+};
+
+export const updateUserProfile = async (
+	profileData: Partial<import("@/types/auth.type").UserProfile>,
+): Promise<{ success: boolean; message: string }> => {
+	const response = await authFetch(`${BACKEND_URL}/users/me/profile`, {
+		method: "PUT",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(profileData),
+	});
+
+	if (!response.ok) {
+		return { success: false, message: "Failed to update profile." };
+	}
+
+	// Trigger a new match run after profile update
+	await authFetch(`${BACKEND_URL}/match/run`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({}),
+	}).catch(() => null); // Don't fail if match trigger fails
+
+	revalidatePath("/app/dashboard");
+	revalidatePath("/app/match");
+	return { success: true, message: "Profile updated. Refreshing matches…" };
 };
 

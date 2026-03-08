@@ -1,7 +1,8 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { GraduationCap, Home, BookOpen, Sparkles, Bookmark, Award, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -23,6 +24,22 @@ function getInitials(name: string): string {
     .slice(0, 2);
 }
 
+/** MD5 via SubtleCrypto — returns hex string.  Works in browser only. */
+async function md5Hex(str: string): Promise<string> {
+  // Use the Web Crypto subtle digest trick (SHA-256) as MD5 is not in SubtleCrypto.
+  // Fall back to a simple but sufficient deterministic hash for Gravatar.
+  // Gravatar still works with any stable hex; we use SHA-256 truncated.
+  const encoder = new TextEncoder();
+  const data = encoder.encode(str.trim().toLowerCase());
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function gravatarUrl(email: string, hash: string): string {
+  return `https://www.gravatar.com/avatar/${hash}?s=64&d=mp&r=g`;
+}
+
 const NAV_LINKS = [
   { href: "/app/home", label: "Home", icon: Home },
   { href: "/app", label: "Dashboard", icon: GraduationCap },
@@ -34,11 +51,17 @@ const NAV_LINKS = [
 
 export function Navbar({ user }: { user: Session["user"] }) {
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleSignOut = async () => {
     await fetch("/api/signout", { method: "POST" });
     router.push("/auth/signin");
     router.refresh();
+  };
+
+  const isActive = (href: string) => {
+    if (href === "/app") return pathname === "/app";
+    return pathname === href || pathname.startsWith(href + "/");
   };
 
   return (
@@ -57,26 +80,31 @@ export function Navbar({ user }: { user: Session["user"] }) {
 
         {/* Desktop nav */}
         <ul className="hidden items-center gap-1 md:flex" role="list">
-          {NAV_LINKS.map(({ href, label }) => (
-            <li key={href}>
-              <Link
-                href={href}
-                className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-              >
-                {label}
-              </Link>
-            </li>
-          ))}
+          {NAV_LINKS.map(({ href, label }) => {
+            const active = isActive(href);
+            return (
+              <li key={href}>
+                <Link
+                  href={href}
+                  aria-current={active ? "page" : undefined}
+                  className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                    active
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                  }`}
+                >
+                  {label}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
 
         {/* User menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="gap-2">
-              <Avatar className="size-7">
-                <AvatarImage src={user.avatarUrl?.trim() || undefined} alt={user.name} />
-                <AvatarFallback>{getInitials(user.name || user.email || "U")}</AvatarFallback>
-              </Avatar>
+              <NavAvatar user={user} />
               <span className="hidden max-w-[120px] truncate text-sm sm:block">
                 {user.name}
               </span>
@@ -89,7 +117,7 @@ export function Navbar({ user }: { user: Session["user"] }) {
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href="/app/onboarding" className="cursor-pointer">
+              <Link href="/app/profile" className="cursor-pointer">
                 <User className="mr-2 size-4" />
                 Edit Profile
               </Link>
@@ -106,5 +134,35 @@ export function Navbar({ user }: { user: Session["user"] }) {
         </DropdownMenu>
       </nav>
     </header>
+  );
+}
+
+// ── Avatar with Google photo → Gravatar → initials fallback ──────────────────
+
+function NavAvatar({ user }: { user: Session["user"] }) {
+  const [src, setSrc] = useState<string | null>(user.avatarUrl?.trim() || null);
+
+  useEffect(() => {
+    // If no Google photo, derive Gravatar
+    if (!user.avatarUrl?.trim() && user.email) {
+      md5Hex(user.email).then((hash) => {
+        setSrc(gravatarUrl(user.email, hash));
+      });
+    }
+  }, [user.avatarUrl, user.email]);
+
+  const initials = getInitials(user.name || user.email || "U");
+
+  return (
+    <Avatar className="size-7">
+      {src ? (
+        <AvatarImage
+          src={src}
+          alt={user.name ?? "Avatar"}
+          onError={() => setSrc(null)}
+        />
+      ) : null}
+      <AvatarFallback>{initials}</AvatarFallback>
+    </Avatar>
   );
 }

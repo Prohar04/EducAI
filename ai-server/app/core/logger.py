@@ -15,11 +15,7 @@ log_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(messa
 stream_handler = logging.StreamHandler(sys.stdout)
 stream_handler.setFormatter(log_format)
 
-file_handler = RotatingFileHandler(
-    os.path.join(log_dir, "api.log"), 
-    maxBytes=10*1024*1024, 
-    backupCount=5
-)
+file_handler = RotatingFileHandler(os.path.join(log_dir, "api.log"), maxBytes=10 * 1024 * 1024, backupCount=5)
 file_handler.setFormatter(log_format)
 
 if not logger.handlers:

@@ -69,6 +69,7 @@ async def submit_preferences(
 # Debug / inspection endpoints
 # ---------------------------------------------------------------------------
 
+
 @router.get(
     "/preferences",
     response_model=List[EduPreferenceRecord],
@@ -166,4 +167,3 @@ async def list_full_context() -> List[EduContextRecord]:
         result.append(EduContextRecord(preference=pref_record, recommendations=rec_records))
 
     return result
-
