@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import {
 	Calendar, ChevronDown, ChevronRight, RefreshCw,
 	BookOpen, Award, Plane, AlertCircle, CheckCircle2,
@@ -50,12 +50,20 @@ const ITEM_ICONS: Record<RoadmapItemType, React.ElementType> = {
 	deadline: Clock,
 };
 
-const ITEM_COLOURS: Record<RoadmapItemType, string> = {
-	preparation: "text-blue-500 bg-blue-500/10 border-blue-500/30",
-	application: "text-primary bg-primary/10 border-primary/30",
-	scholarship: "text-amber-500 bg-amber-500/10 border-amber-500/30",
-	visa: "text-purple-500 bg-purple-500/10 border-purple-500/30",
-	deadline: "text-red-500 bg-red-500/10 border-red-500/30",
+const ITEM_ICON_COLOURS: Record<RoadmapItemType, string> = {
+	preparation: "text-blue-500 bg-blue-500/15 border-blue-500/30",
+	application: "text-primary bg-primary/15 border-primary/30",
+	scholarship: "text-amber-500 bg-amber-500/15 border-amber-500/30",
+	visa: "text-purple-500 bg-purple-500/15 border-purple-500/30",
+	deadline: "text-red-500 bg-red-500/15 border-red-500/30",
+};
+
+const BADGE_COLOURS: Record<RoadmapItemType, string> = {
+	preparation: "text-blue-400 bg-blue-500/20 border-blue-500/40",
+	application: "text-primary bg-primary/20 border-primary/40",
+	scholarship: "text-amber-400 bg-amber-500/20 border-amber-500/40",
+	visa: "text-purple-400 bg-purple-500/20 border-purple-500/40",
+	deadline: "text-red-400 bg-red-500/20 border-red-500/40",
 };
 
 const INTAKES = [
@@ -92,10 +100,11 @@ function MonthCard({ month, defaultOpen = false }: { month: RoadmapMonth; defaul
 				<div className="divide-y divide-border border-t border-border">
 					{month.items.map((item, i) => {
 						const Icon = ITEM_ICONS[item.type] ?? BookOpen;
-						const colourClass = ITEM_COLOURS[item.type] ?? "text-muted-foreground bg-muted border-muted";
+						const iconClass = ITEM_ICON_COLOURS[item.type] ?? "text-muted-foreground bg-muted border-muted";
+						const badgeClass = BADGE_COLOURS[item.type] ?? "text-muted-foreground bg-muted/20 border-muted";
 						return (
-							<div key={i} className="flex gap-3 px-5 py-3.5">
-								<div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border ${colourClass}`}>
+							<div key={i} className="flex items-start gap-3 px-5 py-3.5">
+								<div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border ${iconClass}`}>
 									<Icon className="size-3.5" />
 								</div>
 								<div className="flex-1 min-w-0">
@@ -111,7 +120,7 @@ function MonthCard({ month, defaultOpen = false }: { month: RoadmapMonth; defaul
 										</p>
 									)}
 								</div>
-								<span className={`mt-0.5 shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${colourClass}`}>
+								<span className={`mt-0.5 shrink-0 self-start rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide pointer-events-none select-none ${badgeClass}`}>
 									{item.type}
 								</span>
 							</div>
@@ -152,11 +161,13 @@ export default function TimelinePlannerClient({
 	const [countryCode, setCountryCode] = useState(defaultCountry || "US");
 	const [intake, setIntake] = useState(initialRoadmap?.intake ?? "");
 	const [error, setError] = useState<string | null>(null);
-	const [isPending, startTransition] = useTransition();
+	const [isGenerating, setIsGenerating] = useState(false);
+	const [isCountryLoading, setIsCountryLoading] = useState(false);
 
-	const handleGenerate = () => {
+	const handleGenerate = async () => {
 		setError(null);
-		startTransition(async () => {
+		setIsGenerating(true);
+		try {
 			const result = await generateTimeline(countryCode, intake || undefined);
 			if (!result.success) {
 				setError(result.message ?? "Unknown error");
@@ -164,17 +175,24 @@ export default function TimelinePlannerClient({
 			}
 			const latest = await getLatestTimeline(countryCode);
 			if (latest) setRoadmap(latest as UserRoadmap);
-		});
+		} finally {
+			setIsGenerating(false);
+		}
 	};
 
-	const handleCountryChange = (code: string) => {
+	const handleCountryChange = async (code: string) => {
 		setCountryCode(code);
 		setRoadmap(null);
-		startTransition(async () => {
+		setIsCountryLoading(true);
+		try {
 			const latest = await getLatestTimeline(code);
 			if (latest) setRoadmap(latest as UserRoadmap);
-		});
+		} finally {
+			setIsCountryLoading(false);
+		}
 	};
+
+	const isPending = isGenerating || isCountryLoading;
 
 	const plan = roadmap?.plan ?? [];
 	const countryName = COUNTRIES.find((c) => c.code === countryCode)?.name ?? countryCode;
@@ -247,6 +265,13 @@ export default function TimelinePlannerClient({
 				<div className="mb-4 flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
 					<AlertCircle className="size-4 shrink-0" />
 					{error}
+				</div>
+			)}
+
+			{/* Loading skeletons */}
+			{isCountryLoading && (
+				<div className="space-y-3">
+					{Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)}
 				</div>
 			)}
 
