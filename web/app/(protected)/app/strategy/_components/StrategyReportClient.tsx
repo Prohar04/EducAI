@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import {
 	Target, RefreshCw, Loader2, AlertCircle,
 	CheckSquare, Square, ShieldAlert, ListChecks,
@@ -153,11 +153,13 @@ export default function StrategyReportClient({
 	const [countryCode, setCountryCode] = useState(defaultCountry || "US");
 	const [intake, setIntake] = useState(initialReport?.intake ?? "");
 	const [error, setError] = useState<string | null>(null);
-	const [isPending, startTransition] = useTransition();
+	const [isGenerating, setIsGenerating] = useState(false);
+	const [isCountryLoading, setIsCountryLoading] = useState(false);
 
-	const handleGenerate = () => {
+	const handleGenerate = async () => {
 		setError(null);
-		startTransition(async () => {
+		setIsGenerating(true);
+		try {
 			const result = await generateStrategy(countryCode, intake || undefined);
 			if (!result.success) {
 				setError(result.message ?? "Unknown error");
@@ -165,17 +167,24 @@ export default function StrategyReportClient({
 			}
 			const latest = await getLatestStrategy(countryCode);
 			if (latest) setReport(latest as StrategyReport);
-		});
+		} finally {
+			setIsGenerating(false);
+		}
 	};
 
-	const handleCountryChange = (code: string) => {
+	const handleCountryChange = async (code: string) => {
 		setCountryCode(code);
 		setReport(null);
-		startTransition(async () => {
+		setIsCountryLoading(true);
+		try {
 			const latest = await getLatestStrategy(code);
 			if (latest) setReport(latest as StrategyReport);
-		});
+		} finally {
+			setIsCountryLoading(false);
+		}
 	};
+
+	const isPending = isGenerating || isCountryLoading;
 
 	const r = report?.report;
 	const countryName = COUNTRIES.find((c) => c.code === countryCode)?.name ?? countryCode;
