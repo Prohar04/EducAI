@@ -67,5 +67,5 @@ export async function GET(req: NextRequest) {
 		rememberMe: false,
 	});
 
-	redirect("/onboarding-check");
+	redirect("/app");
 }

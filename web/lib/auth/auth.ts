@@ -179,7 +179,7 @@ export async function signIn(
 				refreshToken: result.refreshToken,
 				rememberMe,
 			});
-			redirect("/onboarding-check");
+			redirect("/app");
 		}
 
 		const data = await response.json().catch(() => null);
