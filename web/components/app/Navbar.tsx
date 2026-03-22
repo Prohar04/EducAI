@@ -18,7 +18,6 @@ import {
   User,
   ChevronDown,
   CalendarDays,
-  Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";

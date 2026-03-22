@@ -6,7 +6,6 @@ import { ReactNode } from "react";
 type AnimatedCardProps = {
   children: ReactNode;
   className?: string;
-  href?: string;
   onClick?: () => void;
 };
 
@@ -14,7 +13,7 @@ type AnimatedCardProps = {
  * Card with subtle hover animation - tiny lift and border brighten.
  * Respects prefers-reduced-motion.
  */
-export function AnimatedCard({ children, className = "", href, onClick }: AnimatedCardProps) {
+export function AnimatedCard({ children, className = "", onClick }: AnimatedCardProps) {
   const reduced = useReducedMotion();
 
   const hoverVariants = reduced
