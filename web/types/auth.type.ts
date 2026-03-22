@@ -214,7 +214,7 @@ export interface MatchResultItem {
         runId: string;
         programId: string | null;
         score: number;
-        reasons: unknown; // JSON array of strings from DB
+        reasons: string[]; // Array of reason strings
         rawData: Record<string, unknown> | null;
         createdAt: string;
 }
