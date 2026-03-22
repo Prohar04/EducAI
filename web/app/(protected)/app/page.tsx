@@ -7,7 +7,6 @@ import {
   BookOpen,
   Sparkles,
   Bookmark,
-  Pencil,
   ChevronRight,
   Clock,
   Calendar,
@@ -20,7 +19,7 @@ import {
   Target,
   ArrowRight,
 } from "lucide-react";
-import type { SavedProgramItem, MatchLatestResponse, UserProfile } from "@/types/auth.type";
+import type { SavedProgramItem, MatchLatestResponse, UserProfile, Session } from "@/types/auth.type";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { StaggerChildren, StaggerItem } from "@/components/motion/FadeIn";
 import { AnimatedCard } from "@/components/motion/AnimatedCard";
@@ -86,7 +85,7 @@ function getProfileCompleteness(profile: UserProfile): number {
 
 // ─── SUB-COMPONENTS ───────────────────────────────────────────────────────────
 
-function SectionHeader({ title, icon: Icon, href, linkText }: { title: string; icon: any; href?: string; linkText?: string }) {
+function SectionHeader({ title, icon: Icon, href, linkText }: { title: string; icon: React.ElementType; href?: string; linkText?: string }) {
   return (
     <div className="mb-4 flex items-center justify-between">
       <h2 className="flex items-center gap-2 text-lg font-semibold">
@@ -129,7 +128,7 @@ function StatusBadge({ children, variant = "default" }: { children: React.ReactN
 }
 
 function EmptyState({ icon: Icon, title, description, ctaText, ctaHref }: {
-  icon: any;
+  icon: React.ElementType;
   title: string;
   description: string;
   ctaText: string;
@@ -150,18 +149,9 @@ function EmptyState({ icon: Icon, title, description, ctaText, ctaHref }: {
   );
 }
 
-function SkeletonCard() {
-  return (
-    <div className="animate-pulse rounded-lg border border-border bg-card p-4">
-      <div className="mb-2 h-4 w-3/4 rounded bg-muted"></div>
-      <div className="h-3 w-1/2 rounded bg-muted"></div>
-    </div>
-  );
-}
-
 // ─── SECTION COMPONENTS ───────────────────────────────────────────────────────
 
-function ProfileSnapshot({ profile, session }: { profile: UserProfile; session: any }) {
+function ProfileSnapshot({ profile, session }: { profile: UserProfile; session: Session }) {
   const targetCountries = getTargetCountriesDisplay(profile.targetCountries);
   const completeness = getProfileCompleteness(profile);
   const isComplete = completeness >= 80;
@@ -205,8 +195,8 @@ function ProfileSnapshot({ profile, session }: { profile: UserProfile; session: 
   );
 }
 
-function YourRoadmap({ timeline }: { timeline: any }) {
-  if (!timeline?.timeline?.phases) {
+function YourRoadmap({ timeline }: { timeline: unknown }) {
+  if (!timeline || typeof timeline !== "object" || !("timeline" in timeline)) {
     return (
       <AnimatedCard className="h-full rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
         <SectionHeader title="Your Roadmap" icon={Target} />
@@ -221,14 +211,30 @@ function YourRoadmap({ timeline }: { timeline: any }) {
     );
   }
 
-  const phases = timeline.timeline.phases.slice(0, 5);
+  const timelineData = timeline as { timeline?: { phases?: Array<{ month?: string; phase?: string; focus?: string; tasks?: string[] }> } };
+  const phases = timelineData.timeline?.phases?.slice(0, 5);
+
+  if (!phases || phases.length === 0) {
+    return (
+      <AnimatedCard className="h-full rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
+        <SectionHeader title="Your Roadmap" icon={Target} />
+        <EmptyState
+          icon={Calendar}
+          title="No roadmap yet"
+          description="Generate a personalized timeline for your application journey"
+          ctaText="Generate Roadmap"
+          ctaHref="/app/timeline"
+        />
+      </AnimatedCard>
+    );
+  }
 
   return (
     <AnimatedCard className="h-full rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
       <SectionHeader title="Your Roadmap" icon={Target} href="/app/timeline" linkText="View Full Timeline" />
 
       <div className="space-y-3">
-        {phases.map((phase: any, idx: number) => (
+        {phases.map((phase, idx: number) => (
           <div key={idx} className="flex gap-3 rounded-lg border border-border/50 bg-muted/20 p-3 transition-colors hover:bg-muted/40">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
               {idx + 1}
@@ -273,7 +279,6 @@ function RecommendedPrograms({ match }: { match: MatchLatestResponse | null }) {
           const title = (raw.program_title as string) ?? (raw.title as string) ?? "Unnamed Programme";
           const university = (raw.university_name as string) ?? (raw.universityName as string) ?? "Unknown University";
           const country = (raw.country as string) ?? "";
-          const programId = result.programId ?? result.id;
 
           return (
             <StaggerItem key={result.id}>
