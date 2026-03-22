@@ -54,20 +54,19 @@ function gravatarUrl(email: string, hash: string): string {
 
 // Top-level navigation links
 const NAV_LINKS = [
-  { href: "/app", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/app", label: "Study Plan", icon: LayoutDashboard },
   { href: "/app/programs", label: "Programs", icon: BookOpen },
   { href: "/app/match", label: "Match", icon: Sparkles },
   { href: "/app/saved", label: "Saved", icon: Bookmark },
 ] as const;
 
-// Module dropdown items — AI Agent is surfaced via the floating widget
-const MODULES = [
+// Tools dropdown items — AI Agent is surfaced via the floating widget
+const TOOLS = [
   { href: "/app/scholarships", label: "Scholarships", icon: Award, soon: false },
-  { href: "/app/timeline", label: "Timeline", icon: CalendarDays, soon: false },
-  { href: "/app/strategy", label: "Strategy", icon: Target, soon: false },
   { href: "/app/sop", label: "SOP Builder", icon: FileText, soon: true },
   { href: "/app/cv", label: "CV Builder", icon: ClipboardList, soon: true },
-  { href: "/app/professors", label: "Professors", icon: Users, soon: true },
+  { href: "/app/professors", label: "Professor Finder", icon: Users, soon: true },
+  { href: "/app/timeline", label: "Insights", icon: CalendarDays, soon: true },
 ] as const;
 
 export function Navbar({ user }: { user: Session["user"] }) {
@@ -87,7 +86,7 @@ export function Navbar({ user }: { user: Session["user"] }) {
     return pathname === href || pathname.startsWith(href + "/");
   };
 
-  const isModulesActive = MODULES.some((m) => isActive(m.href));
+  const isToolsActive = TOOLS.some((m) => isActive(m.href));
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-md">
@@ -133,18 +132,18 @@ export function Navbar({ user }: { user: Session["user"] }) {
             );
           })}
 
-          {/* Modules dropdown */}
+          {/* Tools dropdown */}
           <li>
             <DropdownMenu open={modulesOpen} onOpenChange={setModulesOpen}>
               <DropdownMenuTrigger asChild>
                 <button
                   className={`flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                    isModulesActive
+                    isToolsActive
                       ? "text-primary"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  Modules
+                  Tools
                   <motion.span
                     animate={{ rotate: modulesOpen ? 180 : 0 }}
                     transition={{ duration: 0.2, ease: "easeInOut" }}
@@ -159,7 +158,7 @@ export function Navbar({ user }: { user: Session["user"] }) {
                 className="w-52 p-1"
                 sideOffset={6}
               >
-                {MODULES.map(({ href, label, icon: Icon, soon }) => {
+                {TOOLS.map(({ href, label, icon: Icon, soon }) => {
                   const active = isActive(href);
                   return (
                     <DropdownMenuItem key={href} asChild>
