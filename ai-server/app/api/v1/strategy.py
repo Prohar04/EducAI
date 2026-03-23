@@ -14,13 +14,11 @@ Output (strict JSON):
 
 from __future__ import annotations
 
-import json
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
-from ...core.config import settings
 from ...core.logger import logger
 from ...domains.reasoning.llm_provider import generate_text, parse_json_response
 
