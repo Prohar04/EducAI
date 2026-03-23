@@ -534,7 +534,7 @@ export default async function StudyPlanPage() {
             title="Complete your profile to get started"
             description="Set up your profile to unlock personalized recommendations and insights"
             ctaText="Set Up Profile"
-            ctaHref="/app/profile"
+            ctaHref="/onboarding"
           />
         </FadeIn>
       </div>
