@@ -15,7 +15,6 @@ import json
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Tuple
 
-import httpx
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
@@ -23,13 +22,12 @@ from ...core.config import settings
 from ...core.logger import logger
 from ...domains.scrapping.firecrawl_client import FirecrawlClient
 from ...domains.searching.webSearch import WebSearch
+from ...domains.reasoning.llm_provider import generate_text, parse_json_response
 
 router = APIRouter(tags=["Module 1 Scrape-Match"])
 
 # ── Constants ─────────────────────────────────────────────────────────────
 
-_OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
-_LLM_MODEL = "openai/gpt-4o-mini"
 _MAX_URLS = 6
 _MAX_MARKDOWN_CHARS = 40_000
 
@@ -273,6 +271,7 @@ def _build_queries(req: ScrapeMatchRequest) -> List[str]:
 async def _llm_extract(
     markdown: str, req: ScrapeMatchRequest
 ) -> List[Dict[str, Any]]:
+    """Extract structured program data from scraped markdown using LLM."""
     system_prompt = (
         "You are a university admissions data extractor. "
         "Given scraped web content, extract every distinct "
@@ -295,38 +294,19 @@ async def _llm_extract(
         f"Scraped content:\n{markdown[:_MAX_MARKDOWN_CHARS]}"
     )
 
-    async with httpx.AsyncClient(timeout=60.0) as client:
-        resp = await client.post(
-            f"{_OPENROUTER_BASE_URL}/chat/completions",
-            headers={
-                "Authorization": f"Bearer {settings.OPEN_ROUTER_APIKEY}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "model": _LLM_MODEL,
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
-                "temperature": 0.1,
-                "max_tokens": 4096,
-            },
-        )
-        resp.raise_for_status()
-        content = resp.json()["choices"][0]["message"]["content"]
-
-    content = content.strip()
-    if content.startswith("```"):
-        content = content.split("```")[1]
-        if content.startswith("json"):
-            content = content[4:]
-    content = content.strip()
-
     try:
-        programs: List[Dict[str, Any]] = json.loads(content)
+        content = await generate_text(
+            prompt=user_prompt,
+            system_prompt=system_prompt,
+            temperature=0.1,
+            max_tokens=4096,
+            json_mode=False,  # Let parse_json_response handle markdown cleanup
+        )
+        programs = parse_json_response(content)
         if not isinstance(programs, list):
             programs = []
-    except json.JSONDecodeError:
+    except Exception as e:
+        logger.error(f"LLM extraction failed: {e}")
         programs = []
 
     return programs

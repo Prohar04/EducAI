@@ -17,17 +17,14 @@ from __future__ import annotations
 import json
 from typing import Any, Dict, List, Optional
 
-import httpx
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
 from ...core.config import settings
 from ...core.logger import logger
+from ...domains.reasoning.llm_provider import generate_text, parse_json_response
 
 router = APIRouter(tags=["Module 1 Strategy"])
-
-_OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
-_LLM_MODEL = "openai/gpt-4o-mini"
 
 # ── Request / Response models ─────────────────────────────────────────────────
 
@@ -183,7 +180,6 @@ Return ONLY valid JSON (no markdown, no explanation), matching this EXACT schema
 
 
 # ── Endpoint ─────────────────────────────────────────────────────────────────
-
 @router.post("/strategy")
 async def generate_strategy(req: StrategyRequest) -> Dict[str, Any]:
     logger.info(
@@ -192,55 +188,24 @@ async def generate_strategy(req: StrategyRequest) -> Dict[str, Any]:
     )
 
     prompt = _build_prompt(req)
+    system_prompt = (
+        "You are a world-class international education consultant. "
+        "You always respond with strict JSON only — no markdown, no extra text."
+    )
 
     try:
-        async with httpx.AsyncClient(timeout=90.0) as client:
-            response = await client.post(
-                f"{_OPENROUTER_BASE_URL}/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {settings.OPEN_ROUTER_APIKEY}",
-                    "Content-Type": "application/json",
-                },
-                json={
-                    "model": _LLM_MODEL,
-                    "messages": [
-                        {
-                            "role": "system",
-                            "content": (
-                                "You are a world-class international education consultant. "
-                                "You always respond with strict JSON only — no markdown, no extra text."
-                            ),
-                        },
-                        {"role": "user", "content": prompt},
-                    ],
-                    "temperature": 0.4,
-                    "response_format": {"type": "json_object"},
-                },
-            )
-            response.raise_for_status()
-    except httpx.HTTPStatusError as exc:
-        logger.error(f"[strategy] LLM API error: {exc.response.status_code} {exc.response.text[:500]}")
+        content = await generate_text(
+            prompt=prompt,
+            system_prompt=system_prompt,
+            temperature=0.4,
+            json_mode=True,
+        )
+        report = parse_json_response(content)
+    except Exception as exc:
+        logger.error(f"[strategy] LLM generation failed: {exc}")
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="LLM service error. Please try again.",
-        )
-    except httpx.RequestError as exc:
-        logger.error(f"[strategy] Network error: {exc}")
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="LLM service unreachable.",
-        )
-
-    raw = response.json()
-    content = raw["choices"][0]["message"]["content"]
-
-    try:
-        report = json.loads(content)
-    except json.JSONDecodeError:
-        logger.error(f"[strategy] LLM returned non-JSON: {content[:500]}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="LLM returned invalid JSON. Please retry.",
         )
 
     # Validate required top-level keys
