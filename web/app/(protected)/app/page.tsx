@@ -514,6 +514,11 @@ export default async function StudyPlanPage() {
   // Auth check
   if (!sessionData) redirect("/auth/signin");
 
+  // Onboarding check - redirect to onboarding if not complete
+  if (profileData && !profileData.onboardingDone) {
+    redirect("/app/onboarding");
+  }
+
   // No profile fallback
   if (!profileData) {
     return (
