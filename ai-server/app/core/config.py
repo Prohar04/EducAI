@@ -11,8 +11,15 @@ class Settings(BaseSettings):
     SERPER_APIKEY: str = Field(..., validation_alias="SERPER_APIKEY")
     SERPER_BASE_URL: str = Field(..., validation_alias="SERPER_BASE_URL")
 
+    # LLM Provider configuration
+    LLM_PROVIDER: Optional[str] = Field(default=None, validation_alias="LLM_PROVIDER")
+
     # OpenRouter configuration
-    OPEN_ROUTER_APIKEY: str = Field(..., validation_alias="OPEN_ROUTER_APIKEY")
+    OPENROUTER_API_KEY: Optional[str] = Field(default=None, validation_alias="OPENROUTER_API_KEY")
+    OPEN_ROUTER_APIKEY: Optional[str] = Field(default=None, validation_alias="OPEN_ROUTER_APIKEY")  # Legacy support
+
+    # Gemini configuration
+    GEMINI_API_KEY: Optional[str] = Field(default=None, validation_alias="GEMINI_API_KEY")
 
     # XAI configuration
     XAI_API_KEY: Optional[str] = Field(default=None, validation_alias="XAI_API_KEY")
@@ -46,6 +53,15 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore",
     )
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Fallback: if OPENROUTER_API_KEY is set but OPEN_ROUTER_APIKEY is not, copy it
+        if self.OPENROUTER_API_KEY and not self.OPEN_ROUTER_APIKEY:
+            self.OPEN_ROUTER_APIKEY = self.OPENROUTER_API_KEY
+        # And vice versa for backwards compatibility
+        if self.OPEN_ROUTER_APIKEY and not self.OPENROUTER_API_KEY:
+            self.OPENROUTER_API_KEY = self.OPEN_ROUTER_APIKEY
 
 
 settings = Settings()  # type: ignore
