@@ -146,7 +146,7 @@ export default function HomeAnimations({
               </p>
             </div>
             <Link
-              href="/app/onboarding?edit=true"
+              href="/onboarding?edit=true"
               className="shrink-0 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-600 transition-colors hover:bg-amber-500/20 dark:text-amber-400"
             >
               Complete now
@@ -196,7 +196,7 @@ export default function HomeAnimations({
             <div className="mb-4 flex items-center justify-between">
               <h2 className="font-semibold">Your Profile</h2>
               <Link
-                href="/app/onboarding?edit=true"
+                href="/onboarding?edit=true"
                 className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               >
                 <Pencil className="size-3" /> Edit
@@ -266,7 +266,7 @@ export default function HomeAnimations({
             {!stage && !prof?.targetIntake && targetCountries.length === 0 && (
               <p className="text-xs text-muted-foreground">
                 No profile data yet.{" "}
-                <Link href="/app/onboarding?edit=true" className="text-primary hover:underline">
+                <Link href="/onboarding?edit=true" className="text-primary hover:underline">
                   Set it up →
                 </Link>
               </p>
