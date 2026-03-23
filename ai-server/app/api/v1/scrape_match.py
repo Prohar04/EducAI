@@ -11,14 +11,12 @@ No DB writes happen here.
 
 from __future__ import annotations
 
-import json
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Tuple
 
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
-from ...core.config import settings
 from ...core.logger import logger
 from ...domains.scrapping.firecrawl_client import FirecrawlClient
 from ...domains.searching.webSearch import WebSearch
