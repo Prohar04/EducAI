@@ -158,6 +158,7 @@ export const signup = async (req: Request, res: Response) => {
     });
 
     // If profile data provided at signup, create UserProfile in one go
+    // NOTE: onboardingDone is kept false so the wizard still runs for completeness
     if (profile && typeof profile === 'object') {
       await prisma.userProfile.upsert({
         where: { userId: newUser.id },
@@ -174,7 +175,7 @@ export const signup = async (req: Request, res: Response) => {
           budgetMax: profile.budgetMax ?? undefined,
           budgetCurrency: profile.budgetCurrency ?? 'USD',
           workExperienceMonths: profile.workExperienceMonths ?? undefined,
-          onboardingDone: true,
+          onboardingDone: false,
         },
         create: {
           userId: newUser.id,
@@ -190,7 +191,7 @@ export const signup = async (req: Request, res: Response) => {
           budgetMax: profile.budgetMax ?? undefined,
           budgetCurrency: profile.budgetCurrency ?? 'USD',
           workExperienceMonths: profile.workExperienceMonths ?? undefined,
-          onboardingDone: true,
+          onboardingDone: false,
         },
       }).catch((e) => console.error('Profile creation at signup failed (non-fatal):', e));
     }
