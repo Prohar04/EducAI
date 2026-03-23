@@ -16,26 +16,15 @@ type AnimatedCardProps = {
 export function AnimatedCard({ children, className = "", onClick }: AnimatedCardProps) {
   const reduced = useReducedMotion();
 
-  const hoverVariants = reduced
-    ? {}
-    : {
-        hover: {
-          y: -2,
-          transition: { duration: 0.2, ease: "easeOut" },
-        },
-      };
-
-  const Component = motion.div;
-
   return (
-    <Component
+    <motion.div
       className={className}
-      variants={hoverVariants}
-      whileHover="hover"
+      whileHover={reduced ? undefined : { y: -2 }}
+      transition={reduced ? undefined : { duration: 0.2 }}
       onClick={onClick}
     >
       {children}
-    </Component>
+    </motion.div>
   );
 }
 
