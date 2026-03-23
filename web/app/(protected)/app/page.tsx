@@ -516,7 +516,7 @@ export default async function StudyPlanPage() {
 
   // Onboarding check - redirect to onboarding if not complete
   if (profileData && !profileData.onboardingDone) {
-    redirect("/app/onboarding");
+    redirect("/onboarding");
   }
 
   // No profile fallback
