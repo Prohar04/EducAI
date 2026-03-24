@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import {
 	Target, RefreshCw, Loader2, AlertCircle,
@@ -149,9 +150,11 @@ function SkeletonBlock({ lines = 3 }: { lines?: number }) {
 export default function StrategyReportClient({
 	initialReport,
 	defaultCountry,
+	hasSavedPrograms,
 }: {
 	initialReport: StrategyReport | null;
 	defaultCountry: string;
+	hasSavedPrograms: boolean;
 }) {
 	const [report, setReport] = useState<StrategyReport | null>(initialReport);
 	const [countryCode, setCountryCode] = useState(defaultCountry || "US");
@@ -179,6 +182,7 @@ export default function StrategyReportClient({
 	const handleCountryChange = async (code: string) => {
 		setCountryCode(code);
 		setReport(null);
+		setError(null);
 		setIsCountryLoading(true);
 		try {
 			const latest = await getLatestStrategy(code);
@@ -241,17 +245,25 @@ export default function StrategyReportClient({
 						</select>
 					</div>
 					<div className="flex items-end">
-						<Button
-							onClick={handleGenerate}
-							disabled={isPending}
-							className="gap-2 whitespace-nowrap"
-						>
-							{isPending ? (
-								<><Loader2 className="size-4 animate-spin" /> Generating...</>
-							) : (
-								<><RefreshCw className="size-4" /> Generate Strategy</>
-							)}
-						</Button>
+						{hasSavedPrograms ? (
+							<Button
+								onClick={handleGenerate}
+								disabled={isPending}
+								className="gap-2 whitespace-nowrap"
+							>
+								{isPending ? (
+									<><Loader2 className="size-4 animate-spin" /> Generating...</>
+								) : report ? (
+									<><RefreshCw className="size-4" /> Regenerate Strategy</>
+								) : (
+									<><RefreshCw className="size-4" /> Generate Strategy</>
+								)}
+							</Button>
+						) : (
+							<Button asChild variant="outline" className="whitespace-nowrap">
+								<Link href="/app/programs">Browse Programs</Link>
+							</Button>
+						)}
 					</div>
 				</div>
 			</Reveal>
@@ -269,14 +281,31 @@ export default function StrategyReportClient({
 				<Reveal>
 					<div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20 text-center">
 						<Target className="mb-4 size-12 text-muted-foreground/40" />
-						<h2 className="text-lg font-semibold">No strategy yet</h2>
-						<p className="mt-1 max-w-xs text-sm text-muted-foreground">
-							Save programs to your shortlist, then click <strong>Generate Strategy</strong> for an AI-powered plan.
+						<h2 className="text-lg font-semibold">
+							{hasSavedPrograms ? "No strategy report yet" : "No strategy data yet"}
+						</h2>
+						<p className="mt-1 max-w-sm text-sm text-muted-foreground">
+							{hasSavedPrograms
+								? "Generate a strategy report to turn your saved shortlist into a country-specific action plan."
+								: "Save at least one program to generate a strategy report."}
 						</p>
 						<div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
 							<MapPin className="size-3.5" />
 							For <strong>{countryName}</strong>
 						</div>
+						{hasSavedPrograms ? (
+							<Button onClick={handleGenerate} disabled={isPending} className="mt-6 gap-2">
+								{isPending ? (
+									<><Loader2 className="size-4 animate-spin" /> Generating...</>
+								) : (
+									<><RefreshCw className="size-4" /> Generate Strategy</>
+								)}
+							</Button>
+						) : (
+							<Button asChild className="mt-6">
+								<Link href="/app/programs">Browse Programs</Link>
+							</Button>
+						)}
 					</div>
 				</Reveal>
 			)}
