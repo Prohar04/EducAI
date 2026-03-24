@@ -439,7 +439,7 @@ export default function TimelinePlannerClient({
 						<Calendar className="mb-4 size-12 text-muted-foreground/40" />
 						<h2 className="text-lg font-semibold">Add deadlines to your programs</h2>
 						<p className="mt-1 max-w-sm text-sm text-muted-foreground">
-							You have saved programs for {countryName}, but they don't have application deadlines yet.
+							You have saved programs for {countryName}, but they don&apos;t have application deadlines yet.
 							Add deadlines to generate a timeline.
 						</p>
 						<div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
