@@ -88,3 +88,60 @@ describe('Module 1 — Saved Programs (auth required)', () => {
     expect(res.status).toBe(401);
   });
 });
+
+describe('Module 1 — Timeline API', () => {
+  it('GET /timeline/inputs route is registered and requires auth', async () => {
+    const res = await request(app).get('/timeline/inputs');
+    expect(res.status).not.toBe(404);
+    expect(res.status).toBe(401);
+    expect(res.headers['content-type']).toMatch(/json/);
+  });
+
+  it('POST /timeline/generate route is registered and requires auth', async () => {
+    const res = await request(app)
+      .post('/timeline/generate')
+      .send({ countryCode: 'US' })
+      .set('Content-Type', 'application/json');
+    expect(res.status).not.toBe(404);
+    expect(res.status).toBe(401);
+    expect(res.headers['content-type']).toMatch(/json/);
+  });
+
+  it('GET /timeline/latest route is registered and requires auth', async () => {
+    const res = await request(app).get('/timeline/latest');
+    expect(res.status).not.toBe(404);
+    expect(res.status).toBe(401);
+    expect(res.headers['content-type']).toMatch(/json/);
+  });
+
+  it('GET /timeline/latest?countryCode=US accepts query parameter', async () => {
+    const res = await request(app).get('/timeline/latest?countryCode=US');
+    expect(res.status).not.toBe(404);
+    expect(res.status).toBe(401);
+  });
+});
+
+describe('Module 1 — Strategy API', () => {
+  it('POST /strategy/generate route is registered and requires auth', async () => {
+    const res = await request(app)
+      .post('/strategy/generate')
+      .send({ countryCode: 'US' })
+      .set('Content-Type', 'application/json');
+    expect(res.status).not.toBe(404);
+    expect(res.status).toBe(401);
+    expect(res.headers['content-type']).toMatch(/json/);
+  });
+
+  it('GET /strategy/latest route is registered and requires auth', async () => {
+    const res = await request(app).get('/strategy/latest');
+    expect(res.status).not.toBe(404);
+    expect(res.status).toBe(401);
+    expect(res.headers['content-type']).toMatch(/json/);
+  });
+
+  it('GET /strategy/latest?countryCode=US accepts query parameter', async () => {
+    const res = await request(app).get('/strategy/latest?countryCode=US');
+    expect(res.status).not.toBe(404);
+    expect(res.status).toBe(401);
+  });
+});
