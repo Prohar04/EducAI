@@ -273,7 +273,7 @@ export default function TimelinePlannerClient({
 
 	const plan = roadmap?.plan ?? [];
 	const countryName = COUNTRIES.find((c) => c.code === countryCode)?.name ?? countryCode;
-	const { savedProgramsCount, missingDeadlinesCount, hasCountryPrograms, hasCountryDeadlines, visaTemplateAvailable } =
+	const { savedProgramsCount, hasCountryPrograms, hasCountryDeadlines, visaTemplateAvailable } =
 		getTimelineContext(inputs, countryCode);
 	const hasTimelineInputs = Boolean(inputs);
 
