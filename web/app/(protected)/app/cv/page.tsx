@@ -24,10 +24,10 @@ export default function CVPage() {
 					Match Programs
 				</Link>
 				<Link
-					href="/app/profile"
+					href="/app/programs"
 					className="inline-flex h-9 items-center rounded-lg border border-border px-5 text-sm font-medium hover:bg-accent transition-colors"
 				>
-					Edit Profile
+					Browse Programs
 				</Link>
 			</div>
 		</div>
