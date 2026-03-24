@@ -18,6 +18,7 @@ import {
   User,
   ChevronDown,
   CalendarDays,
+  Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -61,11 +62,12 @@ const NAV_LINKS = [
 
 // Tools dropdown items — AI Agent is surfaced via the floating widget
 const TOOLS = [
+  { href: "/app/timeline", label: "Timeline", icon: CalendarDays, soon: false },
+  { href: "/app/strategy", label: "Strategy", icon: Target, soon: false },
   { href: "/app/scholarships", label: "Scholarships", icon: Award, soon: false },
   { href: "/app/sop", label: "SOP Builder", icon: FileText, soon: true },
   { href: "/app/cv", label: "CV Builder", icon: ClipboardList, soon: true },
   { href: "/app/professors", label: "Professor Finder", icon: Users, soon: true },
-  { href: "/app/timeline", label: "Insights", icon: CalendarDays, soon: true },
 ] as const;
 
 export function Navbar({ user }: { user: Session["user"] }) {
