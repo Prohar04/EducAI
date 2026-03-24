@@ -55,6 +55,8 @@ npm run db:status
 
 Seeding is **idempotent** — safe to re-run; existing rows are skipped, nothing is deleted.
 
+- `npm run seed:visa`
+
 ```bash
 # Local dev (no remote guard needed)
 SEED_ENABLED=true tsx prisma/seed.ts
