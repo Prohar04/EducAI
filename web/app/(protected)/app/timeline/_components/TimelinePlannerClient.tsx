@@ -95,13 +95,14 @@ const INTAKES = [
 ];
 
 function getTimelineContext(inputs: TimelineInputs | null, countryCode: string) {
-	const countryPrograms =
-		inputs?.savedPrograms?.filter(
-			(savedProgram) =>
-				savedProgram.program?.university?.country?.code === countryCode,
-		) ?? [];
+	const allPrograms = inputs?.savedPrograms ?? [];
+	const countryPrograms = allPrograms.filter(
+		(savedProgram) =>
+			savedProgram.program?.university?.country?.code === countryCode,
+	);
 
 	return {
+		totalPrograms: allPrograms.length,
 		hasCountryPrograms: countryPrograms.length > 0,
 		hasCountryDeadlines: countryPrograms.some(
 			(savedProgram) =>
@@ -266,12 +267,16 @@ export default function TimelinePlannerClient({
 
 	const plan = roadmap?.plan ?? [];
 	const countryName = COUNTRIES.find((c) => c.code === countryCode)?.name ?? countryCode;
-	const { hasCountryPrograms, hasCountryDeadlines, hasVisaTemplate } =
+	const { totalPrograms, hasCountryPrograms, hasCountryDeadlines, hasVisaTemplate } =
 		getTimelineContext(inputs, countryCode);
 	const hasTimelineInputs = Boolean(inputs);
-	const lacksDeadlineData =
-		hasTimelineInputs && (!hasCountryPrograms || !hasCountryDeadlines);
-	const showRoadmapActions = !lacksDeadlineData;
+
+	// Determine empty state reason
+	const hasNoPrograms = hasTimelineInputs && totalPrograms === 0;
+	const hasProgramsButNotForCountry = hasTimelineInputs && totalPrograms > 0 && !hasCountryPrograms;
+	const hasProgramsButNoDeadlines = hasTimelineInputs && hasCountryPrograms && !hasCountryDeadlines;
+	const lacksDeadlineData = hasProgramsButNotForCountry || hasProgramsButNoDeadlines;
+	const showRoadmapActions = !lacksDeadlineData && !hasNoPrograms;
 
 	return (
 		<div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
@@ -380,7 +385,8 @@ export default function TimelinePlannerClient({
 				</div>
 			)}
 
-			{!isPending && !error && lacksDeadlineData && (
+			{/* Empty state: No saved programs at all */}
+			{!isPending && !error && hasNoPrograms && (
 				<Reveal>
 					<div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20 text-center">
 						<Calendar className="mb-4 size-12 text-muted-foreground/40" />
@@ -399,8 +405,50 @@ export default function TimelinePlannerClient({
 				</Reveal>
 			)}
 
-			{/* Empty state */}
-			{!isPending && !error && !lacksDeadlineData && plan.length === 0 && (
+			{/* Empty state: Programs exist but not for this country */}
+			{!isPending && !error && hasProgramsButNotForCountry && (
+				<Reveal>
+					<div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20 text-center">
+						<Calendar className="mb-4 size-12 text-muted-foreground/40" />
+						<h2 className="text-lg font-semibold">No programs for {countryName}</h2>
+						<p className="mt-1 max-w-sm text-sm text-muted-foreground">
+							You have {totalPrograms} saved program{totalPrograms !== 1 ? "s" : ""}, but none for {countryName}.
+							Try selecting a different country or save more programs.
+						</p>
+						<div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+							<MapPin className="size-3.5" />
+							Showing plan for <strong>{countryName}</strong>
+						</div>
+						<Button asChild className="mt-6">
+							<Link href="/app/programs">Browse Programs</Link>
+						</Button>
+					</div>
+				</Reveal>
+			)}
+
+			{/* Empty state: Programs exist but no deadlines */}
+			{!isPending && !error && hasProgramsButNoDeadlines && (
+				<Reveal>
+					<div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20 text-center">
+						<Calendar className="mb-4 size-12 text-muted-foreground/40" />
+						<h2 className="text-lg font-semibold">Add deadlines to your programs</h2>
+						<p className="mt-1 max-w-sm text-sm text-muted-foreground">
+							You have saved programs for {countryName}, but they don't have application deadlines yet.
+							Add deadlines to generate a timeline.
+						</p>
+						<div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+							<MapPin className="size-3.5" />
+							Showing plan for <strong>{countryName}</strong>
+						</div>
+						<Button asChild className="mt-6">
+							<Link href="/app/programs">Browse Programs</Link>
+						</Button>
+					</div>
+				</Reveal>
+			)}
+
+			{/* Empty state: Ready to generate */}
+			{!isPending && !error && !lacksDeadlineData && !hasNoPrograms && plan.length === 0 && (
 				<Reveal>
 					<div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20 text-center">
 						<Calendar className="mb-4 size-12 text-muted-foreground/40" />
@@ -427,7 +475,7 @@ export default function TimelinePlannerClient({
 			)}
 
 			{/* Roadmap months */}
-			{!isPending && !lacksDeadlineData && plan.length > 0 && (
+			{!isPending && !lacksDeadlineData && !hasNoPrograms && plan.length > 0 && (
 				<>
 					<div className="mb-4 flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-2.5 text-sm text-primary">
 						<MapPin className="size-4 shrink-0" />
