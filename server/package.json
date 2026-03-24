@@ -20,6 +20,7 @@
     "db:studio": "prisma studio",
     "db:seed": "prisma db seed",
     "db:seed:safe": "tsx scripts/assert-safe-db.ts seed && tsx prisma/seed.ts",
+    "seed:visa": "tsx prisma/seedVisaTemplates.ts",
     "db:check-schema": "tsx scripts/check-neon-schema.ts",
     "db:sync-module1": "tsx scripts/sync-module1.ts",
     "db:verify-neon": "tsx scripts/verify-neon.ts",
