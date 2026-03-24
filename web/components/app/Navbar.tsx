@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   GraduationCap,
   LayoutDashboard,
@@ -31,6 +31,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { Session } from "@/types/auth.type";
 
+const ACTIVE_PILL_CLASS =
+  "bg-primary/12 text-primary shadow-[0_0_0_1px_rgba(220,161,62,0.24),0_12px_30px_-18px_rgba(220,161,62,0.8)]";
+const INACTIVE_PILL_CLASS =
+  "text-muted-foreground hover:bg-muted/60 hover:text-foreground";
+
 function getInitials(name: string): string {
   return name
     .split(" ")
@@ -52,19 +57,17 @@ function gravatarUrl(email: string, hash: string): string {
   return `https://www.gravatar.com/avatar/${hash}?s=64&d=mp&r=g`;
 }
 
-// Top-level navigation links
 const NAV_LINKS = [
-  { href: "/app", label: "Study Plan", icon: LayoutDashboard },
+  { href: "/app/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/app/programs", label: "Programs", icon: BookOpen },
   { href: "/app/match", label: "Match", icon: Sparkles },
   { href: "/app/saved", label: "Saved", icon: Bookmark },
 ] as const;
 
-// Tools dropdown items — AI Agent is surfaced via the floating widget
 const TOOLS = [
   { href: "/app/timeline", label: "Timeline", icon: CalendarDays, soon: false },
   { href: "/app/strategy", label: "Strategy", icon: Target, soon: false },
-  { href: "/app/scholarships", label: "Scholarships", icon: Award, soon: false },
+  { href: "/app/scholarships", label: "Scholarships", icon: Award, soon: true },
   { href: "/app/sop", label: "SOP Builder", icon: FileText, soon: true },
   { href: "/app/cv", label: "CV Builder", icon: ClipboardList, soon: true },
   { href: "/app/professors", label: "Professor Finder", icon: Users, soon: true },
@@ -73,7 +76,6 @@ const TOOLS = [
 export function Navbar({ user }: { user: Session["user"] }) {
   const router = useRouter();
   const pathname = usePathname();
-  const reduced = useReducedMotion();
   const [modulesOpen, setModulesOpen] = useState(false);
 
   const handleSignOut = async () => {
@@ -83,7 +85,13 @@ export function Navbar({ user }: { user: Session["user"] }) {
   };
 
   const isActive = (href: string) => {
-    if (href === "/app") return pathname === "/app";
+    if (href === "/app/dashboard") {
+      return (
+        pathname === "/app" ||
+        pathname === "/app/dashboard" ||
+        pathname.startsWith("/app/dashboard/")
+      );
+    }
     return pathname === href || pathname.startsWith(href + "/");
   };
 
@@ -104,7 +112,7 @@ export function Navbar({ user }: { user: Session["user"] }) {
         </Link>
 
         {/* Desktop nav */}
-        <ul className="hidden items-center gap-0.5 lg:flex" role="list">
+        <ul className="hidden items-center gap-2 lg:flex" role="list">
           {NAV_LINKS.map(({ href, label }) => {
             const active = isActive(href);
             return (
@@ -112,36 +120,23 @@ export function Navbar({ user }: { user: Session["user"] }) {
                 <Link
                   href={href}
                   aria-current={active ? "page" : undefined}
-                  className={`relative px-3 py-2 text-sm font-medium transition-colors rounded-md ${
-                    active
-                      ? "text-primary"
-                      : "text-muted-foreground hover:text-foreground"
+                  className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                    active ? ACTIVE_PILL_CLASS : INACTIVE_PILL_CLASS
                   }`}
                 >
                   {label}
-                  {active && (
-                    <motion.span
-                      layoutId="nav-underline"
-                      className="absolute inset-x-2 -bottom-px h-[2px] rounded-full bg-primary"
-                      initial={reduced ? false : { opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.2 }}
-                    />
-                  )}
                 </Link>
               </li>
             );
           })}
 
-          {/* Tools dropdown */}
           <li>
             <DropdownMenu open={modulesOpen} onOpenChange={setModulesOpen}>
               <DropdownMenuTrigger asChild>
                 <button
-                  className={`flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                    isToolsActive
-                      ? "text-primary"
-                      : "text-muted-foreground hover:text-foreground"
+                  type="button"
+                  className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                    isToolsActive ? ACTIVE_PILL_CLASS : INACTIVE_PILL_CLASS
                   }`}
                 >
                   Tools
@@ -156,23 +151,37 @@ export function Navbar({ user }: { user: Session["user"] }) {
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="start"
-                className="w-52 p-1"
+                className="w-60 rounded-2xl border-border/60 bg-background/95 p-2 shadow-[0_20px_48px_-24px_rgba(0,0,0,0.35)]"
                 sideOffset={6}
               >
                 {TOOLS.map(({ href, label, icon: Icon, soon }) => {
                   const active = isActive(href);
                   return (
-                    <DropdownMenuItem key={href} asChild>
+                    <DropdownMenuItem
+                      key={href}
+                      asChild
+                      className={`rounded-xl p-0 transition-colors ${
+                        active
+                          ? "focus:bg-transparent"
+                          : "focus:bg-muted/60"
+                      }`}
+                    >
                       <Link
                         href={href}
-                        className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm ${
-                          active ? "text-primary" : ""
+                        className={`flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm transition-all ${
+                          active
+                            ? `${ACTIVE_PILL_CLASS} bg-primary/10`
+                            : "text-foreground/90 hover:bg-muted/60"
                         }`}
                       >
-                        <Icon className="size-4 shrink-0 text-muted-foreground" />
+                        <Icon
+                          className={`size-4 shrink-0 ${
+                            active ? "text-primary" : "text-muted-foreground"
+                          }`}
+                        />
                         <span className="flex-1">{label}</span>
                         {soon && (
-                          <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-primary">
+                          <span className="rounded-full border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-primary">
                             Soon
                           </span>
                         )}

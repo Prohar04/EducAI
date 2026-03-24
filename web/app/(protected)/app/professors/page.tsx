@@ -18,16 +18,16 @@ export default function ProfessorsPage() {
 			</p>
 			<div className="mt-8 flex flex-wrap justify-center gap-3">
 				<Link
-					href="/app/programs"
+					href="/app/match"
 					className="inline-flex h-9 items-center rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
 				>
-					Browse Programs
+					Match Programs
 				</Link>
 				<Link
-					href="/app/match"
+					href="/app/programs"
 					className="inline-flex h-9 items-center rounded-lg border border-border px-5 text-sm font-medium hover:bg-accent transition-colors"
 				>
-					Match Programs
+					Browse Programs
 				</Link>
 			</div>
 		</div>
