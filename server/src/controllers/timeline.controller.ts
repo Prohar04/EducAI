@@ -214,7 +214,22 @@ export const getTimelineInputs = async (req: AuthRequest, res: Response) => {
         : [],
     ]);
 
-    res.json({ profile, savedPrograms, visaTemplate, scholarships });
+    // Compute counts for clarity
+    const savedProgramsCount = savedPrograms.length;
+    const savedWithDeadlinesCount = savedPrograms.filter(
+      (sp) => sp.program.deadlines.length > 0
+    ).length;
+    const missingDeadlinesCount = savedProgramsCount - savedWithDeadlinesCount;
+
+    res.json({
+      savedProgramsCount,
+      savedWithDeadlinesCount,
+      missingDeadlinesCount,
+      savedPrograms,
+      visaTemplateAvailable: Boolean(visaTemplate),
+      profile,
+      scholarships,
+    });
   } catch (err) {
     console.error('[timeline/inputs]', err);
     res.status(500).json({ message: 'Failed to fetch timeline inputs' });
