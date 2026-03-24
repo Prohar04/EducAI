@@ -109,6 +109,30 @@ app.get('/health/schema', async (_req, res) => {
   );
 });
 
+app.get('/health/timeline', async (_req, res) => {
+  try {
+    const [visaTemplateCount, roadmapCount] = await Promise.all([
+      prisma.visaTimelineTemplate.count(),
+      prisma.userRoadmap.count(),
+    ]);
+    res.status(200).json({
+      ok: true,
+      timestamp: new Date().toISOString(),
+      database: 'connected',
+      visaTemplates: visaTemplateCount,
+      roadmaps: roadmapCount,
+      ready: visaTemplateCount > 0,
+    });
+  } catch (err) {
+    res.status(503).json({
+      ok: false,
+      status: 'ERROR',
+      message: 'Timeline health check failed',
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
 app.get('/api', (req, res) => {
   res.status(200).json({ message: 'EducAI API is running!' });
 });
