@@ -1,13 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
 	Calendar, ChevronDown, ChevronRight, RefreshCw,
 	BookOpen, Award, Plane, AlertCircle, CheckCircle2,
 	Clock, MapPin, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { generateTimeline, getLatestTimeline } from "@/lib/auth/action";
+import {
+	generateTimeline,
+	getLatestTimeline,
+	getTimelineInputs,
+} from "@/lib/auth/action";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { Reveal } from "@/components/motion/Reveal";
 import { COUNTRIES } from "@/lib/data/countries";
@@ -40,6 +45,25 @@ interface UserRoadmap {
 	createdAt: string;
 }
 
+interface TimelineInputs {
+	savedPrograms: Array<{
+		program?: {
+			university?: {
+				country?: {
+					code?: string | null;
+				} | null;
+			} | null;
+			deadlines?: Array<{
+				deadline?: string;
+			}>;
+		} | null;
+	}>;
+	visaTemplate?: {
+		id: string;
+		title?: string;
+	} | null;
+}
+
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const ITEM_ICONS: Record<RoadmapItemType, React.ElementType> = {
@@ -69,6 +93,23 @@ const BADGE_COLOURS: Record<RoadmapItemType, string> = {
 const INTAKES = [
 	"Fall 2025", "Spring 2026", "Fall 2026", "Spring 2027", "Fall 2027", "Spring 2028",
 ];
+
+function getTimelineContext(inputs: TimelineInputs | null, countryCode: string) {
+	const countryPrograms =
+		inputs?.savedPrograms?.filter(
+			(savedProgram) =>
+				savedProgram.program?.university?.country?.code === countryCode,
+		) ?? [];
+
+	return {
+		hasCountryPrograms: countryPrograms.length > 0,
+		hasCountryDeadlines: countryPrograms.some(
+			(savedProgram) =>
+				(savedProgram.program?.deadlines?.length ?? 0) > 0,
+		),
+		hasVisaTemplate: Boolean(inputs?.visaTemplate),
+	};
+}
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
@@ -152,19 +193,34 @@ function SkeletonCard() {
 
 export default function TimelinePlannerClient({
 	initialRoadmap,
+	initialInputs,
 	defaultCountry,
 }: {
 	initialRoadmap: UserRoadmap | null;
+	initialInputs: TimelineInputs | null;
 	defaultCountry: string;
 }) {
 	const [roadmap, setRoadmap] = useState<UserRoadmap | null>(initialRoadmap);
+	const [inputs, setInputs] = useState<TimelineInputs | null>(initialInputs);
 	const [countryCode, setCountryCode] = useState(defaultCountry || "US");
 	const [intake, setIntake] = useState(initialRoadmap?.intake ?? "");
 	const [error, setError] = useState<string | null>(null);
 	const [isGenerating, setIsGenerating] = useState(false);
 	const [isCountryLoading, setIsCountryLoading] = useState(false);
+	const [successToast, setSuccessToast] = useState<string | null>(null);
+
+	useEffect(() => {
+		if (!successToast) return;
+
+		const timeout = window.setTimeout(() => {
+			setSuccessToast(null);
+		}, 2600);
+
+		return () => window.clearTimeout(timeout);
+	}, [successToast]);
 
 	const handleGenerate = async () => {
+		const existingRoadmap = Boolean(roadmap);
 		setError(null);
 		setIsGenerating(true);
 		try {
@@ -173,8 +229,17 @@ export default function TimelinePlannerClient({
 				setError(result.message ?? "Unknown error");
 				return;
 			}
-			const latest = await getLatestTimeline(countryCode);
-			if (latest) setRoadmap(latest as UserRoadmap);
+			const [latest, nextInputs] = await Promise.all([
+				getLatestTimeline(countryCode),
+				getTimelineInputs(countryCode),
+			]);
+			setRoadmap((latest as UserRoadmap | null) ?? null);
+			setInputs((nextInputs as TimelineInputs | null) ?? null);
+			setSuccessToast(
+				existingRoadmap
+					? "Roadmap regenerated successfully."
+					: "Roadmap generated successfully.",
+			);
 		} finally {
 			setIsGenerating(false);
 		}
@@ -183,10 +248,15 @@ export default function TimelinePlannerClient({
 	const handleCountryChange = async (code: string) => {
 		setCountryCode(code);
 		setRoadmap(null);
+		setError(null);
 		setIsCountryLoading(true);
 		try {
-			const latest = await getLatestTimeline(code);
-			if (latest) setRoadmap(latest as UserRoadmap);
+			const [latest, nextInputs] = await Promise.all([
+				getLatestTimeline(code),
+				getTimelineInputs(code),
+			]);
+			setRoadmap((latest as UserRoadmap | null) ?? null);
+			setInputs((nextInputs as TimelineInputs | null) ?? null);
 		} finally {
 			setIsCountryLoading(false);
 		}
@@ -196,6 +266,12 @@ export default function TimelinePlannerClient({
 
 	const plan = roadmap?.plan ?? [];
 	const countryName = COUNTRIES.find((c) => c.code === countryCode)?.name ?? countryCode;
+	const { hasCountryPrograms, hasCountryDeadlines, hasVisaTemplate } =
+		getTimelineContext(inputs, countryCode);
+	const hasTimelineInputs = Boolean(inputs);
+	const lacksDeadlineData =
+		hasTimelineInputs && (!hasCountryPrograms || !hasCountryDeadlines);
+	const showRoadmapActions = !lacksDeadlineData;
 
 	return (
 		<div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
@@ -245,26 +321,55 @@ export default function TimelinePlannerClient({
 						</select>
 					</div>
 					<div className="flex items-end">
-						<Button
-							onClick={handleGenerate}
-							disabled={isPending}
-							className="gap-2 whitespace-nowrap"
-						>
-							{isPending ? (
-								<><Loader2 className="size-4 animate-spin" /> Generating...</>
-							) : (
-								<><RefreshCw className="size-4" /> Generate Roadmap</>
-							)}
-						</Button>
+						{showRoadmapActions ? (
+							<Button
+								onClick={handleGenerate}
+								disabled={isPending}
+								className="gap-2 whitespace-nowrap"
+							>
+								{isPending ? (
+									<><Loader2 className="size-4 animate-spin" /> Generating...</>
+								) : roadmap ? (
+									<><RefreshCw className="size-4" /> Regenerate Roadmap</>
+								) : (
+									<><RefreshCw className="size-4" /> Generate Roadmap</>
+								)}
+							</Button>
+						) : (
+							<Button asChild variant="outline" className="whitespace-nowrap">
+								<Link href="/app/programs">Browse Programs</Link>
+							</Button>
+						)}
 					</div>
 				</div>
 			</Reveal>
+
+			{successToast && (
+				<div className="pointer-events-none fixed bottom-4 left-4 right-4 z-50 sm:bottom-6 sm:left-auto sm:right-6">
+					<div className="flex items-center gap-2 rounded-xl border border-primary/20 bg-background/95 px-4 py-3 text-sm text-foreground shadow-[0_18px_40px_-24px_rgba(0,0,0,0.45)] backdrop-blur">
+						<CheckCircle2 className="size-4 shrink-0 text-primary" />
+						{successToast}
+					</div>
+				</div>
+			)}
 
 			{/* Error */}
 			{error && (
 				<div className="mb-4 flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
 					<AlertCircle className="size-4 shrink-0" />
 					{error}
+				</div>
+			)}
+
+			{!isPending && !error && !lacksDeadlineData && hasTimelineInputs && !hasVisaTemplate && (
+				<div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
+					<AlertCircle className="mt-0.5 size-4 shrink-0" />
+					<div>
+						<p className="font-medium">Visa template unavailable for {countryName}</p>
+						<p className="text-xs text-amber-700/80 dark:text-amber-300/80">
+							We&apos;ll still build a generic roadmap from your saved application deadlines for now.
+						</p>
+					</div>
 				</div>
 			)}
 
@@ -275,19 +380,41 @@ export default function TimelinePlannerClient({
 				</div>
 			)}
 
-			{/* Empty state */}
-			{!isPending && !error && plan.length === 0 && (
+			{!isPending && !error && lacksDeadlineData && (
 				<Reveal>
 					<div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20 text-center">
 						<Calendar className="mb-4 size-12 text-muted-foreground/40" />
-						<h2 className="text-lg font-semibold">No roadmap yet</h2>
-						<p className="mt-1 max-w-xs text-sm text-muted-foreground">
-							Save at least one program and click <strong>Generate Roadmap</strong> to build your personalised plan.
+						<h2 className="text-lg font-semibold">No deadlines to plan yet</h2>
+						<p className="mt-1 max-w-sm text-sm text-muted-foreground">
+							Save at least one program to generate a deadline-based roadmap.
 						</p>
 						<div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
 							<MapPin className="size-3.5" />
 							Showing plan for <strong>{countryName}</strong>
 						</div>
+						<Button asChild className="mt-6">
+							<Link href="/app/programs">Browse Programs</Link>
+						</Button>
+					</div>
+				</Reveal>
+			)}
+
+			{/* Empty state */}
+			{!isPending && !error && !lacksDeadlineData && plan.length === 0 && (
+				<Reveal>
+					<div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20 text-center">
+						<Calendar className="mb-4 size-12 text-muted-foreground/40" />
+						<h2 className="text-lg font-semibold">Your roadmap is ready to generate</h2>
+						<p className="mt-1 max-w-sm text-sm text-muted-foreground">
+							Use your saved program deadlines to build a month-by-month application plan for {countryName}.
+						</p>
+						<Button onClick={handleGenerate} disabled={isPending} className="mt-6 gap-2">
+							{isPending ? (
+								<><Loader2 className="size-4 animate-spin" /> Generating...</>
+							) : (
+								<><RefreshCw className="size-4" /> Generate Roadmap</>
+							)}
+						</Button>
 					</div>
 				</Reveal>
 			)}
@@ -300,7 +427,7 @@ export default function TimelinePlannerClient({
 			)}
 
 			{/* Roadmap months */}
-			{!isPending && plan.length > 0 && (
+			{!isPending && !lacksDeadlineData && plan.length > 0 && (
 				<>
 					<div className="mb-4 flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-2.5 text-sm text-primary">
 						<MapPin className="size-4 shrink-0" />
