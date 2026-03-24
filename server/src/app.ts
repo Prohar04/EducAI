@@ -9,6 +9,7 @@ import session from 'express-session';
 import passport from 'passport';
 
 import prisma from './config/database.ts';
+import { authMiddleware } from './middlewares/authenticate.ts';
 import authRoutes from './routes/auth.router.ts';
 import userRoutes from './routes/user.router.ts';
 import universityRoutes from './routes/university.router.ts';
@@ -128,6 +129,31 @@ app.get('/health/timeline', async (_req, res) => {
       ok: false,
       status: 'ERROR',
       message: 'Timeline health check failed',
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
+app.get('/health/whoami', authMiddleware, async (req: any, res) => {
+  try {
+    const userId = req.userId;
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const savedProgramsCount = await prisma.savedProgram.count({
+      where: { userId },
+    });
+
+    res.status(200).json({
+      ok: true,
+      userId,
+      email: user?.email,
+      dbHost: process.env.DATABASE_URL?.split('@')[1]?.split('/')[0] ?? 'unknown',
+      savedProgramsCount,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (err) {
+    res.status(500).json({
+      ok: false,
+      message: 'Failed to fetch user info',
       timestamp: new Date().toISOString(),
     });
   }

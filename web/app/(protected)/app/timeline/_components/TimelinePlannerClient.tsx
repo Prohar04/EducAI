@@ -46,6 +46,9 @@ interface UserRoadmap {
 }
 
 interface TimelineInputs {
+	savedProgramsCount: number;
+	savedWithDeadlinesCount: number;
+	missingDeadlinesCount: number;
 	savedPrograms: Array<{
 		program?: {
 			university?: {
@@ -58,10 +61,7 @@ interface TimelineInputs {
 			}>;
 		} | null;
 	}>;
-	visaTemplate?: {
-		id: string;
-		title?: string;
-	} | null;
+	visaTemplateAvailable: boolean;
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -95,20 +95,26 @@ const INTAKES = [
 ];
 
 function getTimelineContext(inputs: TimelineInputs | null, countryCode: string) {
-	const allPrograms = inputs?.savedPrograms ?? [];
-	const countryPrograms = allPrograms.filter(
+	const savedProgramsCount = inputs?.savedProgramsCount ?? 0;
+	const missingDeadlinesCount = inputs?.missingDeadlinesCount ?? 0;
+	const visaTemplateAvailable = inputs?.visaTemplateAvailable ?? false;
+
+	const countryPrograms = (inputs?.savedPrograms ?? []).filter(
 		(savedProgram) =>
 			savedProgram.program?.university?.country?.code === countryCode,
 	);
 
+	const countryHasDeadlines = countryPrograms.some(
+		(savedProgram) =>
+			(savedProgram.program?.deadlines?.length ?? 0) > 0,
+	);
+
 	return {
-		totalPrograms: allPrograms.length,
+		savedProgramsCount,
+		missingDeadlinesCount,
 		hasCountryPrograms: countryPrograms.length > 0,
-		hasCountryDeadlines: countryPrograms.some(
-			(savedProgram) =>
-				(savedProgram.program?.deadlines?.length ?? 0) > 0,
-		),
-		hasVisaTemplate: Boolean(inputs?.visaTemplate),
+		hasCountryDeadlines: countryHasDeadlines,
+		visaTemplateAvailable,
 	};
 }
 
@@ -267,13 +273,13 @@ export default function TimelinePlannerClient({
 
 	const plan = roadmap?.plan ?? [];
 	const countryName = COUNTRIES.find((c) => c.code === countryCode)?.name ?? countryCode;
-	const { totalPrograms, hasCountryPrograms, hasCountryDeadlines, hasVisaTemplate } =
+	const { savedProgramsCount, missingDeadlinesCount, hasCountryPrograms, hasCountryDeadlines, visaTemplateAvailable } =
 		getTimelineContext(inputs, countryCode);
 	const hasTimelineInputs = Boolean(inputs);
 
 	// Determine empty state reason
-	const hasNoPrograms = hasTimelineInputs && totalPrograms === 0;
-	const hasProgramsButNotForCountry = hasTimelineInputs && totalPrograms > 0 && !hasCountryPrograms;
+	const hasNoPrograms = hasTimelineInputs && savedProgramsCount === 0;
+	const hasProgramsButNotForCountry = hasTimelineInputs && savedProgramsCount > 0 && !hasCountryPrograms;
 	const hasProgramsButNoDeadlines = hasTimelineInputs && hasCountryPrograms && !hasCountryDeadlines;
 	const lacksDeadlineData = hasProgramsButNotForCountry || hasProgramsButNoDeadlines;
 	const showRoadmapActions = !lacksDeadlineData && !hasNoPrograms;
@@ -366,7 +372,7 @@ export default function TimelinePlannerClient({
 				</div>
 			)}
 
-			{!isPending && !error && !lacksDeadlineData && hasTimelineInputs && !hasVisaTemplate && (
+			{!isPending && !error && !lacksDeadlineData && hasTimelineInputs && !visaTemplateAvailable && (
 				<div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
 					<AlertCircle className="mt-0.5 size-4 shrink-0" />
 					<div>
@@ -390,7 +396,7 @@ export default function TimelinePlannerClient({
 				<Reveal>
 					<div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20 text-center">
 						<Calendar className="mb-4 size-12 text-muted-foreground/40" />
-						<h2 className="text-lg font-semibold">No deadlines to plan yet</h2>
+						<h2 className="text-lg font-semibold">No programs saved yet</h2>
 						<p className="mt-1 max-w-sm text-sm text-muted-foreground">
 							Save at least one program to generate a deadline-based roadmap.
 						</p>
@@ -412,7 +418,7 @@ export default function TimelinePlannerClient({
 						<Calendar className="mb-4 size-12 text-muted-foreground/40" />
 						<h2 className="text-lg font-semibold">No programs for {countryName}</h2>
 						<p className="mt-1 max-w-sm text-sm text-muted-foreground">
-							You have {totalPrograms} saved program{totalPrograms !== 1 ? "s" : ""}, but none for {countryName}.
+							You have {savedProgramsCount} saved program{savedProgramsCount !== 1 ? "s" : ""}, but none for {countryName}.
 							Try selecting a different country or save more programs.
 						</p>
 						<div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
