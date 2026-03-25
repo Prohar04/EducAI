@@ -227,6 +227,25 @@ export type MatchRunFormState =
         | { success?: boolean; message?: string; runId?: string }
         | undefined;
 
+export interface ChatSource {
+	type: "internal" | "web";
+	title: string;
+	id?: string;
+	url?: string;
+}
+
+export interface ChatReply {
+	answer: string;
+	bullets: string[];
+	nextSteps: string[];
+	sources: ChatSource[];
+	confidence: "high" | "medium" | "low";
+}
+
+export interface ChatApiResponse {
+	reply: ChatReply;
+}
+
 export type OnboardingFormState =
 	| {
 			message?: string;
