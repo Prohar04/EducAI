@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from ...domains.reasoning.llm_provider import _get_provider, _get_model, LLMProvider
+from ...domains.reasoning.llm_provider import _get_provider, _get_model
 from ...core.config import settings
 
 router = APIRouter()
