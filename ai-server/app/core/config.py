@@ -13,6 +13,7 @@ class Settings(BaseSettings):
 
     # LLM Provider configuration
     LLM_PROVIDER: Optional[str] = Field(default=None, validation_alias="LLM_PROVIDER")
+    LLM_MODEL: Optional[str] = Field(default=None, validation_alias="LLM_MODEL")
 
     # OpenRouter configuration
     OPENROUTER_API_KEY: Optional[str] = Field(default=None, validation_alias="OPENROUTER_API_KEY")
@@ -23,6 +24,9 @@ class Settings(BaseSettings):
 
     # XAI configuration
     XAI_API_KEY: Optional[str] = Field(default=None, validation_alias="XAI_API_KEY")
+
+    # Groq configuration
+    GROQ_API_KEY: Optional[str] = Field(default=None, validation_alias="GROQ_API_KEY")
 
     # Chromadb configuration
     CHROMADB_HOST: str = Field(..., validation_alias="CHROMADB_HOST")
