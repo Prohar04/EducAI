@@ -7,6 +7,7 @@ from .db.prisma_connect import lifespan
 # CONFIG
 from .middleware.secure_keys import checkApiKey
 from .api.v1.health import router as health_router
+from .api.v1.chat import router as chat_router
 from .api.v1.recommendations import router as recommendations_router
 from .api.v1.module1_sync import router as module1_sync_router
 from .api.v1.scrape_match import router as scrape_match_router
@@ -24,6 +25,7 @@ app = FastAPI(
 app.add_middleware(AuditLogMiddleware)
 
 app.include_router(health_router, prefix="/api/v1")
+app.include_router(chat_router, prefix="/api/v1")
 
 
 @app.get("/data")
