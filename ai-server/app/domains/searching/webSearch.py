@@ -10,12 +10,15 @@ class WebSearch:
         self.api_key = settings.SERPER_APIKEY
         # Base URL must include the protocol
         self.base_url = settings.SERPER_BASE_URL
-        self.headers = {"X-API-KEY": self.api_key, "Content-Type": "application/json"}
+        self.headers = {"X-API-KEY": self.api_key, "Content-Type": "application/json"} if self.api_key else {}
 
     async def search(self, query: str, num_results: int = 5) -> List[Dict[str, Any]]:
         """
         Performs a Google search via Serper.dev using async httpx.
         """
+        if not self.api_key:
+            return []
+
         payload = {"q": query, "num": num_results}
 
         # We use /search as per the Serper documentation
@@ -29,7 +32,6 @@ class WebSearch:
 
                 return self._parse_results(data)
             except httpx.HTTPStatusError as e:
-                # Log this using your Loguru logger in the future
                 return [{"error": f"Serper API error: {e.response.status_code}"}]
             except Exception as e:
                 return [{"error": f"Unexpected error: {str(e)}"}]

@@ -1,15 +1,24 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field
+from pydantic import AliasChoices, Field
 from typing import Optional
 
 
 class Settings(BaseSettings):
     # Master API key for internal use, not exposed to clients
-    MASTER_APIKEY: str = Field(..., validation_alias="MASTER_APIKEY")
+    MASTER_APIKEY: str = Field(
+        ...,
+        validation_alias=AliasChoices("MASTER_APIKEY", "MASTER_API_KEY", "API_KEY"),
+    )
 
     # Serper.dev configuration
-    SERPER_APIKEY: str = Field(..., validation_alias="SERPER_APIKEY")
-    SERPER_BASE_URL: str = Field(..., validation_alias="SERPER_BASE_URL")
+    SERPER_APIKEY: Optional[str] = Field(
+        default=None,
+        validation_alias=AliasChoices("SERPER_API_KEY", "SERPER_APIKEY"),
+    )
+    SERPER_BASE_URL: str = Field(
+        default="https://google.serper.dev",
+        validation_alias="SERPER_BASE_URL",
+    )
 
     # LLM Provider configuration
     LLM_PROVIDER: Optional[str] = Field(default=None, validation_alias="LLM_PROVIDER")
@@ -49,7 +58,7 @@ class Settings(BaseSettings):
     INGEST_API_KEY: Optional[str] = Field(default=None, validation_alias="INGEST_API_KEY")
 
     PROJECT_NAME: str = "Educai AI Server"
-    DEBUG: bool = False
+    DEBUG: bool | str = False
 
     # Tell Pydantic to read from a .env file
     model_config = SettingsConfigDict(
