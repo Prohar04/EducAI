@@ -57,6 +57,22 @@ export async function getSession() {
 	}
 }
 
+export async function getSessionOrNull() {
+	const cookie = (await cookies()).get("session")?.value;
+	if (!cookie) return null;
+
+	try {
+		const { payload } = await jwtVerify(cookie, encodedKey, {
+			algorithms: ["HS256"],
+		});
+
+		return payload as Session;
+	} catch (err) {
+		console.error("Failed to verify the session", err);
+		return null;
+	}
+}
+
 export async function deleteSession() {
 	await (await cookies()).delete("session");
 }
