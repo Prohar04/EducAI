@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Any
 from ...domains.reasoning.llm_provider import generate_chat_response, RateLimitError
 
 router = APIRouter()
