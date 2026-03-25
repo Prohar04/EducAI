@@ -19,6 +19,7 @@ import savedProgramRoutes from './routes/savedProgram.router.ts';
 import ingestRoutes from './routes/ingest.router.ts';
 import timelineRoutes from './routes/timeline.router.ts';
 import strategyRoutes from './routes/strategy.router.ts';
+import chatRoutes from './routes/chat.router.ts';
 // import { PrismaSessionStore } from './services/session.service.ts';
 
 const app = express();
@@ -172,6 +173,7 @@ app.use('/saved-programs', savedProgramRoutes);
 app.use('/internal', ingestRoutes);
 app.use('/timeline', timelineRoutes);
 app.use('/strategy', strategyRoutes);
+app.use('/chat', chatRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
