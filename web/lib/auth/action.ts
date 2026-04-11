@@ -10,6 +10,12 @@ import {
 	SavedProgramItem,
 	MatchLatestResponse,
 	MatchRunFormState,
+	ScholarshipListResult,
+	ScholarshipItem,
+	EligibilityResult,
+	ProbabilityResult,
+	UpcomingDeadlineItem,
+	EligibleScholarshipItem,
 } from "@/types/auth.type";
 
 const HTTP_STATUS_TEXT: Record<number, string> = {
@@ -271,6 +277,68 @@ export const generateStrategy = async (
 export const getLatestStrategy = async (countryCode?: string) => {
 	const qs = countryCode ? `?countryCode=${encodeURIComponent(countryCode)}` : "";
 	const response = await authFetch(`${BACKEND_URL}/strategy/latest${qs}`);
+	if (!response.ok) return null;
+	return response.json();
+};
+
+// ─── Module 2: Scholarships ──────────────────────────────────────────────────
+
+export const searchScholarships = async (
+	params: Record<string, string> = {},
+): Promise<ScholarshipListResult | null> => {
+	const qs = new URLSearchParams(params).toString();
+	const url = qs
+		? `${BACKEND_URL}/scholarships?${qs}`
+		: `${BACKEND_URL}/scholarships`;
+	const response = await authFetch(url);
+	if (!response.ok) return null;
+	return response.json();
+};
+
+export const getScholarshipById = async (id: string): Promise<ScholarshipItem | null> => {
+	const response = await authFetch(
+		`${BACKEND_URL}/scholarships/${encodeURIComponent(id)}`,
+	);
+	if (!response.ok) return null;
+	return response.json();
+};
+
+export const getEligibleScholarships = async (): Promise<EligibleScholarshipItem[]> => {
+	const response = await authFetch(`${BACKEND_URL}/scholarships/eligible`);
+	if (!response.ok) return [];
+	const data = await response.json();
+	return data.items ?? [];
+};
+
+export const getUpcomingScholarshipDeadlines = async (
+	daysAhead = 90,
+): Promise<UpcomingDeadlineItem[]> => {
+	const response = await authFetch(
+		`${BACKEND_URL}/scholarships/deadlines?daysAhead=${daysAhead}`,
+	);
+	if (!response.ok) return [];
+	const data = await response.json();
+	return data.deadlines ?? [];
+};
+
+export const checkScholarshipEligibility = async (
+	scholarshipId: string,
+): Promise<EligibilityResult | null> => {
+	const response = await authFetch(
+		`${BACKEND_URL}/scholarships/${encodeURIComponent(scholarshipId)}/eligibility`,
+		{ method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" },
+	);
+	if (!response.ok) return null;
+	return response.json();
+};
+
+export const getScholarshipProbability = async (
+	scholarshipId: string,
+): Promise<ProbabilityResult | null> => {
+	const response = await authFetch(
+		`${BACKEND_URL}/scholarships/${encodeURIComponent(scholarshipId)}/probability`,
+		{ method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" },
+	);
 	if (!response.ok) return null;
 	return response.json();
 };
