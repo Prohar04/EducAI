@@ -332,3 +332,90 @@ export type MatchFormState =
 			results?: MatchResult[];
 	  }
 	| undefined;
+
+// ─── Module 2: Scholarships ──────────────────────────────────────────────────
+
+export interface ScholarshipDeadlineItem {
+	id: string;
+	term: string | null;
+	deadline: string; // ISO8601
+}
+
+export interface ScholarshipItem {
+	id: string;
+	title: string;
+	provider: string | null;
+	countryCode: string | null;
+	level: "BSC" | "MSC" | "PHD" | null;
+	field: string | null;
+	url: string | null;
+	description: string | null;
+	amount: string | null;
+	fundingType: "full" | "partial" | "living" | "research" | null;
+	minGpa: number | null;
+	requiresEnglishTest: boolean;
+	financialNeedRequired: boolean;
+	eligibleNationalities: string[] | null;
+	tags: string[] | null;
+	sourceUrl: string | null;
+	lastVerified: string | null;
+	isActive: boolean;
+	deadlines: ScholarshipDeadlineItem[];
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface ScholarshipListResult {
+	items: ScholarshipItem[];
+	page: number;
+	limit: number;
+	total: number;
+}
+
+export interface EligibilityResult {
+	scholarshipId: string;
+	status: "eligible" | "partially_eligible" | "not_eligible";
+	score: number;
+	metCriteria: string[];
+	missingCriteria: string[];
+	improvementActions: string[];
+	confidence: "high" | "medium" | "low";
+}
+
+export interface ProbabilityFactor {
+	factor: string;
+	weight: number;
+	score: number;
+	note: string;
+}
+
+export interface ProbabilityResult {
+	scholarshipId: string;
+	probabilityBand: "High" | "Medium" | "Low";
+	probabilityPct: number;
+	factors: ProbabilityFactor[];
+	weaknesses: string[];
+	improvementActions: string[];
+	confidence: "high" | "medium" | "low";
+}
+
+export interface UpcomingDeadlineItem {
+	id: string;
+	term: string | null;
+	deadline: string;
+	scholarship: {
+		id: string;
+		title: string;
+		provider: string | null;
+		countryCode: string | null;
+		level: string | null;
+		amount: string | null;
+		fundingType: string | null;
+		url: string | null;
+	};
+}
+
+export interface EligibleScholarshipItem {
+	scholarship: ScholarshipItem;
+	eligibility: EligibilityResult;
+}

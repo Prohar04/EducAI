@@ -371,12 +371,28 @@ model Scholarship {
   level       ProgramLevel?
   field       String?       @db.VarChar(100)
   url         String?       @db.Text
+
+  // Extended eligibility & display fields
+  description            String?   @db.Text
+  amount                 String?   @db.VarChar(200)       // e.g. "Full tuition + living allowance"
+  fundingType            String?   @map("funding_type") @db.VarChar(50)   // "full"|"partial"|"living"|"research"
+  minGpa                 Float?    @map("min_gpa") @db.Real
+  requiresEnglishTest    Boolean   @default(false) @map("requires_english_test")
+  financialNeedRequired  Boolean   @default(false) @map("financial_need_required")
+  eligibleNationalities  Json?     @map("eligible_nationalities")  // string[] — null means all nationalities
+  tags                   Json?                                      // string[]
+  sourceUrl              String?   @map("source_url") @db.Text
+  lastVerified           DateTime? @map("last_verified") @db.Timestamp
+  isActive               Boolean   @default(true) @map("is_active")
+
   createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamp
   updatedAt   DateTime      @updatedAt @map("updated_at") @db.Timestamp
 
   deadlines ScholarshipDeadline[]
 
   @@index([countryCode])
+  @@index([level])
+  @@index([isActive])
   @@map("scholarships")
 }
 
