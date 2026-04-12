@@ -174,3 +174,32 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ── Print styles (used by Timeline "Print" button) ────────────────────────── */
+@media print {
+  /* Hide navigation, sidebar, and non-content chrome */
+  header,
+  nav,
+  aside,
+  footer,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Expand all collapsible month cards */
+  [data-print-open] {
+    display: block !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+    font-size: 12pt;
+  }
+
+  /* Prevent cards from breaking across pages */
+  .rounded-xl {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

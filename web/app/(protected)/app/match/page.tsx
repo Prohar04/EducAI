@@ -26,17 +26,21 @@ const LEVEL_LABELS: Record<string, string> = {
   DIPLOMA: "Diploma",
 };
 
+function fitBand(score: number): { label: string; color: string } {
+  if (score >= 80) return { label: "Strong Match", color: "bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20" };
+  if (score >= 50) return { label: "Good Match", color: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border border-yellow-500/20" };
+  return { label: "Stretch", color: "bg-muted text-muted-foreground border border-border" };
+}
+
 function ScoreBadge({ score }: { score: number }) {
-  const color =
-    score >= 80
-      ? "bg-green-500/10 text-green-600 dark:text-green-400"
-      : score >= 50
-        ? "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400"
-        : "bg-muted text-muted-foreground";
+  const { label, color } = fitBand(score);
   return (
-    <span className={`rounded-full px-2.5 py-0.5 text-sm font-semibold ${color}`}>
-      {score}%
-    </span>
+    <div className="flex items-center gap-1.5">
+      <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${color}`}>
+        {label}
+      </span>
+      <span className="text-sm font-semibold text-muted-foreground">{score}%</span>
+    </div>
   );
 }
 

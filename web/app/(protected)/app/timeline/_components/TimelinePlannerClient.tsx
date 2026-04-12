@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import {
 	Calendar, ChevronDown, ChevronRight, RefreshCw,
 	BookOpen, Award, Plane, AlertCircle, CheckCircle2,
-	Clock, MapPin, Loader2,
+	Clock, MapPin, Loader2, Printer,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -295,13 +295,26 @@ export default function TimelinePlannerClient({
 							Your personalised month-by-month roadmap to studying abroad.
 						</p>
 					</div>
-					{roadmap && (
-						<p className="text-xs text-muted-foreground mt-1 sm:mt-2 shrink-0">
-							Updated {new Date(roadmap.createdAt).toLocaleDateString("en-US", {
-								day: "numeric", month: "short", year: "numeric",
-							})}
-						</p>
-					)}
+					<div className="flex items-center gap-3 mt-1 sm:mt-2 shrink-0">
+						{roadmap && (
+							<p className="text-xs text-muted-foreground">
+								Updated {new Date(roadmap.createdAt).toLocaleDateString("en-US", {
+									day: "numeric", month: "short", year: "numeric",
+								})}
+							</p>
+						)}
+						{plan.length > 0 && (
+							<button
+								type="button"
+								onClick={() => window.print()}
+								className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-colors print:hidden"
+								title="Print timeline"
+							>
+								<Printer className="size-3.5" />
+								Print
+							</button>
+						)}
+					</div>
 				</div>
 			</FadeIn>
 

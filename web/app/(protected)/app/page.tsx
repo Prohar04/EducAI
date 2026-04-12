@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { getUserProfile, getMatchLatest, getSavedPrograms, getLatestTimeline } from "@/lib/auth/action";
+import { fetchEducationPulse, type FeedItem } from "@/lib/data/fetchEducationPulse";
 import Link from "next/link";
 import {
   GraduationCap,
@@ -26,14 +27,7 @@ import { AnimatedCard } from "@/components/motion/AnimatedCard";
 
 // ─── TYPE DEFINITIONS ─────────────────────────────────────────────────────────
 
-type EducationNewsItem = {
-  id: string;
-  title: string;
-  source: string;
-  timestamp: string;
-  tag: string;
-  url: string;
-};
+// Re-use FeedItem from the shared fetcher (imported above)
 
 type DeadlineItem = {
   id: string;
@@ -195,8 +189,27 @@ function ProfileSnapshot({ profile, session }: { profile: UserProfile; session: 
   );
 }
 
+interface RoadmapMonthSummary {
+  month: string;
+  label: string;
+  items: Array<{ type: string; title: string }>;
+}
+
+interface UserRoadmapSummary {
+  id: string;
+  countryCode: string;
+  intake?: string | null;
+  startMonth: string;
+  endMonth: string;
+  plan: RoadmapMonthSummary[];
+  createdAt: string;
+}
+
 function YourRoadmap({ timeline }: { timeline: unknown }) {
-  if (!timeline || typeof timeline !== "object" || !("timeline" in timeline)) {
+  const roadmap = timeline as UserRoadmapSummary | null;
+  const plan = roadmap?.plan;
+
+  if (!plan || plan.length === 0) {
     return (
       <AnimatedCard className="h-full rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
         <SectionHeader title="Your Roadmap" icon={Target} />
@@ -211,37 +224,31 @@ function YourRoadmap({ timeline }: { timeline: unknown }) {
     );
   }
 
-  const timelineData = timeline as { timeline?: { phases?: Array<{ month?: string; phase?: string; focus?: string; tasks?: string[] }> } };
-  const phases = timelineData.timeline?.phases?.slice(0, 5);
-
-  if (!phases || phases.length === 0) {
-    return (
-      <AnimatedCard className="h-full rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
-        <SectionHeader title="Your Roadmap" icon={Target} />
-        <EmptyState
-          icon={Calendar}
-          title="No roadmap yet"
-          description="Generate a personalized timeline for your application journey"
-          ctaText="Generate Roadmap"
-          ctaHref="/app/timeline"
-        />
-      </AnimatedCard>
-    );
-  }
+  const shownMonths = plan.slice(0, 4);
 
   return (
     <AnimatedCard className="h-full rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
       <SectionHeader title="Your Roadmap" icon={Target} href="/app/timeline" linkText="View Full Timeline" />
 
-      <div className="space-y-3">
-        {phases.map((phase, idx: number) => (
-          <div key={idx} className="flex gap-3 rounded-lg border border-border/50 bg-muted/20 p-3 transition-colors hover:bg-muted/40">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+      {roadmap?.intake && (
+        <p className="mb-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+          <MapPin className="size-3" />
+          {roadmap.countryCode} · {roadmap.intake}
+        </p>
+      )}
+
+      <div className="space-y-2">
+        {shownMonths.map((month, idx) => (
+          <div key={month.month} className="flex gap-3 rounded-lg border border-border/50 bg-muted/20 p-3 transition-colors hover:bg-muted/40">
+            <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
               {idx + 1}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium">{phase.month || phase.phase}</p>
-              <p className="mt-0.5 truncate text-xs text-muted-foreground">{phase.focus || phase.tasks?.[0] || "Planning"}</p>
+              <p className="text-sm font-medium">{month.label}</p>
+              <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                {month.items[0]?.title ?? "No tasks"}
+                {month.items.length > 1 && ` +${month.items.length - 1} more`}
+              </p>
             </div>
           </div>
         ))}
@@ -421,7 +428,7 @@ function SavedShortlist({ savedPrograms }: { savedPrograms: SavedProgramItem[] }
   );
 }
 
-function GlobalEducationPulse({ news }: { news: EducationNewsItem[] }) {
+function GlobalEducationPulse({ news }: { news: FeedItem[] }) {
   if (news.length === 0) {
     return (
       <AnimatedCard className="rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
@@ -449,12 +456,12 @@ function GlobalEducationPulse({ news }: { news: EducationNewsItem[] }) {
           >
             <TrendingUp className="mt-0.5 size-4 shrink-0 text-primary" />
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium leading-snug">{item.title}</p>
+              <p className="text-sm font-medium leading-snug line-clamp-2">{item.title}</p>
               <div className="mt-1.5 flex items-center gap-2 text-xs text-muted-foreground">
-                <span>{item.source}</span>
+                <span>{item.sourceName}</span>
                 <span>·</span>
-                <span>{item.timestamp}</span>
-                <StatusBadge variant="default">{item.tag}</StatusBadge>
+                <span>{new Date(item.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                <StatusBadge variant="default">{item.topic}</StatusBadge>
               </div>
             </div>
             <ExternalLink className="size-3.5 shrink-0 text-muted-foreground" />
@@ -494,15 +501,13 @@ function buildUpcomingDeadlines(savedPrograms: SavedProgramItem[], nowTs: number
 
 export default async function StudyPlanPage() {
   // Fetch all data in parallel
-  const [session, profile, match, savedPrograms, timeline, newsResponse] = await Promise.allSettled([
+  const [session, profile, match, savedPrograms, timeline, newsItems] = await Promise.allSettled([
     getSession(),
     getUserProfile(),
     getMatchLatest().catch(() => null),
     getSavedPrograms().catch(() => []),
     getLatestTimeline().catch(() => null),
-    fetch(`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/education-pulse`, {
-      cache: "no-store",
-    }).then((res) => res.json()).catch(() => ({ news: [] })),
+    fetchEducationPulse().catch(() => []),
   ]);
 
   // Extract values
@@ -511,7 +516,7 @@ export default async function StudyPlanPage() {
   const matchData = match.status === "fulfilled" ? match.value : null;
   const savedProgramsData = savedPrograms.status === "fulfilled" ? savedPrograms.value : [];
   const timelineData = timeline.status === "fulfilled" ? timeline.value : null;
-  const newsData = newsResponse.status === "fulfilled" ? newsResponse.value.news : [];
+  const newsData = newsItems.status === "fulfilled" ? newsItems.value.slice(0, 5) : [];
 
   // Auth check
   if (!sessionData) redirect("/auth/signin");
