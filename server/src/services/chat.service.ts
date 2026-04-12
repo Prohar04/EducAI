@@ -5,8 +5,32 @@ const AI_SERVER_URL = process.env.AI_SERVER_URL ?? 'http://localhost:8001';
 const AI_SERVER_API_KEY = process.env.AI_SERVER_API_KEY ?? '';
 const CHAT_RATE_LIMIT_PER_MIN = Number(process.env.CHAT_RATE_LIMIT_PER_MIN ?? '0');
 const RATE_LIMIT_WINDOW_MS = 60_000;
+const CONTEXT_CACHE_TTL_MS = 5 * 60_000; // 5-minute cache per user — context rarely changes
 
 const rateLimitByUser = new Map<string, { count: number; windowStartedAt: number }>();
+
+// ── Context cache: avoid re-fetching DB on every message within a session ──
+const contextCache = new Map<string, { ctx: CompactUserContext; expiresAt: number }>();
+
+function getCachedContext(userId: string): CompactUserContext | null {
+  const entry = contextCache.get(userId);
+  if (!entry || Date.now() > entry.expiresAt) {
+    contextCache.delete(userId);
+    return null;
+  }
+  return entry.ctx;
+}
+
+function setCachedContext(userId: string, ctx: CompactUserContext): void {
+  contextCache.set(userId, { ctx, expiresAt: Date.now() + CONTEXT_CACHE_TTL_MS });
+  // Evict entries older than 30 minutes to prevent unbounded growth
+  if (contextCache.size > 500) {
+    const now = Date.now();
+    for (const [key, val] of contextCache.entries()) {
+      if (now > val.expiresAt) contextCache.delete(key);
+    }
+  }
+}
 
 export type ChatRole = 'user' | 'assistant';
 
@@ -571,7 +595,10 @@ async function loadCompactUserContext(userId: string): Promise<CompactUserContex
 export async function answerChatMessage(input: AnswerChatInput): Promise<ChatReply> {
   applyRateLimit(input.userId);
 
-  const userContext = await loadCompactUserContext(input.userId);
+  // Use cached context when available — avoids 5 DB queries on every message
+  const cachedCtx = getCachedContext(input.userId);
+  const userContext = cachedCtx ?? await loadCompactUserContext(input.userId);
+  if (!cachedCtx) setCachedContext(input.userId, userContext);
 
   let aiResponse: Response;
   try {
@@ -589,7 +616,7 @@ export async function answerChatMessage(input: AnswerChatInput): Promise<ChatRep
           history: input.history?.slice(-6) ?? [],
         },
       }),
-      signal: AbortSignal.timeout(90_000),
+      signal: AbortSignal.timeout(45_000), // 45s: reduced from 90s for better UX
     });
   } catch (error) {
     console.error('[chat/service] ai-server unavailable', error);

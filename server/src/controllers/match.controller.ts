@@ -12,7 +12,7 @@ import { Prisma, ProgramLevel } from '../generated/client.ts';
 import { AuthRequest } from '#src/types/authRequest.type.ts';
 import { performIngest, normalizeLevel, CountryInput } from '#services/ingest.service.ts';
 
-const AI_SERVER_URL     = process.env.AI_SERVER_URL     ?? 'http://localhost:8888';
+const AI_SERVER_URL     = process.env.AI_SERVER_URL     ?? 'http://localhost:8001';
 const AI_SERVER_API_KEY = process.env.AI_SERVER_API_KEY ?? '';
 const CACHE_TTL_MS      = 24 * 60 * 60 * 1000; // 24 hours
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import time
 from typing import Any, Dict, List, Literal, Optional, Tuple
 from urllib.parse import urlparse
@@ -506,19 +507,27 @@ async def _build_web_lane(message: str, user_context: UserContext) -> Tuple[str,
 
     ranked_results.sort(key=lambda item: (-int(item["score"]), int(item["position"])))
 
+    top_results = ranked_results[:MAX_WEB_PAGES]
+
+    # Fetch all pages in parallel instead of sequentially
+    extracts = await asyncio.gather(
+        *[_fetch_page_extract(r["url"]) for r in top_results],
+        return_exceptions=True,
+    )
+
     sources: Dict[str, ChatSource] = {}
     fallback_ids: List[str] = []
     evidence_lines: List[str] = []
 
-    for index, result in enumerate(ranked_results[:MAX_WEB_PAGES], start=1):
+    for index, (result, extract) in enumerate(zip(top_results, extracts), start=1):
         source_id = f"web:{index}"
-        extract = await _fetch_page_extract(result["url"])
+        safe_extract = extract if isinstance(extract, str) else None
         evidence = WebEvidence(
             source_id=source_id,
             title=result["title"],
             url=result["url"],
             snippet=result["snippet"],
-            extract=extract,
+            extract=safe_extract,
             credibility=result["credibility"],
         )
         sources[source_id] = ChatSource(type="web", title=evidence.title, url=evidence.url)
