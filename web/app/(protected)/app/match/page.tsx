@@ -26,22 +26,22 @@ const LEVEL_LABELS: Record<string, string> = {
   DIPLOMA: "Diploma",
 };
 
-function fitBand(score: number): { label: string; color: string } {
-  if (score >= 80) return { label: "Strong Match", color: "bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20" };
-  if (score >= 50) return { label: "Good Match", color: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border border-yellow-500/20" };
-  return { label: "Stretch", color: "bg-muted text-muted-foreground border border-border" };
-}
-
-function ScoreBadge({ score }: { score: number }) {
-  const { label, color } = fitBand(score);
-  return (
-    <div className="flex items-center gap-1.5">
-      <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${color}`}>
-        {label}
-      </span>
-      <span className="text-sm font-semibold text-muted-foreground">{score}%</span>
-    </div>
-  );
+function fitBand(score: number): { label: string; scoreColor: string; bandClass: string } {
+  if (score >= 80) return {
+    label: "Strong Match",
+    scoreColor: "text-green-500 dark:text-green-400",
+    bandClass: "from-green-500/40 via-green-500 to-green-500/30",
+  };
+  if (score >= 50) return {
+    label: "Good Match",
+    scoreColor: "text-amber-500 dark:text-amber-400",
+    bandClass: "from-amber-500/40 via-amber-500 to-amber-500/30",
+  };
+  return {
+    label: "Stretch",
+    scoreColor: "text-muted-foreground",
+    bandClass: "from-border via-muted-foreground/40 to-border",
+  };
 }
 
 // ─ Individual program card ─────────────────────────────────────────────────
@@ -96,86 +96,104 @@ function ResultCard({
     }
   };
 
+  const { label, scoreColor, bandClass } = fitBand(result.score);
+
   return (
-    <div className="rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/30">
-      <div className="mb-2 flex items-start justify-between gap-3">
-        <div className="flex flex-wrap gap-1.5">
-          {level && (
-            <span className="inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
-              {LEVEL_LABELS[level.toUpperCase()] ?? level}
+    <div className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md h-full">
+      {/* Score accent band */}
+      <div className={`h-1 w-full bg-gradient-to-r ${bandClass}`} />
+
+      <div className="flex flex-col flex-1 p-5">
+        {/* Header: level/country badges + score */}
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <div className="flex flex-wrap gap-1.5">
+            {level && (
+              <span className="inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                {LEVEL_LABELS[level.toUpperCase()] ?? level}
+              </span>
+            )}
+            {country && (
+              <span className="inline-block rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                {country}
+              </span>
+            )}
+          </div>
+          <div className="flex shrink-0 flex-col items-end">
+            <span className={`text-lg font-extrabold leading-none ${scoreColor}`}>
+              {result.score}%
             </span>
+            <span className={`mt-0.5 text-[10px] font-semibold ${scoreColor} opacity-80`}>
+              {label}
+            </span>
+          </div>
+        </div>
+
+        {/* Title + university */}
+        <h3 className="font-semibold leading-snug">{title}</h3>
+        <p className="mt-0.5 text-sm text-muted-foreground">{university}</p>
+        {(field || tuition) && (
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {[field, tuition].filter(Boolean).join(" · ")}
+          </p>
+        )}
+        {description && (
+          <p className="mt-2 text-xs leading-relaxed text-muted-foreground line-clamp-2">{description}</p>
+        )}
+
+        {/* Fit reasons */}
+        {result.reasons.length > 0 && (
+          <div className="mt-3 rounded-xl border border-border/60 bg-muted/30 px-3 py-2.5 space-y-1.5">
+            {result.reasons.slice(0, 3).map((r, i) => (
+              <div key={i} className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                <span className="mt-1 size-1.5 shrink-0 rounded-full bg-primary/60" />
+                <span>{r}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border/60 pt-3">
+          {result.programId && (
+            <Link
+              href={`/app/programs/${result.programId}`}
+              className="inline-flex items-center gap-1 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/20"
+            >
+              View details
+            </Link>
           )}
-          {country && (
-            <span className="inline-block rounded-full bg-secondary/60 px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
-              {country}
-            </span>
+          {applicationUrl && (
+            <a
+              href={applicationUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground"
+            >
+              <ExternalLink className="size-3" />
+              Official page
+            </a>
+          )}
+          {result.programId && (
+            <button
+              onClick={handleSave}
+              disabled={saved || saving}
+              className={`ml-auto inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                saved
+                  ? "bg-green-500/10 text-green-600 dark:text-green-400 cursor-default"
+                  : "border border-border text-muted-foreground hover:border-primary/30 hover:text-foreground"
+              }`}
+            >
+              {saving ? (
+                <Loader2 className="size-3 animate-spin" />
+              ) : saved ? (
+                <BookmarkCheck className="size-3" />
+              ) : (
+                <Bookmark className="size-3" />
+              )}
+              {saved ? "Saved" : "Save"}
+            </button>
           )}
         </div>
-        <ScoreBadge score={result.score} />
-      </div>
-
-      <h3 className="font-semibold leading-snug">{title}</h3>
-      <p className="mt-0.5 text-sm text-muted-foreground">{university}</p>
-      {(field || tuition) && (
-        <p className="text-xs text-muted-foreground mt-0.5">
-          {[field, tuition].filter(Boolean).join(" · ")}
-        </p>
-      )}
-      {description && (
-        <p className="mt-2 text-xs text-muted-foreground line-clamp-2">{description}</p>
-      )}
-
-      {result.reasons.length > 0 && (
-        <ul className="mt-3 space-y-1">
-          {result.reasons.map((r, i) => (
-            <li key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span className="size-1.5 shrink-0 rounded-full bg-primary/60" />
-              {r}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        {result.programId && (
-          <Link
-            href={`/app/programs/${result.programId}`}
-            className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-          >
-            View details
-          </Link>
-        )}
-        {applicationUrl && (
-          <a
-            href={applicationUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
-          >
-            <ExternalLink className="size-3" />
-            Official page
-          </a>
-        )}
-        {result.programId && (
-          <button
-            onClick={handleSave}
-            disabled={saved || saving}
-            className={`ml-auto inline-flex items-center gap-1 text-xs font-medium transition-colors ${
-              saved
-                ? "text-green-600 dark:text-green-400 cursor-default"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {saving ? (
-              <Loader2 className="size-3 animate-spin" />
-            ) : saved ? (
-              <BookmarkCheck className="size-3" />
-            ) : (
-              <Bookmark className="size-3" />
-            )}
-            {saved ? "Saved" : "Save"}
-          </button>
-        )}
       </div>
     </div>
   );

@@ -76,38 +76,42 @@ export default async function ProgramsPage({
 					<StaggerChildren stagger={0.06} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 						{result.items.map((program) => (
 							<StaggerItem key={program.id}>
-								<div
-									className="flex flex-col rounded-xl border border-border bg-card p-5 transition-all hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md h-full"
-								>
-								<div className="mb-2 flex items-start justify-between gap-2">
-									<span className="inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
-										{levelLabel(program.level)}
-									</span>
-									<SaveButton
-										programId={program.id}
-										initialSaved={savedIds.has(program.id)}
-									/>
-								</div>
-								<Link
-									href={`/app/programs/${program.id}`}
-									className="group flex-1"
-								>
-									<h2 className="font-semibold leading-snug group-hover:text-primary">
-										{program.title}
-									</h2>
-									<p className="mt-0.5 text-sm text-muted-foreground">
-										{program.university.name}
-									</p>
-									<p className="text-xs text-muted-foreground">
-										{program.university.country.name}
-										{program.university.city ? `, ${program.university.city}` : ""}
-									</p>
-									<div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-										<span>{program.field}</span>
-										<span>{tuitionRange(program)}</span>
+								<div className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md h-full">
+									{/* Accent band */}
+									<div className="h-1 w-full bg-gradient-to-r from-primary/30 via-primary/60 to-primary/30" />
+									<div className="flex flex-col flex-1 p-5">
+										<div className="mb-2 flex items-start justify-between gap-2">
+											<div className="flex flex-wrap gap-1.5">
+												<span className="inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+													{levelLabel(program.level)}
+												</span>
+												<span className="inline-block rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+													{program.field}
+												</span>
+											</div>
+											<SaveButton
+												programId={program.id}
+												initialSaved={savedIds.has(program.id)}
+											/>
+										</div>
+										<Link href={`/app/programs/${program.id}`} className="flex-1">
+											<h2 className="font-semibold leading-snug transition-colors group-hover:text-primary">
+												{program.title}
+											</h2>
+											<p className="mt-0.5 text-sm text-muted-foreground">
+												{program.university.name}
+											</p>
+											<p className="text-xs text-muted-foreground">
+												{program.university.country.name}
+												{program.university.city ? `, ${program.university.city}` : ""}
+											</p>
+										</Link>
+										<div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3 text-xs text-muted-foreground">
+											<span className="font-medium">{tuitionRange(program)}</span>
+											<span className="text-primary/70 font-medium group-hover:text-primary transition-colors">View →</span>
+										</div>
 									</div>
-								</Link>
-							</div>
+								</div>
 						</StaggerItem>
 					))}
 					</StaggerChildren>
