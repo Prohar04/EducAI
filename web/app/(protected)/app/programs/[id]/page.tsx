@@ -130,19 +130,47 @@ export default async function ProgramDetailPage({
 				</div>
 			)}
 
-			{/* Apply link */}
-			{program.applicationUrl && (
-				<div className="mt-8">
+			{/* Official program page / university website links */}
+			{(program.sourceUrl || program.university.website) && (
+				<div className="mt-8 flex flex-wrap gap-3">
+					{program.sourceUrl && (
+						<a
+							href={program.sourceUrl}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+						>
+							Official Program Page
+							<ExternalLink className="size-4" />
+						</a>
+					)}
+					{program.university.website && (
+						<a
+							href={program.university.website}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="inline-flex items-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm font-medium hover:bg-accent transition-colors"
+						>
+							University Website
+							<ExternalLink className="size-4" />
+						</a>
+					)}
+				</div>
+			)}
+
+			{/* Source provenance */}
+			{program.sourceUrl && (
+				<p className="mt-4 text-xs text-muted-foreground">
+					Data sourced from:{" "}
 					<a
-						href={program.applicationUrl}
+						href={program.sourceUrl}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+						className="underline underline-offset-2 hover:text-foreground"
 					>
-						Apply Now
-						<ExternalLink className="size-4" />
+						{new URL(program.sourceUrl).hostname}
 					</a>
-				</div>
+				</p>
 			)}
 		</div>
 	);

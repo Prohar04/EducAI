@@ -132,23 +132,31 @@ function ResultCard({
         </ul>
       )}
 
-      <div className="mt-4 flex items-center gap-3">
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        {result.programId && (
+          <Link
+            href={`/app/programs/${result.programId}`}
+            className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+          >
+            View details
+          </Link>
+        )}
         {applicationUrl && (
           <a
             href={applicationUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+            className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
           >
             <ExternalLink className="size-3" />
-            Open program
+            Official page
           </a>
         )}
         {result.programId && (
           <button
             onClick={handleSave}
             disabled={saved || saving}
-            className={`inline-flex items-center gap-1 text-xs font-medium transition-colors ${
+            className={`ml-auto inline-flex items-center gap-1 text-xs font-medium transition-colors ${
               saved
                 ? "text-green-600 dark:text-green-400 cursor-default"
                 : "text-muted-foreground hover:text-foreground"
