@@ -11,7 +11,7 @@
 EducAI helps international students navigate the study-abroad process end to end:
 
 | Feature | Description |
-|---------|-------------|
+| --- | --- |
 | **AI Program Match** | Scrapes university pages live via Firecrawl, ranks programmes against your profile with scored fit reasons |
 | **Admission Requirement Analyzer** | Extracts GPA, English test, GRE/GMAT, deadlines, and documents from each programme |
 | **Application Timeline Planner** | Month-by-month roadmap from saved deadlines + country-specific visa milestones |
@@ -29,7 +29,7 @@ EducAI helps international students navigate the study-abroad process end to end
 
 ## Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                  Browser (Next.js 16)                       │
 │  /web · App Router · React 19 · Tailwind CSS 4 · shadcn/ui  │
@@ -51,7 +51,7 @@ EducAI helps international students navigate the study-abroad process end to end
 ```
 
 | Service | Stack | Port |
-|---------|-------|------|
+| --- | --- | --- |
 | `web` | Next.js 16 · React 19 · TypeScript | 3000 |
 | `server` | Express 5 · Prisma 7 · Node 22 · TypeScript | 8000 |
 | `ai-server` | FastAPI · Python 3.13 · Pydantic | 8001 |
@@ -118,7 +118,7 @@ Open [http://localhost:3000](http://localhost:3000)
 ### Server (`server/.env`)
 
 | Variable | Required | Description |
-|----------|----------|-------------|
+| --- | --- | --- |
 | `DATABASE_URL` | ✅ | Neon pooler connection string |
 | `JWT_SECRET` | ✅ | 64-char random string for access tokens |
 | `REFRESH_JWT_SECRET` | ✅ | 64-char random string for refresh tokens |
@@ -135,7 +135,7 @@ Open [http://localhost:3000](http://localhost:3000)
 ### Web (`web/.env.local`)
 
 | Variable | Required | Description |
-|----------|----------|-------------|
+| --- | --- | --- |
 | `SESSION_SECRET_KEY` | ✅ | iron-session key (32+ chars: `openssl rand -base64 32`) |
 | `BACKEND_URL` | ✅ | Express API URL |
 | `JWT_SECRET` | ✅ | Must match server `JWT_SECRET` |
@@ -143,7 +143,7 @@ Open [http://localhost:3000](http://localhost:3000)
 ### AI Server (`ai-server/.env`)
 
 | Variable | Required | Description |
-|----------|----------|-------------|
+| --- | --- | --- |
 | `OPENROUTER_API_KEY` | Recommended | LLM for chat and matching (free tier available) |
 | `GEMINI_API_KEY` | Optional | LLM fallback (free tier available) |
 | `GROQ_API_KEY` | Optional | Fast inference fallback (free tier available) |
@@ -159,7 +159,7 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ### Program Match
 
-```
+```text
 User triggers match run
   → Express background worker
     → FastAPI /api/v1/module1/scrape-match
@@ -172,7 +172,7 @@ User triggers match run
 
 ### AI Chat Advisor
 
-```
+```text
 User sends message
   → Next.js /api/chat (adds session auth)
     → Express /chat
@@ -184,7 +184,7 @@ User sends message
 
 ### Scholarship Deadline Alerts
 
-```
+```text
 GitHub Actions cron (08:00 UTC daily)
   → POST /deadline-alerts/run (X-Cron-Secret auth)
     → Scan deadlines within 30 days across all users
@@ -198,7 +198,7 @@ GitHub Actions cron (08:00 UTC daily)
 ## CI/CD
 
 | Job | What it checks |
-|-----|----------------|
+| --- | --- |
 | Server | `npm ci` → `prisma generate + validate` → lint → `tsc` → 62 Jest tests |
 | Web | `npm ci` → lint → production build (31 routes) |
 | AI Server | `pip install` → `ruff check` → pytest |
@@ -209,7 +209,7 @@ GitHub Actions cron (08:00 UTC daily)
 ### Required GitHub Secrets
 
 | Secret | Purpose |
-|--------|---------|
+| --- | --- |
 | `DATABASE_URL_CLOUD` | Auto-migration on push to main |
 | `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN` | Docker image push |
 | `API_BASE_URL` + `CRON_SECRET` | Daily scholarship alert cron |
@@ -234,7 +234,7 @@ npm run seed:visa
 ## Module Status
 
 | Module | Feature | Status |
-|--------|---------|--------|
+| --- | --- | --- |
 | **Module 1** | AI Program Match | ✅ Complete |
 | | Admission Requirement Analyzer | ✅ Complete |
 | | Application Timeline Planner | ✅ Complete |
