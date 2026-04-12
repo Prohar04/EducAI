@@ -8,11 +8,8 @@ import {
 	BookOpen,
 	Calendar,
 	Check,
-	ChevronDown,
-	ChevronRight,
 	CircleDashed,
 	ExternalLink,
-	Filter,
 	Globe,
 	Loader2,
 	RefreshCw,
@@ -37,9 +34,7 @@ import type {
 } from "@/types/auth.type";
 import {
 	checkScholarshipEligibility,
-	getEligibleScholarships,
 	getScholarshipProbability,
-	getUpcomingScholarshipDeadlines,
 	searchScholarships,
 } from "@/lib/auth/action";
 
