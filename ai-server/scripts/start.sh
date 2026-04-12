@@ -36,7 +36,7 @@ if [ "$1" == "start" ]; then
 
     # Always start the application
     echo "⚡ Starting Uvicorn..."
-    uvicorn app.main:app --host 0.0.0.0 --port 8888 --reload
+    uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
 
 elif [ "$1" == "stop" ]; then
     echo "🛑 Stopping services..."
