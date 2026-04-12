@@ -22,9 +22,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EducAI - AI-Powered Education Platform",
+  title: "EducAI — AI-Powered Study Abroad Platform",
   description:
-    "EducAI leverages artificial intelligence to personalize your learning experience. Study smarter, not harder.",
+    "Find the right university program, discover scholarships, and build your application strategy — powered by real data and AI reasoning.",
 };
 
 export default function RootLayout({

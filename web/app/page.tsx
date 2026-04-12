@@ -1,93 +1,72 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getSession } from "@/lib/auth/session";
-import { GraduationCap, ArrowRight, Globe, Sparkles, BookOpen, Users, ExternalLink } from "lucide-react";
+import {
+  GraduationCap,
+  ArrowRight,
+  Sparkles,
+  BookOpen,
+  Users,
+  ExternalLink,
+  Globe,
+  CalendarDays,
+  Target,
+  FileText,
+  Award,
+  CheckCircle2,
+  ChevronRight,
+  MessageSquare,
+} from "lucide-react";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { Reveal } from "@/components/motion/Reveal";
 import TrendingFeed from "@/components/home/TrendingFeed";
-import RoadmapCards from "@/components/home/RoadmapCards";
-import HowItWorks from "@/components/home/HowItWorks";
 import QuoteStrip from "@/components/home/QuoteStrip";
-import HeroIllustration from "@/components/home/HeroIllustration";
+import HowItWorks from "@/components/home/HowItWorks";
 import { fetchEducationPulse } from "@/lib/data/fetchEducationPulse";
 import quotesData from "@/lib/data/quotes.json";
 
-// Revalidate the page every 24 hours so quote and feed both update daily
 export const revalidate = 86_400;
 
-// ─────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────
-
 function getQuoteForToday(): string {
-  // Use the calendar date string as a stable, day-scoped seed
-  const dateKey = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+  const dateKey = new Date().toISOString().slice(0, 10);
   const idx =
     dateKey.split("").reduce((a, c) => a + c.charCodeAt(0), 0) %
     (quotesData as string[]).length;
   return (quotesData as string[])[idx];
 }
 
-// ─────────────────────────────────────────────
-// Logo
-// ─────────────────────────────────────────────
-
 function Logo({ className = "" }: { className?: string }) {
   return (
     <Link href="/" className={`flex items-center gap-2 ${className}`} aria-label="EducAI home">
-      <GraduationCap className="size-7 text-primary" />
-      <span className="text-lg font-bold tracking-tight">
+      <GraduationCap className="size-6 text-primary" />
+      <span className="text-base font-bold tracking-tight">
         Educ<span className="text-primary">AI</span>
       </span>
     </Link>
   );
 }
 
-// ─────────────────────────────────────────────
-// Public Navbar
-// ─────────────────────────────────────────────
-
 async function PublicNavbar() {
   const session = await getSession().catch(() => null);
   const isLoggedIn = !!session;
-
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md">
-      <nav
-        className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8"
-        aria-label="Main navigation"
-      >
+    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-lg">
+      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8" aria-label="Main navigation">
         <Logo />
-        <ul className="hidden items-center gap-7 md:flex" role="list">
-          {[
-            { label: "Home", href: "/" },
-            { label: "Features", href: "#features" },
-            { label: "How it works", href: "#how-it-works" },
-            { label: "Modules", href: "#roadmap" },
-          ].map((item) => (
+        <ul className="hidden items-center gap-8 md:flex" role="list">
+          {[{ label: "Features", href: "#features" }, { label: "How it works", href: "#how-it-works" }, { label: "Modules", href: "#modules" }].map((item) => (
             <li key={item.label}>
-              <a
-                href={item.href}
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:text-primary focus-visible:outline-none"
-              >
-                {item.label}
-              </a>
+              <a href={item.href} className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">{item.label}</a>
             </li>
           ))}
         </ul>
         <div className="flex items-center gap-3">
           {isLoggedIn ? (
-            <Button size="sm" asChild>
-              <Link href="/app">Dashboard</Link>
-            </Button>
+            <Button size="sm" asChild><Link href="/app">Dashboard <ArrowRight className="ml-1.5 size-3.5" /></Link></Button>
           ) : (
             <>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/auth/signin">Sign in</Link>
-              </Button>
-              <Button size="sm" asChild>
-                <Link href="/auth/signup">Get started</Link>
-              </Button>
+              <Button variant="ghost" size="sm" asChild><Link href="/auth/signin">Sign in</Link></Button>
+              <Button size="sm" asChild><Link href="/auth/signup">Get started</Link></Button>
             </>
           )}
         </div>
@@ -96,24 +75,137 @@ async function PublicNavbar() {
   );
 }
 
-// ─────────────────────────────────────────────
-// Stats strip
-// ─────────────────────────────────────────────
+async function HeroSection() {
+  const session = await getSession().catch(() => null);
+  const isLoggedIn = !!session;
+  return (
+    <section className="relative overflow-hidden bg-background">
+      <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+        <div className="absolute left-1/2 top-0 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute -right-40 top-20 h-[400px] w-[400px] rounded-full bg-primary/4 blur-[100px]" />
+      </div>
+      <div className="mx-auto max-w-7xl px-4 pt-20 pb-16 sm:px-6 sm:pt-28 sm:pb-24 lg:px-8">
+        <div className="mx-auto max-w-4xl text-center">
+          <FadeIn delay={0}>
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-4 py-1.5 text-xs font-semibold text-primary">
+              <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+              Live · Real university data, updated daily
+            </div>
+          </FadeIn>
+          <FadeIn delay={0.08}>
+            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl xl:text-7xl leading-[1.08]">
+              The intelligent platform<br />for{" "}
+              <span className="text-primary">studying abroad</span>
+            </h1>
+          </FadeIn>
+          <FadeIn delay={0.16}>
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+              Match to the right programs, discover scholarships you actually qualify for,
+              and build a step-by-step application plan — all powered by real data and AI reasoning.
+            </p>
+          </FadeIn>
+          <FadeIn delay={0.24}>
+            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Button size="lg" asChild className="h-12 px-7 text-base font-semibold shadow-lg shadow-primary/20">
+                <Link href={isLoggedIn ? "/app/programs" : "/auth/signup"}>
+                  Start for free <ArrowRight className="ml-2 size-4" />
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild className="h-12 px-7 text-base">
+                <a href="#how-it-works">See how it works</a>
+              </Button>
+            </div>
+          </FadeIn>
+          <FadeIn delay={0.32}>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
+              {["No credit card required", "Free to start", "Real program data"].map((item) => (
+                <span key={item} className="flex items-center gap-1.5">
+                  <CheckCircle2 className="size-3.5 text-primary/70" />{item}
+                </span>
+              ))}
+            </div>
+          </FadeIn>
+        </div>
+
+        <FadeIn delay={0.4}>
+          <div className="mx-auto mt-16 max-w-5xl">
+            <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
+              <div className="flex items-center gap-2 border-b border-border bg-background/60 px-5 py-3">
+                <div className="flex gap-1.5">
+                  <div className="h-2.5 w-2.5 rounded-full bg-red-400/70" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-amber-400/70" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-green-400/70" />
+                </div>
+                <div className="ml-3 flex-1 rounded-md bg-muted/60 px-3 py-1 text-xs text-muted-foreground">
+                  educai.app/app/dashboard
+                </div>
+              </div>
+              <div className="grid grid-cols-12 gap-3 p-4 sm:gap-4 sm:p-6">
+                <div className="col-span-12 rounded-xl border border-border bg-background/60 p-4 sm:col-span-4">
+                  <p className="mb-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Profile Snapshot</p>
+                  <div className="space-y-2">
+                    {[["Stage","Final Year BSc"],["Target","Master&apos;s"],["Major","Computer Science"],["Countries","Germany, UK"],["GPA","3.8 / 4.0"]].map(([label, value]) => (
+                      <div key={label} className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">{label}</span>
+                        <span className="font-medium">{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-3 rounded-full bg-primary/10 px-2.5 py-1 text-center text-[11px] font-semibold text-primary">Profile 90% Complete</div>
+                </div>
+                <div className="col-span-12 rounded-xl border border-border bg-background/60 p-4 sm:col-span-8">
+                  <p className="mb-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    <Sparkles className="mr-1 inline size-3 text-primary" />AI Recommended Programs
+                  </p>
+                  <div className="space-y-2">
+                    {[["MSc Computer Science","TU Munich","Germany",94],["MSc AI & ML","University of Edinburgh","UK",88],["MSc Data Science","KIT Karlsruhe","Germany",82]].map(([program,univ,country,score]) => (
+                      <div key={program as string} className="flex items-center gap-3 rounded-lg border border-border/60 px-3 py-2 text-xs">
+                        <div className="flex-1 min-w-0">
+                          <p className="truncate font-medium">{program as string}</p>
+                          <p className="text-muted-foreground">{univ as string} · {country as string}</p>
+                        </div>
+                        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${(score as number) >= 90 ? "bg-green-500/15 text-green-500" : "bg-amber-500/15 text-amber-500"}`}>
+                          {score as number}% match
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="col-span-12 rounded-xl border border-border bg-background/60 px-4 py-3">
+                  <div className="flex flex-wrap items-center gap-4">
+                    <p className="text-xs font-semibold text-muted-foreground">Upcoming:</p>
+                    {[["TU Munich Application","42 days"],["Chevening Scholarship","68 days"],["IELTS Retake","15 days"]].map(([label,days]) => (
+                      <div key={label as string} className="flex items-center gap-1.5 text-xs">
+                        <CalendarDays className="size-3 text-primary/70" />
+                        <span className="text-muted-foreground">{label as string}</span>
+                        <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">{days as string}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </FadeIn>
+      </div>
+    </section>
+  );
+}
 
 const STATS = [
-  { value: "150+", label: "Programs scraped & analyzed" },
+  { value: "150+", label: "Programs analyzed" },
   { value: "15+", label: "Countries covered" },
   { value: "28+", label: "Verified scholarships" },
-  { value: "LLM", label: "AI-scored recommendations" },
+  { value: "AI", label: "LLM-scored matches" },
 ] as const;
 
 function StatsStrip() {
   return (
-    <div className="border-y border-border/50 bg-muted/20">
+    <div className="border-y border-border/50 bg-muted/30">
       <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px px-4 sm:grid-cols-4 sm:px-6 lg:px-8">
         {STATS.map((s) => (
-          <div key={s.label} className="flex flex-col items-center justify-center py-6 text-center">
-            <span className="text-2xl font-bold text-primary">{s.value}</span>
+          <div key={s.label} className="flex flex-col items-center justify-center py-7 text-center">
+            <span className="text-2xl font-extrabold tracking-tight text-primary">{s.value}</span>
             <span className="mt-1 text-xs text-muted-foreground">{s.label}</span>
           </div>
         ))}
@@ -122,72 +214,42 @@ function StatsStrip() {
   );
 }
 
-// ─────────────────────────────────────────────
-// Features grid
-// ─────────────────────────────────────────────
-
 const FEATURES = [
-  {
-    icon: "Globe",
-    title: "Global coverage",
-    description:
-      "Real-time data from universities across the UK, USA, Canada, Germany, Australia, and more.",
-  },
-  {
-    icon: "Sparkles",
-    title: "AI-powered matching",
-    description:
-      "Programs are scored against your exact profile — GPA, budget, language, and career goals.",
-  },
-  {
-    icon: "BookOpen",
-    title: "Scholarship discovery",
-    description:
-      "Country-specific scholarships with deadline tracking and eligibility pre-screening.",
-  },
-  {
-    icon: "Users",
-    title: "Community insights",
-    description:
-      "See where students with similar profiles applied and what worked for them.",
-  },
+  { icon: Globe, title: "Global program database", description: "Real-time data from universities across Germany, UK, USA, Canada, Australia, and more — scraped and normalized automatically.", badge: "Live data" },
+  { icon: Sparkles, title: "Profile-matched recommendations", description: "Programs are scored against your GPA, language scores, budget, and career goals. Every recommendation explains why it fits.", badge: "AI reasoning" },
+  { icon: Award, title: "Scholarship intelligence", description: "28+ verified scholarships with deadline tracking, eligibility pre-screening, and funding probability scoring.", badge: "Verified data" },
+  { icon: Target, title: "Application strategy", description: "AI-generated admission chance band, risk assessment, and concrete action plan — grounded in your actual profile.", badge: "AI + profile" },
+  { icon: CalendarDays, title: "Timeline planner", description: "Month-by-month roadmap from saved program deadlines, country-specific visa milestones, and document checklists.", badge: "Personalized" },
+  { icon: MessageSquare, title: "AI advisor chatbot", description: "A context-aware assistant that knows your saved programs, scholarship matches, and deadlines — with source citations.", badge: "Profile-aware" },
 ] as const;
-
-type FeatureIconName = "Globe" | "Sparkles" | "BookOpen" | "Users";
-
-const ICON_MAP: Record<FeatureIconName, React.ComponentType<{ className?: string }>> = {
-  Globe,
-  Sparkles,
-  BookOpen,
-  Users,
-};
 
 function FeaturesSection() {
   return (
-    <section id="features" className="py-20 bg-muted/20">
+    <section id="features" className="py-24 bg-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Reveal>
-          <div className="mb-14 text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-primary">Platform</p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-foreground">
-              Everything you need to study abroad
-            </h2>
-            <p className="mt-3 max-w-2xl mx-auto text-muted-foreground">
-              EducAI combines live university data, AI matching, and scholarship intelligence into one coherent workflow.
+          <div className="mb-16 text-center">
+            <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-primary">Platform</p>
+            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Everything you need to study abroad</h2>
+            <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground">
+              EducAI combines live program data, AI matching, and scholarship intelligence into one coherent workflow.
             </p>
           </div>
         </Reveal>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((f, i) => {
-            const Icon = ICON_MAP[f.icon as FeatureIconName];
+            const Icon = f.icon;
             return (
-              <Reveal key={f.title} delay={i * 0.1}>
-                <div className="rounded-xl border border-border bg-card p-6 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all h-full">
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10">
-                    <Icon className="size-5 text-primary" />
+              <Reveal key={f.title} delay={i * 0.06}>
+                <div className="group flex flex-col rounded-2xl border border-border bg-card p-6 transition-all duration-200 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
+                  <div className="mb-4 flex items-start justify-between gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
+                      <Icon className="size-5 text-primary" />
+                    </div>
+                    <span className="rounded-full border border-primary/20 bg-primary/8 px-2.5 py-1 text-[10px] font-semibold text-primary">{f.badge}</span>
                   </div>
-                  <h3 className="font-semibold text-foreground">{f.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{f.description}</p>
+                  <h3 className="mb-2 font-bold text-foreground">{f.title}</h3>
+                  <p className="text-sm leading-relaxed text-muted-foreground">{f.description}</p>
                 </div>
               </Reveal>
             );
@@ -198,111 +260,177 @@ function FeaturesSection() {
   );
 }
 
-// ─────────────────────────────────────────────
-// Footer
-// ─────────────────────────────────────────────
+const MODULES = [
+  { number: "01", name: "Program Finder", description: "AI-matched programs from real scraped data. Every result shows why it fits your profile.", features: ["Profile-based scoring", "GPA & test score fit", "Budget & country filters", "Admission requirement analysis"], href: "/app/programs", icon: BookOpen },
+  { number: "02", name: "Scholarship Hunter", description: "28+ verified scholarships with eligibility scoring, deadline tracking, and funding probability estimates.", features: ["Eligibility pre-screening", "Deadline alerts via email", "Funding probability band", "Country + field filters"], href: "/app/scholarships", icon: Award },
+  { number: "03", name: "Application Tools", description: "AI-generated SOP, ATS-ready CV, and professor outreach — tailored to your academic profile.", features: ["SOP Builder (3 tones)", "CV Builder (3 styles)", "Professor Finder + email templates", "Application timeline planner"], href: "/app/sop", icon: FileText },
+  { number: "04", name: "Strategy & Guidance", description: "Admission chance band, risk factors, and step-by-step action plan with honest AI reasoning.", features: ["Admission chance band", "Risk assessment", "Action plan with timeframes", "AI advisor chatbot"], href: "/app/strategy", icon: Target },
+] as const;
 
-function Footer() {
+function ModulesSection() {
   return (
-    <footer className="border-t border-border bg-background py-10">
+    <section id="modules" className="py-24 bg-muted/20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center gap-6 md:flex-row md:justify-between">
-          <Logo />
-          <nav aria-label="Footer links">
-            <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
-              {[
-                { label: "About", href: "#" },
-                { label: "Privacy", href: "#" },
-                { label: "Terms", href: "#" },
-                { label: "Contact", href: "mailto:hello@educai.app" },
-                {
-                  label: "GitHub",
-                  href: "https://github.com/Prohar04/EducAI",
-                  external: true,
-                },
-              ].map((item) => (
-                <li key={item.label}>
-                  <a
-                    href={item.href}
-                    target={item.external ? "_blank" : undefined}
-                    rel={item.external ? "noopener noreferrer" : undefined}
-                    className="hover:text-foreground transition-colors focus-visible:text-primary focus-visible:outline-none inline-flex items-center gap-1"
-                  >
-                    {item.label}
-                    {item.external && <ExternalLink className="size-3" />}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-          <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} EducAI. All rights reserved.
-          </p>
-        </div>
-      </div>
-    </footer>
-  );
-}
-
-// ─────────────────────────────────────────────
-// Hero
-// ─────────────────────────────────────────────
-
-async function HeroSection() {
-  const session = await getSession().catch(() => null);
-  const isLoggedIn = !!session;
-
-  return (
-    <section className="relative overflow-hidden bg-background">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[500px] w-[800px] rounded-full bg-primary/5 blur-3xl" />
-      </div>
-      <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
-          <div>
-            <FadeIn delay={0}>
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-4 py-1.5 text-xs font-semibold text-primary">
-                <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                Live &middot; Program data updated daily
-              </div>
-            </FadeIn>
-            <FadeIn delay={0.1}>
-              <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-6xl leading-tight">
-                Smart Decisions.{" "}
-                <span className="text-primary">Global</span>{" "}
-                Destination.
-              </h1>
-            </FadeIn>
-            <FadeIn delay={0.2}>
-              <p className="mt-5 max-w-lg text-lg text-muted-foreground leading-relaxed">
-                Find programs, scholarships, and a clear application plan &mdash; powered by data and AI.
-                Built for ambitious students navigating the world&apos;s best universities.
-              </p>
-            </FadeIn>
-            <FadeIn delay={0.3}>
-              <div className="mt-8 flex flex-wrap gap-4">
-                <Button size="lg" asChild className="gap-2 font-semibold">
-                  <Link href={isLoggedIn ? "/app/programs" : "/auth/signin"}>
-                    Explore Programs
-                    <ArrowRight className="size-4" />
-                  </Link>
-                </Button>
-                <Button size="lg" variant="outline" asChild>
-                  <a href="#how-it-works">See how it works</a>
-                </Button>
-              </div>
-            </FadeIn>
+        <Reveal>
+          <div className="mb-16 text-center">
+            <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-primary">Modules</p>
+            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Four modules. One complete journey.</h2>
+            <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground">
+              From discovering the right programs to submitting your application — every module is live.
+            </p>
           </div>
-          <HeroIllustration />
+        </Reveal>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          {MODULES.map((mod, i) => {
+            const Icon = mod.icon;
+            return (
+              <Reveal key={mod.number} delay={i * 0.08}>
+                <div className="group flex flex-col rounded-2xl border border-border bg-card p-7 transition-all duration-200 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 h-full">
+                  <div className="mb-5 flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                        <Icon className="size-6 text-primary" />
+                      </div>
+                      <span className="text-3xl font-black text-foreground/8 select-none">{mod.number}</span>
+                    </div>
+                    <span className="rounded-full border border-green-500/30 bg-green-500/10 px-2.5 py-1 text-[10px] font-bold text-green-500">● Live</span>
+                  </div>
+                  <h3 className="mb-2 text-lg font-bold text-foreground">{mod.name}</h3>
+                  <p className="mb-5 text-sm leading-relaxed text-muted-foreground">{mod.description}</p>
+                  <ul className="mb-6 flex-1 space-y-2">
+                    {mod.features.map((feat) => (
+                      <li key={feat} className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <ChevronRight className="size-3.5 shrink-0 text-primary/60" />{feat}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href={mod.href} className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-all hover:gap-2.5">
+                    Explore module <ArrowRight className="size-4" />
+                  </Link>
+                </div>
+              </Reveal>
+            );
+          })}
         </div>
       </div>
     </section>
   );
 }
 
-// ─────────────────────────────────────────────
-// Page
-// ─────────────────────────────────────────────
+const TRUST_POINTS = [
+  { icon: CheckCircle2, title: "Real data, clearly labeled", desc: "Every program and scholarship shows its source URL, provider, and verification date. No made-up numbers." },
+  { icon: Sparkles, title: "AI reasoning, not magic scores", desc: "Match scores, eligibility checks, and probability bands come with explanations — so you understand the reasoning." },
+  { icon: Users, title: "Profile-grounded guidance", desc: "Every recommendation is grounded in your actual GPA, test scores, budget, and target destinations." },
+] as const;
+
+function TrustSection() {
+  return (
+    <section className="py-20 bg-background">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="rounded-2xl border border-border bg-muted/30 p-8 sm:p-12">
+          <Reveal>
+            <div className="mb-10 text-center">
+              <h2 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Transparent, trustworthy, data-grounded</h2>
+              <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
+                We don&apos;t hide behind vague AI scores. Every output tells you where the data came from and why.
+              </p>
+            </div>
+          </Reveal>
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+            {TRUST_POINTS.map((point, i) => {
+              const Icon = point.icon;
+              return (
+                <Reveal key={point.title} delay={i * 0.08}>
+                  <div className="flex flex-col items-center text-center">
+                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-primary/20 bg-primary/8">
+                      <Icon className="size-5 text-primary" />
+                    </div>
+                    <h3 className="mb-2 font-bold">{point.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{point.desc}</p>
+                  </div>
+                </Reveal>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+async function CTASection() {
+  const session = await getSession().catch(() => null);
+  const isLoggedIn = !!session;
+  return (
+    <section className="py-24 border-y border-primary/10 bg-primary/5">
+      <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+        <Reveal>
+          <GraduationCap className="mx-auto mb-4 size-12 text-primary" />
+          <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Your study abroad journey starts here</h2>
+          <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground">
+            Build your profile in under three minutes and get AI-matched program recommendations,
+            scholarship options, and a personalized application timeline — all for free.
+          </p>
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Button size="lg" asChild className="h-12 px-8 text-base font-semibold shadow-lg shadow-primary/20">
+              <Link href={isLoggedIn ? "/app" : "/auth/signup"}>
+                {isLoggedIn ? "Go to dashboard" : "Create free account"}
+                <ArrowRight className="ml-2 size-4" />
+              </Link>
+            </Button>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="border-t border-border bg-background py-12">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+          <div className="col-span-2">
+            <Logo className="mb-4" />
+            <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
+              AI-powered study abroad platform. Find the right programs, discover scholarships,
+              and plan your application — grounded in real data.
+            </p>
+          </div>
+          <div>
+            <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Platform</p>
+            <ul className="space-y-2.5 text-sm text-muted-foreground">
+              {[["Programs","/app/programs"],["Match","/app/match"],["Scholarships","/app/scholarships"],["Strategy","/app/strategy"]].map(([label, href]) => (
+                <li key={label as string}><Link href={href as string} className="transition-colors hover:text-foreground">{label as string}</Link></li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Links</p>
+            <ul className="space-y-2.5 text-sm text-muted-foreground">
+              {[
+                { label: "Privacy", href: "#" },
+                { label: "Terms", href: "#" },
+                { label: "Contact", href: "mailto:hello@educai.app" },
+                { label: "GitHub", href: "https://github.com/Prohar04/EducAI", external: true },
+              ].map((item) => (
+                <li key={item.label}>
+                  <a href={item.href} target={item.external ? "_blank" : undefined} rel={item.external ? "noopener noreferrer" : undefined} className="inline-flex items-center gap-1 transition-colors hover:text-foreground">
+                    {item.label}{item.external && <ExternalLink className="size-3" />}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <div className="mt-10 border-t border-border pt-6 text-center text-xs text-muted-foreground">
+          &copy; {new Date().getFullYear()} EducAI. All rights reserved.
+          {" · "}Data sourced from official university websites and public scholarship databases.
+        </div>
+      </div>
+    </footer>
+  );
+}
 
 async function TrendingFeedSection() {
   const items = await fetchEducationPulse();
@@ -317,11 +445,13 @@ export default function HomePage() {
       <main className="flex-1">
         <HeroSection />
         <StatsStrip />
-        <TrendingFeedSection />
-        <QuoteStrip quote={dailyQuote} />
         <FeaturesSection />
         <HowItWorks />
-        <RoadmapCards />
+        <ModulesSection />
+        <TrustSection />
+        <TrendingFeedSection />
+        <QuoteStrip quote={dailyQuote} />
+        <CTASection />
       </main>
       <Footer />
     </div>
