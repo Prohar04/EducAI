@@ -101,10 +101,10 @@ async function PublicNavbar() {
 // ─────────────────────────────────────────────
 
 const STATS = [
-  { value: "300+", label: "Universities tracked" },
-  { value: "40+", label: "Countries covered" },
-  { value: "12k+", label: "Scholarships indexed" },
-  { value: "94%", label: "Avg. match accuracy" },
+  { value: "150+", label: "Programs scraped & analyzed" },
+  { value: "15+", label: "Countries covered" },
+  { value: "28+", label: "Verified scholarships" },
+  { value: "LLM", label: "AI-scored recommendations" },
 ] as const;
 
 function StatsStrip() {

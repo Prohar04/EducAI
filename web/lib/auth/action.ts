@@ -390,3 +390,96 @@ export const intelligentSearchAction = async (
 	return response.json();
 };
 
+// ── Module 3: SOP Builder ─────────────────────────────────────────────────────
+
+export type SopTone = "formal" | "research" | "personal";
+export type SopType = "general" | "scholarship" | "research";
+
+export interface SopGenerateRequest {
+	tone: SopTone;
+	sopType: SopType;
+	targetProgram?: string;
+	targetUniversity?: string;
+	targetCountry?: string;
+	targetIntake?: string;
+	highlights?: string;
+}
+
+export interface SopResult {
+	sop: string;
+	wordCount: number;
+	tone: SopTone;
+	sopType: SopType;
+}
+
+export const generateSopAction = async (req: SopGenerateRequest): Promise<SopResult | null> => {
+	const response = await authFetch(`${BACKEND_URL}/sop/generate`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(req),
+	});
+	if (!response.ok) return null;
+	return response.json();
+};
+
+// ── Module 3: CV Builder ──────────────────────────────────────────────────────
+
+export type CvStyle = "academic" | "research" | "industry";
+
+export interface CvGenerateRequest {
+	cvStyle: CvStyle;
+	highlights?: string;
+}
+
+export interface CvResult {
+	cv: string;
+	style: string;
+	sections: string[];
+}
+
+export const generateCvAction = async (req: CvGenerateRequest): Promise<CvResult | null> => {
+	const response = await authFetch(`${BACKEND_URL}/cv/generate`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(req),
+	});
+	if (!response.ok) return null;
+	return response.json();
+};
+
+// ── Module 3: Professor Finder ────────────────────────────────────────────────
+
+export interface ProfessorResult {
+	name: string;
+	title: string;
+	university: string;
+	department: string;
+	researchAreas: string[];
+	email: string | null;
+	profileUrl: string | null;
+	snippet: string;
+	emailTemplate: string;
+}
+
+export interface ProfessorSearchResponse {
+	query: string;
+	results: ProfessorResult[];
+	searchedAt: string;
+}
+
+export const searchProfessorsAction = async (
+	researchInterest: string,
+	university?: string,
+	country?: string,
+	level?: "phd" | "masters",
+): Promise<ProfessorSearchResponse | null> => {
+	if (!researchInterest.trim()) return null;
+	const response = await authFetch(`${BACKEND_URL}/professors/search`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ researchInterest, university, country, level }),
+	});
+	if (!response.ok) return null;
+	return response.json();
+};
+

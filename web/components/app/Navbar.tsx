@@ -73,9 +73,9 @@ const TOOLS = [
   { href: "/app/strategy", label: "Strategy", icon: Target, soon: false },
   { href: "/app/scholarships", label: "Scholarships", icon: Award, soon: false },
   { href: "/app/agent", label: "AI Agent", icon: MessageSquare, soon: false },
-  { href: "/app/sop", label: "SOP Builder", icon: FileText, soon: true },
-  { href: "/app/cv", label: "CV Builder", icon: ClipboardList, soon: true },
-  { href: "/app/professors", label: "Professor Finder", icon: Users, soon: true },
+  { href: "/app/sop", label: "SOP Builder", icon: FileText, soon: false },
+  { href: "/app/cv", label: "CV Builder", icon: ClipboardList, soon: false },
+  { href: "/app/professors", label: "Professor Finder", icon: Users, soon: false },
 ] as const;
 
 export function Navbar({ user }: { user: Session["user"] }) {
