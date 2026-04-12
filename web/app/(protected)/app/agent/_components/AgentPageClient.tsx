@@ -257,7 +257,7 @@ export default function AgentPageClient({
 	]);
 	const [input, setInput] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
-	const [sidebarOpen, setSidebarOpen] = useState(true);
+	const [sidebarOpen, setSidebarOpen] = useState(false);
 
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -358,13 +358,13 @@ export default function AgentPageClient({
 
 	return (
 		<div className="flex h-[calc(100vh-3.5rem)] overflow-hidden">
-			{/* Sidebar */}
+			{/* Sidebar — hidden on mobile, toggle-controlled on desktop */}
 			<aside
 				className={`flex-shrink-0 border-r border-border bg-card transition-all duration-300 overflow-hidden ${
-					sidebarOpen ? "w-64 xl:w-72" : "w-0"
+					sidebarOpen ? "w-72" : "w-0"
 				}`}
 			>
-				<div className="flex h-full w-64 xl:w-72 flex-col overflow-y-auto p-4">
+				<div className="flex h-full w-72 flex-col overflow-y-auto p-4">
 					{/* Profile context */}
 					<div className="mb-4 rounded-xl border border-border bg-background/60 p-3">
 						<p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">

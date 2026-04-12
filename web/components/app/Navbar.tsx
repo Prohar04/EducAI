@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   GraduationCap,
   LayoutDashboard,
@@ -22,6 +22,8 @@ import {
   Bell,
   MessageSquare,
   ExternalLink,
+  Menu,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -83,6 +85,8 @@ export function Navbar({ user }: { user: Session["user"] }) {
   const pathname = usePathname();
   const [modulesOpen, setModulesOpen] = useState(false);
   const [alertsOpen, setAlertsOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileToolsOpen, setMobileToolsOpen] = useState(false);
   const [alerts, setAlerts] = useState<AlertNotification[]>([]);
   const [alertsLoaded, setAlertsLoaded] = useState(false);
 
@@ -104,6 +108,23 @@ export function Navbar({ user }: { user: Session["user"] }) {
     }
   }, [alertsOpen, alertsLoaded, loadAlerts]);
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
+
   const handleSignOut = async () => {
     await fetch("/api/signout", { method: "POST" });
     router.push("/auth/signin");
@@ -124,200 +145,367 @@ export function Navbar({ user }: { user: Session["user"] }) {
   const isToolsActive = TOOLS.some((m) => isActive(m.href));
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-md">
-      <nav
-        className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8"
-        aria-label="App navigation"
-      >
-        {/* Logo */}
-        <Link href="/" className="group flex items-center gap-2 shrink-0">
-          <GraduationCap className="size-7 text-primary transition-transform duration-200 group-hover:scale-110" />
-          <span className="text-lg font-bold tracking-tight">
-            Educ<span className="text-primary">AI</span>
-          </span>
-        </Link>
+    <>
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-md">
+        <nav
+          className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8"
+          aria-label="App navigation"
+        >
+          {/* Logo */}
+          <Link href="/" className="group flex items-center gap-2 shrink-0">
+            <GraduationCap className="size-7 text-primary transition-transform duration-200 group-hover:scale-110" />
+            <span className="text-lg font-bold tracking-tight">
+              Educ<span className="text-primary">AI</span>
+            </span>
+          </Link>
 
-        {/* Desktop nav */}
-        <ul className="hidden items-center gap-2 lg:flex" role="list">
-          {NAV_LINKS.map(({ href, label }) => {
-            const active = isActive(href);
-            return (
-              <li key={href}>
-                <Link
-                  href={href}
-                  aria-current={active ? "page" : undefined}
-                  className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
-                    active ? ACTIVE_PILL_CLASS : INACTIVE_PILL_CLASS
-                  }`}
+          {/* Desktop nav */}
+          <ul className="hidden items-center gap-2 lg:flex" role="list">
+            {NAV_LINKS.map(({ href, label }) => {
+              const active = isActive(href);
+              return (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    aria-current={active ? "page" : undefined}
+                    className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                      active ? ACTIVE_PILL_CLASS : INACTIVE_PILL_CLASS
+                    }`}
+                  >
+                    {label}
+                  </Link>
+                </li>
+              );
+            })}
+
+            <li>
+              <DropdownMenu open={modulesOpen} onOpenChange={setModulesOpen}>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                      isToolsActive ? ACTIVE_PILL_CLASS : INACTIVE_PILL_CLASS
+                    }`}
+                  >
+                    Tools
+                    <motion.span
+                      animate={{ rotate: modulesOpen ? 180 : 0 }}
+                      transition={{ duration: 0.2, ease: "easeInOut" }}
+                      style={{ display: "flex" }}
+                    >
+                      <ChevronDown className="size-3.5" />
+                    </motion.span>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="w-60 rounded-2xl border-border/60 bg-background/95 p-2 shadow-[0_20px_48px_-24px_rgba(0,0,0,0.35)]"
+                  sideOffset={6}
                 >
-                  {label}
-                </Link>
-              </li>
-            );
-          })}
+                  {TOOLS.map(({ href, label, icon: Icon, soon }) => {
+                    const active = isActive(href);
+                    return (
+                      <DropdownMenuItem
+                        key={href}
+                        asChild
+                        className={`rounded-xl p-0 transition-colors ${
+                          active
+                            ? "focus:bg-transparent"
+                            : "focus:bg-muted/60"
+                        }`}
+                      >
+                        <Link
+                          href={href}
+                          className={`flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm transition-all ${
+                            active
+                              ? `${ACTIVE_PILL_CLASS} bg-primary/10`
+                              : "text-foreground/90 hover:bg-muted/60"
+                          }`}
+                        >
+                          <Icon
+                            className={`size-4 shrink-0 ${
+                              active ? "text-primary" : "text-muted-foreground"
+                            }`}
+                          />
+                          <span className="flex-1">{label}</span>
+                          {soon && (
+                            <span className="rounded-full border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-primary">
+                              Soon
+                            </span>
+                          )}
+                        </Link>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </li>
+          </ul>
 
-          <li>
-            <DropdownMenu open={modulesOpen} onOpenChange={setModulesOpen}>
+          {/* Right side: notifications + user + mobile toggle */}
+          <div className="flex items-center gap-1 sm:gap-2">
+            {/* Notification Bell */}
+            <DropdownMenu open={alertsOpen} onOpenChange={setAlertsOpen}>
               <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative size-9" aria-label="Notifications">
+                  <Bell className="size-4" />
+                  {alerts.length > 0 && (
+                    <span className="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                      {alerts.length > 9 ? "9+" : alerts.length}
+                    </span>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80 rounded-2xl p-2">
+                <div className="px-2 py-1.5">
+                  <p className="text-sm font-semibold">Scholarship Alerts</p>
+                  <p className="text-xs text-muted-foreground">Upcoming deadline notifications</p>
+                </div>
+                <DropdownMenuSeparator />
+                {!alertsLoaded ? (
+                  <div className="flex items-center justify-center py-6">
+                    <div className="size-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  </div>
+                ) : alerts.length === 0 ? (
+                  <div className="px-3 py-6 text-center">
+                    <Bell className="mx-auto mb-2 size-8 text-muted-foreground/40" />
+                    <p className="text-sm text-muted-foreground">No recent deadline alerts</p>
+                    <Link href="/app/scholarships" className="mt-2 inline-block text-xs text-primary hover:underline">
+                      View scholarships
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="max-h-64 overflow-y-auto">
+                    {alerts.slice(0, 10).map((alert) => (
+                      <DropdownMenuItem key={alert.id} asChild className="rounded-xl p-0">
+                        <a
+                          href={alert.scholarshipUrl ?? "/app/scholarships"}
+                          target={alert.scholarshipUrl ? "_blank" : undefined}
+                          rel="noopener noreferrer"
+                          className="flex w-full items-start gap-2.5 rounded-xl px-3 py-2.5 text-sm hover:bg-muted/60"
+                        >
+                          <Award className="mt-0.5 size-4 shrink-0 text-primary" />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate font-medium">{alert.scholarshipTitle}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Alerted {alert.daysBeforeSent}d before deadline
+                              {alert.provider ? ` · ${alert.provider}` : ""}
+                            </p>
+                          </div>
+                          {alert.scholarshipUrl && <ExternalLink className="size-3.5 shrink-0 text-muted-foreground" />}
+                        </a>
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild className="rounded-xl">
+                      <Link href="/app/scholarships" className="flex items-center justify-center gap-1.5 py-2 text-xs text-primary">
+                        View all scholarships
+                      </Link>
+                    </DropdownMenuItem>
+                  </div>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* User menu (desktop) */}
+            <div className="hidden lg:block">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <NavAvatar user={user} />
+                    <span className="hidden max-w-[120px] truncate text-sm sm:block">
+                      {user.name}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <div className="px-2 py-1.5">
+                    <p className="truncate text-sm font-medium">{user.name}</p>
+                    <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/app/profile" className="cursor-pointer">
+                      <User className="mr-2 size-4" />
+                      Edit Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleSignOut}
+                    className="cursor-pointer text-destructive focus:text-destructive"
+                  >
+                    <LogOut className="mr-2 size-4" />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Mobile: avatar + hamburger */}
+            <div className="flex items-center gap-1 lg:hidden">
+              <NavAvatar user={user} />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-9"
+                aria-label={mobileOpen ? "Close menu" : "Open menu"}
+                onClick={() => setMobileOpen((v) => !v)}
+              >
+                {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+              </Button>
+            </div>
+          </div>
+        </nav>
+      </header>
+
+      {/* Mobile menu overlay */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key="mobile-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+              onClick={() => setMobileOpen(false)}
+            />
+            {/* Drawer */}
+            <motion.div
+              key="mobile-drawer"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
+              className="fixed right-0 top-0 z-50 h-full w-72 max-w-[85vw] overflow-y-auto border-l border-border bg-background shadow-2xl lg:hidden"
+            >
+              {/* Drawer header */}
+              <div className="flex h-16 items-center justify-between border-b border-border px-4">
+                <div className="flex flex-col">
+                  <p className="text-sm font-semibold">{user.name}</p>
+                  <p className="text-xs text-muted-foreground truncate max-w-[180px]">{user.email}</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-9 shrink-0"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <X className="size-5" />
+                </Button>
+              </div>
+
+              {/* Nav links */}
+              <div className="p-3 space-y-1">
+                <p className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Navigation
+                </p>
+                {NAV_LINKS.map(({ href, label, icon: Icon }) => {
+                  const active = isActive(href);
+                  return (
+                    <Link
+                      key={href}
+                      href={href}
+                      aria-current={active ? "page" : undefined}
+                      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                        active
+                          ? "bg-primary/10 text-primary"
+                          : "text-foreground/80 hover:bg-muted/60 hover:text-foreground"
+                      }`}
+                    >
+                      <Icon className={`size-4 shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`} />
+                      {label}
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {/* Tools section */}
+              <div className="px-3 pb-3">
                 <button
                   type="button"
-                  className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
-                    isToolsActive ? ACTIVE_PILL_CLASS : INACTIVE_PILL_CLASS
-                  }`}
+                  onClick={() => setMobileToolsOpen((v) => !v)}
+                  className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hover:bg-muted/60 transition-colors"
                 >
                   Tools
                   <motion.span
-                    animate={{ rotate: modulesOpen ? 180 : 0 }}
-                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                    animate={{ rotate: mobileToolsOpen ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
                     style={{ display: "flex" }}
                   >
                     <ChevronDown className="size-3.5" />
                   </motion.span>
                 </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="start"
-                className="w-60 rounded-2xl border-border/60 bg-background/95 p-2 shadow-[0_20px_48px_-24px_rgba(0,0,0,0.35)]"
-                sideOffset={6}
-              >
-                {TOOLS.map(({ href, label, icon: Icon, soon }) => {
-                  const active = isActive(href);
-                  return (
-                    <DropdownMenuItem
-                      key={href}
-                      asChild
-                      className={`rounded-xl p-0 transition-colors ${
-                        active
-                          ? "focus:bg-transparent"
-                          : "focus:bg-muted/60"
-                      }`}
+                <AnimatePresence initial={false}>
+                  {mobileToolsOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
                     >
-                      <Link
-                        href={href}
-                        className={`flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm transition-all ${
-                          active
-                            ? `${ACTIVE_PILL_CLASS} bg-primary/10`
-                            : "text-foreground/90 hover:bg-muted/60"
-                        }`}
-                      >
-                        <Icon
-                          className={`size-4 shrink-0 ${
-                            active ? "text-primary" : "text-muted-foreground"
-                          }`}
-                        />
-                        <span className="flex-1">{label}</span>
-                        {soon && (
-                          <span className="rounded-full border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-primary">
-                            Soon
-                          </span>
-                        )}
-                      </Link>
-                    </DropdownMenuItem>
-                  );
-                })}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </li>
-        </ul>
-
-        {/* Notification Bell + User menu */}
-        <div className="flex items-center gap-2">
-          <DropdownMenu open={alertsOpen} onOpenChange={setAlertsOpen}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative size-9" aria-label="Notifications">
-                <Bell className="size-4" />
-                {alerts.length > 0 && (
-                  <span className="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-                    {alerts.length > 9 ? "9+" : alerts.length}
-                  </span>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80 rounded-2xl p-2">
-              <div className="px-2 py-1.5">
-                <p className="text-sm font-semibold">Scholarship Alerts</p>
-                <p className="text-xs text-muted-foreground">Upcoming deadline notifications</p>
+                      <div className="space-y-1 pt-1">
+                        {TOOLS.map(({ href, label, icon: Icon, soon }) => {
+                          const active = isActive(href);
+                          return (
+                            <Link
+                              key={href}
+                              href={href}
+                              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                                active
+                                  ? "bg-primary/10 text-primary"
+                                  : "text-foreground/80 hover:bg-muted/60 hover:text-foreground"
+                              }`}
+                            >
+                              <Icon className={`size-4 shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`} />
+                              <span className="flex-1">{label}</span>
+                              {soon && (
+                                <span className="rounded-full border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-primary">
+                                  Soon
+                                </span>
+                              )}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-              <DropdownMenuSeparator />
-              {!alertsLoaded ? (
-                <div className="flex items-center justify-center py-6">
-                  <div className="size-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                </div>
-              ) : alerts.length === 0 ? (
-                <div className="px-3 py-6 text-center">
-                  <Bell className="mx-auto mb-2 size-8 text-muted-foreground/40" />
-                  <p className="text-sm text-muted-foreground">No recent deadline alerts</p>
-                  <Link href="/app/scholarships" className="mt-2 inline-block text-xs text-primary hover:underline">
-                    View scholarships
-                  </Link>
-                </div>
-              ) : (
-                <div className="max-h-64 overflow-y-auto">
-                  {alerts.slice(0, 10).map((alert) => (
-                    <DropdownMenuItem key={alert.id} asChild className="rounded-xl p-0">
-                      <a
-                        href={alert.scholarshipUrl ?? "/app/scholarships"}
-                        target={alert.scholarshipUrl ? "_blank" : undefined}
-                        rel="noopener noreferrer"
-                        className="flex w-full items-start gap-2.5 rounded-xl px-3 py-2.5 text-sm hover:bg-muted/60"
-                      >
-                        <Award className="mt-0.5 size-4 shrink-0 text-primary" />
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate font-medium">{alert.scholarshipTitle}</p>
-                          <p className="text-xs text-muted-foreground">
-                            Alerted {alert.daysBeforeSent}d before deadline
-                            {alert.provider ? ` · ${alert.provider}` : ""}
-                          </p>
-                        </div>
-                        {alert.scholarshipUrl && <ExternalLink className="size-3.5 shrink-0 text-muted-foreground" />}
-                      </a>
-                    </DropdownMenuItem>
-                  ))}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild className="rounded-xl">
-                    <Link href="/app/scholarships" className="flex items-center justify-center gap-1.5 py-2 text-xs text-primary">
-                      View all scholarships
-                    </Link>
-                  </DropdownMenuItem>
-                </div>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="gap-2">
-              <NavAvatar user={user} />
-              <span className="hidden max-w-[120px] truncate text-sm sm:block">
-                {user.name}
-              </span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <div className="px-2 py-1.5">
-              <p className="truncate text-sm font-medium">{user.name}</p>
-              <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-            </div>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/app/profile" className="cursor-pointer">
-                <User className="mr-2 size-4" />
-                Edit Profile
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={handleSignOut}
-              className="cursor-pointer text-destructive focus:text-destructive"
-            >
-              <LogOut className="mr-2 size-4" />
-              Sign out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        </div>
-      </nav>
-    </header>
+              {/* Divider */}
+              <div className="mx-3 border-t border-border" />
+
+              {/* Account actions */}
+              <div className="p-3 space-y-1">
+                <p className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Account
+                </p>
+                <Link
+                  href="/app/profile"
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground/80 hover:bg-muted/60 hover:text-foreground transition-colors"
+                >
+                  <User className="size-4 shrink-0 text-muted-foreground" />
+                  Edit Profile
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
+                >
+                  <LogOut className="size-4 shrink-0" />
+                  Sign out
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
