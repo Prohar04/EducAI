@@ -47,6 +47,8 @@ export default async function ProgramDetailPage({
       : null;
 
   const levelLabel = LEVEL_LABELS[program.level] ?? program.level;
+  // eslint-disable-next-line react-hooks/purity -- server component: Date.now() runs once at request time, not on re-render
+  const now = Date.now();
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
@@ -189,7 +191,7 @@ export default async function ProgramDetailPage({
                 <div className="space-y-2.5">
                   {program.deadlines.map((dl) => {
                     const date = new Date(dl.deadline);
-                    const daysLeft = Math.ceil((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                    const daysLeft = Math.ceil((date.getTime() - now) / (1000 * 60 * 60 * 24));
                     const urgency =
                       daysLeft < 0
                         ? "text-muted-foreground line-through"
