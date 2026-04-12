@@ -479,6 +479,23 @@ model ScholarshipAlertLog {
   @@map("scholarship_alert_logs")
 }
 
+// ── SEARCH CACHE ──────────────────────────────────────────────────
+// PostgreSQL-backed cache for LLM query-rewrite + Serper search results.
+// Cache key = SHA-256 of the normalized user query string.
+model SearchCache {
+  id        String   @id @default(cuid())
+  key       String   @unique @db.VarChar(64)  // SHA-256 hex (64 chars)
+  query     String   @db.Text                  // original user query
+  rewrites  Json                               // string[] — LLM-generated rewritten queries
+  results   Json                               // SearchResult[] — {title,url,snippet}[]
+  expiresAt DateTime @map("expires_at") @db.Timestamp
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp
+
+  @@index([key])
+  @@index([expiresAt])
+  @@map("search_cache")
+}
+
 // ── GOOGLE OAUTH ONE-TIME CODES ────────────────────────────────────
 model OAuthCode {
   id           String   @id @default(cuid())

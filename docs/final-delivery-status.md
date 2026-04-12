@@ -4,6 +4,9 @@
 **Branch:** main  
 **Build status:** ✅ All checks green
 
+> **Note:** This document is updated continuously as phases complete.  
+> See `docs/master-rebuild-plan.md` for the full phase execution plan.
+
 ---
 
 ## CI/CD Status

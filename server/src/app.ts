@@ -22,6 +22,7 @@ import strategyRoutes from './routes/strategy.router.ts';
 import chatRoutes from './routes/chat.router.ts';
 import scholarshipRoutes from './routes/scholarship.router.ts';
 import deadlineAlertRoutes from './routes/deadlineAlert.router.ts';
+import searchRoutes from './routes/search.router.ts';
 // import { PrismaSessionStore } from './services/session.service.ts';
 
 const app = express();
@@ -178,6 +179,7 @@ app.use('/strategy', strategyRoutes);
 app.use('/chat', chatRoutes);
 app.use('/scholarships', scholarshipRoutes);
 app.use('/deadline-alerts', deadlineAlertRoutes);
+app.use('/search', searchRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
