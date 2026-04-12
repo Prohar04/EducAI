@@ -21,6 +21,9 @@ EducAI helps international students navigate the study-abroad process end to end
 | **Funding Probability Predictor** | 6-factor weighted score with strengths, weaknesses, and improvement actions |
 | **Scholarship Deadline Alerts** | 30/14/7/1-day email alerts, idempotent DB deduplication, daily cron scheduler |
 | **AI Advisor Chatbot** | Full-page conversational agent with profile context, source citations, and retry logic |
+| **SOP Builder** | AI-generated Statement of Purpose — 3 tone modes, 3 SOP types, profile-injected, copy/download |
+| **CV Builder** | ATS-friendly CV in academic / research / industry styles, generated from your profile |
+| **Professor Finder** | Live web search for research supervisors with auto-generated cold-email templates |
 
 ---
 
@@ -126,6 +129,8 @@ Open [http://localhost:3000](http://localhost:3000)
 | `EMAIL_USER` / `EMAIL_PASS` | Optional | Gmail address + App Password for alerts |
 | `CRON_SECRET` | Recommended | Protects `POST /deadline-alerts/run` |
 | `INGEST_API_KEY` | Optional | Shared key for match data ingestion from ai-server |
+| `OPENROUTER_API_KEY` | Recommended | LLM for SOP Builder, CV Builder, Professor Finder (OpenRouter free tier works) |
+| `SERPER_API_KEY` | Recommended | Web search used by Professor Finder to discover faculty pages |
 
 ### Web (`web/.env.local`)
 
@@ -239,9 +244,9 @@ npm run seed:visa
 | | Funding Probability Predictor | ✅ Complete |
 | | Scholarship Deadline Alerts | ✅ Complete |
 | **AI Chatbot** | AI Advisor | ✅ Complete |
-| **Module 3** | SOP Builder | 🔜 Planned |
-| | CV Builder | 🔜 Planned |
-| | Professor Finder | 🔜 Planned |
+| **Module 3** | SOP Builder | ✅ Complete |
+| | CV Builder | ✅ Complete |
+| | Professor Finder | ✅ Complete |
 
 ---
 

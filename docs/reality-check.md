@@ -22,9 +22,9 @@ This document verifies claims made about EducAI against actual code and runtime 
 | Real scholarship data | docs | ✅ Verified True | 28 seeded scholarships with sourceUrl, lastVerified timestamps | Labelled as seeded data — correct |
 | Email notifications for alerts | docs, feature description | ⚠️ Partially True | Backend scheduler endpoint exists; email path requires SMTP/Resend config | Document provider requirement |
 | Daily data updates | Landing page badge | ⚠️ Partially True | RSS feed updates daily; programs update on match run (24h cache); not a continuous crawler | Update wording to "data updated on match runs" |
-| SOP Builder | Project overview PDF | ❌ False | Only a "Coming soon" placeholder page | Implement or clearly mark as roadmap |
-| CV Builder | Project overview PDF | ❌ False | Only a "Coming soon" placeholder page | Implement or clearly mark as roadmap |
-| Professor Finder | Project overview PDF | ❌ False | Only a "Coming soon" placeholder page | Implement or clearly mark as roadmap |
+| SOP Builder | Project overview PDF | ✅ Verified True | Full implementation: `/app/sop`, Express `POST /sop/generate`, OpenRouter `gpt-4o-mini`, 3 tone modes, 3 SOP types, profile-injected | None |
+| CV Builder | Project overview PDF | ✅ Verified True | Full implementation: `/app/cv`, Express `POST /cv/generate`, 3 CV styles (academic/research/industry), ATS-friendly plain text | None |
+| Professor Finder | Project overview PDF | ✅ Verified True | Full implementation: `/app/professors`, Express `POST /professors/search`, Serper live search + LLM extraction + email templates | None |
 | LLM query rewriting | docs (new) | ✅ Verified True | `SearchService` with OpenRouter rewrite + Serper + PostgreSQL TTL cache implemented | None |
 | PostgreSQL search cache | docs (new) | ✅ Verified True | SearchCache Prisma model + SearchService | None |
 | Profile-aware AI chat | feature description | ✅ Verified True | Express chat route injects profile + saved programs context before forwarding to ai-server | None |
@@ -45,12 +45,14 @@ This document verifies claims made about EducAI against actual code and runtime 
 3. `94% match accuracy` → remove or replace with "LLM-scored recommendations"
 4. `40+ countries` → change to "15+ countries"
 
-### MEDIUM — Implement placeholder features
-5. SOP Builder → implement LLM-powered SOP generation
-6. CV Builder → implement LLM-powered CV generation
-7. Professor Finder → implement Serper + LLM professor search
+### MEDIUM — Previously placeholder features (✅ All implemented 2026-04-12)
+
+5. ~~SOP Builder~~ → ✅ Implemented: OpenRouter LLM + profile context, 3 tones, copy/download
+6. ~~CV Builder~~ → ✅ Implemented: 3 styles, ATS plain-text, regenerate support
+7. ~~Professor Finder~~ → ✅ Implemented: Serper + LLM extraction + email templates
 
 ### LOW — Documentation alignment
-8. Update README to reflect actual data sources
+
+8. ✅ README updated to reflect actual data sources and Module 3 completion
 9. Document email provider requirement for alerts
 10. Document "live vs seeded" distinction clearly
