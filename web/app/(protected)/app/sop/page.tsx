@@ -4,7 +4,6 @@ import { useState, useTransition } from "react";
 import {
 	BookOpen,
 	Check,
-	ChevronDown,
 	Copy,
 	Download,
 	FileText,
