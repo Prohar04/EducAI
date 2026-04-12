@@ -419,3 +419,14 @@ export interface EligibleScholarshipItem {
 	scholarship: ScholarshipItem;
 	eligibility: EligibilityResult;
 }
+
+export interface AlertNotification {
+	id: string;
+	scholarshipId: string;
+	scholarshipTitle: string;
+	provider: string | null;
+	scholarshipUrl: string | null;
+	daysBeforeSent: number;
+	sentAt: string;
+	channel: string;
+}

@@ -16,6 +16,7 @@ import {
 	ProbabilityResult,
 	UpcomingDeadlineItem,
 	EligibleScholarshipItem,
+	AlertNotification,
 } from "@/types/auth.type";
 
 const HTTP_STATUS_TEXT: Record<number, string> = {
@@ -341,5 +342,21 @@ export const getScholarshipProbability = async (
 	);
 	if (!response.ok) return null;
 	return response.json();
+};
+
+// ── Deadline Alerts ─────────────────────────────────────────────────────────
+
+export const getAlertNotifications = async (): Promise<AlertNotification[]> => {
+	const response = await authFetch(`${BACKEND_URL}/deadline-alerts/recent`);
+	if (!response.ok) return [];
+	const data = await response.json();
+	return data.alerts ?? [];
+};
+
+export const getAlertCount = async (): Promise<number> => {
+	const response = await authFetch(`${BACKEND_URL}/deadline-alerts/count`);
+	if (!response.ok) return 0;
+	const data = await response.json();
+	return data.count ?? 0;
 };
 

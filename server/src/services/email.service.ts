@@ -86,3 +86,80 @@ export async function sendPasswordResetEmail(
 
   await sendMail({ to: toEmail, subject, html, text });
 }
+
+export interface ScholarshipAlertItem {
+  scholarshipTitle: string;
+  provider: string | null;
+  deadlineDate: string;   // human-readable, e.g. "15 Dec 2026"
+  daysLeft: number;
+  scholarshipUrl: string | null;
+  amount: string | null;
+}
+
+export async function sendScholarshipDeadlineAlert(
+  toEmail: string,
+  userName: string,
+  alerts: ScholarshipAlertItem[],
+): Promise<void> {
+  if (alerts.length === 0) return;
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+  const scholarshipsUrl = `${appUrl}/app/scholarships`;
+
+  const itemRows = alerts
+    .map(
+      (a) => `
+        <tr>
+          <td style="padding:12px 8px;border-bottom:1px solid #eee;">
+            <strong>${a.scholarshipTitle}</strong>${a.provider ? `<br/><span style="color:#666;font-size:13px;">${a.provider}</span>` : ''}
+          </td>
+          <td style="padding:12px 8px;border-bottom:1px solid #eee;white-space:nowrap;">
+            ${a.deadlineDate}
+          </td>
+          <td style="padding:12px 8px;border-bottom:1px solid #eee;text-align:center;">
+            <span style="background:${a.daysLeft <= 7 ? '#fee2e2' : a.daysLeft <= 14 ? '#fef3c7' : '#dcfce7'};
+                         color:${a.daysLeft <= 7 ? '#dc2626' : a.daysLeft <= 14 ? '#d97706' : '#16a34a'};
+                         border-radius:9999px;padding:2px 10px;font-size:13px;font-weight:600;">
+              ${a.daysLeft}d left
+            </span>
+          </td>
+          ${a.scholarshipUrl ? `<td style="padding:12px 8px;border-bottom:1px solid #eee;"><a href="${a.scholarshipUrl}" style="color:#4f46e5;">Apply</a></td>` : '<td style="padding:12px 8px;border-bottom:1px solid #eee;"></td>'}
+        </tr>
+      `,
+    )
+    .join('');
+
+  const subject = alerts.length === 1
+    ? `Scholarship deadline in ${alerts[0].daysLeft} days — ${alerts[0].scholarshipTitle}`
+    : `${alerts.length} scholarship deadlines coming up — EducAI`;
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+      <h2 style="color:#111;">Scholarship Deadline Alert</h2>
+      <p>Hi ${userName},</p>
+      <p>You have ${alerts.length === 1 ? 'a scholarship deadline' : `${alerts.length} scholarship deadlines`} coming up soon. Don't miss out!</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin:16px 0;">
+        <thead>
+          <tr style="background:#f9fafb;">
+            <th style="text-align:left;padding:10px 8px;font-size:13px;color:#666;">Scholarship</th>
+            <th style="text-align:left;padding:10px 8px;font-size:13px;color:#666;">Deadline</th>
+            <th style="text-align:center;padding:10px 8px;font-size:13px;color:#666;">Time Left</th>
+            <th style="padding:10px 8px;font-size:13px;color:#666;">Link</th>
+          </tr>
+        </thead>
+        <tbody>${itemRows}</tbody>
+      </table>
+      <a href="${scholarshipsUrl}"
+         style="display:inline-block;padding:12px 24px;margin:16px 0;background:#4f46e5;color:#fff;text-decoration:none;border-radius:6px;font-weight:bold;">
+        View All Scholarships
+      </a>
+      <hr style="border:none;border-top:1px solid #eee;margin:24px 0;" />
+      <p style="color:#999;font-size:12px;">EducAI &mdash; Your AI-powered study abroad platform</p>
+    </div>
+  `;
+
+  const textLines = alerts.map((a) => `• ${a.scholarshipTitle} (${a.provider ?? 'Unknown'}) — deadline ${a.deadlineDate}, ${a.daysLeft} days left`);
+  const text = `Scholarship Deadline Alert\n\nHi ${userName},\n\nYou have upcoming scholarship deadlines:\n${textLines.join('\n')}\n\nView all: ${scholarshipsUrl}`;
+
+  await sendMail({ to: toEmail, subject, html, text });
+}

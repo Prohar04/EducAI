@@ -43,6 +43,7 @@ model User {
   matchRuns                MatchRun[]
   roadmaps                 UserRoadmap[]
   strategyReports          StrategyReport[]
+  scholarshipAlertLogs     ScholarshipAlertLog[]
 
   @@index([email])
   @@index([oauthProvider, oauthId])
@@ -457,6 +458,25 @@ model StrategyReport {
   @@index([countryCode])
   @@index([cacheKey])
   @@map("strategy_reports")
+}
+
+// ── SCHOLARSHIP DEADLINE ALERT LOG ─────────────────────────────────
+// Tracks which alerts have been dispatched to prevent duplicates.
+model ScholarshipAlertLog {
+  id             String   @id @default(cuid())
+  userId         String   @map("user_id") @db.Uuid
+  scholarshipId  String   @map("scholarship_id")
+  deadlineId     String   @map("deadline_id")
+  daysBeforeSent Int      @map("days_before_sent") // e.g. 30, 14, 7, 1
+  sentAt         DateTime @default(now()) @map("sent_at") @db.Timestamp
+  channel        String   @default("email") @db.VarChar(20) // "email" | "in_app"
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, deadlineId, daysBeforeSent, channel])
+  @@index([userId])
+  @@index([sentAt])
+  @@map("scholarship_alert_logs")
 }
 
 // ── GOOGLE OAUTH ONE-TIME CODES ────────────────────────────────────
