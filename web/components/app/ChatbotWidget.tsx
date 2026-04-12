@@ -111,7 +111,10 @@ function confidenceClasses(confidence: ChatReply["confidence"]) {
 }
 
 export function ChatbotWidget() {
-	const [open, setOpen] = useState(false);
+	const [open, setOpen] = useState(() => {
+		if (typeof window === "undefined") return false;
+		return sessionStorage.getItem("chatbot:open") === "true";
+	});
 	const [input, setInput] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const [messages, setMessages] = useState<ChatMessage[]>([
@@ -421,7 +424,11 @@ export function ChatbotWidget() {
 			<Button
 				size="icon"
 				className="size-14 rounded-full bg-slate-950 text-cyan-200 shadow-[0_18px_40px_rgba(15,23,42,0.4)] hover:bg-slate-900"
-				onClick={() => setOpen((value) => !value)}
+				onClick={() => setOpen((value) => {
+					const next = !value;
+					sessionStorage.setItem("chatbot:open", String(next));
+					return next;
+				})}
 				aria-label={open ? "Close chat" : "Open chat"}
 			>
 				{open ? <X className="size-5" /> : <MessageCircle className="size-5" />}

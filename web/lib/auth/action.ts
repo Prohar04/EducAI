@@ -360,3 +360,33 @@ export const getAlertCount = async (): Promise<number> => {
 	return data.count ?? 0;
 };
 
+// ── Intelligent Search ────────────────────────────────────────────────────────
+
+export interface IntelligentSearchResult {
+	title: string;
+	url: string;
+	snippet: string;
+}
+
+export interface IntelligentSearchResponse {
+	cacheHit: boolean;
+	query: string;
+	rewrites: string[];
+	results: IntelligentSearchResult[];
+	cachedAt: string | null;
+	expiresAt: string | null;
+}
+
+export const intelligentSearchAction = async (
+	query: string,
+): Promise<IntelligentSearchResponse | null> => {
+	if (!query.trim()) return null;
+	const response = await authFetch(`${BACKEND_URL}/search/intelligent`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ query }),
+	});
+	if (!response.ok) return null;
+	return response.json();
+};
+

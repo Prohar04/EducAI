@@ -2,6 +2,7 @@ import Link from "next/link";
 import { searchPrograms, getSavedPrograms } from "@/lib/auth/action";
 import ProgramFilters from "./_components/ProgramFilters";
 import SaveButton from "./_components/SaveButton";
+import NlpSearchPanel from "./_components/NlpSearchPanel";
 import type { Program } from "@/types/auth.type";
 import { ProgramsIllustration } from "@/components/illustrations";
 import { FadeIn } from "@/components/motion/FadeIn";
@@ -51,6 +52,8 @@ export default async function ProgramsPage({
 					Search university programmes worldwide.
 				</p>
 			</FadeIn>
+
+			<NlpSearchPanel />
 
 			<ProgramFilters current={params} />
 
