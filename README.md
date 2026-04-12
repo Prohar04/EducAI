@@ -20,7 +20,7 @@ EducAI helps international students navigate the study-abroad process end to end
 | **Funding Eligibility Checker** | Deterministic profile-aware scoring: eligible / partially eligible / not eligible |
 | **Funding Probability Predictor** | 6-factor weighted score with strengths, weaknesses, and improvement actions |
 | **Scholarship Deadline Alerts** | 30/14/7/1-day email alerts, idempotent DB deduplication, daily cron scheduler |
-| **AI Advisor Chatbot** | Full-page conversational agent with profile context, source citations, and retry logic |
+| **AI Advisor Chatbot** | Floating assistant widget with profile context, source citations, and retry logic — available on every protected page |
 | **SOP Builder** | AI-generated Statement of Purpose — 3 tone modes, 3 SOP types, profile-injected, copy/download |
 | **CV Builder** | ATS-friendly CV in academic / research / industry styles, generated from your profile |
 | **Professor Finder** | Live web search for research supervisors with auto-generated cold-email templates |
