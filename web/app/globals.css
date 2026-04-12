@@ -181,6 +181,12 @@
   }
 }
 
+/* ── Chat widget animation ────────────────────────────────────────────────── */
+@keyframes chatWidgetIn {
+  from { opacity: 0; transform: scale(0.92) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 /* ── Print styles (Timeline) ──────────────────────────────────────────────── */
 @media print {
   header, nav, aside, footer, .print\:hidden {
