@@ -30,49 +30,56 @@ export default function ProgramFilters({ current }: { current: Record<string, st
 	const hasFilters = ["q", "level", "field", "country"].some((k) => current[k]);
 
 	return (
-		<form onSubmit={handleSubmit} className="mb-6 flex flex-wrap items-center gap-3">
-			<Input
-				name="q"
-				className="h-9 w-48"
-				placeholder="Search programs…"
-				defaultValue={current.q ?? ""}
-			/>
-			<select
-				name="level"
-				defaultValue={current.level ?? ""}
-				className="h-9 rounded-md border border-input bg-background px-3 text-sm"
-			>
-				{LEVELS.map((l) => (
-					<option key={l.value} value={l.value}>
-						{l.label}
-					</option>
-				))}
-			</select>
-			<Input
-				name="field"
-				className="h-9 w-40"
-				placeholder="Field (e.g. CS)"
-				defaultValue={current.field ?? ""}
-			/>
-			<Input
-				name="country"
-				className="h-9 w-36"
-				placeholder="Country (US, GB…)"
-				defaultValue={current.country ?? ""}
-			/>
-			<Button type="submit" size="sm">
-				Search
-			</Button>
-			{hasFilters && (
-				<Button
-					type="button"
-					variant="outline"
-					size="sm"
-					onClick={() => router.push(pathname)}
-				>
-					Clear
+		<form onSubmit={handleSubmit} className="mb-6 space-y-3">
+			{/* Primary search row */}
+			<div className="flex gap-2">
+				<Input
+					name="q"
+					className="h-9 min-w-0 flex-1"
+					placeholder="Search programs…"
+					defaultValue={current.q ?? ""}
+				/>
+				<Button type="submit" size="sm" className="shrink-0">
+					Search
 				</Button>
-			)}
+				{hasFilters && (
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						className="shrink-0"
+						onClick={() => router.push(pathname)}
+					>
+						Clear
+					</Button>
+				)}
+			</div>
+			{/* Filter row */}
+			<div className="flex flex-wrap gap-2">
+				<select
+					name="level"
+					defaultValue={current.level ?? ""}
+					className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+				>
+					{LEVELS.map((l) => (
+						<option key={l.value} value={l.value}>
+							{l.label}
+						</option>
+					))}
+				</select>
+				<Input
+					name="field"
+					className="h-9 w-36 sm:w-40"
+					placeholder="Field (e.g. CS)"
+					defaultValue={current.field ?? ""}
+				/>
+				<Input
+					name="country"
+					className="h-9 w-32 sm:w-36"
+					placeholder="Country (US, GB…)"
+					defaultValue={current.country ?? ""}
+				/>
+			</div>
 		</form>
 	);
 }
