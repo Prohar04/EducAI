@@ -590,6 +590,16 @@ function ScholarshipCard({
 					</a>
 				)}
 			</div>
+
+			{/* Data provenance */}
+			{scholarship.lastVerified && (
+				<p className="mt-3 text-[10px] text-muted-foreground/60 border-t border-border/50 pt-2">
+					Verified {new Date(scholarship.lastVerified).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+					{scholarship.sourceUrl && (
+						<> · <a href={scholarship.sourceUrl} target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-muted-foreground">source</a></>
+					)}
+				</p>
+			)}
 		</div>
 	);
 }
