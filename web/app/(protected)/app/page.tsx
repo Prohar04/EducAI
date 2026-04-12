@@ -308,40 +308,17 @@ function RecommendedPrograms({ match }: { match: MatchLatestResponse | null }) {
   );
 }
 
-function ImportantDeadlines({ savedPrograms, profile }: { savedPrograms: SavedProgramItem[]; profile: UserProfile }) {
-  // Generate mock deadlines based on saved programs and profile
-  const deadlines: DeadlineItem[] = [];
+function ImportantDeadlines({ deadlines }: { deadlines: DeadlineItem[] }) {
+  const shown = deadlines.slice(0, 5);
 
-  // Add program deadlines
-  savedPrograms.slice(0, 3).forEach((item, idx) => {
-    deadlines.push({
-      id: `deadline-${idx}`,
-      title: `Application: ${item.program.title}`,
-      date: "Dec 15, 2026",
-      type: "application",
-      priority: "high",
-    });
-  });
-
-  // Add test deadline if user has test info
-  if (profile.englishTestType && !profile.englishScore) {
-    deadlines.push({
-      id: "test-1",
-      title: `${profile.englishTestType} Test`,
-      date: "Nov 30, 2026",
-      type: "test",
-      priority: "high",
-    });
-  }
-
-  if (deadlines.length === 0) {
+  if (shown.length === 0) {
     return (
       <AnimatedCard className="rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
-        <SectionHeader title="Important Deadlines" icon={Calendar} />
+        <SectionHeader title="Upcoming Deadlines" icon={Calendar} />
         <EmptyState
           icon={Clock}
-          title="No deadlines tracked"
-          description="Save programs to track their application deadlines"
+          title="No upcoming deadlines"
+          description="Save programs with deadlines to track them here"
           ctaText="Browse Programs"
           ctaHref="/app/programs"
         />
@@ -351,10 +328,10 @@ function ImportantDeadlines({ savedPrograms, profile }: { savedPrograms: SavedPr
 
   return (
     <AnimatedCard className="rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
-      <SectionHeader title="Important Deadlines" icon={Calendar} />
+      <SectionHeader title="Upcoming Deadlines" icon={Calendar} href="/app/timeline" linkText="View Timeline" />
 
       <div className="space-y-2">
-        {deadlines.map((deadline) => {
+        {shown.map((deadline) => {
           const priorityColors = {
             high: "border-l-red-500",
             medium: "border-l-amber-500",
@@ -488,6 +465,31 @@ function GlobalEducationPulse({ news }: { news: EducationNewsItem[] }) {
   );
 }
 
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+
+function buildUpcomingDeadlines(savedPrograms: SavedProgramItem[], nowTs: number): DeadlineItem[] {
+  const deadlines: DeadlineItem[] = [];
+  for (const item of savedPrograms) {
+    if (!item.program.deadlines?.length) continue;
+    for (const dl of item.program.deadlines) {
+      const ts = new Date(dl.deadline).getTime();
+      if (ts < nowTs) continue;
+      const daysLeft = Math.ceil((ts - nowTs) / (1000 * 60 * 60 * 24));
+      deadlines.push({
+        id: dl.id,
+        title: `${item.program.title} — ${dl.term ?? "Application"}`,
+        date: new Date(dl.deadline).toLocaleDateString("en-US", {
+          day: "numeric", month: "short", year: "numeric",
+        }),
+        type: "application",
+        priority: daysLeft <= 30 ? "high" : daysLeft <= 90 ? "medium" : "low",
+      });
+    }
+  }
+  deadlines.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  return deadlines;
+}
+
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 
 export default async function StudyPlanPage() {
@@ -518,6 +520,9 @@ export default async function StudyPlanPage() {
   if (profileData && !profileData.onboardingDone) {
     redirect("/onboarding");
   }
+
+  // Compute real deadlines from saved programs using server-side utility
+  const upcomingDeadlines = buildUpcomingDeadlines(savedProgramsData, new Date().getTime());
 
   // No profile fallback
   if (!profileData) {
@@ -566,7 +571,7 @@ export default async function StudyPlanPage() {
         </StaggerItem>
 
         <StaggerItem className="lg:col-span-5">
-          <ImportantDeadlines savedPrograms={savedProgramsData} profile={profileData} />
+          <ImportantDeadlines deadlines={upcomingDeadlines} />
         </StaggerItem>
 
         {/* Bottom Row */}

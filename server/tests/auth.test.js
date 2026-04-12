@@ -44,9 +44,11 @@ jest.unstable_mockModule('#src/services/token.service.ts', () => ({
 // Email service
 const mockSendVerificationEmail = jest.fn().mockResolvedValue(undefined);
 const mockSendPasswordResetEmail = jest.fn().mockResolvedValue(undefined);
+const mockSendScholarshipDeadlineAlert = jest.fn().mockResolvedValue(undefined);
 jest.unstable_mockModule('#src/services/email.service.ts', () => ({
   sendVerificationEmail: mockSendVerificationEmail,
   sendPasswordResetEmail: mockSendPasswordResetEmail,
+  sendScholarshipDeadlineAlert: mockSendScholarshipDeadlineAlert,
 }));
 
 // Email verification service

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -19,6 +19,9 @@ import {
   ChevronDown,
   CalendarDays,
   Target,
+  Bell,
+  MessageSquare,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -29,7 +32,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { Session } from "@/types/auth.type";
+import type { Session, AlertNotification } from "@/types/auth.type";
+import { getAlertNotifications } from "@/lib/auth/action";
 
 const ACTIVE_PILL_CLASS =
   "bg-primary/12 text-primary shadow-[0_0_0_1px_rgba(220,161,62,0.24),0_12px_30px_-18px_rgba(220,161,62,0.8)]";
@@ -67,7 +71,8 @@ const NAV_LINKS = [
 const TOOLS = [
   { href: "/app/timeline", label: "Timeline", icon: CalendarDays, soon: false },
   { href: "/app/strategy", label: "Strategy", icon: Target, soon: false },
-  { href: "/app/scholarships", label: "Scholarships", icon: Award, soon: true },
+  { href: "/app/scholarships", label: "Scholarships", icon: Award, soon: false },
+  { href: "/app/agent", label: "AI Agent", icon: MessageSquare, soon: false },
   { href: "/app/sop", label: "SOP Builder", icon: FileText, soon: true },
   { href: "/app/cv", label: "CV Builder", icon: ClipboardList, soon: true },
   { href: "/app/professors", label: "Professor Finder", icon: Users, soon: true },
@@ -77,6 +82,27 @@ export function Navbar({ user }: { user: Session["user"] }) {
   const router = useRouter();
   const pathname = usePathname();
   const [modulesOpen, setModulesOpen] = useState(false);
+  const [alertsOpen, setAlertsOpen] = useState(false);
+  const [alerts, setAlerts] = useState<AlertNotification[]>([]);
+  const [alertsLoaded, setAlertsLoaded] = useState(false);
+
+  const loadAlerts = useCallback(async () => {
+    try {
+      const data = await getAlertNotifications();
+      setAlerts(data);
+    } catch {
+      // Non-critical — fail silently
+    } finally {
+      setAlertsLoaded(true);
+    }
+  }, []);
+
+  // Load alerts when notification panel opens for the first time
+  useEffect(() => {
+    if (alertsOpen && !alertsLoaded) {
+      loadAlerts();
+    }
+  }, [alertsOpen, alertsLoaded, loadAlerts]);
 
   const handleSignOut = async () => {
     await fetch("/api/signout", { method: "POST" });
@@ -194,7 +220,70 @@ export function Navbar({ user }: { user: Session["user"] }) {
           </li>
         </ul>
 
-        {/* User menu */}
+        {/* Notification Bell + User menu */}
+        <div className="flex items-center gap-2">
+          <DropdownMenu open={alertsOpen} onOpenChange={setAlertsOpen}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="relative size-9" aria-label="Notifications">
+                <Bell className="size-4" />
+                {alerts.length > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                    {alerts.length > 9 ? "9+" : alerts.length}
+                  </span>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80 rounded-2xl p-2">
+              <div className="px-2 py-1.5">
+                <p className="text-sm font-semibold">Scholarship Alerts</p>
+                <p className="text-xs text-muted-foreground">Upcoming deadline notifications</p>
+              </div>
+              <DropdownMenuSeparator />
+              {!alertsLoaded ? (
+                <div className="flex items-center justify-center py-6">
+                  <div className="size-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                </div>
+              ) : alerts.length === 0 ? (
+                <div className="px-3 py-6 text-center">
+                  <Bell className="mx-auto mb-2 size-8 text-muted-foreground/40" />
+                  <p className="text-sm text-muted-foreground">No recent deadline alerts</p>
+                  <Link href="/app/scholarships" className="mt-2 inline-block text-xs text-primary hover:underline">
+                    View scholarships
+                  </Link>
+                </div>
+              ) : (
+                <div className="max-h-64 overflow-y-auto">
+                  {alerts.slice(0, 10).map((alert) => (
+                    <DropdownMenuItem key={alert.id} asChild className="rounded-xl p-0">
+                      <a
+                        href={alert.scholarshipUrl ?? "/app/scholarships"}
+                        target={alert.scholarshipUrl ? "_blank" : undefined}
+                        rel="noopener noreferrer"
+                        className="flex w-full items-start gap-2.5 rounded-xl px-3 py-2.5 text-sm hover:bg-muted/60"
+                      >
+                        <Award className="mt-0.5 size-4 shrink-0 text-primary" />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-medium">{alert.scholarshipTitle}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Alerted {alert.daysBeforeSent}d before deadline
+                            {alert.provider ? ` · ${alert.provider}` : ""}
+                          </p>
+                        </div>
+                        {alert.scholarshipUrl && <ExternalLink className="size-3.5 shrink-0 text-muted-foreground" />}
+                      </a>
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild className="rounded-xl">
+                    <Link href="/app/scholarships" className="flex items-center justify-center gap-1.5 py-2 text-xs text-primary">
+                      View all scholarships
+                    </Link>
+                  </DropdownMenuItem>
+                </div>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="gap-2">
@@ -226,6 +315,7 @@ export function Navbar({ user }: { user: Session["user"] }) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        </div>
       </nav>
     </header>
   );
