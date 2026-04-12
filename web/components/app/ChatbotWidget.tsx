@@ -245,7 +245,10 @@ export function ChatbotWidget() {
 	return (
 		<div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
 			{open && (
-				<div className="fixed inset-y-4 right-4 flex w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[28px] border border-white/10 bg-slate-950/96 text-slate-50 shadow-[0_28px_80px_rgba(15,23,42,0.55)] backdrop-blur-xl">
+				<div
+					className="fixed inset-y-4 right-4 flex w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[28px] border border-white/10 bg-slate-950/96 text-slate-50 shadow-[0_28px_80px_rgba(15,23,42,0.55)] backdrop-blur-xl"
+					style={{ animation: "chatWidgetIn 0.22s cubic-bezier(0.34,1.56,0.64,1) both" }}
+				>
 					<div className="border-b border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.25),_transparent_50%),linear-gradient(135deg,_rgba(15,23,42,1),_rgba(2,6,23,0.92))] px-5 py-4">
 						<div className="flex items-start justify-between gap-3">
 							<div>
@@ -390,9 +393,13 @@ export function ChatbotWidget() {
 
 						{isLoading && (
 							<div className="flex justify-start">
-								<div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">
-									<Loader2 className="size-4 animate-spin text-cyan-200" />
-									Thinking through your context...
+								<div className="inline-flex items-center gap-2.5 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">
+									<span className="flex gap-1">
+										<span className="size-1.5 rounded-full bg-cyan-300 animate-bounce [animation-delay:0ms]" />
+										<span className="size-1.5 rounded-full bg-cyan-300 animate-bounce [animation-delay:120ms]" />
+										<span className="size-1.5 rounded-full bg-cyan-300 animate-bounce [animation-delay:240ms]" />
+									</span>
+									Thinking...
 								</div>
 							</div>
 						)}

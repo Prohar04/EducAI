@@ -220,7 +220,7 @@ export default function StrategyReportClient({
 
 			{/* Filters */}
 			<Reveal>
-				<div className="mb-6 flex flex-wrap gap-3 rounded-xl border border-border bg-card px-5 py-4">
+				<div className="mb-6 flex flex-wrap gap-3 rounded-2xl border border-border bg-card px-5 py-4">
 					<div className="flex flex-col gap-1 flex-1 min-w-[160px]">
 						<label className="text-xs font-medium text-muted-foreground">Target Country</label>
 						<select
@@ -279,7 +279,7 @@ export default function StrategyReportClient({
 			{/* Empty state */}
 			{!isPending && !error && !r && (
 				<Reveal>
-					<div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20 text-center">
+					<div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-20 text-center">
 						<Target className="mb-4 size-12 text-muted-foreground/40" />
 						<h2 className="text-lg font-semibold">
 							{hasSavedPrograms ? "No strategy report yet" : "No strategy data yet"}
@@ -314,7 +314,7 @@ export default function StrategyReportClient({
 			{isPending && (
 				<div className="space-y-5">
 					{Array.from({ length: 5 }).map((_, i) => (
-						<div key={i} className="rounded-xl border border-border bg-card p-5">
+						<div key={i} className="rounded-2xl border border-border bg-card p-5">
 							<div className="mb-3 h-5 w-40 rounded bg-muted animate-pulse" />
 							<SkeletonBlock lines={i % 2 === 0 ? 3 : 2} />
 						</div>
@@ -333,7 +333,7 @@ export default function StrategyReportClient({
 					</div>
 
 					{/* Summary */}
-					<section className="rounded-xl border border-border bg-card p-5">
+					<section className="rounded-2xl border border-border bg-card p-5">
 						<h2 className="mb-2 flex items-center gap-2 font-semibold">
 							<FileText className="size-4 text-primary" /> Summary
 						</h2>
@@ -342,7 +342,7 @@ export default function StrategyReportClient({
 
 					{/* Why this country */}
 					{r.whyThisCountryFits?.length > 0 && (
-						<section className="rounded-xl border border-border bg-card p-5">
+						<section className="rounded-2xl border border-border bg-card p-5">
 							<h2 className="mb-3 flex items-center gap-2 font-semibold">
 								<TrendingUp className="size-4 text-primary" /> Why {countryName} Fits You
 							</h2>
@@ -359,7 +359,7 @@ export default function StrategyReportClient({
 
 					{/* Admission chances */}
 					{r.admissionChances && (
-						<section className="rounded-xl border border-border bg-card p-5">
+						<section className="rounded-2xl border border-border bg-card p-5">
 							<h2 className="mb-3 flex items-center gap-2 font-semibold">
 								<Target className="size-4 text-primary" /> Admission Chances
 							</h2>
@@ -379,7 +379,7 @@ export default function StrategyReportClient({
 
 					{/* Risk assessment */}
 					{r.riskAssessment?.length > 0 && (
-						<section className="rounded-xl border border-border bg-card p-5">
+						<section className="rounded-2xl border border-border bg-card p-5">
 							<h2 className="mb-3 flex items-center gap-2 font-semibold">
 								<ShieldAlert className="size-4 text-primary" /> Risk Assessment
 							</h2>
@@ -412,7 +412,7 @@ export default function StrategyReportClient({
 
 					{/* Recommended actions */}
 					{r.recommendedActions?.length > 0 && (
-						<section className="rounded-xl border border-border bg-card p-5">
+						<section className="rounded-2xl border border-border bg-card p-5">
 							<h2 className="mb-3 flex items-center gap-2 font-semibold">
 								<ListChecks className="size-4 text-primary" /> Action Plan
 							</h2>
@@ -426,7 +426,7 @@ export default function StrategyReportClient({
 
 					{/* Document checklist */}
 					{r.documentChecklist?.length > 0 && (
-						<section className="rounded-xl border border-border bg-card p-5">
+						<section className="rounded-2xl border border-border bg-card p-5">
 							<h2 className="mb-3 flex items-center gap-2 font-semibold">
 								<ListChecks className="size-4 text-primary" /> Document Checklist
 							</h2>

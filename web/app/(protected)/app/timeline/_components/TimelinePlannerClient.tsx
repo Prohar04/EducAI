@@ -124,7 +124,7 @@ function MonthCard({ month, defaultOpen = false }: { month: RoadmapMonth; defaul
 	const [open, setOpen] = useState(defaultOpen);
 
 	return (
-		<div className="rounded-xl border border-border bg-card overflow-hidden">
+		<div className="rounded-2xl border border-border bg-card overflow-hidden">
 			<button
 				type="button"
 				onClick={() => setOpen((o) => !o)}
@@ -182,7 +182,7 @@ function MonthCard({ month, defaultOpen = false }: { month: RoadmapMonth; defaul
 
 function SkeletonCard() {
 	return (
-		<div className="rounded-xl border border-border bg-card p-5 animate-pulse">
+		<div className="rounded-2xl border border-border bg-card p-5 animate-pulse">
 			<div className="flex items-center gap-3 mb-3">
 				<div className="h-4 w-4 rounded bg-muted" />
 				<div className="h-4 w-40 rounded bg-muted" />
@@ -320,7 +320,7 @@ export default function TimelinePlannerClient({
 
 			{/* Filters */}
 			<Reveal>
-				<div className="mb-6 flex flex-wrap gap-3 rounded-xl border border-border bg-card px-5 py-4">
+				<div className="mb-6 flex flex-wrap gap-3 rounded-2xl border border-border bg-card px-5 py-4">
 					<div className="flex flex-col gap-1 flex-1 min-w-[160px]">
 						<label className="text-xs font-medium text-muted-foreground">Target Country</label>
 						<select
@@ -407,7 +407,7 @@ export default function TimelinePlannerClient({
 			{/* Empty state: No saved programs at all */}
 			{!isPending && !error && hasNoPrograms && (
 				<Reveal>
-					<div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20 text-center">
+					<div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-20 text-center">
 						<Calendar className="mb-4 size-12 text-muted-foreground/40" />
 						<h2 className="text-lg font-semibold">No programs saved yet</h2>
 						<p className="mt-1 max-w-sm text-sm text-muted-foreground">
@@ -427,7 +427,7 @@ export default function TimelinePlannerClient({
 			{/* Empty state: Programs exist but not for this country */}
 			{!isPending && !error && hasProgramsButNotForCountry && (
 				<Reveal>
-					<div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20 text-center">
+					<div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-20 text-center">
 						<Calendar className="mb-4 size-12 text-muted-foreground/40" />
 						<h2 className="text-lg font-semibold">No programs for {countryName}</h2>
 						<p className="mt-1 max-w-sm text-sm text-muted-foreground">
@@ -448,7 +448,7 @@ export default function TimelinePlannerClient({
 			{/* Empty state: Programs exist but no deadlines */}
 			{!isPending && !error && hasProgramsButNoDeadlines && (
 				<Reveal>
-					<div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20 text-center">
+					<div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-20 text-center">
 						<Calendar className="mb-4 size-12 text-muted-foreground/40" />
 						<h2 className="text-lg font-semibold">Add deadlines to your programs</h2>
 						<p className="mt-1 max-w-sm text-sm text-muted-foreground">
@@ -469,7 +469,7 @@ export default function TimelinePlannerClient({
 			{/* Empty state: Ready to generate */}
 			{!isPending && !error && !lacksDeadlineData && !hasNoPrograms && plan.length === 0 && (
 				<Reveal>
-					<div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20 text-center">
+					<div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-20 text-center">
 						<Calendar className="mb-4 size-12 text-muted-foreground/40" />
 						<h2 className="text-lg font-semibold">Your roadmap is ready to generate</h2>
 						<p className="mt-1 max-w-sm text-sm text-muted-foreground">

@@ -114,7 +114,7 @@ const LEVEL_LABELS: Record<string, string> = { BSC: "Bachelor's", MSC: "Master's
 
 function SkeletonCard() {
 	return (
-		<div className="animate-pulse rounded-xl border border-border bg-card p-5">
+		<div className="animate-pulse rounded-2xl border border-border bg-card p-5">
 			<div className="mb-3 flex items-start justify-between gap-3">
 				<div className="h-5 w-2/3 rounded bg-muted" />
 				<div className="h-5 w-16 rounded-full bg-muted" />
@@ -459,7 +459,10 @@ function ScholarshipCard({
 	const isPast = daysLeft !== null && daysLeft < 0;
 
 	return (
-		<div className="group rounded-xl border border-border bg-card p-5 hover:border-primary/30 hover:shadow-sm transition-all duration-200">
+		<div className="group overflow-hidden rounded-2xl border border-border bg-card hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200">
+			{/* Accent band */}
+			<div className="h-1 w-full bg-gradient-to-r from-primary/30 via-primary/60 to-primary/30" />
+			<div className="p-5">
 			<div className="mb-3 flex items-start justify-between gap-3">
 				<div className="flex-1 min-w-0">
 					<h3 className="font-semibold leading-snug line-clamp-2 group-hover:text-primary transition-colors">
@@ -607,6 +610,7 @@ function ScholarshipCard({
 					)}
 				</p>
 			)}
+			</div>
 		</div>
 	);
 }

@@ -151,7 +151,9 @@ function ProfileSnapshot({ profile, session }: { profile: UserProfile; session: 
   const isComplete = completeness >= 80;
 
   return (
-    <AnimatedCard className="h-full rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
+    <AnimatedCard className="h-full overflow-hidden rounded-2xl border border-border bg-card transition-shadow hover:shadow-md">
+      <div className="h-1 w-full bg-gradient-to-r from-primary/30 via-primary/60 to-primary/30" />
+      <div className="p-6">
       <SectionHeader title="Profile Snapshot" icon={GraduationCap} href="/app/profile" linkText="Edit" />
 
       <dl className="space-y-3">
@@ -185,6 +187,7 @@ function ProfileSnapshot({ profile, session }: { profile: UserProfile; session: 
         </StatusBadge>
         {session.user.emailVerified && <StatusBadge variant="success">Email Verified</StatusBadge>}
       </div>
+      </div>
     </AnimatedCard>
   );
 }
@@ -211,7 +214,7 @@ function YourRoadmap({ timeline }: { timeline: unknown }) {
 
   if (!plan || plan.length === 0) {
     return (
-      <AnimatedCard className="h-full rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
+      <AnimatedCard className="h-full rounded-2xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
         <SectionHeader title="Your Roadmap" icon={Target} />
         <EmptyState
           icon={Calendar}
@@ -227,7 +230,7 @@ function YourRoadmap({ timeline }: { timeline: unknown }) {
   const shownMonths = plan.slice(0, 4);
 
   return (
-    <AnimatedCard className="h-full rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
+    <AnimatedCard className="h-full rounded-2xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
       <SectionHeader title="Your Roadmap" icon={Target} href="/app/timeline" linkText="View Full Timeline" />
 
       {roadmap?.intake && (
@@ -260,7 +263,7 @@ function YourRoadmap({ timeline }: { timeline: unknown }) {
 function RecommendedPrograms({ match }: { match: MatchLatestResponse | null }) {
   if (!match?.run || match.run.status !== "done" || !match.run.results || match.run.results.length === 0) {
     return (
-      <AnimatedCard className="rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
+      <AnimatedCard className="rounded-2xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
         <SectionHeader title="Recommended Programs" icon={Sparkles} />
         <EmptyState
           icon={GraduationCap}
@@ -276,7 +279,7 @@ function RecommendedPrograms({ match }: { match: MatchLatestResponse | null }) {
   const topPrograms = match.run.results.slice(0, 5);
 
   return (
-    <AnimatedCard className="rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
+    <AnimatedCard className="rounded-2xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
       <SectionHeader title="Recommended Programs" icon={Sparkles} href="/app/match" linkText="View All" />
 
       <StaggerChildren stagger={0.05} className="space-y-2">
@@ -320,7 +323,7 @@ function ImportantDeadlines({ deadlines }: { deadlines: DeadlineItem[] }) {
 
   if (shown.length === 0) {
     return (
-      <AnimatedCard className="rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
+      <AnimatedCard className="rounded-2xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
         <SectionHeader title="Upcoming Deadlines" icon={Calendar} />
         <EmptyState
           icon={Clock}
@@ -334,7 +337,7 @@ function ImportantDeadlines({ deadlines }: { deadlines: DeadlineItem[] }) {
   }
 
   return (
-    <AnimatedCard className="rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
+    <AnimatedCard className="rounded-2xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
       <SectionHeader title="Upcoming Deadlines" icon={Calendar} href="/app/timeline" linkText="View Timeline" />
 
       <div className="space-y-2">
@@ -373,7 +376,7 @@ function ImportantDeadlines({ deadlines }: { deadlines: DeadlineItem[] }) {
 function SavedShortlist({ savedPrograms }: { savedPrograms: SavedProgramItem[] }) {
   if (savedPrograms.length === 0) {
     return (
-      <AnimatedCard className="rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
+      <AnimatedCard className="rounded-2xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
         <SectionHeader title="Saved Shortlist" icon={Bookmark} />
         <EmptyState
           icon={BookOpen}
@@ -389,7 +392,7 @@ function SavedShortlist({ savedPrograms }: { savedPrograms: SavedProgramItem[] }
   const topSaved = savedPrograms.slice(0, 3);
 
   return (
-    <AnimatedCard className="rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
+    <AnimatedCard className="rounded-2xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
       <SectionHeader title="Saved Shortlist" icon={Bookmark} href="/app/saved" linkText="View All" />
 
       <div className="space-y-2">
@@ -431,7 +434,7 @@ function SavedShortlist({ savedPrograms }: { savedPrograms: SavedProgramItem[] }
 function GlobalEducationPulse({ news }: { news: FeedItem[] }) {
   if (news.length === 0) {
     return (
-      <AnimatedCard className="rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
+      <AnimatedCard className="rounded-2xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
         <SectionHeader title="Global Education Pulse" icon={Globe} />
         <div className="rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center">
           <Globe className="mx-auto mb-3 size-10 text-muted-foreground/50" />
@@ -442,7 +445,7 @@ function GlobalEducationPulse({ news }: { news: FeedItem[] }) {
   }
 
   return (
-    <AnimatedCard className="rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
+    <AnimatedCard className="rounded-2xl border border-border bg-card p-6 transition-shadow hover:shadow-md">
       <SectionHeader title="Global Education Pulse" icon={Globe} />
 
       <div className="space-y-2">
