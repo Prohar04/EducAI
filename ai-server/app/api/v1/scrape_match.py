@@ -26,8 +26,89 @@ router = APIRouter(tags=["Module 1 Scrape-Match"])
 
 # ── Constants ─────────────────────────────────────────────────────────────
 
-_MAX_URLS = 6
+_MAX_URLS = 10
 _MAX_MARKDOWN_CHARS = 40_000
+
+# ── Major taxonomy — canonical name → list of synonyms/related terms ──────
+
+MAJOR_TAXONOMY: Dict[str, List[str]] = {
+    "computer science": ["cs", "computing", "software engineering", "information technology", "it", "software development"],
+    "artificial intelligence": ["ai", "machine learning", "ml", "deep learning", "neural networks", "data science", "intelligent systems"],
+    "cybersecurity": ["information security", "network security", "cyber security", "digital forensics", "cyber defence", "infosec", "security engineering"],
+    "data science": ["data analytics", "big data", "data engineering", "machine learning", "ml", "statistics", "business analytics"],
+    "software engineering": ["cs", "computer science", "software development", "systems engineering", "information technology"],
+    "electrical engineering": ["ee", "electronics", "power systems", "telecommunications", "signal processing", "embedded systems"],
+    "mechanical engineering": ["me", "manufacturing engineering", "aerospace engineering", "thermal engineering", "robotics"],
+    "civil engineering": ["structural engineering", "environmental engineering", "geotechnical engineering", "construction management"],
+    "chemical engineering": ["process engineering", "materials engineering", "chemical technology"],
+    "biomedical engineering": ["bioengineering", "medical engineering", "biomed", "biotechnology", "clinical engineering"],
+    "engineering": ["mechanical engineering", "electrical engineering", "civil engineering", "chemical engineering", "engineering management"],
+    "business administration": ["mba", "business management", "management", "business studies", "organizational management"],
+    "finance": ["financial management", "financial engineering", "fintech", "banking", "investment management", "corporate finance"],
+    "accounting": ["cpa", "auditing", "tax", "financial accounting", "management accounting"],
+    "economics": ["econometrics", "financial economics", "applied economics", "development economics"],
+    "marketing": ["digital marketing", "brand management", "advertising", "market research", "strategic marketing"],
+    "management": ["business management", "mba", "leadership", "organizational behavior", "operations management"],
+    "law": ["legal studies", "jurisprudence", "llm", "llb", "international law", "corporate law"],
+    "public health": ["epidemiology", "global health", "health policy", "health management", "mph", "community health"],
+    "medicine": ["mbbs", "medical science", "clinical medicine", "healthcare", "md"],
+    "nursing": ["healthcare", "clinical nursing", "advanced practice nursing", "nurse practitioner"],
+    "pharmacy": ["pharmaceutical sciences", "pharmacology", "drug development", "clinical pharmacy"],
+    "psychology": ["cognitive science", "behavioral science", "clinical psychology", "counseling", "mental health"],
+    "sociology": ["anthropology", "cultural studies", "social science", "social policy"],
+    "political science": ["international relations", "political economy", "governance", "public policy", "public administration"],
+    "international relations": ["diplomacy", "foreign policy", "global studies", "international affairs", "political science"],
+    "environmental science": ["environmental studies", "sustainability", "ecology", "climate science", "environmental management"],
+    "architecture": ["urban planning", "interior design", "landscape architecture", "urban design"],
+    "design": ["graphic design", "ux design", "product design", "industrial design", "user experience", "interaction design"],
+    "media": ["media studies", "journalism", "communications", "mass communication", "digital media"],
+    "education": ["teaching", "pedagogy", "educational leadership", "curriculum", "educational technology"],
+    "biotechnology": ["bioinformatics", "molecular biology", "genetic engineering", "biotech", "life sciences"],
+    "mathematics": ["applied mathematics", "statistics", "actuarial science", "math", "mathematical sciences"],
+    "physics": ["applied physics", "astrophysics", "quantum computing", "photonics"],
+    "chemistry": ["applied chemistry", "biochemistry", "chemical sciences", "organic chemistry"],
+    "biology": ["life sciences", "molecular biology", "ecology", "microbiology", "biochemistry"],
+    "hospitality": ["hotel management", "tourism", "hospitality management", "food science", "culinary arts"],
+    "fashion": ["fashion design", "textile design", "apparel design", "costume design"],
+    "linguistics": ["applied linguistics", "language studies", "translation", "computational linguistics"],
+    "geography": ["geographic information systems", "gis", "cartography", "spatial science"],
+    "history": ["heritage studies", "archival studies", "historical studies"],
+    "social work": ["social policy", "community development", "welfare", "human services"],
+}
+
+
+def _get_major_terms(major: str) -> List[str]:
+    """
+    Return the canonical major plus synonyms for broader search/matching.
+    Tries exact match first, then partial word overlap.
+    """
+    lower = major.lower().strip()
+
+    # Exact canonical key match
+    if lower in MAJOR_TAXONOMY:
+        return [lower] + MAJOR_TAXONOMY[lower]
+
+    # Exact synonym match
+    for canonical, synonyms in MAJOR_TAXONOMY.items():
+        if lower in synonyms:
+            return [canonical] + synonyms
+
+    # Partial match — find the most overlapping canonical
+    best: Optional[str] = None
+    best_overlap = 0
+    query_words = set(w for w in lower.split() if len(w) > 2)
+    for canonical in MAJOR_TAXONOMY:
+        canon_words = set(w for w in canonical.split() if len(w) > 2)
+        overlap = len(query_words & canon_words)
+        if overlap > best_overlap:
+            best_overlap = overlap
+            best = canonical
+
+    if best and best_overlap > 0:
+        return [lower] + [best] + MAJOR_TAXONOMY[best]
+
+    # No taxonomy match — return the raw major split into words
+    return [lower]
 
 # ── Country lookup tables ─────────────────────────────────────────────────
 
@@ -250,19 +331,19 @@ def _build_queries(req: ScrapeMatchRequest) -> List[str]:
     level = req.intended_level
     major = req.intended_major
     budget = int(req.budget_max_usd)
+
+    terms = _get_major_terms(major)
+    primary = terms[0]
+    # Use the first synonym as an alt label if available
+    alt = terms[1] if len(terms) > 1 else primary
+
     return [
-        (
-            f"{level} {major} programs in {countries_str}"
-            f" tuition under ${budget}"
-        ),
-        (
-            f"best universities for {major} {level}"
-            f" {countries_str} admission requirements"
-        ),
-        (
-            f"{level} {major} scholarships"
-            f" {countries_str} international students"
-        ),
+        f"{level} {primary} programs in {countries_str} tuition under ${budget}",
+        f"best universities for {primary} {level} {countries_str} admission requirements",
+        f"{level} {primary} scholarships {countries_str} international students",
+        f"{level} {alt} programs {countries_str} rankings 2024 2025",
+        f"top {level} {primary} universities {countries_str} international students apply",
+        f"{primary} {level} graduate programs {countries_str} fees deadlines",
     ]
 
 
@@ -357,8 +438,14 @@ def _score_program(
     prog_field = (
         program.get("field") or program.get("program_title") or ""
     ).lower()
-    major_words = req.intended_major.lower().split()
-    if any(w in prog_field for w in major_words if len(w) > 3):
+    # Build word set from all expanded terms (minimum 2 chars, not 4, so "AI", "CS", "ML" are included)
+    major_terms = _get_major_terms(req.intended_major)
+    all_match_words: set = set()
+    for term in major_terms:
+        for w in term.split():
+            if len(w) > 1:
+                all_match_words.add(w)
+    if any(w in prog_field for w in all_match_words):
         score += 20
         field_val = program.get(
             "field", program.get("program_title", "")
@@ -496,7 +583,7 @@ async def scrape_match(req: ScrapeMatchRequest) -> ScrapeMatchResponse:
     all_urls: List[str] = []
     for q in queries:
         try:
-            results = await searcher.search(q, num_results=3)
+            results = await searcher.search(q, num_results=5)
             for r in results:
                 link = r.get("link") or r.get("url") or ""
                 if link and link not in all_urls:
