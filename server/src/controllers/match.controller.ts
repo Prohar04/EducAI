@@ -17,6 +17,86 @@ const AI_SERVER_URL     = process.env.AI_SERVER_URL     ?? 'http://localhost:800
 const AI_SERVER_API_KEY = process.env.AI_SERVER_API_KEY ?? '';
 const CACHE_TTL_MS      = 24 * 60 * 60 * 1000; // 24 hours
 
+// ── Major synonym map (mirrors Python taxonomy for DB cache-hit ranking) ── //
+
+const MAJOR_SYNONYMS: Record<string, string[]> = {
+  'computer science':       ['cs', 'computing', 'software engineering', 'information technology', 'it'],
+  'artificial intelligence':['ai', 'machine learning', 'ml', 'deep learning', 'neural networks', 'data science'],
+  'cybersecurity':          ['information security', 'network security', 'cyber security', 'digital forensics', 'infosec'],
+  'data science':           ['data analytics', 'big data', 'machine learning', 'ml', 'statistics', 'business analytics'],
+  'software engineering':   ['cs', 'computer science', 'software development', 'information technology'],
+  'electrical engineering': ['ee', 'electronics', 'power systems', 'telecommunications'],
+  'mechanical engineering': ['me', 'manufacturing', 'aerospace engineering', 'thermal engineering'],
+  'civil engineering':      ['structural engineering', 'environmental engineering', 'geotechnical'],
+  'chemical engineering':   ['process engineering', 'materials engineering'],
+  'biomedical engineering': ['bioengineering', 'medical engineering', 'biomed', 'biotechnology'],
+  'engineering':            ['mechanical', 'electrical', 'civil', 'chemical', 'engineering management'],
+  'business administration':['mba', 'business management', 'management', 'business studies'],
+  'finance':                ['financial management', 'fintech', 'banking', 'investment management'],
+  'accounting':             ['auditing', 'tax', 'financial accounting', 'management accounting'],
+  'economics':              ['econometrics', 'financial economics', 'applied economics'],
+  'marketing':              ['digital marketing', 'brand management', 'advertising'],
+  'law':                    ['legal studies', 'jurisprudence', 'llm', 'llb', 'international law'],
+  'public health':          ['epidemiology', 'global health', 'health policy', 'mph', 'community health'],
+  'medicine':               ['mbbs', 'medical science', 'clinical medicine', 'healthcare'],
+  'nursing':                ['healthcare', 'clinical nursing', 'nurse practitioner'],
+  'pharmacy':               ['pharmaceutical sciences', 'pharmacology', 'clinical pharmacy'],
+  'psychology':             ['cognitive science', 'behavioral science', 'clinical psychology', 'counseling'],
+  'political science':      ['international relations', 'governance', 'public policy', 'public administration'],
+  'international relations':['diplomacy', 'foreign policy', 'global studies', 'political science'],
+  'environmental science':  ['environmental studies', 'sustainability', 'ecology', 'climate science'],
+  'architecture':           ['urban planning', 'interior design', 'urban design'],
+  'design':                 ['graphic design', 'ux design', 'product design', 'user experience'],
+  'media':                  ['media studies', 'journalism', 'communications', 'mass communication'],
+  'biotechnology':          ['bioinformatics', 'molecular biology', 'genetic engineering', 'life sciences'],
+  'mathematics':            ['applied mathematics', 'statistics', 'actuarial science', 'math'],
+};
+
+/** Expand a major name into a set of lowercase search terms (min 2 chars). */
+function getMajorTerms(major: string): string[] {
+  const lower = major.toLowerCase().trim();
+  const termSet = new Set<string>();
+
+  // Direct canonical key
+  if (MAJOR_SYNONYMS[lower]) {
+    termSet.add(lower);
+    for (const s of MAJOR_SYNONYMS[lower]) termSet.add(s);
+  } else {
+    // Synonym lookup
+    let found = false;
+    for (const [canonical, synonyms] of Object.entries(MAJOR_SYNONYMS)) {
+      if (synonyms.includes(lower)) {
+        termSet.add(canonical);
+        for (const s of synonyms) termSet.add(s);
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      // Partial word overlap fallback
+      const queryWords = lower.split(/\s+/).filter(w => w.length > 2);
+      for (const [canonical, synonyms] of Object.entries(MAJOR_SYNONYMS)) {
+        const canonWords = canonical.split(/\s+/);
+        if (queryWords.some(w => canonWords.includes(w))) {
+          termSet.add(canonical);
+          for (const s of synonyms) termSet.add(s);
+        }
+      }
+      // Always include the raw major words too
+      termSet.add(lower);
+    }
+  }
+
+  // Flatten all terms into individual words, min 2 chars (allows "AI", "CS", "ML")
+  const words = new Set<string>();
+  for (const term of termSet) {
+    for (const w of term.split(/\s+/)) {
+      if (w.length > 1) words.add(w);
+    }
+  }
+  return [...words];
+}
+
 // ── AI-server response types ────────────────────────────────────────────────
 
 interface AiProgramKey {
@@ -269,21 +349,26 @@ async function rankFromDB(
   major: string,
 ): Promise<Array<{ score: number; reasons: string[]; programId: string; rawData: null }>> {
   const level = normalizeLevel(levelRaw) as ProgramLevel | null;
-  if (!level || !targetCountries.length) return [];
+  if (!level) return [];
 
-  const countries = await prisma.country.findMany({
-    where:  { code: { in: targetCountries.map(c => c.toUpperCase()) } },
-    select: { id: true },
-  });
-  if (!countries.length) return [];
-
-  const uniIds = (await prisma.university.findMany({
-    where:  { countryId: { in: countries.map(c => c.id) } },
-    select: { id: true },
-  })).map(u => u.id);
+  // When target countries are known, filter to those; otherwise search globally.
+  let uniIds: string[];
+  if (targetCountries.length) {
+    const countries = await prisma.country.findMany({
+      where:  { code: { in: targetCountries.map(c => c.toUpperCase()) } },
+      select: { id: true },
+    });
+    if (!countries.length) return [];
+    uniIds = (await prisma.university.findMany({
+      where:  { countryId: { in: countries.map(c => c.id) } },
+      select: { id: true },
+    })).map(u => u.id);
+  } else {
+    uniIds = (await prisma.university.findMany({ select: { id: true }, take: 500 })).map(u => u.id);
+  }
   if (!uniIds.length) return [];
 
-  const terms = major.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+  const terms = getMajorTerms(major);
 
   const programs = await prisma.program.findMany({
     where: {

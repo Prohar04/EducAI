@@ -451,11 +451,39 @@ export default function MatchPage() {
 
       {/* Done but empty */}
       {!loading && run?.status === "done" && results.length === 0 && (
-        <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center flex flex-col items-center">
-          <MatchIllustration className="mb-4 h-28 w-auto text-primary opacity-60" />
-          <p className="text-muted-foreground">
-            The scrape completed but found no matching programmes. Try updating your profile or re-running.
-          </p>
+        <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center flex flex-col items-center gap-4">
+          <MatchIllustration className="h-24 w-auto text-primary opacity-60" />
+          <div className="space-y-1">
+            <p className="font-semibold text-foreground">No programmes found for your profile</p>
+            <p className="text-sm text-muted-foreground">
+              The scraper searched but couldn't find strong matches. Try these fixes:
+            </p>
+          </div>
+          <ul className="text-left text-sm text-muted-foreground space-y-2 max-w-xs">
+            <li className="flex items-start gap-2">
+              <span className="mt-1 size-1.5 shrink-0 rounded-full bg-primary/60" />
+              <span>
+                <Link href="/app/profile" className="text-primary hover:underline font-medium">Update your profile</Link>
+                {" "}— check major, level, and target countries are set.
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-1 size-1.5 shrink-0 rounded-full bg-primary/60" />
+              <span>Increase your budget — some fields have higher average tuition.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-1 size-1.5 shrink-0 rounded-full bg-primary/60" />
+              <span>Try a broader major name (e.g. "Computer Science" instead of a sub-specialty).</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-1 size-1.5 shrink-0 rounded-full bg-primary/60" />
+              <span>Re-run the match — search results vary each run.</span>
+            </li>
+          </ul>
+          <Button variant="outline" onClick={handleRunMatch} disabled={isRunning} className="mt-2">
+            <RefreshCw className="mr-2 size-4" />
+            Re-run Match
+          </Button>
         </div>
       )}
     </div>
