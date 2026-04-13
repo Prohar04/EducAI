@@ -1,9 +1,16 @@
 import prisma from '#src/config/database.ts';
 import { Prisma } from '#src/generated/client.ts';
 
-const AI_SERVER_URL = process.env.AI_SERVER_URL ?? 'http://localhost:8001';
-const AI_SERVER_API_KEY = process.env.AI_SERVER_API_KEY ?? '';
-const CHAT_RATE_LIMIT_PER_MIN = Number(process.env.CHAT_RATE_LIMIT_PER_MIN ?? '0');
+const AI_SERVER_URL             = process.env.AI_SERVER_URL             ?? 'http://localhost:8001';
+const AI_SERVER_API_KEY         = process.env.AI_SERVER_API_KEY         ?? '';
+const CHAT_RATE_LIMIT_PER_MIN   = Number(process.env.CHAT_RATE_LIMIT_PER_MIN ?? '0');
+
+// ── Direct LLM provider keys (used when ai-server is unavailable) ─────────────
+const GROQ_API_KEY        = process.env.GROQ_API_KEY        ?? '';
+const OPENROUTER_API_KEY  = process.env.OPENROUTER_API_KEY  ?? '';
+const ANTHROPIC_API_KEY   = process.env.ANTHROPIC_API_KEY   ?? '';
+const GEMINI_API_KEY      = process.env.GEMINI_API_KEY      ?? '';
+const DIRECT_LLM_TIMEOUT  = 28_000; // 28s — snappy but safe
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const CONTEXT_CACHE_TTL_MS = 5 * 60_000; // 5-minute cache per user — context rarely changes
 
@@ -592,6 +599,231 @@ async function loadCompactUserContext(userId: string): Promise<CompactUserContex
   });
 }
 
+// ─── Direct LLM utilities ──────────────────────────────────────────────────────
+
+/** Converts the compact user context to a concise, readable text block for the LLM. */
+function formatContextForPrompt(ctx: CompactUserContext): string {
+  const parts: string[] = [];
+
+  if (ctx.profile) {
+    const p = ctx.profile;
+    const budgetStr = p.budget.max
+      ? `${p.budget.currency ?? 'USD'} ${p.budget.max.toLocaleString()}/yr`
+      : 'Not set';
+    const gpaStr = p.academics.gpa
+      ? `${p.academics.gpa}${p.academics.gpaScale ? `/${p.academics.gpaScale}` : ''}`
+      : 'Not set';
+    const testStr = Object.entries(p.tests)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join(', ') || 'None';
+    parts.push(
+      `[STUDENT PROFILE]`,
+      `Stage: ${p.stage ?? '—'} | Intake: ${p.targetIntake ?? '—'} | Countries: ${p.targetCountries.join(', ') || '—'} | Level: ${p.level ?? '—'} | Major: ${p.major ?? '—'}`,
+      `GPA: ${gpaStr} | Tests: ${testStr} | Budget: ${budgetStr} | Funding needed: ${p.fundingNeed === true ? 'Yes' : p.fundingNeed === false ? 'No' : '—'}`,
+    );
+  }
+
+  if (ctx.savedPrograms.length > 0) {
+    parts.push(`\n[SAVED PROGRAMS — ${ctx.savedPrograms.length}]`);
+    ctx.savedPrograms.slice(0, 8).forEach((sp, i) => {
+      const tuition = sp.tuitionUSD.min
+        ? `$${sp.tuitionUSD.min.toLocaleString()}–$${(sp.tuitionUSD.max ?? sp.tuitionUSD.min).toLocaleString()}/yr`
+        : 'Tuition not listed';
+      const deadlineStr = sp.deadlines.slice(0, 2).map(d => `${d.term}: ${d.deadline.slice(0, 10)}`).join(', ');
+      parts.push(`${i + 1}. ${sp.title} — ${sp.university} — ${sp.country}`);
+      parts.push(`   ${tuition}${deadlineStr ? ` | Deadlines: ${deadlineStr}` : ''}`);
+    });
+  }
+
+  if (ctx.matchTop.length > 0) {
+    parts.push(`\n[AI MATCH RESULTS — top ${Math.min(ctx.matchTop.length, 6)}]`);
+    ctx.matchTop.slice(0, 6).forEach(m => {
+      const reason = m.reasons.slice(0, 2).join(', ');
+      parts.push(`[${m.score}] ${m.title} — ${m.university ?? '?'} (${m.countryCode ?? '?'})${reason ? `: ${reason}` : ''}`);
+    });
+  }
+
+  if (ctx.timelineSummary) {
+    const t = ctx.timelineSummary;
+    const hl = t.highlights.slice(0, 4).join(', ');
+    parts.push(`\n[TIMELINE — ${t.countryCode}, ${t.intake ?? 'unknown intake'}]`);
+    if (hl) parts.push(`Milestones: ${hl}`);
+  }
+
+  if (ctx.strategySummary) {
+    const s = ctx.strategySummary;
+    parts.push(`\n[STRATEGY — ${s.countryCode}]`);
+    if (s.admissionBand) parts.push(`Band: ${s.admissionBand}`);
+    if (s.recommendedActions.length) parts.push(`Actions: ${s.recommendedActions.slice(0, 3).join('; ')}`);
+    if (s.risks.length) parts.push(`Risks: ${s.risks.slice(0, 3).join('; ')}`);
+  }
+
+  return parts.join('\n');
+}
+
+const DIRECT_SYSTEM_PROMPT = `You are EducAI's study-abroad admissions consultant. Help users plan international education — universities, programs, visas, scholarships, admission requirements, and funding.
+
+Rules:
+- Be specific, actionable, and grounded in the user's data when available
+- Use the user's profile context to personalise answers
+- Never guarantee admission outcomes or visa approval
+- For time-sensitive topics (visa rules, deadlines, fee changes), note the info may need verification
+- confidence: "high" = specific data available; "medium" = general guidance; "low" = uncertain/general info
+
+Respond ONLY with valid JSON in exactly this schema:
+{
+  "answer": "Main response in 1-3 sentences — direct and specific",
+  "bullets": ["Key point 1", "Key point 2", "Key point 3"],
+  "nextSteps": ["Actionable step 1", "Actionable step 2"],
+  "confidence": "high|medium|low"
+}`;
+
+interface LLMMessage { role: 'system' | 'user' | 'assistant'; content: string; }
+
+function buildLLMMessages(
+  contextText: string,
+  question: string,
+  history: ChatHistoryItem[],
+): LLMMessage[] {
+  const messages: LLMMessage[] = [{ role: 'system', content: DIRECT_SYSTEM_PROMPT }];
+
+  // Add previous turns (last 4 exchanges)
+  for (const h of history.slice(-8)) {
+    messages.push({ role: h.role, content: h.content });
+  }
+
+  // Current user message includes the context snapshot
+  const userContent = contextText
+    ? `${contextText}\n\n[QUESTION]\n${question}`
+    : question;
+
+  messages.push({ role: 'user', content: userContent });
+  return messages;
+}
+
+/** Flexible JSON extractor — handles markdown code blocks and raw JSON. */
+function extractJSON(raw: string): Record<string, unknown> {
+  // Try direct parse first
+  try { return JSON.parse(raw); } catch { /* continue */ }
+  // Strip markdown code fences
+  const stripped = raw.replace(/^```(?:json)?\s*/m, '').replace(/\s*```\s*$/m, '').trim();
+  try { return JSON.parse(stripped); } catch { /* continue */ }
+  // Extract first {...} block
+  const match = raw.match(/\{[\s\S]*\}/);
+  if (match) try { return JSON.parse(match[0]); } catch { /* continue */ }
+  throw new Error(`Cannot parse LLM response as JSON: ${raw.slice(0, 200)}`);
+}
+
+function normalizeLLMReply(raw: string): ChatReply {
+  const data = extractJSON(raw);
+  const answer = pickString(data.answer) ?? (Array.isArray(data.bullets) ? String(data.bullets[0] ?? '') : '');
+  if (!answer) throw new ChatServiceError(502, 'LLM returned an empty answer.');
+  const confidence = ['high', 'medium', 'low'].includes(String(data.confidence))
+    ? (data.confidence as ChatReply['confidence'])
+    : 'medium';
+  return {
+    answer,
+    bullets:   normalizeStringArray(data.bullets,   5),
+    nextSteps: normalizeStringArray(data.nextSteps,  4),
+    sources:   [],
+    confidence,
+  };
+}
+
+async function callOpenAICompatible(
+  messages: LLMMessage[],
+  baseUrl: string,
+  apiKey: string,
+  model: string,
+): Promise<string> {
+  const res = await fetch(`${baseUrl}/chat/completions`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model, messages, temperature: 0.2, max_tokens: 900, response_format: { type: 'json_object' } }),
+    signal: AbortSignal.timeout(DIRECT_LLM_TIMEOUT),
+  });
+  if (!res.ok) {
+    const err = await res.text().catch(() => '');
+    if (res.status === 429) throw new ChatServiceError(429, 'Rate limit reached. Try again in a minute.');
+    throw new Error(`${baseUrl} error ${res.status}: ${err.slice(0, 200)}`);
+  }
+  const data = await res.json() as { choices?: Array<{ message?: { content?: string } }> };
+  const content = data?.choices?.[0]?.message?.content;
+  if (!content) throw new Error('Empty content from provider');
+  return content;
+}
+
+async function callAnthropicDirect(messages: LLMMessage[]): Promise<string> {
+  const system = messages.find(m => m.role === 'system')?.content ?? '';
+  const convo = messages.filter(m => m.role !== 'system');
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 900,
+      system,
+      messages: convo,
+    }),
+    signal: AbortSignal.timeout(DIRECT_LLM_TIMEOUT),
+  });
+  if (!res.ok) {
+    if (res.status === 429) throw new ChatServiceError(429, 'Rate limit reached. Try again in a minute.');
+    throw new Error(`Anthropic error ${res.status}`);
+  }
+  const data = await res.json() as { content?: Array<{ text?: string }> };
+  const text = data?.content?.[0]?.text;
+  if (!text) throw new Error('Empty content from Anthropic');
+  return text;
+}
+
+async function callGeminiDirect(messages: LLMMessage[]): Promise<string> {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`;
+  const system = messages.find(m => m.role === 'system')?.content ?? '';
+  const userMsg = [...messages].reverse().find(m => m.role === 'user')?.content ?? '';
+
+  const body = {
+    contents: [{ role: 'user', parts: [{ text: userMsg }] }],
+    systemInstruction: system ? { parts: [{ text: system }] } : undefined,
+    generationConfig: { temperature: 0.2, responseMimeType: 'application/json', maxOutputTokens: 900 },
+  };
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(DIRECT_LLM_TIMEOUT),
+  });
+  if (!res.ok) throw new Error(`Gemini error ${res.status}`);
+  const data = await res.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error('Empty content from Gemini');
+  return text;
+}
+
+async function callDirectLLM(input: AnswerChatInput, ctx: CompactUserContext): Promise<ChatReply> {
+  const contextText = formatContextForPrompt(ctx);
+  const messages = buildLLMMessages(contextText, input.message, input.history ?? []);
+
+  let raw: string;
+  if (GROQ_API_KEY) {
+    raw = await callOpenAICompatible(messages, 'https://api.groq.com/openai/v1', GROQ_API_KEY, 'llama-3.3-70b-versatile');
+  } else if (OPENROUTER_API_KEY) {
+    raw = await callOpenAICompatible(messages, 'https://openrouter.ai/api/v1', OPENROUTER_API_KEY, 'meta-llama/llama-3.3-70b-instruct:free');
+  } else if (ANTHROPIC_API_KEY) {
+    raw = await callAnthropicDirect(messages);
+  } else if (GEMINI_API_KEY) {
+    raw = await callGeminiDirect(messages);
+  } else {
+    throw new Error('No direct LLM provider configured');
+  }
+
+  return normalizeLLMReply(raw);
+}
+
 export async function answerChatMessage(input: AnswerChatInput): Promise<ChatReply> {
   applyRateLimit(input.userId);
 
@@ -600,6 +832,19 @@ export async function answerChatMessage(input: AnswerChatInput): Promise<ChatRep
   const userContext = cachedCtx ?? await loadCompactUserContext(input.userId);
   if (!cachedCtx) setCachedContext(input.userId, userContext);
 
+  // ── Fast path: direct LLM call (no Python ai-server dependency) ────────────
+  const hasDirectProvider = !!(GROQ_API_KEY || OPENROUTER_API_KEY || ANTHROPIC_API_KEY || GEMINI_API_KEY);
+  if (hasDirectProvider) {
+    try {
+      return await callDirectLLM(input, userContext);
+    } catch (err) {
+      if (err instanceof ChatServiceError && err.statusCode === 429) throw err;
+      console.warn('[chat/service] direct LLM failed, falling back to ai-server', (err as Error).message);
+      // Fall through to ai-server path
+    }
+  }
+
+  // ── Fallback: ai-server (Python FastAPI) ───────────────────────────────────
   let aiResponse: Response;
   try {
     aiResponse = await fetch(`${AI_SERVER_URL}/api/v1/chat/answer`, {
@@ -616,11 +861,18 @@ export async function answerChatMessage(input: AnswerChatInput): Promise<ChatRep
           history: input.history?.slice(-6) ?? [],
         },
       }),
-      signal: AbortSignal.timeout(45_000), // 45s: reduced from 90s for better UX
+      signal: AbortSignal.timeout(35_000), // 35s — reduced from 45s
     });
   } catch (error) {
     console.error('[chat/service] ai-server unavailable', error);
-    throw new ChatServiceError(502, 'The AI provider is temporarily unavailable. Please try again shortly.');
+    // If we had a direct provider but it failed, give a more specific message
+    if (hasDirectProvider) {
+      throw new ChatServiceError(502, 'The AI provider encountered an error. Please try again in a moment.');
+    }
+    throw new ChatServiceError(
+      502,
+      'No AI provider is configured. Add GROQ_API_KEY, OPENROUTER_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY to enable the assistant.',
+    );
   }
 
   if (!aiResponse.ok) {

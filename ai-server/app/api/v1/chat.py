@@ -604,22 +604,33 @@ Return ONLY valid JSON with this exact shape:
 
 
 def _provider_sequence() -> List[Optional[LLMProvider]]:
+    """
+    Build a provider fallback chain in speed/reliability order.
+    Groq first (fastest), then OpenRouter, then Gemini, then auto-detect.
+    """
     configured = (settings.LLM_PROVIDER or "").strip().lower()
     providers: List[Optional[LLMProvider]] = []
 
-    if configured == "gemini":
+    # If explicitly configured, put it first
+    if configured == "groq":
+        providers.append(LLMProvider.GROQ)
+    elif configured == "gemini":
         providers.append(LLMProvider.GEMINI)
     elif configured == "openrouter":
         providers.append(LLMProvider.OPENROUTER)
-    elif settings.OPENROUTER_API_KEY:
-        providers.append(LLMProvider.OPENROUTER)
-    elif settings.GEMINI_API_KEY:
-        providers.append(LLMProvider.GEMINI)
-    else:
-        providers.append(None)
 
-    if settings.GEMINI_API_KEY and LLMProvider.GEMINI not in providers:
-        providers.append(LLMProvider.GEMINI)
+    # Auto-fill the fallback chain in speed order
+    for p, key in [
+        (LLMProvider.GROQ,        settings.GROQ_API_KEY),
+        (LLMProvider.OPENROUTER,  settings.OPENROUTER_API_KEY),
+        (LLMProvider.GEMINI,      settings.GEMINI_API_KEY),
+    ]:
+        if key and p not in providers:
+            providers.append(p)
+
+    # If nothing is configured, let _get_provider raise a helpful error
+    if not providers:
+        providers.append(None)
 
     return providers
 

@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
+	AlertTriangle,
 	ExternalLink,
 	Loader2,
 	MessageCircle,
@@ -14,431 +15,417 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { ChatApiResponse, ChatReply } from "@/types/auth.type";
 
-type UserMessage = {
-	id: string;
-	role: "user";
-	text: string;
-};
+// ─── Types ────────────────────────────────────────────────────────────────────
 
-type AssistantMessage = {
-	id: string;
-	role: "assistant";
-	reply: ChatReply;
-	isIntro?: boolean;
-	isError?: boolean;
-};
+type UserMessage    = { id: string; role: "user"; text: string };
+type AssistantMessage = { id: string; role: "assistant"; reply: ChatReply; isIntro?: boolean; isError?: boolean };
+type ChatMessage    = UserMessage | AssistantMessage;
 
-type ChatMessage = UserMessage | AssistantMessage;
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 const SUGGESTED_PROMPTS = [
 	"Compare my saved programs",
-	"What deadlines should I focus on?",
-	"Visa timeline for my target country",
-	"Scholarships for my profile",
+	"What visa do I need for my target country?",
+	"Scholarships that match my profile",
+	"Deadlines I should focus on this month",
+	"Which program fits my budget?",
+	"How do I strengthen my application?",
 ];
 
 const INTRO_REPLY: ChatReply = {
 	answer:
-		"Ask about your saved programs, deadlines, visa timing, or scholarships and I’ll keep the guidance advice-only with citations.",
+		"Hi! I'm your EducAI admissions consultant. Ask me about your saved programs, visa requirements, scholarships, application strategy, or anything else about studying abroad.",
 	bullets: [],
 	nextSteps: [],
 	sources: [],
 	confidence: "medium",
 };
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 function buildHistory(messages: ChatMessage[]) {
 	return messages
-		.filter((message): message is Exclude<ChatMessage, { isIntro?: true }> => {
-			if (message.role === "assistant") return !message.isIntro;
-			return true;
-		})
-		.slice(-6)
-		.map((message) =>
-			message.role === "user"
-				? { role: "user" as const, content: message.text }
-				: { role: "assistant" as const, content: message.reply.answer },
+		.filter((m): m is Exclude<ChatMessage, { isIntro?: true }> =>
+			m.role === "assistant" ? !m.isIntro : true,
+		)
+		.slice(-8)
+		.map((m) =>
+			m.role === "user"
+				? { role: "user" as const, content: m.text }
+				: { role: "assistant" as const, content: m.reply.answer },
 		);
 }
 
 function buildErrorReply(message: string): ChatReply {
-	return {
-		answer: message,
-		bullets: [],
-		nextSteps: [],
-		sources: [],
-		confidence: "low",
-	};
+	return { answer: message, bullets: [], nextSteps: [], sources: [], confidence: "low" };
 }
 
 function normalizeReply(payload: unknown): ChatReply | null {
 	if (!payload || typeof payload !== "object") return null;
-
 	const reply = payload as Partial<ChatReply>;
 	if (typeof reply.answer !== "string" || !reply.answer.trim()) return null;
 
-	const normalizeList = (value: unknown) =>
-		Array.isArray(value)
-			? value.filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+	const normalizeList = (v: unknown) =>
+		Array.isArray(v)
+			? v.filter((i): i is string => typeof i === "string" && i.trim().length > 0)
 			: [];
+
 	const sources = Array.isArray(reply.sources)
 		? reply.sources.filter(
-				(item): item is NonNullable<ChatReply["sources"]>[number] =>
-					Boolean(
-						item &&
-							typeof item === "object" &&
-							(item.type === "internal" || item.type === "web") &&
-							typeof item.title === "string",
-					),
+				(i): i is NonNullable<ChatReply["sources"]>[number] =>
+					Boolean(i && typeof i === "object" && (i.type === "internal" || i.type === "web") && typeof i.title === "string"),
 			)
 		: [];
 
 	return {
-		answer: reply.answer.trim(),
-		bullets: normalizeList(reply.bullets),
-		nextSteps: normalizeList(reply.nextSteps),
+		answer:     reply.answer.trim(),
+		bullets:    normalizeList(reply.bullets),
+		nextSteps:  normalizeList(reply.nextSteps),
 		sources,
-		confidence:
-			reply.confidence === "high" || reply.confidence === "medium" || reply.confidence === "low"
-				? reply.confidence
-				: "medium",
+		confidence: reply.confidence === "high" || reply.confidence === "medium" || reply.confidence === "low"
+			? reply.confidence
+			: "medium",
 	};
 }
 
-function confidenceClasses(confidence: ChatReply["confidence"]) {
-	if (confidence === "high") return "border-emerald-500/30 bg-emerald-500/10 text-emerald-200";
-	if (confidence === "low") return "border-amber-500/30 bg-amber-500/10 text-amber-100";
-	return "border-sky-500/30 bg-sky-500/10 text-sky-100";
+function confidenceBadge(c: ChatReply["confidence"]) {
+	if (c === "high")   return "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
+	if (c === "low")    return "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400";
+	return "border-border bg-muted/60 text-muted-foreground";
 }
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export function ChatbotWidget() {
 	const [open, setOpen] = useState(() => {
 		if (typeof window === "undefined") return false;
 		return sessionStorage.getItem("chatbot:open") === "true";
 	});
-	const [input, setInput] = useState("");
+	const [input,     setInput]     = useState("");
 	const [isLoading, setIsLoading] = useState(false);
-	const [messages, setMessages] = useState<ChatMessage[]>([
-		{
-			id: "intro",
-			role: "assistant",
-			reply: INTRO_REPLY,
-			isIntro: true,
-		},
+	const [messages,  setMessages]  = useState<ChatMessage[]>([
+		{ id: "intro", role: "assistant", reply: INTRO_REPLY, isIntro: true },
 	]);
 
-	const scrollRef = useRef<HTMLDivElement | null>(null);
-	const conversationIdRef = useRef("");
+	const scrollRef        = useRef<HTMLDivElement | null>(null);
+	const inputRef         = useRef<HTMLInputElement | null>(null);
+	const conversationId   = useRef("");
 
-	const hasRealConversation = useMemo(
-		() => messages.some((message) => message.role === "user"),
+	const hasRealMessages = useMemo(
+		() => messages.some((m) => m.role === "user"),
 		[messages],
 	);
 
+	// Stable conversation ID
 	useEffect(() => {
-		if (!conversationIdRef.current) {
-			conversationIdRef.current =
-				globalThis.crypto?.randomUUID?.() ?? `chat-${Date.now()}`;
+		if (!conversationId.current) {
+			conversationId.current = globalThis.crypto?.randomUUID?.() ?? `chat-${Date.now()}`;
 		}
 	}, []);
 
+	// Auto-scroll on new messages
 	useEffect(() => {
-		const container = scrollRef.current;
-		if (!container) return;
-		container.scrollTop = container.scrollHeight;
+		const el = scrollRef.current;
+		if (el) el.scrollTop = el.scrollHeight;
 	}, [messages, isLoading]);
 
+	// Focus input when panel opens
+	useEffect(() => {
+		if (open) setTimeout(() => inputRef.current?.focus(), 120);
+	}, [open]);
+
+	// ── Submit ──────────────────────────────────────────────────────────────────
 	const submitPrompt = async (prompt: string) => {
 		const trimmed = prompt.trim();
 		if (!trimmed || isLoading) return;
 
-		const conversationId =
-			conversationIdRef.current ||
-			(globalThis.crypto?.randomUUID?.() ?? `chat-${Date.now()}`);
-		conversationIdRef.current = conversationId;
+		const cid = conversationId.current || `chat-${Date.now()}`;
+		conversationId.current = cid;
 
-		const userMessage: UserMessage = {
-			id: `${conversationId}-user-${Date.now()}`,
-			role: "user",
-			text: trimmed,
-		};
-
-		const nextMessages = [...messages, userMessage];
+		const userMsg: UserMessage = { id: `${cid}-u-${Date.now()}`, role: "user", text: trimmed };
+		const nextMessages = [...messages, userMsg];
 		setMessages(nextMessages);
 		setInput("");
 		setIsLoading(true);
 
 		try {
 			const response = await fetch("/api/chat", {
-				method: "POST",
+				method:  "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					message: trimmed,
-					conversationId,
-					history: buildHistory(messages),
-				}),
+				body:    JSON.stringify({ message: trimmed, conversationId: cid, history: buildHistory(messages) }),
 			});
 
-			const payload = (await response.json().catch(() => null)) as ChatApiResponse | { message?: string } | null;
+			const payload = await response.json().catch(() => null) as ChatApiResponse | { message?: string } | null;
 
 			if (!response.ok) {
 				let errorMessage =
 					payload && "message" in payload && typeof payload.message === "string"
 						? payload.message
-						: "The assistant is temporarily unavailable. Please try again shortly.";
+						: "Something went wrong. Please try again.";
 
-				if (response.status === 401) {
-					errorMessage = "Session expired. Please sign in again.";
-				} else if (response.status === 429) {
-					errorMessage = "Rate limit reached. Try again in a minute.";
-				} else if (response.status >= 500) {
-					errorMessage = "The assistant is temporarily unavailable. Please try again shortly.";
-				}
+				if      (response.status === 401) errorMessage = "Session expired. Please sign in again.";
+				else if (response.status === 429) errorMessage = "You're sending messages too fast. Please wait a moment.";
+				else if (response.status >= 500)  errorMessage = "The assistant encountered an error. Please try again in a moment.";
 
-				setMessages((current) => [
-					...current,
-					{
-						id: `${conversationId}-error-${Date.now()}`,
-						role: "assistant",
-						reply: buildErrorReply(errorMessage),
-						isError: true,
-					},
-				]);
+				setMessages((cur) => [...cur, {
+					id: `${cid}-err-${Date.now()}`,
+					role: "assistant",
+					reply: buildErrorReply(errorMessage),
+					isError: true,
+				}]);
 				return;
 			}
 
 			const reply = normalizeReply(payload && "reply" in payload ? payload.reply : null);
-			if (!reply) {
-				throw new Error("Invalid chat response");
-			}
+			if (!reply) throw new Error("Invalid response shape");
 
-			setMessages((current) => [
-				...current,
-				{
-					id: `${conversationId}-assistant-${Date.now()}`,
-					role: "assistant",
-					reply,
-				},
-			]);
-		} catch (error) {
-			console.error("[chat-widget]", error);
-			setMessages((current) => [
-				...current,
-				{
-					id: `${conversationId}-failure-${Date.now()}`,
-					role: "assistant",
-					reply: buildErrorReply(
-						"The assistant is temporarily unavailable. Please try again shortly.",
-					),
-					isError: true,
-				},
-			]);
+			setMessages((cur) => [...cur, { id: `${cid}-a-${Date.now()}`, role: "assistant", reply }]);
+
+		} catch (err) {
+			const msg = err instanceof Error ? err.message : null;
+			if (msg?.includes("NEXT_REDIRECT")) return;
+			setMessages((cur) => [...cur, {
+				id: `${cid}-fail-${Date.now()}`,
+				role: "assistant",
+				reply: buildErrorReply("Could not reach the assistant. Check your connection and try again."),
+				isError: true,
+			}]);
 		} finally {
 			setIsLoading(false);
 		}
 	};
 
-	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-		event.preventDefault();
-		await submitPrompt(input);
-	};
+	const handleSubmit = (e: FormEvent<HTMLFormElement>) => { e.preventDefault(); void submitPrompt(input); };
+	const toggleOpen   = () => setOpen((v) => { const next = !v; sessionStorage.setItem("chatbot:open", String(next)); return next; });
 
+	// ── Render ──────────────────────────────────────────────────────────────────
 	return (
 		<div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
+
+			{/* ── Chat panel ── */}
 			{open && (
 				<div
-					className="fixed inset-y-4 right-4 flex w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[28px] border border-white/10 bg-slate-950/96 text-slate-50 shadow-[0_28px_80px_rgba(15,23,42,0.55)] backdrop-blur-xl"
-					style={{ animation: "chatWidgetIn 0.22s cubic-bezier(0.34,1.56,0.64,1) both" }}
+					className="flex w-[min(388px,calc(100vw-2.5rem))] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-xl"
+					style={{
+						height: "min(580px, calc(100vh - 7rem))",
+						animation: "chatWidgetIn 0.22s cubic-bezier(0.34,1.56,0.64,1) both",
+					}}
 				>
-					<div className="border-b border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.25),_transparent_50%),linear-gradient(135deg,_rgba(15,23,42,1),_rgba(2,6,23,0.92))] px-5 py-4">
-						<div className="flex items-start justify-between gap-3">
-							<div>
-								<div className="flex items-center gap-2">
-									<div className="flex size-9 items-center justify-center rounded-2xl bg-white/10">
-										<Sparkles className="size-4 text-cyan-200" />
-									</div>
-									<div>
-										<p className="text-sm font-semibold text-white">EducAI Assistant</p>
-										<p className="text-xs text-slate-300">
-											Advice-only guidance with internal and web citations
-										</p>
-									</div>
-								</div>
+					{/* Header */}
+					<div className="flex items-center justify-between gap-3 border-b border-border bg-card px-4 py-3.5">
+						<div className="flex items-center gap-2.5">
+							<div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/15">
+								<Sparkles className="size-4 text-primary" />
 							</div>
-							<button
-								onClick={() => setOpen(false)}
-								aria-label="Close chat"
-								className="rounded-full p-2 text-slate-300 transition hover:bg-white/10 hover:text-white"
-							>
-								<X className="size-4" />
-							</button>
+							<div>
+								<p className="text-sm font-semibold leading-none text-foreground">EducAI Assistant</p>
+								<p className="mt-0.5 text-xs text-muted-foreground">Personalised study-abroad guidance</p>
+							</div>
 						</div>
+						<button
+							onClick={toggleOpen}
+							aria-label="Close chat"
+							className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+						>
+							<X className="size-4" />
+						</button>
 					</div>
 
-					<div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto bg-slate-950/70 p-4">
-						{!hasRealConversation && (
-							<div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-								<p className="mb-3 text-xs font-medium uppercase tracking-[0.24em] text-slate-400">
-									Suggested prompts
+					{/* Messages */}
+					<div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto bg-muted/20 p-4">
+
+						{/* Suggested prompts (only before first message) */}
+						{!hasRealMessages && (
+							<div className="rounded-xl border border-border bg-card p-3">
+								<p className="mb-2.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+									Suggested questions
 								</p>
-								<div className="flex flex-wrap gap-2">
-									{SUGGESTED_PROMPTS.map((prompt) => (
+								<div className="flex flex-wrap gap-1.5">
+									{SUGGESTED_PROMPTS.map((p) => (
 										<button
-											key={prompt}
+											key={p}
 											type="button"
-											onClick={() => void submitPrompt(prompt)}
-											className="rounded-full border border-cyan-400/25 bg-cyan-400/10 px-3 py-1.5 text-left text-xs text-cyan-100 transition hover:border-cyan-300/40 hover:bg-cyan-300/15"
+											onClick={() => void submitPrompt(p)}
+											className="rounded-full border border-primary/25 bg-primary/8 px-3 py-1.5 text-left text-xs text-foreground transition hover:border-primary/50 hover:bg-primary/15"
 										>
-											{prompt}
+											{p}
 										</button>
 									))}
 								</div>
 							</div>
 						)}
 
-						{messages.map((message) =>
-							message.role === "user" ? (
-								<div key={message.id} className="flex justify-end">
-									<div className="max-w-[88%] rounded-2xl rounded-br-md bg-cyan-400 px-4 py-3 text-sm font-medium text-slate-950">
-										{message.text}
+						{/* Message list */}
+						{messages.map((m) =>
+							m.role === "user" ? (
+								/* User bubble */
+								<div key={m.id} className="flex justify-end">
+									<div className="max-w-[86%] rounded-2xl rounded-br-sm bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm">
+										{m.text}
 									</div>
 								</div>
 							) : (
-								<div key={message.id} className="flex justify-start">
+								/* Assistant bubble */
+								<div key={m.id} className="flex justify-start">
 									<div
-										className={`max-w-[92%] rounded-3xl rounded-bl-md border px-4 py-3 text-sm ${
-											message.isError
-												? "border-amber-500/20 bg-amber-500/10 text-amber-50"
-												: "border-white/10 bg-white/5 text-slate-100"
+										className={`max-w-[92%] rounded-2xl rounded-bl-sm border px-4 py-3 text-sm ${
+											m.isError
+												? "border-destructive/25 bg-destructive/8 text-foreground"
+												: "border-border bg-card text-foreground"
 										}`}
 									>
-										<div className="space-y-3">
-											<p className="leading-6">{message.reply.answer}</p>
+										{/* Error icon */}
+										{m.isError && (
+											<div className="mb-2 flex items-center gap-1.5 text-xs text-destructive">
+												<AlertTriangle className="size-3.5 shrink-0" />
+												<span className="font-medium">Assistant error</span>
+											</div>
+										)}
 
-											{message.reply.bullets.length > 0 && (
-												<ul className="space-y-1.5 text-slate-200">
-													{message.reply.bullets.map((bullet) => (
-														<li key={bullet} className="flex gap-2">
-															<span className="mt-1 text-cyan-300">•</span>
-															<span>{bullet}</span>
+										{/* Main answer */}
+										<p className="leading-relaxed">{m.reply.answer}</p>
+
+										{/* Bullets */}
+										{m.reply.bullets.length > 0 && (
+											<ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
+												{m.reply.bullets.map((b) => (
+													<li key={b} className="flex gap-2">
+														<span className="mt-1 size-1.5 shrink-0 rounded-full bg-primary/70" />
+														<span>{b}</span>
+													</li>
+												))}
+											</ul>
+										)}
+
+										{/* Next steps */}
+										{m.reply.nextSteps.length > 0 && (
+											<div className="mt-3 rounded-xl border border-border bg-muted/40 p-3">
+												<p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+													Next steps
+												</p>
+												<ol className="space-y-1.5 text-sm text-foreground">
+													{m.reply.nextSteps.map((step, i) => (
+														<li key={step} className="flex gap-2">
+															<span className="shrink-0 font-semibold text-primary">{i + 1}.</span>
+															<span>{step}</span>
 														</li>
 													))}
-												</ul>
-											)}
+												</ol>
+											</div>
+										)}
 
-											{message.reply.nextSteps.length > 0 && (
-												<div className="rounded-2xl border border-white/10 bg-slate-900/70 p-3">
-													<p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-														Next steps
-													</p>
-													<ol className="space-y-1.5 text-slate-200">
-														{message.reply.nextSteps.map((step, index) => (
-															<li key={step} className="flex gap-2">
-																<span className="text-cyan-300">{index + 1}.</span>
-																<span>{step}</span>
-															</li>
-														))}
-													</ol>
-												</div>
-											)}
+										{/* Confidence + Sources row */}
+										{!m.isIntro && (
+											<div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
+												<span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 ${confidenceBadge(m.reply.confidence)}`}>
+													<ShieldCheck className="size-2.5" />
+													{m.reply.confidence} confidence
+												</span>
+											</div>
+										)}
 
-											{!message.isIntro && (
-												<div className="flex flex-wrap items-center gap-2 text-xs">
-													<span
-														className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 ${confidenceClasses(message.reply.confidence)}`}
+										{/* Sources */}
+										{m.reply.sources.length > 0 && (
+											<div className="mt-3 space-y-1.5">
+												<p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+													Sources
+												</p>
+												{m.reply.sources.map((src) => (
+													<div
+														key={`${src.type}-${src.id ?? src.url ?? src.title}`}
+														className="rounded-lg border border-border bg-muted/30 px-3 py-2"
 													>
-														<ShieldCheck className="size-3" />
-														{message.reply.confidence} confidence
-													</span>
-												</div>
-											)}
-
-											{message.reply.sources.length > 0 && (
-												<div className="rounded-2xl border border-white/10 bg-slate-900/80 p-3">
-													<p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-														Sources
-													</p>
-													<div className="space-y-2">
-														{message.reply.sources.map((source) => (
-															<div
-																key={`${source.type}-${source.id || source.url || source.title}`}
-																className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2"
+														<p className="mb-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+															{src.type}{src.id ? ` · ${src.id}` : ""}
+														</p>
+														{src.type === "web" && src.url ? (
+															<a
+																href={src.url}
+																target="_blank"
+																rel="noreferrer"
+																className="inline-flex items-center gap-1 text-xs font-medium text-primary transition hover:opacity-80"
 															>
-																<div className="mb-1 flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-slate-400">
-																	<span>{source.type}</span>
-																	{source.id && <span>{source.id}</span>}
-																</div>
-																{source.type === "web" && source.url ? (
-																	<a
-																		href={source.url}
-																		target="_blank"
-																		rel="noreferrer"
-																		className="inline-flex items-center gap-1 text-sm text-cyan-200 transition hover:text-cyan-100"
-																	>
-																		{source.title}
-																		<ExternalLink className="size-3" />
-																	</a>
-																) : (
-																	<p className="text-sm text-slate-100">{source.title}</p>
-																)}
-															</div>
-														))}
+																{src.title}
+																<ExternalLink className="size-3" />
+															</a>
+														) : (
+															<p className="text-xs text-foreground">{src.title}</p>
+														)}
 													</div>
-												</div>
-											)}
-										</div>
+												))}
+											</div>
+										)}
 									</div>
 								</div>
 							),
 						)}
 
+						{/* Loading indicator */}
 						{isLoading && (
 							<div className="flex justify-start">
-								<div className="inline-flex items-center gap-2.5 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">
+								<div className="inline-flex items-center gap-2 rounded-2xl rounded-bl-sm border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
 									<span className="flex gap-1">
-										<span className="size-1.5 rounded-full bg-cyan-300 animate-bounce [animation-delay:0ms]" />
-										<span className="size-1.5 rounded-full bg-cyan-300 animate-bounce [animation-delay:120ms]" />
-										<span className="size-1.5 rounded-full bg-cyan-300 animate-bounce [animation-delay:240ms]" />
+										{[0, 100, 200].map((delay) => (
+											<span
+												key={delay}
+												className="size-1.5 rounded-full bg-primary animate-bounce"
+												style={{ animationDelay: `${delay}ms` }}
+											/>
+										))}
 									</span>
-									Thinking...
+									Thinking…
 								</div>
 							</div>
 						)}
 					</div>
 
-					<form onSubmit={handleSubmit} className="border-t border-white/10 bg-slate-950 px-4 py-4">
+					{/* Input */}
+					<form
+						onSubmit={handleSubmit}
+						className="border-t border-border bg-card px-4 py-3"
+					>
 						<div className="flex gap-2">
 							<Input
+								ref={inputRef}
 								value={input}
-								onChange={(event) => setInput(event.target.value)}
-								placeholder="Ask about your saved programs, deadlines, visas, or scholarships..."
-								className="h-11 flex-1 border-white/10 bg-white/5 text-sm text-white placeholder:text-slate-500"
+								onChange={(e) => setInput(e.target.value)}
+								placeholder="Ask about visas, programs, scholarships…"
+								className="h-10 flex-1 text-sm"
 								disabled={isLoading}
+								autoComplete="off"
 							/>
 							<Button
 								type="submit"
 								size="icon"
-								className="size-11 rounded-2xl bg-cyan-400 text-slate-950 hover:bg-cyan-300"
+								className="size-10 shrink-0 rounded-xl"
 								disabled={isLoading || input.trim().length === 0}
 								aria-label="Send message"
 							>
-								{isLoading ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+								{isLoading
+									? <Loader2 className="size-4 animate-spin" />
+									: <Send className="size-4" />
+								}
 							</Button>
 						</div>
+						<p className="mt-2 text-center text-[10px] text-muted-foreground/60">
+							Advice only · Not a substitute for official guidance
+						</p>
 					</form>
 				</div>
 			)}
 
+			{/* ── Toggle button ── */}
 			<Button
 				size="icon"
-				className="size-14 rounded-full bg-slate-950 text-cyan-200 shadow-[0_18px_40px_rgba(15,23,42,0.4)] hover:bg-slate-900"
-				onClick={() => setOpen((value) => {
-					const next = !value;
-					sessionStorage.setItem("chatbot:open", String(next));
-					return next;
-				})}
-				aria-label={open ? "Close chat" : "Open chat"}
+				variant={open ? "outline" : "default"}
+				className="size-13 rounded-full shadow-lg"
+				onClick={toggleOpen}
+				aria-label={open ? "Close chat" : "Open AI assistant"}
 			>
-				{open ? <X className="size-5" /> : <MessageCircle className="size-5" />}
+				{open
+					? <X className="size-5" />
+					: <MessageCircle className="size-5" />
+				}
 			</Button>
 		</div>
 	);
