@@ -102,9 +102,13 @@ export const upsertUserProfile = async (
 	});
 
 	if (!response.ok) {
-		return { success: false, message: "Failed to save profile. Please try again." };
+		const errData = await response.json().catch(() => null);
+		const msg = errData?.message ?? `Server error (${response.status}). Please try again.`;
+		return { success: false, message: msg };
 	}
 
+	revalidatePath("/app");
+	revalidatePath("/app/profile");
 	return { success: true, message: "Profile saved!" };
 };
 
