@@ -79,17 +79,14 @@ export const upsertUserProfile = async (req: AuthRequest, res: Response) => {
       // Step 4
       ...(body.budgetCurrency !== undefined && { budgetCurrency: body.budgetCurrency }),
       ...(body.budgetMax !== undefined && { budgetMax: body.budgetMax }),
-      // Compute canonical USD value whenever budget fields change
-      ...((body.budgetMax !== undefined || body.budgetCurrency !== undefined) && (() => {
-        // We need both values; read the incoming ones or fall back to existing
-        const amount   = body.budgetMax;
-        const currency = body.budgetCurrency;
-        if (amount != null && currency != null) {
-          const usd = toUSD(amount, currency);
-          return usd != null ? { budgetAmountUSD: usd } : {};
-        }
-        return {};
-      })()),
+      // Canonical USD-normalized budget — computed whenever both fields are present.
+      // Only included in the update when we have a valid amount + currency pair.
+      ...(body.budgetMax != null && body.budgetCurrency != null
+        ? (() => {
+            const usd = toUSD(body.budgetMax!, body.budgetCurrency!);
+            return usd != null ? { budgetAmountUSD: usd } : {};
+          })()
+        : {}),
       ...(body.fundingNeed !== undefined && { fundingNeed: body.fundingNeed }),
       ...(body.preferredCities !== undefined && { preferredCities: body.preferredCities }),
       ...(body.priorities !== undefined && { priorities: body.priorities }),

@@ -708,10 +708,14 @@ export default function OnboardingWizard({
 					router.push("/app");
 					router.refresh();
 				} else {
-					setError(result?.message ?? "Something went wrong.");
+					setError(result?.message ?? "Something went wrong. Please try again.");
 				}
-			} catch {
-				setError("Failed to save profile. Please try again.");
+			} catch (err) {
+				// Only surface a useful message; don't expose raw error internals.
+				const msg = err instanceof Error ? err.message : null;
+				// Ignore Next.js redirect "errors" — those are intentional navigation.
+				if (msg?.includes("NEXT_REDIRECT")) return;
+				setError("Could not reach the server. Check your connection and try again.");
 			}
 		});
 	};
