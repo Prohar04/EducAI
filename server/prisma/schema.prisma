@@ -84,6 +84,9 @@ model UserProfile {
   // ── Step 4: Budget & Preferences ──────────
   budgetCurrency  String?  @map("budget_currency") @db.VarChar(10) @default("USD")
   budgetMax       Float?   @map("budget_max") @db.Real
+  // Canonical USD-normalized budget for matching/filtering logic.
+  // Computed from budgetMax + budgetCurrency using static fallback exchange rates.
+  budgetAmountUSD Float?   @map("budget_amount_usd") @db.Real
   fundingNeed     Boolean? @map("funding_need")
   preferredCities Json?    @map("preferred_cities") // string[]
   priorities      Json?    // string[]

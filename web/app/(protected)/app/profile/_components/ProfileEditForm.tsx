@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, CheckCircle2 } from "lucide-react";
+import { convert, toUSD, RATES_ARE_LIVE } from "@/lib/utils/exchangeRates";
 import type { UserProfile, OnboardingFormState } from "@/types/auth.type";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -27,7 +28,7 @@ const INTAKES = [
 
 const ENGLISH_TESTS = ["None", "IELTS", "TOEFL", "PTE", "Duolingo"];
 
-const CURRENCIES = ["USD", "GBP", "EUR", "AUD", "CAD", "INR"];
+const CURRENCIES = ["USD", "EUR", "GBP", "CAD", "AUD", "SGD", "INR", "BDT", "SEK"];
 
 // ─── Small helpers ─────────────────────────────────────────────────────────────
 
@@ -81,6 +82,12 @@ export default function ProfileEditForm({ initialProfile }: Props) {
 
 	const [budgetCurrency, setBudgetCurrency] = useState<string>(p?.budgetCurrency ?? "USD");
 	const [budgetMax, setBudgetMax] = useState<string>(p?.budgetMax?.toString() ?? "");
+
+	const budgetNum = parseFloat(budgetMax);
+	const budgetUSD = !isNaN(budgetNum) && budgetNum > 0
+		? toUSD(budgetNum, budgetCurrency)
+		: null;
+	const showUSDHint = budgetUSD != null && budgetCurrency !== "USD";
 
 	// Current target countries as comma-separated string for the hidden input
 	const defaultCountries = (() => {
@@ -245,14 +252,21 @@ export default function ProfileEditForm({ initialProfile }: Props) {
 			{/* ── Section 4: Budget & Preferences ── */}
 			<section className="rounded-xl border border-border bg-card p-6 space-y-5">
 				<h2 className="font-semibold text-base">Budget &amp; Preferences</h2>
+				<p className="text-xs text-muted-foreground -mt-2">Used for tuition-based matching and affordability ranking.</p>
 				<div className="grid gap-5 sm:grid-cols-2">
 					<Field label="Currency">
 						<select
 							name="budgetCurrency"
 							value={budgetCurrency}
 							onChange={(e) => {
-								setBudgetCurrency(e.target.value);
-								setBudgetMax("");
+								const newCurrency = e.target.value;
+								// Convert existing amount to preserve the real-world value.
+								const existing = parseFloat(budgetMax);
+								if (!isNaN(existing) && existing > 0) {
+									const converted = convert(existing, budgetCurrency, newCurrency);
+									setBudgetMax(converted != null ? String(converted) : "");
+								}
+								setBudgetCurrency(newCurrency);
 							}}
 							className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 						>
@@ -261,7 +275,7 @@ export default function ProfileEditForm({ initialProfile }: Props) {
 							))}
 						</select>
 					</Field>
-					<Field label="Max budget per year">
+					<Field label="Max annual tuition budget">
 						<Input
 							type="number"
 							name="budgetMax"
@@ -270,6 +284,11 @@ export default function ProfileEditForm({ initialProfile }: Props) {
 							placeholder="e.g. 30000"
 							min="0"
 						/>
+						{showUSDHint && (
+							<p className="mt-1 text-xs text-muted-foreground">
+								≈ USD {budgetUSD!.toLocaleString()}/yr{!RATES_ARE_LIVE ? " (approx.)" : ""}
+							</p>
+						)}
 					</Field>
 					<Field label="Funding need">
 						<select

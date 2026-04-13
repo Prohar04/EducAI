@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { toUSD } from '#src/utils/exchangeRates.ts';
 import crypto from 'crypto';
 import passport from 'passport';
 import '../config/google.config.ts';
@@ -174,6 +175,9 @@ export const signup = async (req: Request, res: Response) => {
           englishScore: profile.englishScore ?? undefined,
           budgetMax: profile.budgetMax ?? undefined,
           budgetCurrency: profile.budgetCurrency ?? 'USD',
+          budgetAmountUSD: (profile.budgetMax != null && profile.budgetCurrency != null)
+            ? (toUSD(profile.budgetMax, profile.budgetCurrency) ?? undefined)
+            : undefined,
           workExperienceMonths: profile.workExperienceMonths ?? undefined,
           onboardingDone: false,
         },
@@ -190,6 +194,9 @@ export const signup = async (req: Request, res: Response) => {
           englishScore: profile.englishScore ?? undefined,
           budgetMax: profile.budgetMax ?? undefined,
           budgetCurrency: profile.budgetCurrency ?? 'USD',
+          budgetAmountUSD: (profile.budgetMax != null && profile.budgetCurrency != null)
+            ? (toUSD(profile.budgetMax, profile.budgetCurrency) ?? undefined)
+            : undefined,
           workExperienceMonths: profile.workExperienceMonths ?? undefined,
           onboardingDone: false,
         },

@@ -11,6 +11,7 @@ import prisma from '#src/config/database.ts';
 import { Prisma, ProgramLevel } from '../generated/client.ts';
 import { AuthRequest } from '#src/types/authRequest.type.ts';
 import { performIngest, normalizeLevel, CountryInput } from '#services/ingest.service.ts';
+import { toUSD } from '#src/utils/exchangeRates.ts';
 
 const AI_SERVER_URL     = process.env.AI_SERVER_URL     ?? 'http://localhost:8001';
 const AI_SERVER_API_KEY = process.env.AI_SERVER_API_KEY ?? '';
@@ -125,7 +126,11 @@ async function runMatchBackground(runId: string, userId: string, profile: Profil
         target_countries:  targetCountries,
         intended_level:    intendedLevel,
         intended_major:    intendedMajor,
-        budget_max_usd:    profile.budgetMax       ?? 30_000,
+        // Use pre-normalized USD value; fall back to on-the-fly conversion; then default.
+        budget_max_usd:    profile.budgetAmountUSD
+                           ?? (profile.budgetMax != null
+                               ? (toUSD(profile.budgetMax, profile.budgetCurrency ?? 'USD') ?? 30_000)
+                               : 30_000),
         gpa:               profile.gpa             ?? 0,
         english_test_type: profile.englishTestType ?? null,
         english_score:     profile.englishScore    ?? null,
@@ -299,7 +304,12 @@ async function rankFromDB(
     orderBy: { createdAt: 'desc' },
   });
 
-  const budgetMax = profile.budgetMax ?? Infinity;
+  // Use the pre-normalized USD value for fair comparison against tuitionMinUSD (always USD).
+  // Fall back to on-the-fly conversion if budgetAmountUSD wasn't persisted yet.
+  const budgetMax = profile.budgetAmountUSD
+    ?? (profile.budgetMax != null
+        ? (toUSD(profile.budgetMax, profile.budgetCurrency ?? 'USD') ?? Infinity)
+        : Infinity);
   const userGpa   = profile.gpa ?? 0;
 
   return programs
