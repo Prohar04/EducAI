@@ -33,10 +33,12 @@ def _get_provider() -> LLMProvider:
     """
     Determine which LLM provider to use.
 
-    Priority:
+    Priority (re-ordered for speed and reliability):
     1. LLM_PROVIDER environment variable if set
-    2. Default to OpenRouter (free tier)
-    3. Fallback chain: Gemini → Groq → xAI
+    2. Groq — fastest (free tier, ~400 tok/s)
+    3. OpenRouter — broad model access (free tier available)
+    4. Gemini — reliable free tier
+    5. xAI — fallback
 
     :return: LLMProvider enum value
     """
@@ -51,20 +53,20 @@ def _get_provider() -> LLMProvider:
                 f"Valid values: gemini, openrouter, groq, xai. Falling back to auto-detection."
             )
 
-    # Priority 1: OpenRouter (free tier default)
+    # Priority 1: Groq (fastest, free tier)
+    if settings.GROQ_API_KEY:
+        logger.info("Defaulting to Groq provider (fastest free tier)")
+        return LLMProvider.GROQ
+
+    # Priority 2: OpenRouter
     if settings.OPENROUTER_API_KEY:
-        logger.info("Defaulting to OpenRouter provider (free tier)")
+        logger.info("Defaulting to OpenRouter provider")
         return LLMProvider.OPENROUTER
 
-    # Priority 2: Gemini
+    # Priority 3: Gemini
     if settings.GEMINI_API_KEY:
         logger.info("Defaulting to Gemini provider")
         return LLMProvider.GEMINI
-
-    # Priority 3: Groq
-    if settings.GROQ_API_KEY:
-        logger.info("Defaulting to Groq provider")
-        return LLMProvider.GROQ
 
     # Priority 4: xAI
     if settings.XAI_API_KEY:
@@ -72,8 +74,8 @@ def _get_provider() -> LLMProvider:
         return LLMProvider.XAI
 
     raise RuntimeError(
-        "No LLM provider configured. Set LLM_PROVIDER and provide at least one API key: "
-        "OPENROUTER_API_KEY, GEMINI_API_KEY, GROQ_API_KEY, or XAI_API_KEY"
+        "No LLM provider configured. Set at least one API key: "
+        "GROQ_API_KEY, OPENROUTER_API_KEY, GEMINI_API_KEY, or XAI_API_KEY"
     )
 
 
@@ -158,7 +160,7 @@ async def _generate_text_gemini(
     if system_prompt:
         payload["systemInstruction"] = {"parts": [{"text": system_prompt}]}
 
-    async with httpx.AsyncClient(timeout=90.0) as client:
+    async with httpx.AsyncClient(timeout=22.0) as client:
         response = await client.post(
             url,
             headers={"Content-Type": "application/json"},
