@@ -15,6 +15,7 @@ import { STAGES, TARGET_INTAKES, LEVELS } from "@/lib/data/stages";
 import { COUNTRIES, COUNTRY_TESTS } from "@/lib/data/countries";
 import { MAJORS } from "@/lib/data/majors";
 import { TUITION_RANGES, PRIORITIES, CURRENCIES } from "@/lib/data/tuitionRanges";
+import { convert, toUSD, RATES_ARE_LIVE } from "@/lib/utils/exchangeRates";
 import type { UserProfile, Session } from "@/types/auth.type";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -413,21 +414,38 @@ function Step4({ values, set }: StepProps) {
 	);
 
 	const budgetNum = parseFloat(values.budgetMax);
-	const lowBudget = !isNaN(budgetNum) && relevantRanges.some(
-		(r) => budgetNum < (values.intendedLevel === "BSc" ? r.bscMin : r.mscMin),
-	);
+
+	// Compare against USD-normalized tuition minimums (all TUITION_RANGES values are in local currency).
+	// For a fair low-budget warning, convert user budget to USD then check against USD equivalents.
+	const budgetUSD = !isNaN(budgetNum) ? toUSD(budgetNum, values.budgetCurrency) : null;
+	const lowBudget = budgetUSD != null && relevantRanges.some((r) => {
+		// Convert the range's local-currency min to USD for comparison.
+		const rangeMinLocal = values.intendedLevel === "BSc" ? r.bscMin : r.mscMin;
+		const rangeMinUSD = toUSD(rangeMinLocal, r.currency) ?? rangeMinLocal;
+		return budgetUSD < rangeMinUSD;
+	});
+
+	// Show a USD equivalent hint when the user is using a non-USD currency.
+	const showUSDHint = !isNaN(budgetNum) && budgetNum > 0 && values.budgetCurrency !== "USD" && budgetUSD != null;
 
 	return (
 		<div className="space-y-5">
 			{/* Budget */}
 			<div>
 				<Label className="mb-2 block text-sm font-medium">Annual Budget (tuition only)</Label>
+				<p className="mb-2 text-xs text-muted-foreground">Used for tuition-based matching and affordability. Enter your maximum annual tuition budget.</p>
 				<div className="flex gap-2">
 					<select
 						value={values.budgetCurrency}
 						onChange={(e) => {
-							set("budgetCurrency", e.target.value);
-							set("budgetMax", "");
+							const newCurrency = e.target.value;
+							// Convert the existing amount to the new currency so the real-world value is preserved.
+							const existing = parseFloat(values.budgetMax);
+							if (!isNaN(existing) && existing > 0) {
+								const converted = convert(existing, values.budgetCurrency, newCurrency);
+								set("budgetMax", converted != null ? String(converted) : "");
+							}
+							set("budgetCurrency", newCurrency);
 						}}
 						className="rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
 					>
@@ -436,10 +454,16 @@ function Step4({ values, set }: StepProps) {
 					<Input
 						type="number"
 						placeholder="e.g. 35000"
+						min="0"
 						value={values.budgetMax}
 						onChange={(e) => set("budgetMax", e.target.value)}
 					/>
 				</div>
+				{showUSDHint && (
+					<p className="mt-1.5 text-xs text-muted-foreground">
+						≈ USD {budgetUSD!.toLocaleString()}/yr{!RATES_ARE_LIVE ? " (approx.)" : ""}
+					</p>
+				)}
 				{lowBudget && (
 					<div className="mt-2 flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
 						<AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
