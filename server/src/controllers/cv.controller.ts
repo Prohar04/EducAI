@@ -17,12 +17,16 @@ export async function cvGenerateHandler(req: Request, res: Response): Promise<vo
   }
 
   try {
-    const profile = await prisma.userProfile.findUnique({ where: { userId } });
+    const [profile, user] = await Promise.all([
+      prisma.userProfile.findUnique({ where: { userId } }),
+      prisma.user.findUnique({ where: { id: userId }, select: { name: true, email: true } }),
+    ]);
 
     logger.info(`[cv] generating for userId=${userId} style=${cvStyle}`);
 
     const result = await generateCv({
-      name: undefined,
+      name: user?.name ?? undefined,
+      email: user?.email ?? undefined,
       currentDegree: profile?.currentStage ?? undefined,
       currentInstitution: profile?.currentInstitution ?? undefined,
       majorOrTrack: profile?.majorOrTrack ?? undefined,

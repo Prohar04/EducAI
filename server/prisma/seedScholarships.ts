@@ -7,9 +7,9 @@
  * data. Switch `isActive` to false to hide from production without deleting.
  */
 
-import { PrismaClient, ProgramLevel } from '../src/generated/client.ts';
-
-const prisma = new PrismaClient();
+import "dotenv/config";
+import { ProgramLevel } from '../src/generated/client.ts';
+import prisma from '../src/config/database.ts';
 
 interface ScholarshipSeed {
   title: string;
@@ -121,7 +121,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     field: 'All Fields',
     url: 'https://www.chevening.org/',
     description:
-      'The UK government's global scholarship programme. For one year Master's degrees at UK universities. Leadership and academic potential are key criteria.',
+      "The UK government's global scholarship programme. For one year Master's degrees at UK universities. Leadership and academic potential are key criteria.",
     amount: 'Full tuition + monthly stipend + flights + visa costs',
     fundingType: 'full',
     minGpa: 2.8,
@@ -161,7 +161,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     field: 'All Fields',
     url: 'https://www.ox.ac.uk/admissions/graduate/fees-and-funding/scholarships/clarendon',
     description:
-      'Oxford University's flagship graduate scholarship. Awarded on the basis of outstanding academic achievement and potential.',
+      "Oxford University's flagship graduate scholarship. Awarded on the basis of outstanding academic achievement and potential.",
     amount: 'Full tuition + annual living grant (~£18,000)',
     fundingType: 'full',
     minGpa: 3.8,
@@ -196,14 +196,14 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     ],
   },
   {
-    title: 'Canada Graduate Scholarships – Master's (CGS-M)',
+    title: "Canada Graduate Scholarships \u2013 Master's (CGS-M)",
     provider: 'Government of Canada (NSERC/SSHRC/CIHR)',
     countryCode: 'CA',
     level: ProgramLevel.MSC,
     field: 'All Fields',
     url: 'https://www.nserc-crsng.gc.ca/students-etudiants/pg-cs/cgsm-bescm_eng.asp',
     description:
-      'Supports high-calibre Master's students in any eligible Canadian university. Covers STEM, social sciences, and health.',
+      "Supports high-calibre Master's students in any eligible Canadian university. Covers STEM, social sciences, and health.",
     amount: 'CAD $17,500 for 12 months',
     fundingType: 'partial',
     minGpa: 3.5,
@@ -392,7 +392,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     field: 'Leadership',
     url: 'https://www.schwarzmanscholars.org/',
     description:
-      'One-year Master's programme in global affairs at Tsinghua University in Beijing. Designed to build the next generation of global leaders.',
+      "One-year Master's programme in global affairs at Tsinghua University in Beijing. Designed to build the next generation of global leaders.",
     amount: 'Full tuition + room & board + stipend + international travel',
     fundingType: 'full',
     minGpa: 3.5,
@@ -452,7 +452,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     field: 'Development',
     url: 'https://opecfund.org/operations/grants/scholarships',
     description:
-      'For citizens of developing countries to pursue Master's degrees in development-related fields at leading universities worldwide.',
+      "For citizens of developing countries to pursue Master's degrees in development-related fields at leading universities worldwide.",
     amount: 'Tuition + living allowance (amount varies by destination)',
     fundingType: 'full',
     minGpa: 3.0,
@@ -574,7 +574,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     field: 'All Fields',
     url: 'https://si.se/en/apply/scholarships/',
     description:
-      'For future leaders from certain countries to pursue Master's programmes in Sweden. Emphasises professional experience and leadership potential.',
+      "For future leaders from certain countries to pursue Master's programmes in Sweden. Emphasises professional experience and leadership potential.",
     amount: 'SEK 11,000/month + tuition + travel grant + insurance',
     fundingType: 'full',
     minGpa: 3.0,
