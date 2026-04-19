@@ -487,3 +487,166 @@ export const searchProfessorsAction = async (
 	return response.json();
 };
 
+// ── Module 3: Gap Fix Recommender ────────────────────────────────────────────
+
+export interface GapFixRecommendation {
+	category: string;
+	priority: "high" | "medium" | "low";
+	title: string;
+	description: string;
+	actions: string[];
+	resources: string[];
+	timelineWeeks: number;
+}
+
+export interface GapFixResult {
+	profileScore: number;
+	strengths: string[];
+	weaknesses: string[];
+	recommendations: GapFixRecommendation[];
+	prioritySummary: string;
+	generatedAt: string;
+}
+
+export const generateGapFixAction = async (): Promise<GapFixResult | null> => {
+	const response = await authFetch(`${BACKEND_URL}/gap-fix/analyze`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: "{}",
+	});
+	if (!response.ok) return null;
+	return response.json();
+};
+
+// ── Module 4: Career Outcome Predictor ──────────────────────────────────────
+
+export interface CareerOutlookFactor {
+	factor: string;
+	rating: "Strong" | "Good" | "Moderate" | "Weak";
+	explanation: string;
+}
+
+export interface CareerPathway {
+	role: string;
+	sector: string;
+	salaryRangeUsd: string;
+	demandLevel: "High" | "Medium" | "Low";
+	timeToEntry: string;
+}
+
+export interface CareerResult {
+	overallOutlook: "Excellent" | "Good" | "Moderate" | "Challenging";
+	outlookSummary: string;
+	employabilityScore: number;
+	topCountry: string;
+	factors: CareerOutlookFactor[];
+	pathways: CareerPathway[];
+	keySkillsToAdd: string[];
+	industryTrends: string[];
+	disclaimer: string;
+	generatedAt: string;
+}
+
+export const predictCareerAction = async (): Promise<CareerResult | null> => {
+	const response = await authFetch(`${BACKEND_URL}/career/predict`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: "{}",
+	});
+	if (!response.ok) return null;
+	return response.json();
+};
+
+// ── Module 4: PR & Immigration Engine ────────────────────────────────────────
+
+export interface ImmigrationStep {
+	phase: string;
+	title: string;
+	description: string;
+	typicalDuration: string;
+	keyCriteria: string[];
+	pitfalls: string[];
+}
+
+export interface CountryPathway {
+	countryCode: string;
+	countryName: string;
+	overallFeasibility: "High" | "Medium" | "Low";
+	feasibilityReason: string;
+	studyVisaType: string;
+	postStudyWorkVisa: string;
+	postStudyWorkDuration: string;
+	prPathway: string;
+	prTimeline: string;
+	pointsRequired?: number;
+	estimatedPoints?: number;
+	steps: ImmigrationStep[];
+	advantages: string[];
+	challenges: string[];
+	officialSource: string;
+}
+
+export interface ImmigrationResult {
+	pathways: CountryPathway[];
+	bestFitCountry: string;
+	bestFitReason: string;
+	generalTips: string[];
+	disclaimer: string;
+	lastUpdated: string;
+	generatedAt: string;
+}
+
+export const getImmigrationGuideAction = async (): Promise<ImmigrationResult | null> => {
+	const response = await authFetch(`${BACKEND_URL}/immigration/guide`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: "{}",
+	});
+	if (!response.ok) return null;
+	return response.json();
+};
+
+// ── Module 4: Data Sync Agent ─────────────────────────────────────────────────
+
+export interface SyncRunResult {
+	target: string;
+	status: "success" | "partial" | "failed";
+	recordsProcessed: number;
+	recordsUpdated: number;
+	recordsCreated: number;
+	errors: string[];
+	durationMs: number;
+	triggeredBy: string;
+	startedAt: string;
+	completedAt: string;
+}
+
+export interface SyncStatusResponse {
+	lastRun: SyncRunResult | null;
+	totalRuns: number;
+	successRate: number;
+	nextScheduledRun: string;
+	dataFreshness: {
+		scholarships: { count: number; lastUpdated: string | null };
+		programs: { count: number; lastUpdated: string | null };
+	};
+}
+
+export const getDataSyncStatusAction = async (): Promise<SyncStatusResponse | null> => {
+	const response = await authFetch(`${BACKEND_URL}/data-sync/status`);
+	if (!response.ok) return null;
+	return response.json();
+};
+
+export const triggerDataSyncAction = async (
+	target: "scholarships" | "programs" | "all" = "all",
+): Promise<SyncRunResult | null> => {
+	const response = await authFetch(`${BACKEND_URL}/data-sync/run`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ target }),
+	});
+	if (!response.ok) return null;
+	return response.json();
+};
+
