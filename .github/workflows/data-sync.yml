@@ -1,0 +1,52 @@
+name: Data Sync Agent
+
+on:
+  schedule:
+    # Run daily at 06:00 UTC
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Sync target (scholarships | programs | all)"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all
+          - scholarships
+          - programs
+
+jobs:
+  sync:
+    name: Run Data Sync
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Trigger data sync
+        run: |
+          TARGET="${{ github.event.inputs.target || 'all' }}"
+          echo "Triggering data sync for target: $TARGET"
+
+          RESPONSE=$(curl -s -o /tmp/sync_response.json -w "%{http_code}" \
+            -X POST "${{ secrets.BACKEND_URL }}/data-sync/run" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"target\": \"$TARGET\"}" \
+            --max-time 120)
+
+          echo "HTTP Status: $RESPONSE"
+          echo "Response body:"
+          cat /tmp/sync_response.json | python3 -m json.tool 2>/dev/null || cat /tmp/sync_response.json
+
+          # Treat 200 and 207 (partial) as acceptable
+          if [ "$RESPONSE" -eq 200 ] || [ "$RESPONSE" -eq 207 ]; then
+            echo "Sync completed successfully (status $RESPONSE)"
+            exit 0
+          else
+            echo "Sync failed with status $RESPONSE"
+            exit 1
+          fi
+        env:
+          BACKEND_URL: ${{ secrets.BACKEND_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}

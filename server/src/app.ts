@@ -26,6 +26,10 @@ import searchRoutes from './routes/search.router.ts';
 import sopRoutes from './routes/sop.router.ts';
 import cvRoutes from './routes/cv.router.ts';
 import professorsRoutes from './routes/professors.router.ts';
+import gapFixRoutes from './routes/gapfix.router.ts';
+import careerRoutes from './routes/career.router.ts';
+import immigrationRoutes from './routes/immigration.router.ts';
+import dataSyncRoutes from './routes/dataSync.router.ts';
 // import { PrismaSessionStore } from './services/session.service.ts';
 
 const app = express();
@@ -186,6 +190,10 @@ app.use('/search', searchRoutes);
 app.use('/sop', sopRoutes);
 app.use('/cv', cvRoutes);
 app.use('/professors', professorsRoutes);
+app.use('/gap-fix', gapFixRoutes);
+app.use('/career', careerRoutes);
+app.use('/immigration', immigrationRoutes);
+app.use('/data-sync', dataSyncRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });

@@ -23,6 +23,10 @@ import {
   ExternalLink,
   Menu,
   X,
+  TrendingUp,
+  Plane,
+  Wrench,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -76,6 +80,10 @@ const TOOLS = [
   { href: "/app/sop", label: "SOP Builder", icon: FileText, soon: false },
   { href: "/app/cv", label: "CV Builder", icon: ClipboardList, soon: false },
   { href: "/app/professors", label: "Professor Finder", icon: Users, soon: false },
+  { href: "/app/gap-fix", label: "Gap Fix", icon: Zap, soon: false },
+  { href: "/app/career", label: "Career Outlook", icon: TrendingUp, soon: false },
+  { href: "/app/immigration", label: "Immigration", icon: Plane, soon: false },
+  { href: "/app/data-sync", label: "Data Sync", icon: Wrench, soon: false },
 ] as const;
 
 export function Navbar({ user }: { user: Session["user"] }) {
