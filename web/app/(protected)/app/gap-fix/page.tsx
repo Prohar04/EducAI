@@ -168,7 +168,7 @@ export default function GapFixPage() {
 					</div>
 					<h3 className="mb-2 font-semibold">Profile Gap Analysis</h3>
 					<p className="max-w-sm text-sm text-muted-foreground mb-6">
-						We'll analyze your academic profile, test scores, experience, and goals to identify weaknesses and give you a concrete improvement roadmap.
+						We&apos;ll analyze your academic profile, test scores, experience, and goals to identify weaknesses and give you a concrete improvement roadmap.
 					</p>
 					<Button onClick={handleAnalyze} disabled={isPending} size="lg" className="gap-2">
 						{isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}

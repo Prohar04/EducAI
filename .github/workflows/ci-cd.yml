@@ -97,39 +97,27 @@ jobs:
         if: steps.check.outputs.configured == 'true'
         run: npx prisma generate
 
-      - name: Check database reachability
-        if: steps.check.outputs.configured == 'true'
-        id: db-ping
-        working-directory: .
-        run: |
-          # Extract host from DATABASE_URL_CLOUD (strips pooler suffix)
-          DB_HOST=$(echo "$DATABASE_URL_CLOUD" | \
-            sed -E 's|.*@([^:/]+).*|\1|')
-          echo "Checking connectivity to $DB_HOST:5432 …"
-          if nc -z -w 8 "$DB_HOST" 5432 2>/dev/null; then
-            echo "reachable=true" >> "$GITHUB_OUTPUT"
-            echo "✅ Database is reachable."
-          else
-            echo "reachable=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Database at $DB_HOST appears unreachable (Neon instance may be paused). Migration skipped — re-run once the instance is active."
-          fi
-        env:
-          DATABASE_URL_CLOUD: ${{ secrets.DATABASE_URL_CLOUD }}
-
       - name: Apply migrations to Neon
-        if: steps.check.outputs.configured == 'true' && steps.db-ping.outputs.reachable == 'true'
-        run: npx prisma migrate deploy
+        if: steps.check.outputs.configured == 'true'
+        working-directory: ./server
+        run: |
+          set +e
+          OUTPUT=$(DATABASE_URL="$DATABASE_URL_CLOUD" npx prisma migrate deploy 2>&1)
+          EXIT_CODE=$?
+          echo "$OUTPUT"
+          if [ $EXIT_CODE -ne 0 ]; then
+            if echo "$OUTPUT" | grep -qE "P1001|Can't reach database|connection refused|ECONNREFUSED|timed out"; then
+              echo "::warning::Neon database is paused or unreachable (P1001). Migration skipped — re-run this workflow once the Neon instance is active, or run manually: cd server && DATABASE_URL=\$YOUR_URL npx prisma migrate deploy"
+              exit 0
+            else
+              echo "::error::Migration failed with an unexpected error (not a connectivity issue). Check the output above."
+              exit $EXIT_CODE
+            fi
+          fi
+          echo "✅ Migrations applied successfully."
         env:
           NODE_ENV: production
           DATABASE_URL_CLOUD: ${{ secrets.DATABASE_URL_CLOUD }}
-
-      - name: Migration skipped notice
-        if: steps.check.outputs.configured == 'true' && steps.db-ping.outputs.reachable != 'true'
-        run: |
-          echo "ℹ️  Migration was skipped because the Neon database is currently unreachable."
-          echo "   To apply pending migrations, either:"
-          echo "   1. Wake the Neon instance and re-run this workflow manually."
-          echo "   2. Run: cd server && DATABASE_URL=\$YOUR_URL npx prisma migrate deploy"
 
   # ════════════════════════════════════════════════════════════════════
   # Web — Lint & Build
