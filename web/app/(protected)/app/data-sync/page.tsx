@@ -87,8 +87,8 @@ export default function DataSyncPage() {
 	const [syncTarget, setSyncTarget] = useState<"scholarships" | "programs" | "all">("all");
 
 	function loadStatus() {
-		setLoadError(null);
 		startLoading(async () => {
+			setLoadError(null);
 			const res = await getDataSyncStatusAction();
 			if (res) setStatus(res);
 			else setLoadError("Could not load sync status. Make sure the server is running.");
@@ -106,7 +106,11 @@ export default function DataSyncPage() {
 	}
 
 	useEffect(() => {
-		loadStatus();
+		startLoading(async () => {
+			const res = await getDataSyncStatusAction();
+			if (res) setStatus(res);
+			else setLoadError("Could not load sync status. Make sure the server is running.");
+		});
 	}, []);
 
 	return (

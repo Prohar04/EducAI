@@ -456,7 +456,7 @@ export default function MatchPage() {
           <div className="space-y-1">
             <p className="font-semibold text-foreground">No programmes found for your profile</p>
             <p className="text-sm text-muted-foreground">
-              The scraper searched but couldn't find strong matches. Try these fixes:
+              The scraper searched but couldn&apos;t find strong matches. Try these fixes:
             </p>
           </div>
           <ul className="text-left text-sm text-muted-foreground space-y-2 max-w-xs">
@@ -473,7 +473,7 @@ export default function MatchPage() {
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-1 size-1.5 shrink-0 rounded-full bg-primary/60" />
-              <span>Try a broader major name (e.g. "Computer Science" instead of a sub-specialty).</span>
+              <span>Try a broader major name (e.g. &ldquo;Computer Science&rdquo; instead of a sub-specialty).</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-1 size-1.5 shrink-0 rounded-full bg-primary/60" />
