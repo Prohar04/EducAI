@@ -515,25 +515,55 @@ async def generate_text(
 
 def parse_json_response(content: str) -> Any:
     """
-    Parse JSON from LLM response, handling markdown code blocks.
+    Parse JSON from LLM response, handling markdown code blocks and embedded JSON.
 
-    :param content: Raw content from LLM
-    :return: Parsed JSON object (dict or list)
-    :raises json.JSONDecodeError: If content is not valid JSON
+    Tries in order:
+    1. Direct json.loads
+    2. Strip ```json...``` or ```...``` fences, then parse
+    3. Extract first {...} or [...] block from the content
     """
+    import re
+
+    original = content
     content = content.strip()
 
-    # Remove markdown code blocks if present
+    # 1. Direct parse (fastest path — json_mode=True should land here)
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError:
+        pass
+
+    # 2. Strip markdown fences
     if content.startswith("```"):
-        parts = content.split("```")
-        if len(parts) >= 2:
-            content = parts[1]
-            # Remove language identifier (e.g., "json")
-            if content.lower().startswith("json"):
-                content = content[4:]
+        # Find closing fence
+        close = content.find("```", 3)
+        inner = content[3:close].strip() if close > 3 else content[3:].strip()
+        # Remove optional language tag on the first line
+        if "\n" in inner:
+            first_line, rest = inner.split("\n", 1)
+            if first_line.strip().lower() in ("json", ""):
+                inner = rest.strip()
+        try:
+            return json.loads(inner)
+        except json.JSONDecodeError:
+            content = inner  # carry stripped content forward
 
     content = content.strip()
-    return json.loads(content)
+
+    # 3. Extract first { } or [ ] block
+    for pattern in (r"\{[\s\S]*\}", r"\[[\s\S]*\]"):
+        m = re.search(pattern, content)
+        if m:
+            try:
+                return json.loads(m.group())
+            except json.JSONDecodeError:
+                pass
+
+    raise json.JSONDecodeError(
+        f"Cannot parse LLM response as JSON (first 200 chars): {original[:200]!r}",
+        original,
+        0,
+    )
 
 
 # ── Chat API for multi-turn conversations ─────────────────────────────────────
