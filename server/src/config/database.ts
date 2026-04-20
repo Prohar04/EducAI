@@ -35,7 +35,16 @@ const dbHost = (() => {
 })();
 console.log(`[db] connecting to host=${dbHost} NODE_ENV=${node_env ?? 'unset'}`);
 
-const pool = new PrismaPg({ connectionString });
-const prisma = new PrismaClient({ adapter: pool });
+const adapter = new PrismaPg({
+  connectionString,
+  // Keep connections alive across the process — prevents "Error { kind: Closed }"
+  // on long-running background jobs (scrape-match can take 90-120s).
+  keepAlive: true,
+  keepAliveInitialDelayMillis: 10_000,
+  idleTimeoutMillis: 60_000,       // 60s idle before releasing
+  connectionTimeoutMillis: 10_000, // fail fast if pool can't acquire
+  max: 5,
+});
+const prisma = new PrismaClient({ adapter });
 
 export default prisma;

@@ -809,22 +809,35 @@ async function callDirectLLM(input: AnswerChatInput, ctx: CompactUserContext): P
   const contextText = formatContextForPrompt(ctx);
   const messages = buildLLMMessages(contextText, input.message, input.history ?? []);
 
-  let raw: string;
-  if (OPENAI_API_KEY) {
-    raw = await callOpenAICompatible(messages, 'https://api.openai.com/v1', OPENAI_API_KEY, 'gpt-4o-mini');
-  } else if (GROQ_API_KEY) {
-    raw = await callOpenAICompatible(messages, 'https://api.groq.com/openai/v1', GROQ_API_KEY, 'llama-3.3-70b-versatile');
-  } else if (OPENROUTER_API_KEY) {
-    raw = await callOpenAICompatible(messages, 'https://openrouter.ai/api/v1', OPENROUTER_API_KEY, 'meta-llama/llama-3.3-70b-instruct:free');
-  } else if (ANTHROPIC_API_KEY) {
-    raw = await callAnthropicDirect(messages);
-  } else if (GEMINI_API_KEY) {
-    raw = await callGeminiDirect(messages);
-  } else {
-    throw new Error('No direct LLM provider configured');
+  // Build ordered provider chain — tries each in sequence on any failure
+  type ProviderFn = () => Promise<string>;
+  const chain: ProviderFn[] = [];
+  if (OPENAI_API_KEY)     chain.push(() => callOpenAICompatible(messages, 'https://api.openai.com/v1', OPENAI_API_KEY, 'gpt-4o-mini'));
+  if (GROQ_API_KEY)       chain.push(() => callOpenAICompatible(messages, 'https://api.groq.com/openai/v1', GROQ_API_KEY, 'llama-3.3-70b-versatile'));
+  if (OPENROUTER_API_KEY) chain.push(() => callOpenAICompatible(messages, 'https://openrouter.ai/api/v1', OPENROUTER_API_KEY, 'meta-llama/llama-3.3-70b-instruct:free'));
+  if (ANTHROPIC_API_KEY)  chain.push(() => callAnthropicDirect(messages));
+  if (GEMINI_API_KEY)     chain.push(() => callGeminiDirect(messages));
+
+  if (chain.length === 0) throw new Error('No direct LLM provider configured');
+
+  let lastErr: Error = new Error('No LLM provider configured');
+  let allRateLimited = true;
+  for (const call of chain) {
+    try {
+      const raw = await call();
+      return normalizeLLMReply(raw);
+    } catch (err) {
+      lastErr = err as Error;
+      const is429 = err instanceof ChatServiceError && (err as ChatServiceError).statusCode === 429;
+      if (!is429) allRateLimited = false;
+      console.warn(`[chat/direct] provider failed (${is429 ? '429' : (err as Error).message?.slice(0, 80) ?? 'unknown'}), trying next`);
+    }
   }
 
-  return normalizeLLMReply(raw);
+  if (allRateLimited) {
+    throw new ChatServiceError(429, 'The assistant is temporarily busy. Please wait a moment and try again.');
+  }
+  throw lastErr;
 }
 
 export async function answerChatMessage(input: AnswerChatInput): Promise<ChatReply> {

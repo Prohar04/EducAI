@@ -164,7 +164,7 @@ export function ChatbotWidget() {
 						: "Something went wrong. Please try again.";
 
 				if      (response.status === 401) errorMessage = "Session expired. Please sign in again.";
-				else if (response.status === 429) errorMessage = "You're sending messages too fast. Please wait a moment.";
+				else if (response.status === 429) errorMessage = "The assistant is temporarily busy. Please wait a moment and try again.";
 				else if (response.status >= 500)  errorMessage = "The assistant encountered an error. Please try again in a moment.";
 
 				setMessages((cur) => [...cur, {

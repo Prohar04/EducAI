@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Tuple
+from urllib.parse import urlparse
 
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
@@ -26,8 +27,38 @@ router = APIRouter(tags=["Module 1 Scrape-Match"])
 
 # ── Constants ─────────────────────────────────────────────────────────────
 
-_MAX_URLS = 10
-_MAX_MARKDOWN_CHARS = 40_000
+_MAX_URLS = 12
+_MAX_CHUNK_CHARS = 12_000   # Max chars per LLM extraction chunk
+_MAX_CHUNKS = 4              # Max chunks to extract per run
+
+# ── Domain denylist — social/forum/unsupported sites ─────────────────────
+
+_BLOCKED_DOMAINS = frozenset({
+    "reddit.com", "old.reddit.com",
+    "facebook.com", "fb.com", "m.facebook.com",
+    "twitter.com", "x.com", "t.co",
+    "youtube.com", "youtu.be",
+    "linkedin.com", "lnkd.in",
+    "instagram.com",
+    "quora.com",
+    "tiktok.com",
+    "pinterest.com",
+    "tumblr.com",
+    "discord.com", "discord.gg",
+    "telegram.org", "t.me",
+    "whatsapp.com",
+    "medium.com",   # low data quality for structured extraction
+})
+
+
+def _is_allowed_url(url: str) -> bool:
+    """Return True only for URLs that Firecrawl can meaningfully extract program data from."""
+    try:
+        hostname = (urlparse(url).hostname or "").lower()
+        host = hostname[4:] if hostname.startswith("www.") else hostname
+        return host not in _BLOCKED_DOMAINS and bool(host)
+    except Exception:
+        return False
 
 # ── Major taxonomy — canonical name → list of synonyms/related terms ──────
 
@@ -347,48 +378,86 @@ def _build_queries(req: ScrapeMatchRequest) -> List[str]:
     ]
 
 
-async def _llm_extract(
-    markdown: str, req: ScrapeMatchRequest
-) -> List[Dict[str, Any]]:
-    """Extract structured program data from scraped markdown using LLM."""
-    system_prompt = (
-        "You are a university admissions data extractor. "
-        "Given scraped web content, extract every distinct "
-        "university program you can find. "
-        "For each program output a JSON object with keys: "
-        "university_name, program_title, level, field, country, city, "
-        "tuition_usd_per_year (number or null), "
-        "duration_months (number or null), "
-        "min_gpa (number or null), "
-        "english_requirement (string or null), "
-        "application_url (string or null), "
-        "description (short string). "
-        "Return a JSON array only — no markdown, no explanation."
-    )
-    user_prompt = (
-        f"Student preferences: {req.intended_level}"
-        f" in {req.intended_major}, "
-        f"countries: {', '.join(req.target_countries) or 'any'}, "
-        f"budget: ${req.budget_max_usd}/yr, GPA: {req.gpa}.\n\n"
-        f"Scraped content:\n{markdown[:_MAX_MARKDOWN_CHARS]}"
-    )
+_EXTRACT_SYSTEM = (
+    "You are a university admissions data extractor. "
+    "Given scraped web content, extract every distinct university program you can find. "
+    "Return a JSON object with a single key 'programs' containing an array of program objects. "
+    "Each program object must have these keys: "
+    "university_name (string), program_title (string), level (string — e.g. MSc/BSc/PhD), "
+    "field (string), country (string), city (string or null), "
+    "tuition_usd_per_year (number or null), duration_months (number or null), "
+    "min_gpa (number or null), english_requirement (string or null), "
+    "application_url (string or null), description (string — 1-2 sentences). "
+    "Only include programs that are real, named, and have at least university_name and program_title. "
+    "If no programs are found return {\"programs\": []}."
+)
 
+
+async def _extract_chunk(
+    chunk: str, req: ScrapeMatchRequest, chunk_idx: int
+) -> List[Dict[str, Any]]:
+    """Extract programs from a single content chunk using OpenAI JSON mode."""
+    user_prompt = (
+        f"Student profile: {req.intended_level} in {req.intended_major}, "
+        f"target countries: {', '.join(req.target_countries) or 'any'}, "
+        f"budget: ${int(req.budget_max_usd)}/yr, GPA: {req.gpa}.\n\n"
+        f"Scraped content (chunk {chunk_idx + 1}):\n{chunk}"
+    )
     try:
         content = await generate_text(
             prompt=user_prompt,
-            system_prompt=system_prompt,
-            temperature=0.1,
+            system_prompt=_EXTRACT_SYSTEM,
+            temperature=0.0,
             max_tokens=4096,
-            json_mode=False,  # Let parse_json_response handle markdown cleanup
+            json_mode=True,
         )
-        programs = parse_json_response(content)
+        data = parse_json_response(content)
+        if isinstance(data, dict):
+            programs = data.get("programs", [])
+        elif isinstance(data, list):
+            programs = data
+        else:
+            programs = []
         if not isinstance(programs, list):
             programs = []
-    except Exception as e:
-        logger.error(f"LLM extraction failed: {e}")
-        programs = []
+        return [p for p in programs if isinstance(p, dict)]
+    except Exception as exc:
+        logger.warning(f"LLM extraction chunk {chunk_idx} failed: {exc}")
+        return []
 
-    return programs
+
+async def _llm_extract(
+    markdown: str, req: ScrapeMatchRequest
+) -> List[Dict[str, Any]]:
+    """Split content into chunks and extract structured program data from each."""
+    # Split on source separators first to keep source context together
+    sections = markdown.split("\n\n---\n")
+    chunks: List[str] = []
+    current = ""
+    for section in sections:
+        if len(current) + len(section) > _MAX_CHUNK_CHARS and current:
+            chunks.append(current.strip())
+            current = section
+        else:
+            current = (current + "\n\n---\n" + section) if current else section
+    if current.strip():
+        chunks.append(current.strip())
+
+    chunks = chunks[:_MAX_CHUNKS]
+    logger.info(f"scrape-match: extracting from {len(chunks)} chunk(s)")
+
+    all_programs: List[Dict[str, Any]] = []
+    seen: set = set()
+    for i, chunk in enumerate(chunks):
+        programs = await _extract_chunk(chunk, req, i)
+        for p in programs:
+            key = f"{(p.get('university_name') or '').lower()}::{(p.get('program_title') or '').lower()}"
+            if key and key not in seen:
+                seen.add(key)
+                all_programs.append(p)
+
+    logger.info(f"scrape-match: LLM extracted {len(all_programs)} unique programs across all chunks")
+    return all_programs
 
 
 ScoreResult = Tuple[float, List[str]]
@@ -600,11 +669,22 @@ async def scrape_match(req: ScrapeMatchRequest) -> ScrapeMatchResponse:
             ),
         )
 
+    # Filter out social/forum/unsupported domains before scraping
+    allowed_urls = [u for u in all_urls if _is_allowed_url(u)]
+    blocked_count = len(all_urls) - len(allowed_urls)
+    if blocked_count:
+        logger.info(f"scrape-match run_id={req.run_id}: filtered out {blocked_count} unsupported URLs (social/forum)")
+    if not allowed_urls:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="All search results were from unsupported domains. Adjust search terms.",
+        )
+
     # Step 2 — scrape
     scraper = FirecrawlClient()
     combined_markdown = ""
     scraped = 0
-    for url in all_urls[:_MAX_URLS]:
+    for url in allowed_urls[:_MAX_URLS]:
         try:
             md = await scraper.scrape_url(url)
             if md:
