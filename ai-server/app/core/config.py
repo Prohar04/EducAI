@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     LLM_PROVIDER: Optional[str] = Field(default=None, validation_alias="LLM_PROVIDER")
     LLM_MODEL: Optional[str] = Field(default=None, validation_alias="LLM_MODEL")
 
+    # OpenAI configuration (primary provider)
+    OPENAI_API_KEY: Optional[str] = Field(default=None, validation_alias="OPENAI_API_KEY")
+
     # OpenRouter configuration
     OPENROUTER_API_KEY: Optional[str] = Field(default=None, validation_alias="OPENROUTER_API_KEY")
     OPEN_ROUTER_APIKEY: Optional[str] = Field(default=None, validation_alias="OPEN_ROUTER_APIKEY")  # Legacy support

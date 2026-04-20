@@ -3,7 +3,8 @@
  * Outputs clean ATS-friendly plain text suitable for copy/paste.
  */
 
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'; // fallback
 
 export interface CvRequest {
   name?: string;
@@ -33,7 +34,11 @@ export interface CvResult {
 }
 
 export async function generateCv(req: CvRequest): Promise<CvResult> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const openaiKey = process.env.OPENAI_API_KEY;
+  const openrouterKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = openaiKey || openrouterKey;
+  const apiUrl = openaiKey ? OPENAI_URL : OPENROUTER_URL;
+  const model = openaiKey ? 'gpt-4o-mini' : 'openai/gpt-4o-mini';
 
   const styleInstructions: Record<string, string> = {
     academic: 'Format as an academic CV with sections: Education, Research Experience, Publications (if any), Skills, Test Scores, Awards.',
@@ -79,22 +84,20 @@ Write ONLY the CV text. No commentary, no explanations.`;
 
   if (!apiKey) {
     return {
-      cv: `[Configure OPENROUTER_API_KEY to enable AI-generated CV]\n\n${req.name?.toUpperCase() ?? 'YOUR NAME'}\n${req.email ?? 'your.email@example.com'}\n\nEDUCATION\n${req.currentDegree ?? 'B.Sc.'} in ${req.majorOrTrack ?? req.intendedMajor ?? '[Major]'}\n${req.currentInstitution ?? '[Institution]'}\n\n[Full CV will be generated once the AI key is configured.]`,
+      cv: `[Configure OPENAI_API_KEY to enable AI-generated CV]\n\n${req.name?.toUpperCase() ?? 'YOUR NAME'}\n${req.email ?? 'your.email@example.com'}\n\nEDUCATION\n${req.currentDegree ?? 'B.Sc.'} in ${req.majorOrTrack ?? req.intendedMajor ?? '[Major]'}\n${req.currentInstitution ?? '[Institution]'}\n\n[Full CV will be generated once the AI key is configured.]`,
       style: req.cvStyle,
       sections,
     };
   }
 
-  const response = await fetch(OPENROUTER_URL, {
+  const response = await fetch(apiUrl, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://educai.app',
-      'X-Title': 'EducAI CV Builder',
     },
     body: JSON.stringify({
-      model: 'openai/gpt-4o-mini',
+      model,
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.4,
       max_tokens: 1500,

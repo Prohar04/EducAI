@@ -4,7 +4,8 @@
  */
 
 const SERPER_URL = 'https://google.serper.dev/search';
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'; // fallback
 
 export interface ProfessorSearchRequest {
   researchInterest: string;
@@ -54,7 +55,11 @@ async function extractProfessors(
   searchResults: Array<{ title: string; link: string; snippet: string }>,
   req: ProfessorSearchRequest,
 ): Promise<ProfessorResult[]> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const openaiKey = process.env.OPENAI_API_KEY;
+  const openrouterKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = openaiKey || openrouterKey;
+  const apiUrl = openaiKey ? OPENAI_URL : OPENROUTER_URL;
+  const model = openaiKey ? 'gpt-4o-mini' : 'openai/gpt-4o-mini';
 
   if (!apiKey || searchResults.length === 0) {
     // Return stub results based on search snippets
@@ -108,16 +113,14 @@ Extract up to 5 professors from these results. For each professor return ONLY a 
 If you cannot extract a professor from a result, skip it. Return ONLY the JSON array.`;
 
   try {
-    const response = await fetch(OPENROUTER_URL, {
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://educai.app',
-        'X-Title': 'EducAI Professor Finder',
       },
       body: JSON.stringify({
-        model: 'openai/gpt-4o-mini',
+        model,
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.2,
         max_tokens: 1000,

@@ -20,6 +20,7 @@ from ...core.logger import logger
 class LLMProvider(str, Enum):
     """Supported LLM providers."""
 
+    OPENAI = "openai"
     GEMINI = "gemini"
     OPENROUTER = "openrouter"
     GROQ = "groq"
@@ -50,32 +51,36 @@ def _get_provider() -> LLMProvider:
         except ValueError:
             logger.warning(
                 f"Invalid LLM_PROVIDER '{provider_str}'. "
-                f"Valid values: gemini, openrouter, groq, xai. Falling back to auto-detection."
+                f"Valid values: openai, gemini, openrouter, groq, xai. Falling back to auto-detection."
             )
 
-    # Priority 1: Groq (fastest, free tier)
+    # Priority 1: OpenAI (primary)
+    if settings.OPENAI_API_KEY:
+        logger.info("Defaulting to OpenAI provider (primary)")
+        return LLMProvider.OPENAI
+
+    # Priority 2: Groq (fastest free-tier fallback)
     if settings.GROQ_API_KEY:
-        logger.info("Defaulting to Groq provider (fastest free tier)")
+        logger.info("Defaulting to Groq provider (free tier fallback)")
         return LLMProvider.GROQ
 
-    # Priority 2: OpenRouter
+    # Priority 3: OpenRouter
     if settings.OPENROUTER_API_KEY:
         logger.info("Defaulting to OpenRouter provider")
         return LLMProvider.OPENROUTER
 
-    # Priority 3: Gemini
+    # Priority 4: Gemini
     if settings.GEMINI_API_KEY:
         logger.info("Defaulting to Gemini provider")
         return LLMProvider.GEMINI
 
-    # Priority 4: xAI
+    # Priority 5: xAI
     if settings.XAI_API_KEY:
         logger.info("Defaulting to xAI provider")
         return LLMProvider.XAI
 
     raise RuntimeError(
-        "No LLM provider configured. Set at least one API key: "
-        "GROQ_API_KEY, OPENROUTER_API_KEY, GEMINI_API_KEY, or XAI_API_KEY"
+        "No LLM provider configured. Set OPENAI_API_KEY to enable AI features."
     )
 
 
@@ -83,9 +88,10 @@ def _get_provider() -> LLMProvider:
 
 
 _DEFAULT_MODELS = {
+    LLMProvider.OPENAI: "gpt-4o-mini",
     LLMProvider.GEMINI: "gemini-2.0-flash-exp",
-    LLMProvider.OPENROUTER: "openrouter/free",  # Free tier model
-    LLMProvider.GROQ: "llama-3.3-70b-versatile",  # Free tier model
+    LLMProvider.OPENROUTER: "openrouter/free",
+    LLMProvider.GROQ: "llama-3.3-70b-versatile",
     LLMProvider.XAI: "grok-beta",
 }
 
@@ -111,6 +117,56 @@ def _get_model(provider: LLMProvider, override: Optional[str] = None) -> str:
 
 
 # ── Provider implementations ──────────────────────────────────────────────────
+
+
+async def _generate_text_openai(
+    prompt: str,
+    *,
+    system_prompt: Optional[str] = None,
+    model: Optional[str] = None,
+    temperature: float = 0.3,
+    max_tokens: Optional[int] = None,
+    json_mode: bool = False,
+) -> str:
+    """Generate text using the official OpenAI API (OpenAI-compatible endpoint)."""
+    if not settings.OPENAI_API_KEY:
+        raise RuntimeError("OPENAI_API_KEY not configured")
+
+    model_name = _get_model(LLMProvider.OPENAI, model)
+    url = "https://api.openai.com/v1/chat/completions"
+
+    messages: List[Dict[str, str]] = []
+    if system_prompt:
+        messages.append({"role": "system", "content": system_prompt})
+    messages.append({"role": "user", "content": prompt})
+
+    payload: Dict[str, Any] = {
+        "model": model_name,
+        "messages": messages,
+        "temperature": temperature,
+    }
+    if max_tokens:
+        payload["max_tokens"] = max_tokens
+    if json_mode:
+        payload["response_format"] = {"type": "json_object"}
+
+    async with httpx.AsyncClient(timeout=90.0) as client:
+        response = await client.post(
+            url,
+            headers={
+                "Authorization": f"Bearer {settings.OPENAI_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json=payload,
+        )
+        response.raise_for_status()
+
+    data = response.json()
+    try:
+        return data["choices"][0]["message"]["content"]
+    except (KeyError, IndexError) as e:
+        logger.error(f"Failed to parse OpenAI response: {e}\n{data}")
+        raise RuntimeError(f"Unexpected OpenAI API response format: {e}")
 
 
 async def _generate_text_gemini(
@@ -443,7 +499,9 @@ async def generate_text(
         "json_mode": json_mode,
     }
 
-    if selected_provider == LLMProvider.GEMINI:
+    if selected_provider == LLMProvider.OPENAI:
+        return await _generate_with_retry(_generate_text_openai, **common_kwargs)
+    elif selected_provider == LLMProvider.GEMINI:
         return await _generate_with_retry(_generate_text_gemini, **common_kwargs)
     elif selected_provider == LLMProvider.OPENROUTER:
         return await _generate_with_retry(_generate_text_openrouter, **common_kwargs)

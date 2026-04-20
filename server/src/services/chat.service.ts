@@ -6,6 +6,7 @@ const AI_SERVER_API_KEY         = process.env.AI_SERVER_API_KEY         ?? '';
 const CHAT_RATE_LIMIT_PER_MIN   = Number(process.env.CHAT_RATE_LIMIT_PER_MIN ?? '0');
 
 // ── Direct LLM provider keys (used when ai-server is unavailable) ─────────────
+const OPENAI_API_KEY      = process.env.OPENAI_API_KEY      ?? '';
 const GROQ_API_KEY        = process.env.GROQ_API_KEY        ?? '';
 const OPENROUTER_API_KEY  = process.env.OPENROUTER_API_KEY  ?? '';
 const ANTHROPIC_API_KEY   = process.env.ANTHROPIC_API_KEY   ?? '';
@@ -809,7 +810,9 @@ async function callDirectLLM(input: AnswerChatInput, ctx: CompactUserContext): P
   const messages = buildLLMMessages(contextText, input.message, input.history ?? []);
 
   let raw: string;
-  if (GROQ_API_KEY) {
+  if (OPENAI_API_KEY) {
+    raw = await callOpenAICompatible(messages, 'https://api.openai.com/v1', OPENAI_API_KEY, 'gpt-4o-mini');
+  } else if (GROQ_API_KEY) {
     raw = await callOpenAICompatible(messages, 'https://api.groq.com/openai/v1', GROQ_API_KEY, 'llama-3.3-70b-versatile');
   } else if (OPENROUTER_API_KEY) {
     raw = await callOpenAICompatible(messages, 'https://openrouter.ai/api/v1', OPENROUTER_API_KEY, 'meta-llama/llama-3.3-70b-instruct:free');
@@ -833,7 +836,7 @@ export async function answerChatMessage(input: AnswerChatInput): Promise<ChatRep
   if (!cachedCtx) setCachedContext(input.userId, userContext);
 
   // ── Fast path: direct LLM call (no Python ai-server dependency) ────────────
-  const hasDirectProvider = !!(GROQ_API_KEY || OPENROUTER_API_KEY || ANTHROPIC_API_KEY || GEMINI_API_KEY);
+  const hasDirectProvider = !!(OPENAI_API_KEY || GROQ_API_KEY || OPENROUTER_API_KEY || ANTHROPIC_API_KEY || GEMINI_API_KEY);
   if (hasDirectProvider) {
     try {
       return await callDirectLLM(input, userContext);
@@ -871,7 +874,7 @@ export async function answerChatMessage(input: AnswerChatInput): Promise<ChatRep
     }
     throw new ChatServiceError(
       502,
-      'No AI provider is configured. Add GROQ_API_KEY, OPENROUTER_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY to enable the assistant.',
+      'No AI provider is configured. Add OPENAI_API_KEY to enable the assistant.',
     );
   }
 

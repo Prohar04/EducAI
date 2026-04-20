@@ -36,7 +36,8 @@ export interface IntelligentSearchResponse {
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const MAX_RESULTS_PER_QUERY = 5;
 const SERPER_URL = 'https://google.serper.dev/search';
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'; // fallback
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -51,9 +52,12 @@ function hashQuery(normalized: string): string {
 // ── LLM query rewrite ────────────────────────────────────────────────────────
 
 async function rewriteQuery(query: string): Promise<string[]> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const openaiKey = process.env.OPENAI_API_KEY;
+  const openrouterKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = openaiKey || openrouterKey;
+  const apiUrl = openaiKey ? OPENAI_URL : OPENROUTER_URL;
+  const model = openaiKey ? 'gpt-4o-mini' : 'openai/gpt-4o-mini';
   if (!apiKey) {
-    // Fallback: return the original query as-is
     return [query];
   }
 
@@ -66,16 +70,14 @@ Return ONLY a JSON array of 3 strings (search queries), no explanation, no markd
 ["query 1", "query 2", "query 3"]`;
 
   try {
-    const response = await fetch(OPENROUTER_URL, {
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://educai.app',
-        'X-Title': 'EducAI Search',
       },
       body: JSON.stringify({
-        model: 'openai/gpt-4o-mini',
+        model,
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.3,
         max_tokens: 200,
