@@ -1,6 +1,7 @@
 # AI Provider Audit — EducAI
 
-**Audited:** 2026-04-20
+**Audited:** 2026-04-20  
+**Verified:** 2026-04-20 — all builds passing, OpenAI confirmed as active provider
 
 ---
 
@@ -27,10 +28,9 @@
 | `domains/embeddings/openapi.py` | OpenRouter (proxied text-embedding-3-small) | Vector embeddings for RAG/ChromaDB | ✅ Direct OpenAI embeddings API |
 | `api/v1/chat.py` | (uses llm_provider) | Multi-turn chat with web search | ✅ Inherits from llm_provider |
 | `api/v1/strategy.py` | (uses llm_provider) | Strategy report generation | ✅ Inherits from llm_provider |
-| `domains/reasoning/rag_pipeline.py` | OpenRouter hardcoded | RAG pipeline — query rewrite + extraction | ⚠️ Still uses OpenRouter URL directly — see note |
-| `domains/reasoning/xai.py` | xAI Grok | xAI-specific integration | Not migrated (xAI-specific module) |
-
-> **Note on rag_pipeline.py**: This pipeline hard-codes the OpenRouter base URL for structured extraction during web scraping. Since scraping + extraction is a long-running background task that uses OpenRouter's `gpt-4o-mini` via their proxy, it was left on OpenRouter to avoid breaking the pipeline. Set `OPENROUTER_API_KEY` as the fallback for this to continue working. If `OPENAI_API_KEY` is set, the llm_provider abstraction will prefer it for all other ai-server calls.
+| `domains/reasoning/rag_pipeline.py` | OpenRouter (via LangChain proxy) | RAG pipeline — query rewrite + extraction | ✅ Uses `OPENAI_API_KEY` directly when set; falls back to OpenRouter via LangChain |
+| `api/v1/scrape_match.py` | (uses llm_provider) | Scrape + match + rank programs | ✅ Inherits from llm_provider |
+| `domains/reasoning/xai.py` | xAI Grok | xAI-specific integration | Kept as optional fallback in llm_provider |
 
 ---
 
