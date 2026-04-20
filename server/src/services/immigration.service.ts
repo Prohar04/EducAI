@@ -6,7 +6,8 @@
  * guidance only and includes policy-change disclaimers.
  */
 
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'; // fallback
 
 export interface ImmigrationRequest {
   targetCountries?: string[];
@@ -169,7 +170,11 @@ const PATHWAY_TEMPLATES: Record<string, Omit<CountryPathway, 'overallFeasibility
 };
 
 export async function getImmigrationGuidance(req: ImmigrationRequest): Promise<ImmigrationResult> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const openaiKey = process.env.OPENAI_API_KEY;
+  const openrouterKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = openaiKey || openrouterKey;
+  const apiUrl = openaiKey ? OPENAI_URL : OPENROUTER_URL;
+  const model = openaiKey ? 'gpt-4o-mini' : 'openai/gpt-4o-mini';
   const targetCodes = (req.targetCountries ?? ['CA', 'UK']).filter(c => PATHWAY_TEMPLATES[c]);
 
   if (targetCodes.length === 0) targetCodes.push('CA', 'UK');
@@ -241,16 +246,14 @@ Return ONLY valid JSON. No markdown.`;
   }
 
   try {
-    const response = await fetch(OPENROUTER_URL, {
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://educai.app',
-        'X-Title': 'EducAI Immigration Engine',
       },
       body: JSON.stringify({
-        model: 'openai/gpt-4o-mini',
+        model,
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.3,
         max_tokens: 2000,

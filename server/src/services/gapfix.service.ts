@@ -3,7 +3,8 @@
  * recommends concrete next steps: courses, certifications, projects, tests.
  */
 
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'; // fallback
 
 export interface GapFixRequest {
   // Academic
@@ -142,7 +143,11 @@ function assessProfileWeaknesses(req: GapFixRequest): {
 }
 
 export async function generateGapFix(req: GapFixRequest): Promise<GapFixResult> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const openaiKey = process.env.OPENAI_API_KEY;
+  const openrouterKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = openaiKey || openrouterKey;
+  const apiUrl = openaiKey ? OPENAI_URL : OPENROUTER_URL;
+  const model = openaiKey ? 'gpt-4o-mini' : 'openai/gpt-4o-mini';
   const { weaknesses, strengths, score } = assessProfileWeaknesses(req);
 
   const profileSummary = [
@@ -197,16 +202,14 @@ Return ONLY valid JSON. No markdown, no explanation.`;
   }
 
   try {
-    const response = await fetch(OPENROUTER_URL, {
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://educai.app',
-        'X-Title': 'EducAI Gap Fix Recommender',
       },
       body: JSON.stringify({
-        model: 'openai/gpt-4o-mini',
+        model,
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.4,
         max_tokens: 1500,

@@ -3,7 +3,8 @@
  * employability based on field, country, degree level, and profile.
  */
 
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'; // fallback
 
 export interface CareerRequest {
   intendedMajor?: string;
@@ -56,7 +57,11 @@ const COUNTRY_JOB_MARKET: Record<string, { name: string; strength: string; visa:
 };
 
 export async function predictCareerOutcome(req: CareerRequest): Promise<CareerResult> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const openaiKey = process.env.OPENAI_API_KEY;
+  const openrouterKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = openaiKey || openrouterKey;
+  const apiUrl = openaiKey ? OPENAI_URL : OPENROUTER_URL;
+  const model = openaiKey ? 'gpt-4o-mini' : 'openai/gpt-4o-mini';
 
   const primaryCountry = req.targetCountries?.[0] ?? 'US';
   const countryInfo = COUNTRY_JOB_MARKET[primaryCountry] ?? { name: primaryCountry, strength: 'Active graduate job market', visa: 'Work permit required' };
@@ -117,16 +122,14 @@ Return ONLY valid JSON. No markdown, no explanation.`;
   }
 
   try {
-    const response = await fetch(OPENROUTER_URL, {
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://educai.app',
-        'X-Title': 'EducAI Career Predictor',
       },
       body: JSON.stringify({
-        model: 'openai/gpt-4o-mini',
+        model,
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.3,
         max_tokens: 1200,

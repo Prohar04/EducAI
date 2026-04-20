@@ -3,7 +3,8 @@
  * Calls OpenRouter directly (same pattern as search.service.ts).
  */
 
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'; // fallback
 
 export type SopTone = 'formal' | 'research' | 'personal';
 export type SopType = 'general' | 'scholarship' | 'research';
@@ -39,7 +40,11 @@ export interface SopResult {
 }
 
 export async function generateSop(req: SopRequest): Promise<SopResult> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const openaiKey = process.env.OPENAI_API_KEY;
+  const openrouterKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = openaiKey || openrouterKey;
+  const apiUrl = openaiKey ? OPENAI_URL : OPENROUTER_URL;
+  const model = openaiKey ? 'gpt-4o-mini' : 'openai/gpt-4o-mini';
 
   const toneInstructions: Record<SopTone, string> = {
     formal: 'Use a formal, professional academic tone. Avoid colloquialisms.',
@@ -94,23 +99,21 @@ Write ONLY the SOP text. No metadata, no word count, no headings. Just the full 
   if (!apiKey) {
     // Fallback when no API key — return structured placeholder
     return {
-      sop: `[Configure OPENROUTER_API_KEY to enable AI-generated SOP]\n\nStatement of Purpose\n\nI am writing to express my strong interest in the ${req.intendedLevel ?? 'graduate'} program in ${req.intendedMajor ?? req.majorOrTrack ?? 'the selected field'} at ${req.targetUniversity ?? 'your esteemed institution'}.\n\n[Full SOP will be generated once the AI key is configured.]`,
+      sop: `[Configure OPENAI_API_KEY to enable AI-generated SOP]\n\nStatement of Purpose\n\nI am writing to express my strong interest in the ${req.intendedLevel ?? 'graduate'} program in ${req.intendedMajor ?? req.majorOrTrack ?? 'the selected field'} at ${req.targetUniversity ?? 'your esteemed institution'}.\n\n[Full SOP will be generated once the AI key is configured.]`,
       wordCount: 0,
       tone: req.tone,
       sopType: req.sopType,
     };
   }
 
-  const response = await fetch(OPENROUTER_URL, {
+  const response = await fetch(apiUrl, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://educai.app',
-      'X-Title': 'EducAI SOP Builder',
     },
     body: JSON.stringify({
-      model: 'openai/gpt-4o-mini',
+      model,
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.7,
       max_tokens: 1200,
