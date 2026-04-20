@@ -46,7 +46,6 @@ _CACHE_TTL_DAYS = 180  # 6 months
 _MAX_URLS_TO_SCRAPE = 9
 _MAX_MARKDOWN_CHARS = 50_000
 _OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
-_LLM_MODEL = "openai/gpt-4o-mini"
 
 # ── Small pure helpers ───────────────────────────────────────────────────
 
@@ -108,17 +107,23 @@ class EduRAGPipeline:
             OpenAIEmbeddings,
         )
 
-        self._embeddings = OpenAIEmbeddings(
-            model="text-embedding-3-small",
-            api_key=settings.OPEN_ROUTER_APIKEY,
-            base_url=_OPENROUTER_BASE_URL,
-        )
-        self._llm = ChatOpenAI(
-            model=_LLM_MODEL,
-            api_key=settings.OPEN_ROUTER_APIKEY,
-            base_url=_OPENROUTER_BASE_URL,
-            temperature=0.1,
-        )
+        # Prefer direct OpenAI; fall back to OpenRouter proxy
+        _openai_key = settings.OPENAI_API_KEY
+        _openrouter_key = settings.OPEN_ROUTER_APIKEY
+        _use_openai_direct = bool(_openai_key)
+        _llm_api_key = _openai_key or _openrouter_key
+        _llm_base_url = None if _use_openai_direct else _OPENROUTER_BASE_URL
+        _llm_model = "gpt-4o-mini" if _use_openai_direct else "openai/gpt-4o-mini"
+
+        emb_kwargs = dict(model="text-embedding-3-small", api_key=_llm_api_key)
+        if not _use_openai_direct:
+            emb_kwargs["base_url"] = _OPENROUTER_BASE_URL
+        self._embeddings = OpenAIEmbeddings(**emb_kwargs)
+
+        llm_kwargs = dict(model=_llm_model, api_key=_llm_api_key, temperature=0.1)
+        if _llm_base_url:
+            llm_kwargs["base_url"] = _llm_base_url
+        self._llm = ChatOpenAI(**llm_kwargs)
         _chroma_client = chromadb.HttpClient(
             host=settings.CHROMADB_HOST,
             port=settings.CHROMADB_PORT,
