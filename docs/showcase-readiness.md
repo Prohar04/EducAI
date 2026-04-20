@@ -1,6 +1,7 @@
 # EducAI Showcase Readiness
 
-**Date:** 2026-04-19
+**Date:** 2026-04-20  
+**AI Provider:** OpenAI GPT-4o-mini (primary) · Groq / OpenRouter (fallback)
 
 ---
 
@@ -51,10 +52,11 @@
 
 ## Things That Require API Keys for Full Quality
 
-1. `OPENROUTER_API_KEY` — enables LLM-powered outputs for Gap Fix, Career, Immigration, SOP, CV, Strategy, Chat
-2. `FIRECRAWL_API_KEY` — enables live web scraping for Program Match
-3. `SERPER_API_KEY` — enables Professor Finder web search
-4. Email config — enables Scholarship Deadline email alerts
+1. `OPENAI_API_KEY` — **primary** LLM for SOP, CV, Gap Fix, Career, Immigration, Chat, Strategy (GPT-4o-mini)
+2. `OPENROUTER_API_KEY` or `GROQ_API_KEY` — fallback LLM providers (free tier available, used if OpenAI key absent)
+3. `FIRECRAWL_API_KEY` — enables live web scraping for Program Match
+4. `SERPER_API_KEY` — enables Professor Finder web search and intelligent search query rewriting
+5. Email config — enables Scholarship Deadline email alerts
 
 **Without these keys, the product is still functionally navigable** — all pages load, fallback results are shown, and UI is fully interactive. The product is honest about what requires live providers.
 

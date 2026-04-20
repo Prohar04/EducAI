@@ -24,6 +24,10 @@ EducAI helps international students navigate the study-abroad process end to end
 | **SOP Builder** | AI-generated Statement of Purpose — 3 tone modes, 3 SOP types, profile-injected, copy/download |
 | **CV Builder** | ATS-friendly CV in academic / research / industry styles, generated from your profile |
 | **Professor Finder** | Live web search for research supervisors with auto-generated cold-email templates |
+| **Gap Fix Recommender** | AI profile gap analysis — competitiveness score, strengths/weaknesses, prioritised improvement roadmap |
+| **Career Outcome Predictor** | Employability score, career pathways, salary ranges, key skills, and industry trends for your field and target country |
+| **PR & Immigration Guide** | Step-by-step study visa, post-study work permit, and PR pathways for each target country |
+| **Data Sync Agent** | Manual and scheduled data refresh pipeline for programs and scholarships with run history |
 
 ---
 
@@ -44,7 +48,7 @@ EducAI helps international students navigate the study-abroad process end to end
 ┌──────────▼────────────────────┐    ┌────────────────────────┐
 │    FastAPI AI Server           │    │  Neon PostgreSQL        │
 │  /ai-server · Python 3.13      │    │  (Serverless Postgres)  │
-│  OpenRouter · Gemini · Groq    │    └────────────────────────┘
+│  OpenAI · Groq · OpenRouter    │    └────────────────────────┘
 │  Firecrawl scraping            │
 │  Serper web search             │
 └───────────────────────────────┘
@@ -129,8 +133,9 @@ Open [http://localhost:3000](http://localhost:3000)
 | `EMAIL_USER` / `EMAIL_PASS` | Optional | Gmail address + App Password for alerts |
 | `CRON_SECRET` | Recommended | Protects `POST /deadline-alerts/run` |
 | `INGEST_API_KEY` | Optional | Shared key for match data ingestion from ai-server |
-| `OPENROUTER_API_KEY` | Recommended | LLM for SOP Builder, CV Builder, Professor Finder (OpenRouter free tier works) |
-| `SERPER_API_KEY` | Recommended | Web search used by Professor Finder to discover faculty pages |
+| `OPENAI_API_KEY` | **Recommended** | Primary LLM for chat, SOP, CV, Gap Fix, Career, Immigration (GPT-4o-mini) |
+| `OPENROUTER_API_KEY` | Optional | Fallback LLM provider when `OPENAI_API_KEY` is not set |
+| `SERPER_API_KEY` | Recommended | Web search used by Professor Finder and intelligent search |
 
 ### Web (`web/.env.local`)
 
@@ -144,14 +149,15 @@ Open [http://localhost:3000](http://localhost:3000)
 
 | Variable | Required | Description |
 | --- | --- | --- |
-| `OPENROUTER_API_KEY` | Recommended | LLM for chat and matching (free tier available) |
-| `GEMINI_API_KEY` | Optional | LLM fallback (free tier available) |
-| `GROQ_API_KEY` | Optional | Fast inference fallback (free tier available) |
-| `SERPER_API_KEY` | Optional | Web search for chat citations |
+| `OPENAI_API_KEY` | **Recommended** | Primary LLM — chat, strategy, RAG reasoning (GPT-4o-mini) |
+| `GROQ_API_KEY` | Optional | Fast free-tier fallback when `OPENAI_API_KEY` is not set |
+| `OPENROUTER_API_KEY` | Optional | Secondary fallback (proxies GPT-4o-mini and other models) |
+| `GEMINI_API_KEY` | Optional | Tertiary LLM fallback |
+| `SERPER_API_KEY` | Optional | Web search for chat citations and professor discovery |
 | `FIRECRAWL_API_KEY` | Optional | Live university page scraping for program match |
 | `INGEST_API_KEY` | Optional | Must match server `INGEST_API_KEY` |
 
-> **No LLM key?** The ai-server falls back gracefully. Match still works from cached DB data; the chat advisor returns a clear "provider unavailable" message instead of crashing.
+> **No LLM key?** Services fall back gracefully — SOP/CV/Gap Fix/Career/Immigration return structured template responses, chat shows a "provider unavailable" message, and match still works from cached DB data.
 
 ---
 
@@ -247,6 +253,10 @@ npm run seed:visa
 | **Module 3** | SOP Builder | ✅ Complete |
 | | CV Builder | ✅ Complete |
 | | Professor Finder | ✅ Complete |
+| | Gap Fix Recommender | ✅ Complete |
+| **Module 4** | Career Outcome Predictor | ✅ Complete |
+| | PR & Immigration Guide | ✅ Complete |
+| | Data Sync Agent | ✅ Complete |
 
 ---
 
