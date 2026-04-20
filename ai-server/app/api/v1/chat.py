@@ -605,22 +605,25 @@ Return ONLY valid JSON with this exact shape:
 
 def _provider_sequence() -> List[Optional[LLMProvider]]:
     """
-    Build a provider fallback chain in speed/reliability order.
-    Groq first (fastest), then OpenRouter, then Gemini, then auto-detect.
+    Build a provider fallback chain. OpenAI first (primary), then Groq (fastest
+    free tier), then OpenRouter, then Gemini.
     """
     configured = (settings.LLM_PROVIDER or "").strip().lower()
     providers: List[Optional[LLMProvider]] = []
 
     # If explicitly configured, put it first
-    if configured == "groq":
+    if configured == "openai":
+        providers.append(LLMProvider.OPENAI)
+    elif configured == "groq":
         providers.append(LLMProvider.GROQ)
     elif configured == "gemini":
         providers.append(LLMProvider.GEMINI)
     elif configured == "openrouter":
         providers.append(LLMProvider.OPENROUTER)
 
-    # Auto-fill the fallback chain in speed order
+    # Auto-fill the fallback chain: OpenAI → Groq → OpenRouter → Gemini
     for p, key in [
+        (LLMProvider.OPENAI,      settings.OPENAI_API_KEY),
         (LLMProvider.GROQ,        settings.GROQ_API_KEY),
         (LLMProvider.OPENROUTER,  settings.OPENROUTER_API_KEY),
         (LLMProvider.GEMINI,      settings.GEMINI_API_KEY),

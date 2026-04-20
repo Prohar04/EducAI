@@ -39,6 +39,8 @@
 - All 7 server LLM services: prefer `OPENAI_API_KEY`, fall back to `OPENROUTER_API_KEY` ✅
 - `ai-server/app/domains/reasoning/llm_provider.py`: `LLMProvider.OPENAI` as priority 0 ✅
 - `ai-server/app/domains/embeddings/openapi.py`: direct OpenAI embeddings when key present ✅
+- `ai-server/app/api/v1/chat.py`: `_provider_sequence()` now includes `LLMProvider.OPENAI` as priority 1 ✅ *(fixed)*
+- `ai-server/app/domains/reasoning/rag_pipeline.py`: `_lazy_init()` now prefers direct OpenAI over OpenRouter ✅ *(fixed)*
 
 ---
 
