@@ -626,27 +626,65 @@ export const getImmigrationGuideAction = async (): Promise<ImmigrationResult | n
 
 // ── Module 4: Data Sync Agent ─────────────────────────────────────────────────
 
-export interface SyncRunResult {
-	target: string;
-	status: "success" | "partial" | "failed";
+export type SyncStatus = "running" | "success" | "partial_success" | "failed" | "cancelled" | "idle";
+export type SyncTarget = "scholarships" | "programs" | "all";
+
+export interface SourceResult {
+	sourceKey: string;
+	label: string;
+	status: SyncStatus;
 	recordsProcessed: number;
+	recordsAdded: number;
 	recordsUpdated: number;
-	recordsCreated: number;
+	recordsSkipped: number;
+	notes: string[];
 	errors: string[];
 	durationMs: number;
+}
+
+export interface SyncRunResult {
+	jobId: string;
+	target: SyncTarget;
+	status: SyncStatus;
+	triggerType: "manual" | "cron" | "system";
 	triggeredBy: string;
 	startedAt: string;
-	completedAt: string;
+	finishedAt: string;
+	durationMs: number;
+	recordsProcessed: number;
+	recordsAdded: number;
+	recordsUpdated: number;
+	recordsSkipped: number;
+	sources: SourceResult[];
+	errorSummary: string | null;
+}
+
+export interface SyncSourceHealth {
+	sourceKey: string;
+	label: string;
+	description: string;
+	lastRunAt: string | null;
+	lastSuccessAt: string | null;
+	lastStatus: SyncStatus;
+	isStale: boolean;
+	staleSinceHours: number | null;
+	recordCount: number;
+	lastRunId: string | null;
 }
 
 export interface SyncStatusResponse {
-	lastRun: SyncRunResult | null;
+	sources: SyncSourceHealth[];
+	activeJob: { jobId: string; sourceKey: string; startedAt: string } | null;
+	recentRuns: SyncRunResult[];
 	totalRuns: number;
 	successRate: number;
 	nextScheduledRun: string;
-	dataFreshness: {
-		scholarships: { count: number; lastUpdated: string | null };
-		programs: { count: number; lastUpdated: string | null };
+	summary: {
+		totalSources: number;
+		healthySources: number;
+		staleSources: number;
+		failedLastRun: number;
+		running: number;
 	};
 }
 
@@ -656,14 +694,21 @@ export const getDataSyncStatusAction = async (): Promise<SyncStatusResponse | nu
 	return response.json();
 };
 
+export const getDataSyncHistoryAction = async (limit = 20): Promise<{ runs: SyncRunResult[]; total: number } | null> => {
+	const response = await authFetch(`${BACKEND_URL}/data-sync/history?limit=${limit}`);
+	if (!response.ok) return null;
+	return response.json();
+};
+
 export const triggerDataSyncAction = async (
-	target: "scholarships" | "programs" | "all" = "all",
-): Promise<SyncRunResult | null> => {
+	target: SyncTarget = "all",
+): Promise<SyncRunResult | { error: string; status: string } | null> => {
 	const response = await authFetch(`${BACKEND_URL}/data-sync/run`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ target }),
 	});
+	if (response.status === 409) return response.json(); // already running
 	if (!response.ok) return null;
 	return response.json();
 };

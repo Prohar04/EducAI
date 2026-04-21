@@ -1,5 +1,10 @@
 import type { Request, Response } from 'express';
-import { runDataSync, getSyncStatus, type SyncTarget } from '#src/services/dataSync.service.ts';
+import {
+  runDataSync,
+  getSyncStatus,
+  getSyncHistory,
+  type SyncTarget,
+} from '#src/services/dataSync.service.ts';
 import logger from '#src/config/logger.ts';
 
 export async function dataSyncRunHandler(req: Request, res: Response): Promise<void> {
@@ -7,9 +12,9 @@ export async function dataSyncRunHandler(req: Request, res: Response): Promise<v
   const authHeader = req.headers.authorization ?? '';
   const isCron = cronSecret && authHeader === `Bearer ${cronSecret}`;
   const userId = (req as unknown as { userId?: string }).userId;
-  const isAdmin = !!userId; // any authenticated user can trigger manual sync
+  const isAuthorized = !!userId || isCron;
 
-  if (!isAdmin && !isCron) {
+  if (!isAuthorized) {
     res.status(403).json({ error: 'Forbidden' });
     return;
   }
@@ -21,12 +26,22 @@ export async function dataSyncRunHandler(req: Request, res: Response): Promise<v
     return;
   }
 
-  const triggeredBy = isCron ? 'cron' : 'manual';
-  logger.info(`[dataSync] trigger by ${triggeredBy} for target=${target}`);
+  const triggerType = isCron ? 'cron' : 'manual';
+  const triggeredBy = userId ?? 'cron';
+
+  logger.info(`[dataSync] trigger type=${triggerType} target=${target} by=${triggeredBy}`);
 
   try {
-    const result = await runDataSync(target, triggeredBy);
-    res.status(result.status === 'failed' ? 207 : 200).json(result);
+    const result = await runDataSync(target, triggerType, triggeredBy);
+
+    // Already-running returns status 'running' with no finishedAt — use 409 Conflict
+    if (result.status === 'running' && !result.finishedAt) {
+      res.status(409).json(result);
+      return;
+    }
+
+    const httpStatus = result.status === 'failed' ? 207 : 200;
+    res.status(httpStatus).json(result);
   } catch (err) {
     logger.error(`[dataSync] unexpected error: ${err}`);
     res.status(500).json({ error: 'Sync failed unexpectedly. Check server logs.' });
@@ -40,5 +55,16 @@ export async function dataSyncStatusHandler(req: Request, res: Response): Promis
   } catch (err) {
     logger.error(`[dataSync] status check failed: ${err}`);
     res.status(500).json({ error: 'Failed to retrieve sync status.' });
+  }
+}
+
+export async function dataSyncHistoryHandler(req: Request, res: Response): Promise<void> {
+  try {
+    const limit = Math.min(Number(req.query.limit ?? 20), 50);
+    const history = await getSyncHistory(limit);
+    res.status(200).json({ runs: history, total: history.length });
+  } catch (err) {
+    logger.error(`[dataSync] history fetch failed: ${err}`);
+    res.status(500).json({ error: 'Failed to retrieve sync history.' });
   }
 }
