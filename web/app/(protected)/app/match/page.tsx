@@ -374,8 +374,16 @@ export default function MatchPage() {
             {run.status === "done"
               ? `${results.length} programme${results.length !== 1 ? "s" : ""} found · Last run: ${new Date(run.createdAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}`
               : run.status === "error"
-                ? `Match run failed${run.error ? `: ${run.error}` : ""}. Try again.`
-                : `Scraping and ranking programmes… this may take a minute. (${progress}%)`}
+                ? `Match run failed. ${run.error?.includes("AI server unavailable") ? "The AI pipeline timed out — please try again." : (run.error ?? "Unknown error")} `
+                : progress < 20
+                  ? `Preparing search… (${progress}%)`
+                  : progress < 40
+                    ? `Searching for programmes… (${progress}%)`
+                    : progress < 65
+                      ? `Scraping university pages… (${progress}%)`
+                      : progress < 85
+                        ? `Extracting and ranking programmes… (${progress}%)`
+                        : `Finalising results… (${progress}%)`}
           </span>
         </div>
       )}

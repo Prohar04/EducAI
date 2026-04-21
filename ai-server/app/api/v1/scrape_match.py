@@ -11,6 +11,7 @@ No DB writes happen here.
 
 from __future__ import annotations
 
+import asyncio
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
@@ -27,9 +28,10 @@ router = APIRouter(tags=["Module 1 Scrape-Match"])
 
 # ── Constants ─────────────────────────────────────────────────────────────
 
-_MAX_URLS = 12
-_MAX_CHUNK_CHARS = 12_000   # Max chars per LLM extraction chunk
-_MAX_CHUNKS = 4              # Max chunks to extract per run
+_MAX_URLS = 6               # Scrape fewer, higher-quality pages
+_MAX_CHUNK_CHARS = 8_000    # Smaller chunks = faster extraction
+_MAX_CHUNKS = 3             # Cap LLM calls
+_MAX_TOTAL_CHARS = 48_000   # Hard cap on combined scraped text before chunking
 
 # ── Domain denylist — social/forum/unsupported sites ─────────────────────
 
@@ -47,8 +49,31 @@ _BLOCKED_DOMAINS = frozenset({
     "discord.com", "discord.gg",
     "telegram.org", "t.me",
     "whatsapp.com",
-    "medium.com",   # low data quality for structured extraction
+    "medium.com",
+    "substack.com",
+    "glassdoor.com",
+    "indeed.com",
+    "payscale.com",
+    "niche.com",
+    "unigo.com",
+    "cappex.com",
+    "chegg.com",
+    "coursera.org",
+    "edx.org",
+    "udemy.com",
+    "collegeconfidential.com",
+    "studentroom.co.uk",
+    "thestudentroom.co.uk",
+    "yelp.com",
+    "trustpilot.com",
+    "studentreviews.com",
 })
+
+# Preferred domains score higher during URL selection — official program pages
+_PREFERRED_DOMAIN_SUFFIXES = (
+    ".edu", ".ac.uk", ".edu.au", ".ac.nz", ".ac.za",
+    ".uni-", "university", "college", "institute", "school",
+)
 
 
 def _is_allowed_url(url: str) -> bool:
@@ -59,6 +84,21 @@ def _is_allowed_url(url: str) -> bool:
         return host not in _BLOCKED_DOMAINS and bool(host)
     except Exception:
         return False
+
+
+def _url_priority(url: str) -> int:
+    """Higher = preferred. Used to sort candidate URLs before capping at _MAX_URLS."""
+    lower = url.lower()
+    score = 0
+    for suffix in _PREFERRED_DOMAIN_SUFFIXES:
+        if suffix in lower:
+            score += 10
+            break
+    # Penalise generic aggregator/article pages
+    for bad in ("/news/", "/blog/", "/article/", "/forum/", "/thread/", "/comment"):
+        if bad in lower:
+            score -= 5
+    return score
 
 # ── Major taxonomy — canonical name → list of synonyms/related terms ──────
 
@@ -369,27 +409,23 @@ def _build_queries(req: ScrapeMatchRequest) -> List[str]:
     alt = terms[1] if len(terms) > 1 else primary
 
     return [
-        f"{level} {primary} programs in {countries_str} tuition under ${budget}",
-        f"best universities for {primary} {level} {countries_str} admission requirements",
-        f"{level} {primary} scholarships {countries_str} international students",
-        f"{level} {alt} programs {countries_str} rankings 2024 2025",
-        f"top {level} {primary} universities {countries_str} international students apply",
-        f"{primary} {level} graduate programs {countries_str} fees deadlines",
+        f"{level} {primary} programs {countries_str} tuition fees international students",
+        f"best universities {primary} {level} {countries_str} admission requirements 2025",
+        f"top {level} {alt} programs {countries_str} rankings apply",
+        f"{primary} {level} {countries_str} official university program page",
     ]
 
 
 _EXTRACT_SYSTEM = (
-    "You are a university admissions data extractor. "
-    "Given scraped web content, extract every distinct university program you can find. "
-    "Return a JSON object with a single key 'programs' containing an array of program objects. "
-    "Each program object must have these keys: "
-    "university_name (string), program_title (string), level (string — e.g. MSc/BSc/PhD), "
-    "field (string), country (string), city (string or null), "
-    "tuition_usd_per_year (number or null), duration_months (number or null), "
-    "min_gpa (number or null), english_requirement (string or null), "
-    "application_url (string or null), description (string — 1-2 sentences). "
-    "Only include programs that are real, named, and have at least university_name and program_title. "
-    "If no programs are found return {\"programs\": []}."
+    "You are a university program data extractor. "
+    "Extract every distinct degree program from the scraped content. "
+    "Return ONLY valid JSON: {\"programs\": [...]}. "
+    "Each program: {university_name, program_title, level (MSc/BSc/PhD), field, country, "
+    "tuition_usd_per_year (number|null), duration_months (number|null), "
+    "min_gpa (number|null), english_requirement (string|null), "
+    "application_url (string|null), description (1 sentence|null)}. "
+    "Include only real named programs with at least university_name + program_title. "
+    "No commentary. If none found: {\"programs\": []}."
 )
 
 
@@ -398,17 +434,17 @@ async def _extract_chunk(
 ) -> List[Dict[str, Any]]:
     """Extract programs from a single content chunk using OpenAI JSON mode."""
     user_prompt = (
-        f"Student profile: {req.intended_level} in {req.intended_major}, "
-        f"target countries: {', '.join(req.target_countries) or 'any'}, "
-        f"budget: ${int(req.budget_max_usd)}/yr, GPA: {req.gpa}.\n\n"
-        f"Scraped content (chunk {chunk_idx + 1}):\n{chunk}"
+        f"Profile: {req.intended_level} {req.intended_major}, "
+        f"countries: {', '.join(req.target_countries) or 'any'}, "
+        f"budget ${int(req.budget_max_usd)}/yr.\n\n"
+        f"Content:\n{chunk}"
     )
     try:
         content = await generate_text(
             prompt=user_prompt,
             system_prompt=_EXTRACT_SYSTEM,
             temperature=0.0,
-            max_tokens=4096,
+            max_tokens=2048,
             json_mode=True,
         )
         data = parse_json_response(content)
@@ -429,8 +465,11 @@ async def _extract_chunk(
 async def _llm_extract(
     markdown: str, req: ScrapeMatchRequest
 ) -> List[Dict[str, Any]]:
-    """Split content into chunks and extract structured program data from each."""
-    # Split on source separators first to keep source context together
+    """Split content into chunks and extract structured program data in parallel."""
+    # Cap total input size before chunking
+    if len(markdown) > _MAX_TOTAL_CHARS:
+        markdown = markdown[:_MAX_TOTAL_CHARS]
+
     sections = markdown.split("\n\n---\n")
     chunks: List[str] = []
     current = ""
@@ -444,13 +483,21 @@ async def _llm_extract(
         chunks.append(current.strip())
 
     chunks = chunks[:_MAX_CHUNKS]
-    logger.info(f"scrape-match: extracting from {len(chunks)} chunk(s)")
+    logger.info(f"scrape-match: extracting from {len(chunks)} chunk(s) in parallel")
+
+    # Run all chunks concurrently
+    chunk_results = await asyncio.gather(
+        *[_extract_chunk(c, req, i) for i, c in enumerate(chunks)],
+        return_exceptions=True,
+    )
 
     all_programs: List[Dict[str, Any]] = []
     seen: set = set()
-    for i, chunk in enumerate(chunks):
-        programs = await _extract_chunk(chunk, req, i)
-        for p in programs:
+    for result in chunk_results:
+        if isinstance(result, Exception):
+            logger.warning(f"Chunk extraction error (skipped): {result}")
+            continue
+        for p in result:
             key = f"{(p.get('university_name') or '').lower()}::{(p.get('program_title') or '').lower()}"
             if key and key not in seen:
                 seen.add(key)
@@ -646,65 +693,66 @@ async def scrape_match(req: ScrapeMatchRequest) -> ScrapeMatchResponse:
         f"countries={req.target_countries}"
     )
 
-    # Step 1 — query -> URLs
+    # Step 1 — parallel search queries → URL pool
     searcher = WebSearch()
     queries = _build_queries(req)
-    all_urls: List[str] = []
-    for q in queries:
+
+    async def _search_one(q: str) -> List[str]:
         try:
             results = await searcher.search(q, num_results=5)
-            for r in results:
-                link = r.get("link") or r.get("url") or ""
-                if link and link not in all_urls:
-                    all_urls.append(link)
+            return [r.get("link") or r.get("url") or "" for r in results if r.get("link") or r.get("url")]
         except Exception as exc:
             logger.warning(f"Search query failed: {q!r} — {exc}")
+            return []
+
+    search_results = await asyncio.gather(*[_search_one(q) for q in queries])
+
+    seen_urls: set = set()
+    all_urls: List[str] = []
+    for links in search_results:
+        for link in links:
+            if link and link not in seen_urls:
+                seen_urls.add(link)
+                all_urls.append(link)
 
     if not all_urls:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=(
-                "Search returned no URLs"
-                " — check SERPER_APIKEY configuration."
-            ),
+            detail="Search returned no URLs — check SERPER_APIKEY configuration.",
         )
 
-    # Filter out social/forum/unsupported domains before scraping
+    # Filter blocked domains then sort by priority (official pages first)
     allowed_urls = [u for u in all_urls if _is_allowed_url(u)]
     blocked_count = len(all_urls) - len(allowed_urls)
     if blocked_count:
-        logger.info(f"scrape-match run_id={req.run_id}: filtered out {blocked_count} unsupported URLs (social/forum)")
+        logger.info(f"scrape-match run_id={req.run_id}: filtered {blocked_count} blocked URLs")
     if not allowed_urls:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="All search results were from unsupported domains. Adjust search terms.",
+            detail="All search results were from unsupported domains.",
         )
 
-    # Step 2 — scrape
-    scraper = FirecrawlClient()
-    combined_markdown = ""
-    scraped = 0
-    for url in allowed_urls[:_MAX_URLS]:
-        try:
-            md = await scraper.scrape_url(url)
-            if md:
-                combined_markdown += f"\n\n---\nSource: {url}\n{md}"
-                scraped += 1
-        except Exception as exc:
-            logger.warning(f"Scrape failed for {url}: {exc}")
+    # Sort by domain quality, cap at _MAX_URLS
+    allowed_urls.sort(key=_url_priority, reverse=True)
+    candidate_urls = allowed_urls[:_MAX_URLS]
+    logger.info(f"scrape-match run_id={req.run_id}: scraping {len(candidate_urls)} URLs in parallel")
 
-    if not combined_markdown:
+    # Step 2 — parallel scrape
+    scraper = FirecrawlClient()
+    scraped_pages = await scraper.scrape_urls(candidate_urls)
+
+    if not scraped_pages:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=(
-                "No content scraped"
-                " — check FIRECRAWL_API_KEY configuration."
-            ),
+            detail="No content scraped — check FIRECRAWL_API_KEY configuration.",
         )
+
+    combined_markdown = "\n\n---\n".join(scraped_pages)
+    scraped = len(scraped_pages)
 
     logger.info(
         f"scrape-match run_id={req.run_id}: scraped {scraped} URLs,"
-        f" {len(combined_markdown)} chars"
+        f" {len(combined_markdown)} chars (capped at {_MAX_TOTAL_CHARS})"
     )
 
     # Step 3 — LLM extraction

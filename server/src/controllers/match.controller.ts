@@ -225,7 +225,7 @@ async function runMatchBackground(runId: string, userId: string, profile: Profil
             ...(AI_SERVER_API_KEY ? { 'X-API-KEY': AI_SERVER_API_KEY } : {}),
           },
           body:   JSON.stringify(aiPayload),
-          signal: AbortSignal.timeout(120_000),
+          signal: AbortSignal.timeout(240_000),
         });
         if (!aiRes.ok) {
           const txt = await aiRes.text().catch(() => '');
