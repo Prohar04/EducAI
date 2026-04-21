@@ -346,6 +346,31 @@ model DataSourceMeta {
   @@map("data_source_meta")
 }
 
+// ── SYNC JOBS ──────────────────────────────────────────────────────
+// Tracks every data-sync execution for auditing, history, and health monitoring.
+model SyncJob {
+  id               String    @id @default(cuid())
+  sourceKey        String    @map("source_key") @db.VarChar(100)  // scholarships | programs | all
+  status           String    @default("running") @db.VarChar(50)  // running | success | partial_success | failed | cancelled
+  triggerType      String    @map("trigger_type") @db.VarChar(50) // manual | cron | system
+  triggeredBy      String?   @map("triggered_by") @db.VarChar(255)
+  startedAt        DateTime  @map("started_at") @db.Timestamp
+  finishedAt       DateTime? @map("finished_at") @db.Timestamp
+  durationMs       Int?      @map("duration_ms")
+  recordsProcessed Int       @default(0) @map("records_processed")
+  recordsAdded     Int       @default(0) @map("records_added")
+  recordsUpdated   Int       @default(0) @map("records_updated")
+  recordsSkipped   Int       @default(0) @map("records_skipped")
+  errorMessage     String?   @map("error_message") @db.Text
+  summary          Json?     // structured details per source
+  idempotencyKey   String?   @unique @map("idempotency_key") @db.VarChar(255)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamp
+
+  @@index([sourceKey, status])
+  @@index([createdAt])
+  @@map("sync_jobs")
+}
+
 model MatchResult {
   id        String   @id @default(cuid())
   runId     String   @map("run_id")
