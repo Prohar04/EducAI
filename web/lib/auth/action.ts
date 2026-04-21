@@ -258,6 +258,24 @@ export const getLatestTimeline = async (countryCode?: string) => {
 	return response.json();
 };
 
+export const updateTaskStatus = async (
+	roadmapId: string,
+	taskId: string,
+	status: "pending" | "in_progress" | "completed" | "overdue",
+): Promise<{ success: boolean; data?: unknown; message?: string }> => {
+	const response = await authFetch(`${BACKEND_URL}/timeline/tasks`, {
+		method: "PATCH",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ roadmapId, taskId, status }),
+	});
+	if (!response.ok) {
+		const err = await response.json().catch(() => null);
+		return { success: false, message: err?.message ?? "Failed to update task" };
+	}
+	const data = await response.json();
+	return { success: true, data };
+};
+
 // ─── Strategy ─────────────────────────────────────────────────────────────────
 
 export const generateStrategy = async (

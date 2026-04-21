@@ -1,17 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
 	Calendar, ChevronDown, ChevronRight, RefreshCw,
 	BookOpen, Award, Plane, AlertCircle, CheckCircle2,
-	Clock, MapPin, Loader2, Printer,
+	Clock, MapPin, Loader2, Printer, Target,
+	AlertTriangle, TrendingUp, Circle, CheckCheck,
+	Info, XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
 	generateTimeline,
 	getLatestTimeline,
 	getTimelineInputs,
+	updateTaskStatus,
 } from "@/lib/auth/action";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { Reveal } from "@/components/motion/Reveal";
@@ -19,14 +22,21 @@ import { COUNTRIES } from "@/lib/data/countries";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
+type TaskStatus = "pending" | "in_progress" | "completed" | "overdue";
+type TaskPriority = "critical" | "high" | "medium" | "low";
 type RoadmapItemType = "preparation" | "application" | "scholarship" | "visa" | "deadline";
+type FilterTab = "all" | "overdue" | "pending" | "completed";
 
 interface RoadmapItem {
+	id: string;
 	type: RoadmapItemType;
 	title: string;
 	description: string;
 	date?: string;
 	sourceId?: string;
+	status: TaskStatus;
+	priority: TaskPriority;
+	estimatedDuration?: string;
 }
 
 interface RoadmapMonth {
@@ -49,19 +59,16 @@ interface TimelineInputs {
 	savedProgramsCount: number;
 	savedWithDeadlinesCount: number;
 	missingDeadlinesCount: number;
+	countryProgramsCount?: number;
+	countryProgramsWithDeadlinesCount?: number;
 	savedPrograms: Array<{
 		program?: {
-			university?: {
-				country?: {
-					code?: string | null;
-				} | null;
-			} | null;
-			deadlines?: Array<{
-				deadline?: string;
-			}>;
+			university?: { country?: { code?: string | null } | null } | null;
+			deadlines?: Array<{ deadline?: string }>;
 		} | null;
 	}>;
 	visaTemplateAvailable: boolean;
+	profile?: { targetIntake?: string | null } | null;
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -90,90 +97,242 @@ const BADGE_COLOURS: Record<RoadmapItemType, string> = {
 	deadline: "text-red-400 bg-red-500/20 border-red-500/40",
 };
 
+const PRIORITY_COLOURS: Record<TaskPriority, string> = {
+	critical: "text-red-500",
+	high: "text-orange-500",
+	medium: "text-yellow-500",
+	low: "text-muted-foreground",
+};
+
 const INTAKES = [
 	"Fall 2025", "Spring 2026", "Fall 2026", "Spring 2027", "Fall 2027", "Spring 2028",
 ];
 
-function getTimelineContext(inputs: TimelineInputs | null, countryCode: string) {
-	const savedProgramsCount = inputs?.savedProgramsCount ?? 0;
-	const missingDeadlinesCount = inputs?.missingDeadlinesCount ?? 0;
-	const visaTemplateAvailable = inputs?.visaTemplateAvailable ?? false;
+// ── Derived helpers ───────────────────────────────────────────────────────────
 
-	const countryPrograms = (inputs?.savedPrograms ?? []).filter(
-		(savedProgram) =>
-			savedProgram.program?.university?.country?.code === countryCode,
-	);
+function getAllTasks(plan: RoadmapMonth[]): RoadmapItem[] {
+	return plan.flatMap((m) => m.items);
+}
 
-	const countryHasDeadlines = countryPrograms.some(
-		(savedProgram) =>
-			(savedProgram.program?.deadlines?.length ?? 0) > 0,
-	);
+function getCurrentMonthKey(): string {
+	const now = new Date();
+	return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
 
-	return {
-		savedProgramsCount,
-		missingDeadlinesCount,
-		hasCountryPrograms: countryPrograms.length > 0,
-		hasCountryDeadlines: countryHasDeadlines,
-		visaTemplateAvailable,
-	};
+function getProgressStats(plan: RoadmapMonth[]) {
+	const all = getAllTasks(plan);
+	const total = all.length;
+	const completed = all.filter((t) => t.status === "completed").length;
+	const overdue = all.filter((t) => t.status === "overdue").length;
+	const inProgress = all.filter((t) => t.status === "in_progress").length;
+	const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+	return { total, completed, overdue, inProgress, pct };
+}
+
+function filterPlan(plan: RoadmapMonth[], tab: FilterTab): RoadmapMonth[] {
+	if (tab === "all") return plan;
+	return plan
+		.map((m) => ({
+			...m,
+			items: m.items.filter((item) => {
+				if (tab === "overdue") return item.status === "overdue";
+				if (tab === "pending") return item.status === "pending" || item.status === "in_progress";
+				if (tab === "completed") return item.status === "completed";
+				return true;
+			}),
+		}))
+		.filter((m) => m.items.length > 0);
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function MonthCard({ month, defaultOpen = false }: { month: RoadmapMonth; defaultOpen?: boolean }) {
-	const [open, setOpen] = useState(defaultOpen);
+function StatusIcon({ status }: { status: TaskStatus }) {
+	if (status === "completed") return <CheckCheck className="size-3.5 text-emerald-500" />;
+	if (status === "overdue") return <XCircle className="size-3.5 text-red-500" />;
+	if (status === "in_progress") return <TrendingUp className="size-3.5 text-blue-500" />;
+	return <Circle className="size-3.5 text-muted-foreground/50" />;
+}
+
+function TaskItem({
+	item,
+	roadmapId,
+	onStatusChange,
+	updatingId,
+}: {
+	item: RoadmapItem;
+	roadmapId: string;
+	onStatusChange: (roadmapId: string, taskId: string, status: TaskStatus) => void;
+	updatingId: string | null;
+}) {
+	const Icon = ITEM_ICONS[item.type] ?? BookOpen;
+	const iconClass = ITEM_ICON_COLOURS[item.type] ?? "text-muted-foreground bg-muted border-muted";
+	const badgeClass = BADGE_COLOURS[item.type] ?? "text-muted-foreground bg-muted/20 border-muted";
+	const isUpdating = updatingId === item.id;
+	const isDone = item.status === "completed";
+	const isOverdue = item.status === "overdue";
+
+	const nextStatus: TaskStatus = isDone ? "pending" : "completed";
 
 	return (
-		<div className="rounded-2xl border border-border bg-card overflow-hidden">
+		<div
+			className={`flex items-start gap-3 px-5 py-3.5 transition-colors ${isDone ? "opacity-60" : ""}`}
+		>
+			{/* Completion toggle */}
+			<button
+				type="button"
+				disabled={isUpdating}
+				onClick={() => onStatusChange(roadmapId, item.id, nextStatus)}
+				className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all
+					${isDone
+						? "border-emerald-500 bg-emerald-500/20 hover:bg-emerald-500/30"
+						: isOverdue
+							? "border-red-400/60 bg-red-500/10 hover:bg-red-500/15"
+							: "border-border hover:border-primary/50 hover:bg-primary/5"
+					}
+				`}
+				title={isDone ? "Mark as pending" : "Mark as completed"}
+				aria-label={isDone ? "Mark as pending" : "Mark as completed"}
+			>
+				{isUpdating ? (
+					<Loader2 className="size-3 animate-spin text-muted-foreground" />
+				) : (
+					<StatusIcon status={item.status} />
+				)}
+			</button>
+
+			{/* Type icon */}
+			<div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border ${iconClass}`}>
+				<Icon className="size-3.5" />
+			</div>
+
+			{/* Content */}
+			<div className="flex-1 min-w-0">
+				<div className="flex items-start gap-2 flex-wrap">
+					<p className={`text-sm font-medium leading-snug ${isDone ? "line-through text-muted-foreground" : ""}`}>
+						{item.title}
+					</p>
+					{isOverdue && (
+						<span className="inline-flex items-center gap-1 rounded border border-red-500/30 bg-red-500/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-red-500">
+							<AlertTriangle className="size-2.5" /> Overdue
+						</span>
+					)}
+					{item.status === "in_progress" && (
+						<span className="inline-flex items-center gap-1 rounded border border-blue-500/30 bg-blue-500/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-500">
+							In Progress
+						</span>
+					)}
+				</div>
+				{item.description && (
+					<p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">{item.description}</p>
+				)}
+				<div className="mt-1 flex items-center gap-3 flex-wrap">
+					{item.date && (
+						<p className="text-xs text-muted-foreground/70">
+							{new Date(item.date).toLocaleDateString("en-US", {
+								day: "numeric", month: "short", year: "numeric",
+							})}
+						</p>
+					)}
+					{item.estimatedDuration && (
+						<p className="text-xs text-muted-foreground/50">~ {item.estimatedDuration}</p>
+					)}
+					{item.priority === "critical" && !isDone && (
+						<span className={`text-xs font-medium ${PRIORITY_COLOURS[item.priority]}`}>
+							● Critical
+						</span>
+					)}
+					{item.priority === "high" && !isDone && (
+						<span className={`text-xs font-medium ${PRIORITY_COLOURS[item.priority]}`}>
+							● High priority
+						</span>
+					)}
+				</div>
+			</div>
+
+			{/* Type badge */}
+			<span className={`mt-0.5 shrink-0 self-start rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide pointer-events-none select-none ${badgeClass}`}>
+				{item.type}
+			</span>
+		</div>
+	);
+}
+
+function MonthCard({
+	month,
+	roadmapId,
+	defaultOpen = false,
+	isCurrentMonth = false,
+	onStatusChange,
+	updatingId,
+}: {
+	month: RoadmapMonth;
+	roadmapId: string;
+	defaultOpen?: boolean;
+	isCurrentMonth?: boolean;
+	onStatusChange: (roadmapId: string, taskId: string, status: TaskStatus) => void;
+	updatingId: string | null;
+}) {
+	const [open, setOpen] = useState(defaultOpen);
+	const overdueCount = month.items.filter((i) => i.status === "overdue").length;
+	const completedCount = month.items.filter((i) => i.status === "completed").length;
+	const totalCount = month.items.length;
+
+	return (
+		<div className={`rounded-2xl border overflow-hidden transition-colors ${
+			isCurrentMonth
+				? "border-primary/40 bg-primary/5"
+				: "border-border bg-card"
+		}`}>
 			<button
 				type="button"
 				onClick={() => setOpen((o) => !o)}
 				className="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-muted/30 transition-colors"
 			>
-				<div className="flex items-center gap-3">
-					<Calendar className="size-4 text-primary shrink-0" />
-					<span className="font-semibold">{month.label}</span>
-					<span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-						{month.items.length} task{month.items.length !== 1 ? "s" : ""}
+				<div className="flex items-center gap-3 flex-wrap">
+					<Calendar className={`size-4 shrink-0 ${isCurrentMonth ? "text-primary" : "text-muted-foreground"}`} />
+					<span className="font-semibold">
+						{month.label}
+						{isCurrentMonth && (
+							<span className="ml-2 text-xs font-normal text-primary">← This month</span>
+						)}
 					</span>
+					<span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+						{totalCount} task{totalCount !== 1 ? "s" : ""}
+					</span>
+					{overdueCount > 0 && (
+						<span className="rounded-full bg-red-500/15 px-2 py-0.5 text-xs font-medium text-red-500">
+							{overdueCount} overdue
+						</span>
+					)}
+					{completedCount > 0 && completedCount < totalCount && (
+						<span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-500">
+							{completedCount}/{totalCount} done
+						</span>
+					)}
+					{completedCount === totalCount && totalCount > 0 && (
+						<span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-600">
+							✓ All done
+						</span>
+					)}
 				</div>
 				{open ? (
-					<ChevronDown className="size-4 text-muted-foreground" />
+					<ChevronDown className="size-4 text-muted-foreground shrink-0" />
 				) : (
-					<ChevronRight className="size-4 text-muted-foreground" />
+					<ChevronRight className="size-4 text-muted-foreground shrink-0" />
 				)}
 			</button>
 
 			{open && (
 				<div className="divide-y divide-border border-t border-border">
-					{month.items.map((item, i) => {
-						const Icon = ITEM_ICONS[item.type] ?? BookOpen;
-						const iconClass = ITEM_ICON_COLOURS[item.type] ?? "text-muted-foreground bg-muted border-muted";
-						const badgeClass = BADGE_COLOURS[item.type] ?? "text-muted-foreground bg-muted/20 border-muted";
-						return (
-							<div key={i} className="flex items-start gap-3 px-5 py-3.5">
-								<div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border ${iconClass}`}>
-									<Icon className="size-3.5" />
-								</div>
-								<div className="flex-1 min-w-0">
-									<p className="text-sm font-medium leading-snug">{item.title}</p>
-									{item.description && (
-										<p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">{item.description}</p>
-									)}
-									{item.date && (
-										<p className="mt-1 text-xs text-muted-foreground/70">
-											{new Date(item.date).toLocaleDateString("en-US", {
-												day: "numeric", month: "short", year: "numeric",
-											})}
-										</p>
-									)}
-								</div>
-								<span className={`mt-0.5 shrink-0 self-start rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide pointer-events-none select-none ${badgeClass}`}>
-									{item.type}
-								</span>
-							</div>
-						);
-					})}
+					{month.items.map((item) => (
+						<TaskItem
+							key={item.id ?? item.title}
+							item={item}
+							roadmapId={roadmapId}
+							onStatusChange={onStatusChange}
+							updatingId={updatingId}
+						/>
+					))}
 				</div>
 			)}
 		</div>
@@ -196,7 +355,7 @@ function SkeletonCard() {
 	);
 }
 
-// ── Main component ───────────────────────────────────────────────────────────
+// ── Main component ────────────────────────────────────────────────────────────
 
 export default function TimelinePlannerClient({
 	initialRoadmap,
@@ -215,15 +374,13 @@ export default function TimelinePlannerClient({
 	const [isGenerating, setIsGenerating] = useState(false);
 	const [isCountryLoading, setIsCountryLoading] = useState(false);
 	const [successToast, setSuccessToast] = useState<string | null>(null);
+	const [updatingTaskId, setUpdatingTaskId] = useState<string | null>(null);
+	const [activeFilter, setActiveFilter] = useState<FilterTab>("all");
 
 	useEffect(() => {
 		if (!successToast) return;
-
-		const timeout = window.setTimeout(() => {
-			setSuccessToast(null);
-		}, 2600);
-
-		return () => window.clearTimeout(timeout);
+		const t = window.setTimeout(() => setSuccessToast(null), 2800);
+		return () => window.clearTimeout(t);
 	}, [successToast]);
 
 	const handleGenerate = async () => {
@@ -242,11 +399,8 @@ export default function TimelinePlannerClient({
 			]);
 			setRoadmap((latest as UserRoadmap | null) ?? null);
 			setInputs((nextInputs as TimelineInputs | null) ?? null);
-			setSuccessToast(
-				existingRoadmap
-					? "Roadmap regenerated successfully."
-					: "Roadmap generated successfully.",
-			);
+			setActiveFilter("all");
+			setSuccessToast(existingRoadmap ? "Roadmap regenerated." : "Roadmap generated!");
 		} finally {
 			setIsGenerating(false);
 		}
@@ -256,6 +410,7 @@ export default function TimelinePlannerClient({
 		setCountryCode(code);
 		setRoadmap(null);
 		setError(null);
+		setActiveFilter("all");
 		setIsCountryLoading(true);
 		try {
 			const [latest, nextInputs] = await Promise.all([
@@ -269,20 +424,77 @@ export default function TimelinePlannerClient({
 		}
 	};
 
-	const isPending = isGenerating || isCountryLoading;
+	const handleToggleTask = useCallback(
+		async (rmId: string, taskId: string, newStatus: TaskStatus) => {
+			if (updatingTaskId) return;
+			setUpdatingTaskId(taskId);
 
+			// Optimistic update
+			setRoadmap((prev) => {
+				if (!prev) return prev;
+				return {
+					...prev,
+					plan: prev.plan.map((month) => ({
+						...month,
+						items: month.items.map((item) =>
+							item.id === taskId ? { ...item, status: newStatus } : item,
+						),
+					})),
+				};
+			});
+
+			const result = await updateTaskStatus(rmId, taskId, newStatus);
+			if (!result.success) {
+				// Roll back on failure
+				setRoadmap((prev) => {
+					if (!prev) return prev;
+					return {
+						...prev,
+						plan: prev.plan.map((month) => ({
+							...month,
+							items: month.items.map((item) =>
+								item.id === taskId
+									? { ...item, status: newStatus === "completed" ? "pending" : "completed" }
+									: item,
+							),
+						})),
+					};
+				});
+				setError(result.message ?? "Failed to update task");
+			}
+
+			setUpdatingTaskId(null);
+		},
+		[updatingTaskId],
+	);
+
+	// ── Derived state ────────────────────────────────────────────────────────
+
+	const isPending = isGenerating || isCountryLoading;
 	const plan = roadmap?.plan ?? [];
 	const countryName = COUNTRIES.find((c) => c.code === countryCode)?.name ?? countryCode;
-	const { savedProgramsCount, hasCountryPrograms, hasCountryDeadlines, visaTemplateAvailable } =
-		getTimelineContext(inputs, countryCode);
-	const hasTimelineInputs = Boolean(inputs);
+	const currentMonthKey = getCurrentMonthKey();
+	const stats = plan.length > 0 ? getProgressStats(plan) : null;
+	const filteredPlan = filterPlan(plan, activeFilter);
 
-	// Determine empty state reason
-	const hasNoPrograms = hasTimelineInputs && savedProgramsCount === 0;
-	const hasProgramsButNotForCountry = hasTimelineInputs && savedProgramsCount > 0 && !hasCountryPrograms;
-	const hasProgramsButNoDeadlines = hasTimelineInputs && hasCountryPrograms && !hasCountryDeadlines;
-	const lacksDeadlineData = hasProgramsButNotForCountry || hasProgramsButNoDeadlines;
-	const showRoadmapActions = !lacksDeadlineData && !hasNoPrograms;
+	const savedProgramsCount = inputs?.savedProgramsCount ?? 0;
+	const countryProgramsCount = inputs?.countryProgramsCount ?? 0;
+	const countryProgramsWithDeadlines = inputs?.countryProgramsWithDeadlinesCount ?? 0;
+	const hasTimelineInputs = Boolean(inputs);
+	const visaTemplateAvailable = inputs?.visaTemplateAvailable ?? false;
+
+	// Determine informational banner (not blocking — generation always allowed with profile)
+	const infoMessage: string | null =
+		hasTimelineInputs && savedProgramsCount === 0
+			? "No programs saved yet. We'll build a generic roadmap based on your target intake. Add programs for deadline-based tasks."
+			: hasTimelineInputs && countryProgramsCount === 0 && savedProgramsCount > 0
+				? `You have ${savedProgramsCount} saved program${savedProgramsCount !== 1 ? "s" : ""} but none for ${countryName}. Roadmap will use your target intake as anchor.`
+				: hasTimelineInputs && countryProgramsCount > 0 && countryProgramsWithDeadlines === 0
+					? `Your ${countryName} programs don't have deadlines yet. Add deadlines for a more personalised roadmap.`
+					: null;
+
+	// No profile = hard block
+	const hasNoProfile = hasTimelineInputs && !inputs?.profile;
 
 	return (
 		<div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
@@ -298,7 +510,8 @@ export default function TimelinePlannerClient({
 					<div className="flex items-center gap-3 mt-1 sm:mt-2 shrink-0">
 						{roadmap && (
 							<p className="text-xs text-muted-foreground">
-								Updated {new Date(roadmap.createdAt).toLocaleDateString("en-US", {
+								Updated{" "}
+								{new Date(roadmap.createdAt).toLocaleDateString("en-US", {
 									day: "numeric", month: "short", year: "numeric",
 								})}
 							</p>
@@ -318,7 +531,7 @@ export default function TimelinePlannerClient({
 				</div>
 			</FadeIn>
 
-			{/* Filters */}
+			{/* Controls */}
 			<Reveal>
 				<div className="mb-6 flex flex-wrap gap-3 rounded-2xl border border-border bg-card px-5 py-4">
 					<div className="flex flex-col gap-1 flex-1 min-w-[160px]">
@@ -329,7 +542,9 @@ export default function TimelinePlannerClient({
 							className="rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
 						>
 							{COUNTRIES.map((c) => (
-								<option key={c.code} value={c.code}>{c.flag} {c.name}</option>
+								<option key={c.code} value={c.code}>
+									{c.flag} {c.name}
+								</option>
 							))}
 						</select>
 					</div>
@@ -341,33 +556,30 @@ export default function TimelinePlannerClient({
 							className="rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
 						>
 							<option value="">Auto-detect from profile</option>
-							{INTAKES.map((i) => <option key={i} value={i}>{i}</option>)}
+							{INTAKES.map((i) => (
+								<option key={i} value={i}>{i}</option>
+							))}
 						</select>
 					</div>
 					<div className="flex items-end">
-						{showRoadmapActions ? (
-							<Button
-								onClick={handleGenerate}
-								disabled={isPending}
-								className="gap-2 whitespace-nowrap"
-							>
-								{isPending ? (
-									<><Loader2 className="size-4 animate-spin" /> Generating...</>
-								) : roadmap ? (
-									<><RefreshCw className="size-4" /> Regenerate Roadmap</>
-								) : (
-									<><RefreshCw className="size-4" /> Generate Roadmap</>
-								)}
-							</Button>
-						) : (
-							<Button asChild variant="outline" className="whitespace-nowrap">
-								<Link href="/app/programs">Browse Programs</Link>
-							</Button>
-						)}
+						<Button
+							onClick={handleGenerate}
+							disabled={isPending || hasNoProfile}
+							className="gap-2 whitespace-nowrap"
+						>
+							{isPending ? (
+								<><Loader2 className="size-4 animate-spin" /> Generating…</>
+							) : roadmap ? (
+								<><RefreshCw className="size-4" /> Regenerate Roadmap</>
+							) : (
+								<><Target className="size-4" /> Generate Roadmap</>
+							)}
+						</Button>
 					</div>
 				</div>
 			</Reveal>
 
+			{/* Success toast */}
 			{successToast && (
 				<div className="pointer-events-none fixed bottom-4 left-4 right-4 z-50 sm:bottom-6 sm:left-auto sm:right-6">
 					<div className="flex items-center gap-2 rounded-xl border border-primary/20 bg-background/95 px-4 py-3 text-sm text-foreground shadow-[0_18px_40px_-24px_rgba(0,0,0,0.45)] backdrop-blur">
@@ -382,108 +594,54 @@ export default function TimelinePlannerClient({
 				<div className="mb-4 flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
 					<AlertCircle className="size-4 shrink-0" />
 					{error}
+					<button
+						type="button"
+						className="ml-auto text-xs underline opacity-70 hover:opacity-100"
+						onClick={() => setError(null)}
+					>
+						Dismiss
+					</button>
 				</div>
 			)}
 
-			{!isPending && !error && !lacksDeadlineData && hasTimelineInputs && !visaTemplateAvailable && (
+			{/* No profile state */}
+			{!isPending && hasNoProfile && (
+				<Reveal>
+					<div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-20 text-center">
+						<AlertCircle className="mb-4 size-12 text-muted-foreground/40" />
+						<h2 className="text-lg font-semibold">Complete your profile first</h2>
+						<p className="mt-1 max-w-sm text-sm text-muted-foreground">
+							Your profile is needed to generate a personalised roadmap with the right intake date and target countries.
+						</p>
+						<Button asChild className="mt-6">
+							<Link href="/app/profile">Go to Profile</Link>
+						</Button>
+					</div>
+				</Reveal>
+			)}
+
+			{/* Informational banner (non-blocking) */}
+			{!isPending && !error && infoMessage && (
+				<div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
+					<Info className="mt-0.5 size-4 shrink-0" />
+					<p>{infoMessage}</p>
+					<Button asChild variant="ghost" size="sm" className="ml-auto shrink-0 h-auto py-0 text-xs">
+						<Link href="/app/programs">Browse Programs</Link>
+					</Button>
+				</div>
+			)}
+
+			{/* Visa template warning */}
+			{!isPending && !error && !infoMessage && hasTimelineInputs && !visaTemplateAvailable && (
 				<div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
 					<AlertCircle className="mt-0.5 size-4 shrink-0" />
 					<div>
-						<p className="font-medium">Visa template unavailable for {countryName}</p>
+						<p className="font-medium">No visa template for {countryName}</p>
 						<p className="text-xs text-amber-700/80 dark:text-amber-300/80">
-							We&apos;ll still build a generic roadmap from your saved application deadlines for now.
+							Roadmap will be built from your program deadlines without country-specific visa milestones.
 						</p>
 					</div>
 				</div>
-			)}
-
-			{/* Loading skeletons */}
-			{isCountryLoading && (
-				<div className="space-y-3">
-					{Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)}
-				</div>
-			)}
-
-			{/* Empty state: No saved programs at all */}
-			{!isPending && !error && hasNoPrograms && (
-				<Reveal>
-					<div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-20 text-center">
-						<Calendar className="mb-4 size-12 text-muted-foreground/40" />
-						<h2 className="text-lg font-semibold">No programs saved yet</h2>
-						<p className="mt-1 max-w-sm text-sm text-muted-foreground">
-							Save at least one program to generate a deadline-based roadmap.
-						</p>
-						<div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-							<MapPin className="size-3.5" />
-							Showing plan for <strong>{countryName}</strong>
-						</div>
-						<Button asChild className="mt-6">
-							<Link href="/app/programs">Browse Programs</Link>
-						</Button>
-					</div>
-				</Reveal>
-			)}
-
-			{/* Empty state: Programs exist but not for this country */}
-			{!isPending && !error && hasProgramsButNotForCountry && (
-				<Reveal>
-					<div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-20 text-center">
-						<Calendar className="mb-4 size-12 text-muted-foreground/40" />
-						<h2 className="text-lg font-semibold">No programs for {countryName}</h2>
-						<p className="mt-1 max-w-sm text-sm text-muted-foreground">
-							You have {savedProgramsCount} saved program{savedProgramsCount !== 1 ? "s" : ""}, but none for {countryName}.
-							Try selecting a different country or save more programs.
-						</p>
-						<div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-							<MapPin className="size-3.5" />
-							Showing plan for <strong>{countryName}</strong>
-						</div>
-						<Button asChild className="mt-6">
-							<Link href="/app/programs">Browse Programs</Link>
-						</Button>
-					</div>
-				</Reveal>
-			)}
-
-			{/* Empty state: Programs exist but no deadlines */}
-			{!isPending && !error && hasProgramsButNoDeadlines && (
-				<Reveal>
-					<div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-20 text-center">
-						<Calendar className="mb-4 size-12 text-muted-foreground/40" />
-						<h2 className="text-lg font-semibold">Add deadlines to your programs</h2>
-						<p className="mt-1 max-w-sm text-sm text-muted-foreground">
-							You have saved programs for {countryName}, but they don&apos;t have application deadlines yet.
-							Add deadlines to generate a timeline.
-						</p>
-						<div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-							<MapPin className="size-3.5" />
-							Showing plan for <strong>{countryName}</strong>
-						</div>
-						<Button asChild className="mt-6">
-							<Link href="/app/programs">Browse Programs</Link>
-						</Button>
-					</div>
-				</Reveal>
-			)}
-
-			{/* Empty state: Ready to generate */}
-			{!isPending && !error && !lacksDeadlineData && !hasNoPrograms && plan.length === 0 && (
-				<Reveal>
-					<div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-20 text-center">
-						<Calendar className="mb-4 size-12 text-muted-foreground/40" />
-						<h2 className="text-lg font-semibold">Your roadmap is ready to generate</h2>
-						<p className="mt-1 max-w-sm text-sm text-muted-foreground">
-							Use your saved program deadlines to build a month-by-month application plan for {countryName}.
-						</p>
-						<Button onClick={handleGenerate} disabled={isPending} className="mt-6 gap-2">
-							{isPending ? (
-								<><Loader2 className="size-4 animate-spin" /> Generating...</>
-							) : (
-								<><RefreshCw className="size-4" /> Generate Roadmap</>
-							)}
-						</Button>
-					</div>
-				</Reveal>
 			)}
 
 			{/* Loading skeletons */}
@@ -493,17 +651,156 @@ export default function TimelinePlannerClient({
 				</div>
 			)}
 
-			{/* Roadmap months */}
-			{!isPending && !lacksDeadlineData && !hasNoPrograms && plan.length > 0 && (
+			{/* Empty state: ready to generate */}
+			{!isPending && !hasNoProfile && plan.length === 0 && (
+				<Reveal>
+					<div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-20 text-center">
+						<Calendar className="mb-4 size-12 text-muted-foreground/40" />
+						<h2 className="text-lg font-semibold">Your roadmap is ready to build</h2>
+						<p className="mt-1 max-w-sm text-sm text-muted-foreground">
+							Generate a personalised month-by-month study-abroad plan for <strong>{countryName}</strong>.
+							{savedProgramsCount === 0 && " We'll use your target intake as the anchor until you add programs."}
+						</p>
+						<Button onClick={handleGenerate} disabled={isPending} className="mt-6 gap-2">
+							{isPending ? (
+								<><Loader2 className="size-4 animate-spin" /> Generating…</>
+							) : (
+								<><Target className="size-4" /> Generate Roadmap</>
+							)}
+						</Button>
+					</div>
+				</Reveal>
+			)}
+
+			{/* Roadmap display */}
+			{!isPending && plan.length > 0 && (
 				<>
+					{/* Roadmap context banner */}
 					<div className="mb-4 flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-2.5 text-sm text-primary">
 						<MapPin className="size-4 shrink-0" />
-						Roadmap for <strong>{countryName}</strong>
-						{roadmap?.intake && <> · Intake: <strong>{roadmap.intake}</strong></>}
+						<span>
+							Roadmap for <strong>{countryName}</strong>
+							{roadmap?.intake && <> · Intake: <strong>{roadmap.intake}</strong></>}
+						</span>
 					</div>
+
+					{/* Progress summary */}
+					{stats && (
+						<Reveal>
+							<div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+								<div className="rounded-xl border border-border bg-card px-4 py-3 text-center">
+									<p className="text-2xl font-bold">{stats.total}</p>
+									<p className="text-xs text-muted-foreground mt-0.5">Total tasks</p>
+								</div>
+								<div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-center">
+									<p className="text-2xl font-bold text-emerald-500">{stats.completed}</p>
+									<p className="text-xs text-muted-foreground mt-0.5">Completed</p>
+								</div>
+								<div className={`rounded-xl border px-4 py-3 text-center ${stats.overdue > 0 ? "border-red-500/20 bg-red-500/5" : "border-border bg-card"}`}>
+									<p className={`text-2xl font-bold ${stats.overdue > 0 ? "text-red-500" : "text-muted-foreground"}`}>
+										{stats.overdue}
+									</p>
+									<p className="text-xs text-muted-foreground mt-0.5">Overdue</p>
+								</div>
+								<div className="rounded-xl border border-border bg-card px-4 py-3 text-center">
+									<p className="text-2xl font-bold">{stats.pct}%</p>
+									<p className="text-xs text-muted-foreground mt-0.5">Progress</p>
+								</div>
+							</div>
+
+							{/* Progress bar */}
+							<div className="mb-6">
+								<div className="flex justify-between text-xs text-muted-foreground mb-1.5">
+									<span>{stats.completed} of {stats.total} tasks completed</span>
+									<span>{stats.pct}%</span>
+								</div>
+								<div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+									<div
+										className="h-full rounded-full bg-primary transition-all duration-500"
+										style={{ width: `${stats.pct}%` }}
+									/>
+								</div>
+							</div>
+						</Reveal>
+					)}
+
+					{/* Overdue callout */}
+					{stats && stats.overdue > 0 && activeFilter === "all" && (
+						<Reveal>
+							<div className="mb-6 rounded-xl border border-red-500/25 bg-red-500/8 px-4 py-3">
+								<div className="flex items-center gap-2 text-red-500 font-medium text-sm">
+									<AlertTriangle className="size-4 shrink-0" />
+									{stats.overdue} overdue task{stats.overdue !== 1 ? "s" : ""} require attention
+								</div>
+								<p className="mt-1 text-xs text-muted-foreground">
+									These tasks passed their target date. Complete them or they will carry over into your plan.
+								</p>
+								<button
+									type="button"
+									className="mt-2 text-xs font-medium text-red-500 underline"
+									onClick={() => setActiveFilter("overdue")}
+								>
+									View overdue tasks →
+								</button>
+							</div>
+						</Reveal>
+					)}
+
+					{/* Filter tabs */}
+					<div className="mb-4 flex gap-2 flex-wrap">
+						{(["all", "overdue", "pending", "completed"] as FilterTab[]).map((tab) => {
+							const count = tab === "all"
+								? stats?.total
+								: tab === "overdue"
+									? stats?.overdue
+									: tab === "pending"
+										? (stats ? stats.total - stats.completed - stats.overdue : 0)
+										: stats?.completed;
+							return (
+								<button
+									key={tab}
+									type="button"
+									onClick={() => setActiveFilter(tab)}
+									className={`rounded-lg border px-3 py-1.5 text-xs font-medium capitalize transition-colors ${
+										activeFilter === tab
+											? "border-primary bg-primary/10 text-primary"
+											: "border-border bg-card text-muted-foreground hover:bg-muted/60"
+									}`}
+								>
+									{tab}{count !== undefined && count > 0 && ` (${count})`}
+								</button>
+							);
+						})}
+					</div>
+
+					{/* Empty filtered state */}
+					{filteredPlan.length === 0 && (
+						<div className="rounded-xl border border-dashed border-border py-10 text-center text-sm text-muted-foreground">
+							No {activeFilter === "all" ? "" : activeFilter} tasks found.
+							{activeFilter !== "all" && (
+								<button
+									type="button"
+									className="ml-1 underline"
+									onClick={() => setActiveFilter("all")}
+								>
+									Show all
+								</button>
+							)}
+						</div>
+					)}
+
+					{/* Month cards */}
 					<div className="space-y-3">
-						{plan.map((month, i) => (
-							<MonthCard key={month.month} month={month} defaultOpen={i === 0} />
+						{filteredPlan.map((month, i) => (
+							<MonthCard
+								key={month.month}
+								month={month}
+								roadmapId={roadmap!.id}
+								defaultOpen={i === 0 || month.month === currentMonthKey}
+								isCurrentMonth={month.month === currentMonthKey}
+								onStatusChange={handleToggleTask}
+								updatingId={updatingTaskId}
+							/>
 						))}
 					</div>
 				</>
