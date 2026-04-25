@@ -362,7 +362,11 @@ model SyncJob {
   recordsUpdated   Int       @default(0) @map("records_updated")
   recordsSkipped   Int       @default(0) @map("records_skipped")
   errorMessage     String?   @map("error_message") @db.Text
-  summary          Json?     // structured details per source
+  summary          Json?     // structured details per source (SourceResult[])
+  rawLogs          String?   @map("raw_logs") @db.Text      // newline-delimited structured log lines
+  queueState       String?   @map("queue_state") @db.VarChar(50) // queued | running | done
+  crawlerDetails   Json?     @map("crawler_details") // { taskId, preferences, programCountBefore, programCountAfter }
+  stackTrace       String?   @map("stack_trace") @db.Text   // unexpected error stack for debugging
   idempotencyKey   String?   @unique @map("idempotency_key") @db.VarChar(255)
   createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamp
 

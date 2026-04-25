@@ -629,6 +629,15 @@ export const getImmigrationGuideAction = async (): Promise<ImmigrationResult | n
 export type SyncStatus = "running" | "success" | "partial_success" | "failed" | "cancelled" | "idle";
 export type SyncTarget = "scholarships" | "programs" | "all";
 
+export interface CrawlerDetails {
+	taskId?: string;
+	preferences?: { countries: string[]; fields: string[]; levels: string[] };
+	programCountBefore?: number;
+	programCountAfter?: number;
+	pipelineStatus?: string;
+	aiServerUrl?: string;
+}
+
 export interface SourceResult {
 	sourceKey: string;
 	label: string;
@@ -640,12 +649,15 @@ export interface SourceResult {
 	notes: string[];
 	errors: string[];
 	durationMs: number;
+	crawlerDetails?: CrawlerDetails;
+	rawLogs?: string[];
 }
 
 export interface SyncRunResult {
 	jobId: string;
 	target: SyncTarget;
 	status: SyncStatus;
+	queueState: string;
 	triggerType: "manual" | "cron" | "system";
 	triggeredBy: string;
 	startedAt: string;
@@ -657,6 +669,9 @@ export interface SyncRunResult {
 	recordsSkipped: number;
 	sources: SourceResult[];
 	errorSummary: string | null;
+	rawLogs: string[];
+	crawlerDetails: CrawlerDetails | null;
+	stackTrace: string | null;
 }
 
 export interface SyncSourceHealth {
@@ -674,7 +689,7 @@ export interface SyncSourceHealth {
 
 export interface SyncStatusResponse {
 	sources: SyncSourceHealth[];
-	activeJob: { jobId: string; sourceKey: string; startedAt: string } | null;
+	activeJob: { jobId: string; sourceKey: string; startedAt: string; queueState: string } | null;
 	recentRuns: SyncRunResult[];
 	totalRuns: number;
 	successRate: number;
@@ -685,6 +700,7 @@ export interface SyncStatusResponse {
 		staleSources: number;
 		failedLastRun: number;
 		running: number;
+		totalRecordsManaged: number;
 	};
 }
 
@@ -700,6 +716,12 @@ export const getDataSyncHistoryAction = async (limit = 20): Promise<{ runs: Sync
 	return response.json();
 };
 
+export const getJobDetailsAction = async (jobId: string): Promise<SyncRunResult | null> => {
+	const response = await authFetch(`${BACKEND_URL}/data-sync/job/${jobId}`);
+	if (!response.ok) return null;
+	return response.json();
+};
+
 export const triggerDataSyncAction = async (
 	target: SyncTarget = "all",
 ): Promise<SyncRunResult | { error: string; status: string } | null> => {
@@ -708,7 +730,28 @@ export const triggerDataSyncAction = async (
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ target }),
 	});
-	if (response.status === 409) return response.json(); // already running
+	if (response.status === 409) return response.json();
+	if (!response.ok) return null;
+	return response.json();
+};
+
+export const retryDataSyncAction = async (
+	target: SyncTarget = "all",
+): Promise<SyncRunResult | { error: string } | null> => {
+	const response = await authFetch(`${BACKEND_URL}/data-sync/retry`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ target }),
+	});
+	if (response.status === 409) return response.json();
+	if (!response.ok) return null;
+	return response.json();
+};
+
+export const cancelJobAction = async (jobId: string): Promise<{ ok: boolean; message: string } | null> => {
+	const response = await authFetch(`${BACKEND_URL}/data-sync/cancel/${jobId}`, {
+		method: "POST",
+	});
 	if (!response.ok) return null;
 	return response.json();
 };

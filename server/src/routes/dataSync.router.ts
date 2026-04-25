@@ -4,17 +4,29 @@ import {
   dataSyncRunHandler,
   dataSyncStatusHandler,
   dataSyncHistoryHandler,
+  dataSyncJobDetailsHandler,
+  dataSyncCancelHandler,
+  dataSyncRetryHandler,
 } from '#src/controllers/dataSync.controller.ts';
 
 const router = Router();
 
-// GET /data-sync/status — overall health, per-source status, recent runs
+// Overview status + recent runs
 router.get('/status', authMiddleware, dataSyncStatusHandler);
 
-// GET /data-sync/history — paginated run history
+// Paginated job history
 router.get('/history', authMiddleware, dataSyncHistoryHandler);
 
-// POST /data-sync/run — trigger a sync (authenticated users or cron secret)
+// Full job details including raw logs, crawler details, stack trace
+router.get('/job/:id', authMiddleware, dataSyncJobDetailsHandler);
+
+// Trigger a new sync (manual users or cron via Bearer token)
 router.post('/run', dataSyncRunHandler);
+
+// Retry (alias to run — added explicitly for UX clarity)
+router.post('/retry', dataSyncRetryHandler);
+
+// Cancel a running/stuck job
+router.post('/cancel/:id', authMiddleware, dataSyncCancelHandler);
 
 export default router;
