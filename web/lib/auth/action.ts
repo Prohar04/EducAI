@@ -416,21 +416,48 @@ export const intelligentSearchAction = async (
 
 export type SopTone = "formal" | "research" | "personal";
 export type SopType = "general" | "scholarship" | "research";
+export type SopTemplate =
+	| "formal-academic"
+	| "research-focused"
+	| "scholarship-focused"
+	| "personal-story"
+	| "professional-career"
+	| "technical-engineering"
+	| "business-management"
+	| "compact-direct"
+	| "highly-persuasive"
+	| "phd-proposal";
 
 export interface SopGenerateRequest {
-	tone: SopTone;
-	sopType: SopType;
+	sopTemplate: SopTemplate;
 	targetProgram?: string;
 	targetUniversity?: string;
 	targetCountry?: string;
 	targetIntake?: string;
+	degreeLevel?: string;
 	highlights?: string;
+	sopPurpose?: string;
+	academicBackground?: string;
+	motivation?: string;
+	whySubject?: string;
+	whyUniversity?: string;
+	whyCountry?: string;
+	careerGoals?: string;
+	researchInterests?: string;
+	achievements?: string;
+	workExperience?: string;
+	projects?: string;
+	challengesOvercome?: string;
+	scholarshipAngle?: string;
+	// Legacy
+	tone?: SopTone;
+	sopType?: SopType;
 }
 
 export interface SopResult {
 	sop: string;
 	wordCount: number;
-	tone: SopTone;
+	template: SopTemplate;
 	sopType: SopType;
 }
 
@@ -447,15 +474,46 @@ export const generateSopAction = async (req: SopGenerateRequest): Promise<SopRes
 // ── Module 3: CV Builder ──────────────────────────────────────────────────────
 
 export type CvStyle = "academic" | "research" | "industry";
+export type CvTemplate =
+	| "minimal-academic"
+	| "research-focused"
+	| "modern-professional"
+	| "scholarship-focused"
+	| "international-student"
+	| "technical-engineering"
+	| "business-management"
+	| "clean-classic"
+	| "compact-one-page"
+	| "phd-research";
 
 export interface CvGenerateRequest {
-	cvStyle: CvStyle;
+	cvTemplate: CvTemplate;
 	highlights?: string;
+	phone?: string;
+	linkedin?: string;
+	github?: string;
+	summary?: string;
+	thesisOrResearch?: string;
+	publications?: string;
+	workExperience?: string;
+	internships?: string;
+	technicalSkills?: string;
+	softSkills?: string;
+	projects?: string;
+	certifications?: string;
+	awards?: string;
+	extracurriculars?: string;
+	volunteering?: string;
+	references?: string;
+	targetDegree?: string;
+	targetCountry?: string;
+	targetUniversity?: string;
+	targetProgram?: string;
 }
 
 export interface CvResult {
 	cv: string;
-	style: string;
+	template: CvTemplate;
 	sections: string[];
 }
 
@@ -481,12 +539,21 @@ export interface ProfessorResult {
 	profileUrl: string | null;
 	snippet: string;
 	emailTemplate: string;
+	sourceVerified: boolean;
+}
+
+export interface ProfessorSearchResponseFull {
+	query: string;
+	results: ProfessorResult[];
+	searchedAt: string;
+	warning?: string;
 }
 
 export interface ProfessorSearchResponse {
 	query: string;
 	results: ProfessorResult[];
 	searchedAt: string;
+	warning?: string;
 }
 
 export const searchProfessorsAction = async (
@@ -501,7 +568,14 @@ export const searchProfessorsAction = async (
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ researchInterest, university, country, level }),
 	});
-	if (!response.ok) return null;
+	if (!response.ok) {
+		// Return structured error if backend returned 400
+		if (response.status === 400) {
+			const data = await response.json().catch(() => ({})) as { error?: string };
+			throw new Error(data.error ?? "Invalid input");
+		}
+		return null;
+	}
 	return response.json();
 };
 
