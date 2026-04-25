@@ -25,7 +25,7 @@ import {
   X,
   TrendingUp,
   Plane,
-  Wrench,
+  RefreshCw,
   Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -83,7 +83,7 @@ const TOOLS = [
   { href: "/app/gap-fix", label: "Gap Fix", icon: Zap, soon: false },
   { href: "/app/career", label: "Career Outlook", icon: TrendingUp, soon: false },
   { href: "/app/immigration", label: "Immigration", icon: Plane, soon: false },
-  { href: "/app/data-sync", label: "Data Sync", icon: Wrench, soon: false },
+  { href: "/app/data-sync", label: "Data Updates", icon: RefreshCw, soon: false },
 ] as const;
 
 export function Navbar({ user }: { user: Session["user"] }) {
