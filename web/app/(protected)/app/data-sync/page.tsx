@@ -131,10 +131,10 @@ function FreshnessBadge({ status }: { status: FreshnessStatus }) {
 
 // ─── Source helpers ───────────────────────────────────────────────────────────
 
-function sourceIcon(key: string): React.ElementType {
-  if (key === "scholarships") return BookOpen;
-  if (key === "programs") return GraduationCap;
-  return Sparkles;
+function renderSourceIcon(key: string, className: string): React.ReactNode {
+  if (key === "scholarships") return <BookOpen className={className} />;
+  if (key === "programs") return <GraduationCap className={className} />;
+  return <Sparkles className={className} />;
 }
 
 function sourceNiceLabel(key: string): string {
@@ -164,14 +164,13 @@ function FreshnessCard({
 }) {
   const status = getFreshnessStatus(source, isActiveSource);
   const cfg = FRESHNESS_CONFIG[status];
-  const SourceIcon = sourceIcon(source.sourceKey);
 
   return (
     <div className={cn("rounded-2xl border bg-card p-5 flex flex-col gap-4", cfg.cardBorder)}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl shrink-0", cfg.iconBg)}>
-            <SourceIcon className={cn("h-5 w-5", cfg.iconColor)} />
+            {renderSourceIcon(source.sourceKey, cn("h-5 w-5", cfg.iconColor))}
           </div>
           <div>
             <p className="text-sm font-semibold">{sourceNiceLabel(source.sourceKey)}</p>
@@ -261,8 +260,15 @@ function changedSummary(run: SyncRunResult): string | null {
 }
 
 function UpdateHistoryRow({ run }: { run: SyncRunResult }) {
-  const RowIcon = sourceIcon(run.target);
   const summary = changedSummary(run);
+  const iconClassName = cn(
+    "h-3.5 w-3.5",
+    run.status === "success" || run.status === "partial_success"
+      ? "text-emerald-600 dark:text-emerald-400"
+      : run.status === "failed"
+      ? "text-red-500"
+      : "text-muted-foreground",
+  );
 
   return (
     <div className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-muted/20 transition-colors">
@@ -276,16 +282,7 @@ function UpdateHistoryRow({ run }: { run: SyncRunResult }) {
             : "bg-muted",
         )}
       >
-        <RowIcon
-          className={cn(
-            "h-3.5 w-3.5",
-            run.status === "success" || run.status === "partial_success"
-              ? "text-emerald-600 dark:text-emerald-400"
-              : run.status === "failed"
-              ? "text-red-500"
-              : "text-muted-foreground",
-          )}
-        />
+        {renderSourceIcon(run.target, iconClassName)}
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium">
