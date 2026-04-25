@@ -209,7 +209,6 @@ function ActiveJobBanner({
 	isCancelling: boolean;
 }) {
 	if (!job) return null;
-	const elapsed = Math.round((Date.now() - new Date(job.startedAt).getTime()) / 1000);
 	return (
 		<div className="flex items-center gap-3 rounded-xl border border-blue-500/20 bg-blue-500/5 px-4 py-3">
 			<Loader2 className="h-4 w-4 text-blue-500 animate-spin shrink-0" />
@@ -221,7 +220,7 @@ function ActiveJobBanner({
 					</span>
 				</p>
 				<p className="text-xs text-muted-foreground font-mono">
-					Job ID: {job.jobId} · Started {elapsed}s ago
+					Job ID: {job.jobId} · Started {timeAgo(job.startedAt)}
 				</p>
 			</div>
 			<CopyButton text={job.jobId} />
