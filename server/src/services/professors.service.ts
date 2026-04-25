@@ -1,17 +1,22 @@
 /**
  * Professors Service — Serper-powered professor search with LLM extraction.
- * Uses the same Serper client as SearchService.
+ *
+ * Trust rules:
+ * - Never invent professors. If search returns nothing credible, return empty array.
+ * - Every result must have a real profileUrl from a university or academic domain.
+ * - LLM is instructed to return [] when uncertain — no fabrication.
+ * - Obvious nonsense or too-short inputs are rejected before hitting search.
  */
 
 const SERPER_URL = 'https://google.serper.dev/search';
 const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'; // fallback
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 export interface ProfessorSearchRequest {
   researchInterest: string;
   university?: string;
   country?: string;
-  level?: 'phd' | 'masters'; // used to frame email template
+  level?: 'phd' | 'masters';
 }
 
 export interface ProfessorResult {
@@ -24,12 +29,44 @@ export interface ProfessorResult {
   profileUrl: string | null;
   snippet: string;
   emailTemplate: string;
+  sourceVerified: boolean;
 }
 
 export interface ProfessorSearchResponse {
   query: string;
   results: ProfessorResult[];
   searchedAt: string;
+  warning?: string;
+}
+
+// Domains that are credible academic sources
+const ACADEMIC_DOMAINS = [
+  '.edu', '.ac.uk', '.ac.in', '.ac.au', '.ac.nz', '.ac.za', '.ac.jp', '.ac.kr',
+  '.uni-', 'university', 'institute', 'college', 'scholar.google', 'researchgate.net',
+  'academia.edu', 'orcid.org', 'dblp.org', 'semanticscholar.org', 'pubmed',
+  'faculty', 'staff', 'people', 'lab.', '-lab', 'research',
+];
+
+function isAcademicUrl(url: string): boolean {
+  const lower = url.toLowerCase();
+  return ACADEMIC_DOMAINS.some(d => lower.includes(d));
+}
+
+/**
+ * Rejects obvious nonsense: random characters, too short, all digits, etc.
+ */
+function isValidQuery(text: string): boolean {
+  const trimmed = text.trim();
+  if (trimmed.length < 3) return false;
+  // Reject strings that are >80% random chars (no vowels, no spaces)
+  const hasVowel = /[aeiouAEIOU]/.test(trimmed);
+  const hasSpace = /\s/.test(trimmed);
+  const wordCount = trimmed.split(/\s+/).length;
+  // Single word with no vowels and short = likely nonsense
+  if (!hasVowel && wordCount === 1 && trimmed.length < 6) return false;
+  // Pure numbers
+  if (/^\d+$/.test(trimmed)) return false;
+  return true;
 }
 
 async function serperSearch(query: string): Promise<Array<{ title: string; link: string; snippet: string }>> {
@@ -40,7 +77,7 @@ async function serperSearch(query: string): Promise<Array<{ title: string; link:
     const response = await fetch(SERPER_URL, {
       method: 'POST',
       headers: { 'X-API-KEY': apiKey, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ q: query, num: 8 }),
+      body: JSON.stringify({ q: query, num: 10 }),
       signal: AbortSignal.timeout(8_000),
     });
     if (!response.ok) return [];
@@ -61,56 +98,62 @@ async function extractProfessors(
   const apiUrl = openaiKey ? OPENAI_URL : OPENROUTER_URL;
   const model = openaiKey ? 'gpt-4o-mini' : 'openai/gpt-4o-mini';
 
+  // Without AI key or search results, we cannot safely extract — return empty
   if (!apiKey || searchResults.length === 0) {
-    // Return stub results based on search snippets
-    return searchResults.slice(0, 5).map((r, i) => ({
-      name: r.title.split(' - ')[0].split('|')[0].trim() || `Professor ${i + 1}`,
-      title: 'Faculty Member',
-      university: req.university ?? 'University',
-      department: req.researchInterest,
-      researchAreas: [req.researchInterest],
-      email: null,
-      profileUrl: r.link || null,
-      snippet: r.snippet,
-      emailTemplate: buildEmailTemplate({
-        name: r.title.split(' - ')[0].trim(),
-        university: req.university ?? 'your university',
-        researchInterest: req.researchInterest,
-        level: req.level ?? 'phd',
-      }),
-    }));
+    return [];
   }
 
+  // Only pass results that look like academic pages to reduce hallucination
+  const academicResults = searchResults.filter(r => isAcademicUrl(r.link));
+  const resultsToProcess = academicResults.length >= 2 ? academicResults : searchResults;
+
   const resultsJson = JSON.stringify(
-    searchResults.slice(0, 8).map(r => ({ title: r.title, url: r.link, snippet: r.snippet })),
+    resultsToProcess.slice(0, 8).map(r => ({ title: r.title, url: r.link, snippet: r.snippet })),
     null,
     2,
   );
 
-  const prompt = `You are extracting professor information from search results.
+  const universityFilter = req.university
+    ? `IMPORTANT: Only extract professors who are explicitly from "${req.university}". Reject any professor from a different institution.`
+    : '';
+
+  const countryFilter = req.country
+    ? `IMPORTANT: Only extract professors from institutions in "${req.country}". Reject professors from other countries.`
+    : '';
+
+  const prompt = `You are a strict academic data extractor. Extract professor information ONLY from the provided search result snippets.
 
 Research interest: "${req.researchInterest}"
-${req.university ? `University filter: ${req.university}` : ''}
-${req.country ? `Country filter: ${req.country}` : ''}
+${universityFilter}
+${countryFilter}
 
 Search results:
 ${resultsJson}
 
-Extract up to 5 professors from these results. For each professor return ONLY a JSON array:
+STRICT RULES:
+1. Only extract a professor if their name, institution, and research area are CLEARLY mentioned in the search result text or URL.
+2. Do NOT invent, guess, or extrapolate any professor who is not explicitly present in the results.
+3. Do NOT fill in placeholder names like "Professor X" or "Faculty Member".
+4. If a result is not about a real professor, skip it completely.
+5. If you cannot confidently identify ANY real professor from these results, return an empty array [].
+6. The profileUrl MUST be the actual URL from the search result (not a made-up URL).
+7. Email can only be included if it appears verbatim in the snippet.
+
+Return ONLY a JSON array (may be empty []):
 [
   {
-    "name": "Prof. Full Name",
-    "title": "Associate Professor / Professor / etc",
-    "university": "University name",
-    "department": "Department name",
-    "researchAreas": ["area1", "area2"],
-    "email": "email@uni.edu or null",
-    "profileUrl": "https://... or null",
-    "snippet": "brief description of their work"
+    "name": "Exact name as found in results",
+    "title": "Title as found (Professor/Associate Professor/etc) or null",
+    "university": "University name as found in results",
+    "department": "Department if mentioned, otherwise null",
+    "researchAreas": ["area from results", "..."],
+    "email": "exact email if found verbatim, otherwise null",
+    "profileUrl": "exact URL from results",
+    "snippet": "1-2 sentence summary of their work from the results"
   }
 ]
 
-If you cannot extract a professor from a result, skip it. Return ONLY the JSON array.`;
+Return ONLY the JSON array. No explanation, no markdown.`;
 
   try {
     const response = await fetch(apiUrl, {
@@ -122,56 +165,54 @@ If you cannot extract a professor from a result, skip it. Return ONLY the JSON a
       body: JSON.stringify({
         model,
         messages: [{ role: 'user', content: prompt }],
-        temperature: 0.2,
-        max_tokens: 1000,
+        temperature: 0.1,
+        max_tokens: 1200,
       }),
       signal: AbortSignal.timeout(15_000),
     });
 
-    if (!response.ok) throw new Error('LLM failed');
+    if (!response.ok) return [];
 
     const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
     const content = data?.choices?.[0]?.message?.content?.trim() ?? '';
 
-    const parsed = JSON.parse(content) as unknown;
-    if (!Array.isArray(parsed)) throw new Error('Not an array');
+    // Strip markdown code blocks if present
+    const cleaned = content.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim();
+    const parsed = JSON.parse(cleaned) as unknown;
+    if (!Array.isArray(parsed)) return [];
 
-    return (parsed as Array<Record<string, unknown>>).slice(0, 5).map(p => ({
-      name: String(p.name ?? 'Unknown Professor'),
-      title: String(p.title ?? 'Faculty'),
-      university: String(p.university ?? req.university ?? 'University'),
-      department: String(p.department ?? req.researchInterest),
-      researchAreas: Array.isArray(p.researchAreas)
-        ? (p.researchAreas as unknown[]).map(String)
-        : [req.researchInterest],
-      email: p.email ? String(p.email) : null,
-      profileUrl: p.profileUrl ? String(p.profileUrl) : null,
-      snippet: String(p.snippet ?? ''),
-      emailTemplate: buildEmailTemplate({
-        name: String(p.name ?? 'Professor'),
-        university: String(p.university ?? req.university ?? 'your university'),
-        researchInterest: req.researchInterest,
-        level: req.level ?? 'phd',
-      }),
-    }));
+    return (parsed as Array<Record<string, unknown>>)
+      .filter(p => {
+        // Require a real name (not empty, not "Unknown", not "Professor N")
+        const name = String(p.name ?? '').trim();
+        if (!name || name.toLowerCase().startsWith('professor ') || name === 'Unknown Professor') return false;
+        // Require a profileUrl
+        if (!p.profileUrl) return false;
+        return true;
+      })
+      .slice(0, 5)
+      .map(p => ({
+        name: String(p.name),
+        title: p.title ? String(p.title) : 'Faculty',
+        university: String(p.university ?? req.university ?? 'University'),
+        department: p.department ? String(p.department) : req.researchInterest,
+        researchAreas: Array.isArray(p.researchAreas)
+          ? (p.researchAreas as unknown[]).map(String)
+          : [req.researchInterest],
+        email: p.email ? String(p.email) : null,
+        profileUrl: p.profileUrl ? String(p.profileUrl) : null,
+        snippet: String(p.snippet ?? ''),
+        sourceVerified: true,
+        emailTemplate: buildEmailTemplate({
+          name: String(p.name),
+          university: String(p.university ?? req.university ?? 'their university'),
+          researchInterest: req.researchInterest,
+          level: req.level ?? 'phd',
+        }),
+      }));
   } catch {
-    // Fallback: extract basic info from snippets
-    return searchResults.slice(0, 5).map((r) => ({
-      name: r.title.split(' - ')[0].split('|')[0].trim(),
-      title: 'Faculty Member',
-      university: req.university ?? 'University',
-      department: req.researchInterest,
-      researchAreas: [req.researchInterest],
-      email: null,
-      profileUrl: r.link || null,
-      snippet: r.snippet,
-      emailTemplate: buildEmailTemplate({
-        name: r.title.split(' - ')[0].trim(),
-        university: req.university ?? 'their university',
-        researchInterest: req.researchInterest,
-        level: req.level ?? 'phd',
-      }),
-    }));
+    // On any error (parse failure, network, etc.) — return empty rather than inventing data
+    return [];
   }
 }
 
@@ -205,18 +246,33 @@ Warm regards,
 }
 
 export async function searchProfessors(req: ProfessorSearchRequest): Promise<ProfessorSearchResponse> {
-  const queryParts = [req.researchInterest, 'professor'];
-  if (req.university) queryParts.push(req.university);
+  const queryParts: string[] = [];
+
+  // Build a targeted search query
+  if (req.university) {
+    queryParts.push(`site:${req.university.toLowerCase().replace(/\s+/g, '')}.edu OR "${req.university}" professor`);
+  } else {
+    queryParts.push('professor');
+  }
+
+  queryParts.push(`"${req.researchInterest}"`);
   if (req.country) queryParts.push(req.country);
-  queryParts.push('faculty research');
+  queryParts.push('faculty research lab');
 
   const query = queryParts.join(' ');
   const rawResults = await serperSearch(query);
   const professors = await extractProfessors(rawResults, req);
 
+  const warning = professors.length === 0 && rawResults.length === 0
+    ? 'No web results found. Check your search terms or try a different university name.'
+    : undefined;
+
   return {
     query,
     results: professors,
     searchedAt: new Date().toISOString(),
+    warning,
   };
 }
+
+export { isValidQuery };
