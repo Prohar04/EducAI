@@ -11,11 +11,12 @@ export default defineConfig({
     seed: 'prisma/seed.ts',
   },
   datasource: {
+    // Priority: DATABASE_URL (Render/Neon inject this) → LOCAL (dev) → CLOUD (legacy)
+    // @ts-ignore
     url:
-      node_env === 'development'
-        ? // @ts-ignore
-          process.env['DATABASE_URL_LOCAL']
-        : // @ts-ignore
-          process.env['DATABASE_URL_CLOUD'],
+      process.env['DATABASE_URL'] ||
+      (node_env === 'development'
+        ? process.env['DATABASE_URL_LOCAL']
+        : process.env['DATABASE_URL_CLOUD']),
   },
 });
