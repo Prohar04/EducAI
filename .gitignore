@@ -45,3 +45,17 @@ __pycache__/
 # Misc
 .DS_Store
 *.pem
+
+# Log files
+*.log
+logs/
+ai-server/logs/
+
+# Generated PDFs and local artifacts
+docs/*.pdf
+*.pdf
+
+# Editor / OS artifacts
+*.swp
+*.swo
+*~
