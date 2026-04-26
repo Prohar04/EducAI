@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "npx nodemon",
-    "build": "tsc",
-    "start": "node dist/index.js",
+    "build": "prisma generate && tsc --noEmit",
+    "start": "tsx src/index.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -53,6 +53,7 @@
     "passport": "^0.7.0",
     "passport-google-oauth2": "^0.2.0",
     "winston": "^3.18.3",
+    "tsx": "^4.21.0",
     "zod": "^4.1.11"
   },
   "devDependencies": {
@@ -80,7 +81,6 @@
     "supertest": "^7.1.4",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
-    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
   "imports": {

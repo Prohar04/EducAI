@@ -33,10 +33,25 @@ import dataSyncRoutes from './routes/dataSync.router.ts';
 // import { PrismaSessionStore } from './services/session.service.ts';
 
 const app = express();
+
+// Trust the first reverse proxy hop (required on Render, Railway, Heroku, etc.)
+// so req.ip, req.secure, and secure cookies work correctly behind load balancers.
+app.set('trust proxy', 1);
+
 app.use(helmet());
+const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000')
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (curl, server-to-server, health checks)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      callback(new Error(`CORS: origin ${origin} not allowed`));
+    },
     credentials: true,
   })
 );
