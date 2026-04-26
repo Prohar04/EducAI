@@ -582,6 +582,7 @@ export const searchProfessorsAction = async (
 // ── Module 3: Gap Fix Recommender ────────────────────────────────────────────
 
 export interface GapFixRecommendation {
+	id: string;
 	category: string;
 	priority: "high" | "medium" | "low";
 	title: string;
@@ -600,7 +601,60 @@ export interface GapFixResult {
 	generatedAt: string;
 }
 
-export const generateGapFixAction = async (): Promise<GapFixResult | null> => {
+export type GapStatus = "not_started" | "in_progress" | "completed" | "skipped";
+
+export interface ImprovementEntry {
+	id: string;
+	type: string;
+	description: string;
+	testType?: string;
+	scoreValue?: number;
+	addedAt: string;
+	appliedToProfile: boolean;
+}
+
+export interface GapFixEvidenceItem {
+	id: string;
+	sessionId: string;
+	userId: string;
+	recId: string;
+	type: string;
+	label: string;
+	url?: string | null;
+	fileName?: string | null;
+	fileSize?: number | null;
+	status: string;
+	uploadedAt: string;
+}
+
+export interface GapFixComparison {
+	previousScore: number;
+	currentScore: number;
+	scoreImprovement: number;
+	previousStrengths: string[];
+	newStrengths: string[];
+	resolvedGaps: string[];
+	remainingGaps: string[];
+	newGaps: string[];
+}
+
+export interface GapFixSession {
+	id: string;
+	userId: string;
+	result: GapFixResult;
+	gapStatuses: Record<string, GapStatus>;
+	improvements: ImprovementEntry[];
+	profileSnapshot: Record<string, unknown>;
+	previousSessionId?: string | null;
+	previousResult?: GapFixResult | null;
+	comparison?: GapFixComparison | null;
+	evidences: GapFixEvidenceItem[];
+	createdAt: string;
+	updatedAt: string;
+}
+
+// Analyze and persist a new session
+export const analyzeGapFixAction = async (): Promise<GapFixSession | null> => {
 	const response = await authFetch(`${BACKEND_URL}/gap-fix/analyze`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
@@ -609,6 +663,101 @@ export const generateGapFixAction = async (): Promise<GapFixResult | null> => {
 	if (!response.ok) return null;
 	return response.json();
 };
+
+// Fetch the latest saved session
+export const getGapFixSessionAction = async (): Promise<GapFixSession | null> => {
+	const response = await authFetch(`${BACKEND_URL}/gap-fix/session`);
+	if (!response.ok) return null;
+	return response.json();
+};
+
+// Update one gap's progress status
+export const updateGapStatusAction = async (
+	sessionId: string,
+	recId: string,
+	status: GapStatus,
+): Promise<boolean> => {
+	const response = await authFetch(`${BACKEND_URL}/gap-fix/session/${sessionId}/status`, {
+		method: "PATCH",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ recId, status }),
+	});
+	return response.ok;
+};
+
+// Add an improvement log entry (optionally updates profile for test scores)
+export const addImprovementAction = async (
+	sessionId: string,
+	entry: {
+		type: string;
+		description: string;
+		testType?: string;
+		scoreValue?: number;
+		applyToProfile?: boolean;
+	},
+): Promise<GapFixSession | null> => {
+	const response = await authFetch(`${BACKEND_URL}/gap-fix/session/${sessionId}/improvement`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(entry),
+	});
+	if (!response.ok) return null;
+	return response.json();
+};
+
+// Attach a link as evidence for a gap
+export const addEvidenceLinkAction = async (
+	sessionId: string,
+	recId: string,
+	label: string,
+	type: string,
+	url: string,
+): Promise<GapFixEvidenceItem | null> => {
+	const response = await authFetch(`${BACKEND_URL}/gap-fix/session/${sessionId}/evidence`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ recId, type, label, url }),
+	});
+	if (!response.ok) return null;
+	return response.json();
+};
+
+// Upload a file as evidence for a gap
+export const uploadEvidenceAction = async (
+	sessionId: string,
+	recId: string,
+	formData: FormData,
+): Promise<GapFixEvidenceItem | null> => {
+	formData.set("recId", recId);
+	const response = await authFetch(`${BACKEND_URL}/gap-fix/session/${sessionId}/evidence`, {
+		method: "POST",
+		body: formData,
+	});
+	if (!response.ok) return null;
+	return response.json();
+};
+
+// Delete an evidence entry
+export const deleteEvidenceAction = async (evidenceId: string): Promise<boolean> => {
+	const response = await authFetch(`${BACKEND_URL}/gap-fix/evidence/${evidenceId}`, {
+		method: "DELETE",
+	});
+	return response.ok;
+};
+
+// Re-run analysis against current profile, creating a new session with comparison
+export const reanalyzeGapFixAction = async (sessionId: string): Promise<GapFixSession | null> => {
+	const response = await authFetch(`${BACKEND_URL}/gap-fix/session/${sessionId}/reanalyze`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: "{}",
+	});
+	if (!response.ok) return null;
+	return response.json();
+};
+
+// Legacy — kept for backward compat; prefer analyzeGapFixAction
+export const generateGapFixAction = analyzeGapFixAction;
 
 // ── Module 4: Career Outcome Predictor ──────────────────────────────────────
 

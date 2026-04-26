@@ -44,6 +44,7 @@ model User {
   roadmaps                 UserRoadmap[]
   strategyReports          StrategyReport[]
   scholarshipAlertLogs     ScholarshipAlertLog[]
+  gapFixSessions           GapFixSession[]
 
   @@index([email])
   @@index([oauthProvider, oauthId])
@@ -526,6 +527,48 @@ model SearchCache {
   @@index([key])
   @@index([expiresAt])
   @@map("search_cache")
+}
+
+// ── GAP FIX SESSIONS ──────────────────────────────────────────────
+// Persists a user's gap analysis result, per-gap progress, improvements, and evidence.
+model GapFixSession {
+  id                String   @id @default(cuid())
+  userId            String   @map("user_id") @db.Uuid
+  result            Json     // GapFixResultWithIds — recommendations include stable `id` fields
+  gapStatuses       Json     @default("{}") @map("gap_statuses") // { [recId]: "not_started" | "in_progress" | "completed" | "skipped" }
+  improvements      Json     @default("[]") // ImprovementEntry[]
+  profileSnapshot   Json     @map("profile_snapshot") // key profile fields at time of analysis
+  previousSessionId String?  @map("previous_session_id") // set after re-analysis
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamp
+
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  evidences GapFixEvidence[]
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("gap_fix_sessions")
+}
+
+// Evidence attached to a specific recommendation inside a session.
+model GapFixEvidence {
+  id         String   @id @default(cuid())
+  sessionId  String   @map("session_id")
+  userId     String   @map("user_id") @db.Uuid
+  recId      String   @map("rec_id") @db.VarChar(100) // matches GapFixRecommendation.id
+  type       String   @db.VarChar(50)  // certificate | cv | sop | transcript | internship_letter | link | publication | other
+  label      String   @db.VarChar(200)
+  url        String?  @db.Text         // for links / portfolio / GitHub
+  fileName   String?  @map("file_name") @db.VarChar(255)
+  fileSize   Int?     @map("file_size")
+  status     String   @default("pending") @db.VarChar(20) // uploaded | linked
+  uploadedAt DateTime @default(now()) @map("uploaded_at") @db.Timestamp
+
+  session GapFixSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([userId])
+  @@map("gap_fix_evidences")
 }
 
 // ── GOOGLE OAUTH ONE-TIME CODES ────────────────────────────────────
