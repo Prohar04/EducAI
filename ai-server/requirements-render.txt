@@ -1,0 +1,18 @@
+# Slim requirements for Render free-tier deployment.
+# Excludes chromadb, crewai, apify-client, and other heavy optional deps
+# that are not imported by any active route on startup.
+# chromadb is lazily imported only when CHROMADB_HOST is configured.
+# crewai/apify are used only by web_scrapper.py which has no active callers.
+
+fastapi[standard]>=0.129.0
+uvicorn[standard]>=0.34.0
+httpx>=0.28.1
+loguru>=0.7.3
+pydantic-settings>=2.13.1
+python-dotenv>=1.1.0
+openai>=2.24.0
+prisma>=0.15.0
+psycopg2-binary>=2.9.11
+firecrawl-py>=4.18.1
+langchain>=0.3
+langchain-openai>=0.3

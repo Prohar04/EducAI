@@ -74,7 +74,7 @@ services:
     region: oregon
     plan: free
     rootDir: ai-server
-    buildCommand: pip install uv && uv pip install --system -r pyproject.toml 2>/dev/null || pip install fastapi[standard] uvicorn pydantic-settings httpx loguru python-dotenv openai langchain langchain-openai prisma psycopg2-binary sqlmodel firecrawl-py apify-client
+    buildCommand: pip install -r requirements-render.txt && prisma generate --schema prisma/schema.prisma
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port 8001
     healthCheckPath: /api/v1/health
     envVars:

@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { toUSD } from '#src/utils/exchangeRates.ts';
 import crypto from 'crypto';
 import passport from 'passport';
-import '../config/google.config.ts';
+import { GOOGLE_OAUTH_ENABLED } from '../config/google.config.ts';
 import {
   createUser,
   findUserByEmail,
@@ -397,11 +397,15 @@ export const signout = async (req: AuthRequest, res: Response) => {
 
 // ── GOOGLE OAUTH ───────────────────────────────────────────────────
 
-export const googleAuth = passport.authenticate('google', {
-  scope: ['email', 'profile'],
-});
+const _googleAuthDisabled = (_req: Request, res: Response) =>
+  res.status(503).json({ message: 'Google OAuth is not configured on this server.' });
 
-export const googleAuthCallback = [
+export const googleAuth = GOOGLE_OAUTH_ENABLED
+  ? passport.authenticate('google', { scope: ['email', 'profile'] })
+  : _googleAuthDisabled;
+
+export const googleAuthCallback = GOOGLE_OAUTH_ENABLED
+  ? [
   (req: Request, res: Response, next: NextFunction) => {
     passport.authenticate('google', { session: false }, (err: any, user: any, info: any) => {
       if (err) {
@@ -449,7 +453,8 @@ export const googleAuthCallback = [
       return res.redirect(`${frontend}/auth/signin?error=oauth_failed`);
     }
   },
-];
+]
+  : [_googleAuthDisabled];
 
 // ── GOOGLE EXCHANGE (one-time code → tokens) ──────────────────────
 export const googleExchange = async (req: Request, res: Response) => {
