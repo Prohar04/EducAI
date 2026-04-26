@@ -454,13 +454,8 @@ Most university search tools are static databases. EducAI is a reasoning platfor
 |---|---|
 | GitHub | [github.com/Prohar04](https://github.com/Prohar04) |
 | LinkedIn | `[Add LinkedIn URL here]` |
-| Email | prohar@raktch.com |
+| Email | sahaprohar10@gmail.com |
 
----
-
-## License
-
-`[Add license here]`
 
 ---
 
