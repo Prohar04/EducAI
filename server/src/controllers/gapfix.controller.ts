@@ -127,29 +127,33 @@ export async function gapFixGenerateHandler(req: Request, res: Response): Promis
 
   try {
     const profileRecord = await prisma.userProfile.findUnique({ where: { userId } });
-    if (!profileRecord) {
-      res.status(404).json({ error: 'Profile not found. Please complete your profile first.' });
-      return;
-    }
 
-    logger.info(`[gapfix] generating recommendations for userId=${userId}`);
+    // Determine how much profile data we have for UX feedback
+    const hasGoalData = !!(profileRecord?.intendedLevel || profileRecord?.intendedMajor || profileRecord?.majorOrTrack || profileRecord?.targetCountries);
+    const hasAcademicData = !!(profileRecord?.gpa || profileRecord?.englishTestType);
+    const analysisMode: 'full' | 'partial' | 'minimal' = !profileRecord
+      ? 'minimal'
+      : (hasGoalData && hasAcademicData ? 'full' : 'partial');
+
+    logger.info(`[gapfix] generating recommendations for userId=${userId} mode=${analysisMode}`);
 
     const result = await generateGapFix({
-      gpa: profileRecord.gpa ?? undefined,
-      gpaScale: profileRecord.gpaScale ?? undefined,
-      backlogs: profileRecord.backlogs ?? undefined,
-      graduationYear: profileRecord.graduationYear ?? undefined,
-      englishTestType: profileRecord.englishTestType ?? undefined,
-      englishScore: profileRecord.englishScore ?? undefined,
-      gre: profileRecord.gre ?? undefined,
-      gmat: profileRecord.gmat ?? undefined,
-      workExperienceMonths: profileRecord.workExperienceMonths ?? undefined,
-      intendedLevel: profileRecord.intendedLevel ?? undefined,
-      intendedMajor: profileRecord.intendedMajor ?? undefined,
-      targetCountries: (profileRecord.targetCountries as string[]) ?? undefined,
-      targetIntake: profileRecord.targetIntake ?? undefined,
-      currentStage: profileRecord.currentStage ?? undefined,
-      fundingNeed: profileRecord.fundingNeed ?? undefined,
+      gpa: profileRecord?.gpa ?? undefined,
+      gpaScale: profileRecord?.gpaScale ?? undefined,
+      backlogs: profileRecord?.backlogs ?? undefined,
+      graduationYear: profileRecord?.graduationYear ?? undefined,
+      englishTestType: profileRecord?.englishTestType ?? undefined,
+      englishScore: profileRecord?.englishScore ?? undefined,
+      gre: profileRecord?.gre ?? undefined,
+      gmat: profileRecord?.gmat ?? undefined,
+      workExperienceMonths: profileRecord?.workExperienceMonths ?? undefined,
+      intendedLevel: profileRecord?.intendedLevel ?? undefined,
+      // Use majorOrTrack as fallback for intendedMajor (handles both legacy and current profile saves)
+      intendedMajor: profileRecord?.intendedMajor ?? profileRecord?.majorOrTrack ?? undefined,
+      targetCountries: (profileRecord?.targetCountries as string[]) ?? undefined,
+      targetIntake: profileRecord?.targetIntake ?? undefined,
+      currentStage: profileRecord?.currentStage ?? undefined,
+      fundingNeed: profileRecord?.fundingNeed ?? undefined,
     });
 
     const initialStatuses: Record<string, GapStatus> = {};
@@ -157,19 +161,23 @@ export async function gapFixGenerateHandler(req: Request, res: Response): Promis
       initialStatuses[rec.id] = 'not_started';
     }
 
+    const profileSnap = profileRecord
+      ? { ...buildProfileSnapshot(profileRecord), analysisMode }
+      : { analysisMode };
+
     const session = await prisma.gapFixSession.create({
       data: {
         userId,
         result: result as unknown as Prisma.InputJsonValue,
         gapStatuses: initialStatuses as unknown as Prisma.InputJsonValue,
         improvements: [],
-        profileSnapshot: buildProfileSnapshot(profileRecord) as unknown as Prisma.InputJsonValue,
+        profileSnapshot: profileSnap as unknown as Prisma.InputJsonValue,
       },
       include: { evidences: true },
     });
 
-    logger.info(`[gapfix] session=${session.id} score=${result.profileScore} for userId=${userId}`);
-    res.status(200).json({ ...session, previousResult: null, comparison: null });
+    logger.info(`[gapfix] session=${session.id} score=${result.profileScore} mode=${analysisMode} for userId=${userId}`);
+    res.status(200).json({ ...session, previousResult: null, comparison: null, analysisMode });
   } catch (err) {
     logger.error(`[gapfix] analyze failed for userId=${userId}: ${err}`);
     res.status(502).json({ error: 'Gap analysis failed. Please try again.' });
@@ -361,7 +369,7 @@ export async function gapFixReanalyzeHandler(req: Request, res: Response): Promi
       gmat: profileRecord.gmat ?? undefined,
       workExperienceMonths: profileRecord.workExperienceMonths ?? undefined,
       intendedLevel: profileRecord.intendedLevel ?? undefined,
-      intendedMajor: profileRecord.intendedMajor ?? undefined,
+      intendedMajor: profileRecord.intendedMajor ?? profileRecord.majorOrTrack ?? undefined,
       targetCountries: (profileRecord.targetCountries as string[]) ?? undefined,
       targetIntake: profileRecord.targetIntake ?? undefined,
       currentStage: profileRecord.currentStage ?? undefined,
