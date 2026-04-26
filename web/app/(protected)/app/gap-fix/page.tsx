@@ -757,12 +757,12 @@ export default function GapFixPage() {
 	function handleAnalyze() {
 		setError(null);
 		startAnalyze(async () => {
-			const s = await analyzeGapFixAction();
-			if (!s) {
-				setError("Analysis failed. Please complete your profile first.");
+			const result = await analyzeGapFixAction();
+			if (result.error) {
+				setError(result.error);
 				return;
 			}
-			setSession(s);
+			setSession(result.session);
 		});
 	}
 
@@ -882,16 +882,59 @@ export default function GapFixPage() {
 						{analyzing ? "Analyzing your profile…" : "Analyze My Profile"}
 					</Button>
 					{error && (
-						<div className="mt-4 flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/5 px-4 py-2.5 text-sm text-destructive">
-							<AlertCircle className="h-4 w-4 shrink-0" />
-							{error}
+						<div className="mt-4 flex items-start gap-2 rounded-lg border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive max-w-sm text-left">
+							<AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+							<div>
+								{error}
+								{(error.toLowerCase().includes("profile") || error.toLowerCase().includes("complete")) && (
+									<div className="mt-1.5">
+										<a href="/app/profile" className="underline underline-offset-2 font-medium">
+											Go to profile settings
+										</a>
+									</div>
+								)}
+							</div>
 						</div>
 					)}
-					<p className="mt-4 text-xs text-muted-foreground">Complete your profile for the most accurate recommendations</p>
+					<p className="mt-4 text-xs text-muted-foreground">
+						<a href="/app/profile" className="underline underline-offset-2 hover:text-foreground transition-colors">
+							Set up your profile
+						</a>{" "}for the most accurate recommendations
+					</p>
 				</div>
 			) : (
 				<FadeIn>
 					<div className="space-y-6">
+
+						{/* Partial / minimal analysis notice */}
+						{(session.analysisMode === "minimal" || session.analysisMode === "partial") && (
+							<div className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${
+								session.analysisMode === "minimal"
+									? "border-amber-500/30 bg-amber-500/5 text-amber-700 dark:text-amber-400"
+									: "border-blue-500/30 bg-blue-500/5 text-blue-700 dark:text-blue-400"
+							}`}>
+								<AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+								<div className="flex-1">
+									{session.analysisMode === "minimal" ? (
+										<>
+											<span className="font-medium">Analysis based on limited data.</span>
+											{" "}Your profile is not set up yet — these are general recommendations.{" "}
+											<a href="/app/profile" className="underline underline-offset-2 font-medium hover:opacity-80 transition-opacity">
+												Complete your profile
+											</a>{" "}and re-analyze for personalized results.
+										</>
+									) : (
+										<>
+											<span className="font-medium">Partial analysis.</span>
+											{" "}Some profile fields are missing — adding your degree level, GPA, and test scores will improve recommendation accuracy.{" "}
+											<a href="/app/profile" className="underline underline-offset-2 font-medium hover:opacity-80 transition-opacity">
+												Update your profile
+											</a>{" "}then re-analyze.
+										</>
+									)}
+								</div>
+							</div>
+						)}
 
 						{/* Score overview + progress */}
 						<div className="rounded-xl border border-border bg-card p-6">

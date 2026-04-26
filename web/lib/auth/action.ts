@@ -649,19 +649,28 @@ export interface GapFixSession {
 	previousResult?: GapFixResult | null;
 	comparison?: GapFixComparison | null;
 	evidences: GapFixEvidenceItem[];
+	analysisMode?: "full" | "partial" | "minimal";
 	createdAt: string;
 	updatedAt: string;
 }
 
 // Analyze and persist a new session
-export const analyzeGapFixAction = async (): Promise<GapFixSession | null> => {
-	const response = await authFetch(`${BACKEND_URL}/gap-fix/analyze`, {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: "{}",
-	});
-	if (!response.ok) return null;
-	return response.json();
+export const analyzeGapFixAction = async (): Promise<{ session: GapFixSession; error: null } | { session: null; error: string }> => {
+	try {
+		const response = await authFetch(`${BACKEND_URL}/gap-fix/analyze`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: "{}",
+		});
+		if (!response.ok) {
+			const errData = await response.json().catch(() => null);
+			return { session: null, error: errData?.error ?? "Analysis failed. Please try again." };
+		}
+		const session = await response.json();
+		return { session, error: null };
+	} catch {
+		return { session: null, error: "Could not reach the server. Please check your connection and try again." };
+	}
 };
 
 // Fetch the latest saved session
@@ -756,7 +765,7 @@ export const reanalyzeGapFixAction = async (sessionId: string): Promise<GapFixSe
 	return response.json();
 };
 
-// Legacy — kept for backward compat; prefer analyzeGapFixAction
+/** @deprecated use analyzeGapFixAction */
 export const generateGapFixAction = analyzeGapFixAction;
 
 // ── Module 4: Career Outcome Predictor ──────────────────────────────────────
