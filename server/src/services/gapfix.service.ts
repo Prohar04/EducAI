@@ -29,6 +29,7 @@ export interface GapFixRequest {
 }
 
 export interface GapFixRecommendation {
+  id: string; // stable identifier (category slug + index)
   category: string;
   priority: 'high' | 'medium' | 'low';
   title: string;
@@ -45,6 +46,44 @@ export interface GapFixResult {
   recommendations: GapFixRecommendation[];
   prioritySummary: string;
   generatedAt: string;
+}
+
+export interface GapFixComparison {
+  previousScore: number;
+  currentScore: number;
+  scoreImprovement: number;
+  previousStrengths: string[];
+  newStrengths: string[];
+  resolvedGaps: string[];
+  remainingGaps: string[];
+  newGaps: string[];
+}
+
+export function computeGapFixComparison(prev: GapFixResult, current: GapFixResult): GapFixComparison {
+  return {
+    previousScore: prev.profileScore,
+    currentScore: current.profileScore,
+    scoreImprovement: current.profileScore - prev.profileScore,
+    previousStrengths: prev.strengths,
+    newStrengths: current.strengths,
+    resolvedGaps: prev.weaknesses.filter(w => !current.weaknesses.some(cw => cw === w)),
+    remainingGaps: current.weaknesses.filter(w => prev.weaknesses.some(pw => pw === w)),
+    newGaps: current.weaknesses.filter(w => !prev.weaknesses.some(pw => pw === w)),
+  };
+}
+
+function slugify(text: string): string {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+function assignRecommendationIds(recs: Omit<GapFixRecommendation, 'id'>[]): GapFixRecommendation[] {
+  const seen = new Map<string, number>();
+  return recs.map(rec => {
+    const base = slugify(rec.category);
+    const count = (seen.get(base) ?? 0);
+    seen.set(base, count + 1);
+    return { ...rec, id: count === 0 ? base : `${base}-${count}` };
+  });
 }
 
 function assessProfileWeaknesses(req: GapFixRequest): {
@@ -230,7 +269,7 @@ Return ONLY valid JSON. No markdown, no explanation.`;
       profileScore: score,
       strengths,
       weaknesses,
-      recommendations: (parsed.recommendations ?? []).slice(0, 6),
+      recommendations: assignRecommendationIds((parsed.recommendations ?? []).slice(0, 6)),
       prioritySummary: parsed.prioritySummary ?? 'Focus on your highest-priority gaps first.',
       generatedAt: new Date().toISOString(),
     };
@@ -239,8 +278,10 @@ Return ONLY valid JSON. No markdown, no explanation.`;
   }
 }
 
+type RawRec = Omit<GapFixRecommendation, 'id'>;
+
 function buildFallbackResult(req: GapFixRequest, score: number, weaknesses: string[], strengths: string[]): GapFixResult {
-  const recs: GapFixRecommendation[] = [];
+  const recs: RawRec[] = [];
 
   const gpa = req.gpa ? (req.gpaScale === '4.0' ? req.gpa : req.gpaScale === '10' ? (req.gpa / 10) * 4 : req.gpa) : null;
   if (gpa !== null && gpa < 3.0) {
@@ -343,7 +384,7 @@ function buildFallbackResult(req: GapFixRequest, score: number, weaknesses: stri
     profileScore: score,
     strengths,
     weaknesses,
-    recommendations: recs.slice(0, 5),
+    recommendations: assignRecommendationIds(recs.slice(0, 5)),
     prioritySummary: weaknesses.length > 0
       ? `Focus on: ${weaknesses.slice(0, 2).join('; ')}. Your profile score is ${score}/100 — addressing high-priority gaps can significantly improve your competitiveness.`
       : `Your profile looks strong with a score of ${score}/100. Focus on rounding out the medium-priority areas to maximize your chances.`,
