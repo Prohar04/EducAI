@@ -79,9 +79,7 @@ MSG="chore(auto): progress snapshot — ${FILE_COUNT} file(s) [${TIMESTAMP}]
 
 Auto-committed by scripts/auto-commit-progress.sh on branch ${BRANCH}.
 Files changed:
-$(echo "$STAGED" | head -20 | sed 's/^/  - /')
-
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+$(echo "$STAGED" | head -20 | sed 's/^/  - /')"
 
 # ── Commit ────────────────────────────────────────────────────────────────────
 
