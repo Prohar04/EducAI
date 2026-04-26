@@ -124,6 +124,11 @@ class EduRAGPipeline:
         if _llm_base_url:
             llm_kwargs["base_url"] = _llm_base_url
         self._llm = ChatOpenAI(**llm_kwargs)
+        if not settings.CHROMADB_HOST or not settings.CHROMADB_PORT:
+            raise RuntimeError(
+                "ChromaDB is not configured (CHROMADB_HOST / CHROMADB_PORT unset). "
+                "RAG pipeline requires a running ChromaDB instance."
+            )
         _chroma_client = chromadb.HttpClient(
             host=settings.CHROMADB_HOST,
             port=settings.CHROMADB_PORT,

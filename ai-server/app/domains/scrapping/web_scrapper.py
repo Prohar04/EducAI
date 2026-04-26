@@ -21,13 +21,15 @@ SCRAPED_CONTENT_DIR = Path(__file__).resolve().parent.parent.parent / "scraped_c
 SCRAPED_CONTENT_DIR.mkdir(parents=True, exist_ok=True)
 
 # ---------------------------------------------------------------------------
-# ChromaDB collection used for scraped-page embeddings
+# ChromaDB collection used for scraped-page embeddings (optional feature)
 # ---------------------------------------------------------------------------
-_vector_store = VectorStore(
-    host=settings.CHROMADB_HOST,
-    port=settings.CHROMADB_PORT,
-    collection_name="web_scrapes",
-)
+_vector_store: "VectorStore | None" = None
+if settings.CHROMADB_HOST and settings.CHROMADB_PORT:
+    _vector_store = VectorStore(
+        host=settings.CHROMADB_HOST,
+        port=settings.CHROMADB_PORT,
+        collection_name="web_scrapes",
+    )
 
 # Maximum characters per embedding chunk (≈ ~500 tokens for text-embedding-3-small)
 _CHUNK_SIZE = 2_000
@@ -35,6 +37,8 @@ _CHUNK_SIZE = 2_000
 
 class WebScrapperAPIFY:
     def __init__(self):
+        if not settings.APIFY_APIKEY:
+            raise RuntimeError("APIFY_APIKEY is not configured. Scraping features are unavailable.")
         self.api_key = settings.APIFY_APIKEY
         self.base_url = "https://api.apify.com/v2/acts/Educai~web-scraper/runs?token=" + self.api_key
         self.client = ApifyClient(self.api_key)
