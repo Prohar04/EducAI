@@ -40,15 +40,15 @@ class Settings(BaseSettings):
     # Groq configuration
     GROQ_API_KEY: Optional[str] = Field(default=None, validation_alias="GROQ_API_KEY")
 
-    # Chromadb configuration
-    CHROMADB_HOST: str = Field(..., validation_alias="CHROMADB_HOST")
-    CHROMADB_PORT: int = Field(..., validation_alias="CHROMADB_PORT")
+    # Chromadb configuration (optional — vector search features disabled when absent)
+    CHROMADB_HOST: Optional[str] = Field(default=None, validation_alias="CHROMADB_HOST")
+    CHROMADB_PORT: Optional[int] = Field(default=None, validation_alias="CHROMADB_PORT")
 
     # Firecrawl configuration
     FIRECRAWL_API_KEY: Optional[str] = Field(default=None, validation_alias="FIRECRAWL_API_KEY")
 
-    # Apify configuration
-    APIFY_APIKEY: str = Field(..., validation_alias="APIFY_APIKEY")
+    # Apify configuration (optional — scraping features disabled when absent)
+    APIFY_APIKEY: Optional[str] = Field(default=None, validation_alias="APIFY_APIKEY")
 
     # Database configuration
     DATABASE_URL: str = Field(..., validation_alias="DATABASE_URL")
