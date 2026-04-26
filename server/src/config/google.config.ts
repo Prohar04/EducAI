@@ -10,17 +10,19 @@ const GOOGLE_CALLBACK_URL =
   process.env.GOOGLE_CALLBACK_URL ||
   'http://localhost:8000/auth/google/callback';
 
-if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
-  throw new Error(
-    'Google Client ID and Secret must be set in environment variables'
+export const GOOGLE_OAUTH_ENABLED = !!(GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET);
+
+if (!GOOGLE_OAUTH_ENABLED) {
+  console.warn(
+    '[google.config] GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET not set — Google OAuth disabled'
   );
 }
 
-passport.use(
+if (GOOGLE_OAUTH_ENABLED) passport.use(
   new GoogleStrategy(
     {
-      clientID: GOOGLE_CLIENT_ID,
-      clientSecret: GOOGLE_CLIENT_SECRET,
+      clientID: GOOGLE_CLIENT_ID as string,
+      clientSecret: GOOGLE_CLIENT_SECRET as string,
       callbackURL: GOOGLE_CALLBACK_URL,
       passReqToCallback: true,
     },
