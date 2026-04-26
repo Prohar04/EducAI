@@ -1,0 +1,117 @@
+services:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Express API — EducAI Backend
+  # ─────────────────────────────────────────────────────────────────────────────
+  - type: web
+    name: educai-api
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: server
+    buildCommand: npm ci && npx prisma generate
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "8000"
+      # ── Database (Neon) ──────────────────────────────────────────────────────
+      - key: DATABASE_URL
+        sync: false   # set manually in Render dashboard
+      # ── Security ────────────────────────────────────────────────────────────
+      - key: JWT_SECRET
+        generateValue: true
+      - key: REFRESH_JWT_SECRET
+        generateValue: true
+      - key: SESSION_SECRET
+        generateValue: true
+      # ── Frontend CORS origin ─────────────────────────────────────────────────
+      - key: FRONTEND_URL
+        sync: false   # set to your Vercel URL, e.g. https://educai.vercel.app
+      # ── AI Server ────────────────────────────────────────────────────────────
+      - key: AI_SERVER_URL
+        sync: false   # set to your Render AI service URL
+      - key: AI_SERVER_API_KEY
+        sync: false   # must match MASTER_APIKEY on the AI server
+      # ── Google OAuth ─────────────────────────────────────────────────────────
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_CALLBACK_URL
+        sync: false   # https://<api-service>.onrender.com/auth/google/callback
+      # ── Email ────────────────────────────────────────────────────────────────
+      - key: EMAIL_HOST
+        value: smtp.resend.com
+      - key: EMAIL_PORT
+        value: "465"
+      - key: EMAIL_SECURE
+        value: "true"
+      - key: EMAIL_USER
+        value: resend
+      - key: EMAIL_PASS
+        sync: false   # Resend API key
+      - key: EMAIL_FROM
+        value: "EducAI <noreply@yourdomain.com>"
+      # ── Optional: Arcjet (bot/rate-limit protection) ─────────────────────────
+      - key: ARCJET_KEY
+        sync: false   # optional — leave empty to skip Arcjet
+      # ── Optional: direct LLM fallback ────────────────────────────────────────
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: CHAT_RATE_LIMIT_PER_MIN
+        value: "20"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # FastAPI AI Server
+  # ─────────────────────────────────────────────────────────────────────────────
+  - type: web
+    name: educai-ai
+    runtime: python
+    region: oregon
+    plan: free
+    rootDir: ai-server
+    buildCommand: pip install uv && uv pip install --system -r pyproject.toml 2>/dev/null || pip install fastapi[standard] uvicorn pydantic-settings httpx loguru python-dotenv openai langchain langchain-openai prisma psycopg2-binary sqlmodel firecrawl-py apify-client
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port 8001
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: MASTER_APIKEY
+        sync: false   # generate with: openssl rand -hex 32; must match AI_SERVER_API_KEY on Express
+      # ── Database (shared Neon connection) ────────────────────────────────────
+      - key: DATABASE_URL
+        sync: false
+      # ── LLM Provider ─────────────────────────────────────────────────────────
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: LLM_PROVIDER
+        sync: false   # openai | openrouter | gemini | groq | xai
+      - key: LLM_MODEL
+        sync: false
+      # ── Express API back-reference ────────────────────────────────────────────
+      - key: SERVER_BASE_URL
+        sync: false   # https://<api-service>.onrender.com
+      - key: INGEST_API_KEY
+        sync: false
+      # ── Optional: web search ─────────────────────────────────────────────────
+      - key: SERPER_API_KEY
+        sync: false
+      # ── Optional: Firecrawl ───────────────────────────────────────────────────
+      - key: FIRECRAWL_API_KEY
+        sync: false
+      # ── Optional: Apify scraping ─────────────────────────────────────────────
+      - key: APIFY_APIKEY
+        sync: false
+      # ── Optional: ChromaDB (vector search) ────────────────────────────────────
+      - key: CHROMADB_HOST
+        sync: false   # leave empty to disable vector search on free tier
+      - key: CHROMADB_PORT
+        sync: false
