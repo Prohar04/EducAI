@@ -475,12 +475,6 @@ Most university search tools are static databases. EducAI is a reasoning platfor
 
 ---
 
-## License
-
-`[Add license here]`
-
----
-
 <div align="center">
 
 Built with [Next.js](https://nextjs.org), [FastAPI](https://fastapi.tiangolo.com), [Prisma](https://www.prisma.io), and [Neon](https://neon.tech).
