@@ -4,17 +4,17 @@
 | Setting | Value |
 |---------|-------|
 | Service type | Web Service |
-| Runtime | Python |
+| Runtime | Docker |
 | Python version | 3.13 |
 | Region | Oregon (US West) — same as Express API |
 | Plan | Free |
 | Root Directory | `ai-server` |
-| Build Command | `pip install -r requirements-render.txt && bash scripts/render-prisma-engine.sh` |
-| Start Command | `uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
+| Dockerfile | `ai-server/Dockerfile` |
+| Docker Context | `ai-server` |
 | Health Check Path | `/api/v1/health` |
 
-The native Render Python runtime is the source of truth for this service.
-The build script generates the Prisma client, fetches the engine, and copies the query engine into `.prisma-cache/prisma-query-engine-*` so the runtime can resolve it.
+The Docker image is the source of truth for this service.
+The Docker build generates the Prisma client, fetches the engine, and copies the query engine into the final image before startup.
 
 ## Environment variables
 

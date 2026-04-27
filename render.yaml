@@ -70,12 +70,13 @@ services:
   # ─────────────────────────────────────────────────────────────────────────────
   - type: web
     name: educai-ai
-    runtime: python
+    env: docker
     region: oregon
     plan: free
     rootDir: ai-server
-    buildCommand: pip install -r requirements-render.txt && bash scripts/render-prisma-engine.sh
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    dockerfilePath: ai-server/Dockerfile
+    dockerContext: ai-server
+    dockerCommand: sh -c "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8001}"
     healthCheckPath: /api/v1/health
     envVars:
       - key: MASTER_APIKEY
@@ -115,5 +116,3 @@ services:
         sync: false   # leave empty to disable vector search on free tier
       - key: CHROMADB_PORT
         sync: false
-      - key: PRISMA_BINARY_CACHE_DIR
-        value: .prisma-cache
