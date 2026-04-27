@@ -1,9 +1,16 @@
 import os
+import importlib
 from contextlib import asynccontextmanager
+from pathlib import Path
 from fastapi import FastAPI
-from prisma import Prisma
 from app.core.config import settings
 from app.core.logger import logger
+
+
+PRISMA_CACHE_DIR = Path(__file__).resolve().parents[2] / ".prisma-cache"
+os.environ.setdefault("PRISMA_BINARY_CACHE_DIR", str(PRISMA_CACHE_DIR))
+
+Prisma = importlib.import_module("prisma").Prisma
 
 
 def _build_neon_url(url: str) -> str:

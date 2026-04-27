@@ -2,6 +2,8 @@ FROM python:3.13-slim
 
 WORKDIR /app
 
+ENV PRISMA_BINARY_CACHE_DIR=/app/.prisma-cache
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libatomic1 \
     gcc \
