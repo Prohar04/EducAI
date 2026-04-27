@@ -74,7 +74,7 @@ services:
     region: oregon
     plan: free
     rootDir: ai-server
-    buildCommand: PRISMA_BINARY_CACHE_DIR=.prisma-cache pip install -r requirements-render.txt && PRISMA_BINARY_CACHE_DIR=.prisma-cache prisma generate --schema prisma/schema.prisma && PRISMA_BINARY_CACHE_DIR=.prisma-cache python -m prisma py fetch
+    buildCommand: PRISMA_BINARY_CACHE_DIR=.prisma-cache pip install -r requirements-render.txt && PRISMA_BINARY_CACHE_DIR=.prisma-cache python -m prisma generate --schema prisma/schema.prisma || true && PRISMA_BINARY_CACHE_DIR=.prisma-cache prisma generate --schema prisma/schema.prisma && PRISMA_BINARY_CACHE_DIR=.prisma-cache python -m prisma py fetch
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port 8001
     healthCheckPath: /api/v1/health
     envVars:
