@@ -6,18 +6,34 @@
 
 | Service | URL | Platform |
 |---|---|---|
-| **Frontend** | https://educai-web.vercel.app | Vercel (Hobby) |
+| **Frontend (Next.js)** | https://educai-web.vercel.app | Vercel (Hobby) |
+| **Frontend (Render)** | https://educai-gday.onrender.com | Render (Free) |
 | **Express API** | https://educai-api-91ai.onrender.com | Render (Free) |
 | **FastAPI AI Server** | https://educai-ai-rd5y.onrender.com | Render (Free) |
 | **Database** | Neon PostgreSQL (serverless, ap-southeast-1) | Neon (Free) |
 
 ## Health Endpoints
 
+All `/health` endpoints below are **liveness-only** (no DB or AI dependency) — safe for frequent uptime polling.
+
+### UptimeRobot monitor URLs
+
+| Service | Codebase | UptimeRobot URL |
+|---|---|---|
+| Express API | `server/` | `https://educai-api-91ai.onrender.com/health` |
+| FastAPI AI Server | `ai-server/` | `https://educai-ai-rd5y.onrender.com/api/v1/health` |
+| Next.js Web | `web/` | `https://educai-gday.onrender.com/api/health` |
+
+All three return HTTP 200 with:
+```json
+{ "status": "ok", "service": "<name>", "version": "...", "environment": "production", "uptime": 123, "timestamp": "..." }
+```
+
+### Additional diagnostic endpoints (not for uptime monitoring)
+
 | Endpoint | Purpose |
 |---|---|
-| `GET https://educai-api-91ai.onrender.com/health` | Express API liveness |
-| `GET https://educai-api-91ai.onrender.com/health/db` | DB connectivity |
-| `GET https://educai-ai-rd5y.onrender.com/api/v1/health` | AI server liveness |
+| `GET https://educai-api-91ai.onrender.com/health/db` | DB connectivity check |
 | `GET https://educai-ai-rd5y.onrender.com/api/v1/health/llm` | LLM provider status |
 
 ## Render Service IDs
