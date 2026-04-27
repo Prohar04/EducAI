@@ -32,9 +32,34 @@
 
 ---
 
-## Summary
+## Summary (Round 1 — 2026-04-26)
 
 - **Files removed:** 6
 - **Files fixed:** 1 (`scripts/auto-commit-progress.sh`)
 - **`.gitignore` updated:** Yes
 - **Files kept as-is:** All others
+
+---
+
+## Round 2 Audit — 2026-04-28
+
+| Path | Category | Why It Looks Unnecessary | Proof / Reference | Safe to Remove? | Action Taken |
+|------|----------|--------------------------|-------------------|-----------------|--------------|
+| `ai-server/.coverage` | Generated artifact | SQLite pytest coverage database (53 KB binary). Not needed at runtime or in CI. | `file ai-server/.coverage` → SQLite 3.x database | ✅ Yes | **Removed from tracking** |
+| `ai-server/app/firstEmbedding.json` | Legacy debug artifact | 33 KB embedding vector JSON. Only referenced in fully commented-out code in `app/db/base.py` (TODO comment marks it as demo-only). | `grep -r firstEmbedding app/ --include="*.py"` — only commented references | ✅ Yes | **Removed from tracking** |
+| `server/prisma/schema_complete.txt` | Stale file from another project | 482-line file of entirely commented-out Prisma schema for a completely different project ("Multi-Layer Fashion Try-On Platform"). Not referenced anywhere. | First line: `// This is your Prisma schema file for the Multi-Layer Fashion Try-On Platform` | ✅ Yes | **Removed from tracking** |
+| `skills-lock.json` | Editor artifact | Claude Code internal lock file. Previously marked "Maybe" — now confirmed not referenced by any script, build, or CI. | `grep -r skills-lock . --include="*.json" --include="*.yml"` — no references | ✅ Yes | **Removed from tracking** |
+| `server/package.json` metadata | Stale metadata | `repository`, `bugs`, `homepage` fields pointed to `hirokr/AI-Shop` — a completely different project. | Verified actual remote: `git remote -v` → `Prohar04/EducAI` | ✅ Yes (fix, not removal) | **Updated to correct EducAI repo URLs** |
+
+### Round 2 Gitignore Updates
+
+| File | Change |
+|---|---|
+| `ai-server/.gitignore` | Added `.coverage`, `.coverage.*`, `htmlcov/` |
+| `.gitignore` (root) | Added `skills-lock.json` |
+
+### Round 2 Summary
+
+- **Tracked artifacts untracked:** 4
+- **Metadata fixes:** 1 (`server/package.json`)
+- **`.gitignore` updated:** Yes (2 files)
