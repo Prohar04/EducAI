@@ -48,6 +48,10 @@ __pycache__/
 
 # Log files
 *.log
+
+# Platform-specific Prisma query engine binaries
+**/prisma-query-engine-*
+**/query-engine-*
 logs/
 ai-server/logs/
 
