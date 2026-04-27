@@ -1,13 +1,24 @@
+import time
+from datetime import datetime, timezone
 from fastapi import APIRouter
 from ...domains.reasoning.llm_provider import _get_provider, _get_model
 from ...core.config import settings
 
 router = APIRouter()
 
+_START_TIME = time.time()
+
 
 @router.get("/health")
 async def health_check():
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "service": "educai-ai",
+        "version": "0.1.0",
+        "environment": __import__("os").environ.get("NODE_ENV", "production"),
+        "uptime": int(time.time() - _START_TIME),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
 
 
 @router.get("/health/llm")
