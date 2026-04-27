@@ -79,6 +79,8 @@ services:
     dockerCommand: sh -c "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8001}"
     healthCheckPath: /api/v1/health
     envVars:
+      - key: PORT
+        value: "8001"
       - key: MASTER_APIKEY
         sync: false   # generate with: openssl rand -hex 32; must match AI_SERVER_API_KEY on Express
       # ── Database (shared Neon connection) ────────────────────────────────────
