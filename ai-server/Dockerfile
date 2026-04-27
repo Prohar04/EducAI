@@ -39,8 +39,9 @@ RUN uv pip install --system --no-cache -r pyproject.toml 2>/dev/null \
 
 COPY . .
 
-RUN prisma generate --schema prisma/schema.prisma \
-    && python -m prisma py fetch
+RUN PRISMA_BINARY_CACHE_DIR=/app/.prisma-cache python -m prisma generate --schema prisma/schema.prisma || true \
+    && PRISMA_BINARY_CACHE_DIR=/app/.prisma-cache prisma generate --schema prisma/schema.prisma \
+    && PRISMA_BINARY_CACHE_DIR=/app/.prisma-cache python -m prisma py fetch
 
 EXPOSE 8001
 
