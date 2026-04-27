@@ -74,7 +74,7 @@ services:
     region: oregon
     plan: free
     rootDir: ai-server
-    buildCommand: pip install -r requirements-render.txt && prisma generate --schema prisma/schema.prisma && python -m prisma py fetch
+    buildCommand: PRISMA_BINARY_CACHE_DIR=.prisma-cache pip install -r requirements-render.txt && PRISMA_BINARY_CACHE_DIR=.prisma-cache prisma generate --schema prisma/schema.prisma && PRISMA_BINARY_CACHE_DIR=.prisma-cache python -m prisma py fetch
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port 8001
     healthCheckPath: /api/v1/health
     envVars:
@@ -115,3 +115,6 @@ services:
         sync: false   # leave empty to disable vector search on free tier
       - key: CHROMADB_PORT
         sync: false
+      # ── Prisma engine cache ────────────────────────────────────────────────
+      - key: PRISMA_BINARY_CACHE_DIR
+        value: .prisma-cache
