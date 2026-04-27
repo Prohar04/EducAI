@@ -42,3 +42,6 @@ COPY . .
 RUN bash scripts/render-prisma-engine.sh
 
 EXPOSE 8001
+
+# Use exec form so that sh expands $PORT and uvicorn is PID 1
+CMD ["sh", "-c", "exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8001} --workers 1"]

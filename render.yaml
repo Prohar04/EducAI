@@ -76,7 +76,6 @@ services:
     rootDir: ai-server
     dockerfilePath: ai-server/Dockerfile
     dockerContext: ai-server
-    dockerCommand: sh -c "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8001}"
     healthCheckPath: /api/v1/health
     envVars:
       - key: PORT
