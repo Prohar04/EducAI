@@ -92,7 +92,7 @@ app.get('/', (req, res) => {
 
 app.get('/health', (_req, res) => {
   res.status(200).json({
-    status: 'ok',
+    status: 'OK',
     service: 'educai-api',
     version: '1.0.0',
     environment: process.env.NODE_ENV ?? 'development',
