@@ -46,6 +46,9 @@ def _ensure_prisma_query_engine() -> None:
             destination.chmod(0o755)
 
 
+_ensure_prisma_query_engine()
+
+
 def _build_neon_url(url: str) -> str:
     """Append Neon-serverless-compatible params to the connection string.
 
