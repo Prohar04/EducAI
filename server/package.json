@@ -96,16 +96,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hirokr/AI-Shop.git"
+    "url": "git+https://github.com/Prohar04/EducAI.git"
   },
   "bugs": {
-    "url": "https://github.com/hirokr/AI-Shop/issues"
+    "url": "https://github.com/Prohar04/EducAI/issues"
   },
-  "homepage": "https://github.com/hirokr/AI-Shop/blob/main/README.md",
-  "keywords": [],
-  "author": "",
+  "homepage": "https://github.com/Prohar04/EducAI#readme",
+  "keywords": ["education", "ai", "study-abroad", "scholarships"],
+  "author": "Prohar Saha Polak",
   "license": "ISC",
-  "description": "",
+  "description": "AI-powered study abroad guidance platform",
   "engines": {
     "node": ">=22"
   }
