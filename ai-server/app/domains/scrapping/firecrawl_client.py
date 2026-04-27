@@ -15,10 +15,20 @@ from ...core.logger import logger
 
 class FirecrawlClient:
     def __init__(self) -> None:
+        self._app = None
+        self._enabled = bool(settings.FIRECRAWL_API_KEY)
+
+        if not self._enabled:
+            logger.warning("Firecrawl API key is not configured; scraping is disabled.")
+            return
+
         self._app = AsyncFirecrawlApp(api_key=settings.FIRECRAWL_API_KEY)
 
     async def scrape_url(self, url: str) -> Optional[str]:
         """Scrape a single URL and return its markdown content, or None on error."""
+        if not self._enabled or self._app is None:
+            return None
+
         try:
             result = await self._app.scrape(url, formats=["markdown"])
             return result.markdown if result else None
@@ -28,6 +38,9 @@ class FirecrawlClient:
 
     async def scrape_urls(self, urls: List[str]) -> List[str]:
         """Scrape multiple URLs concurrently and return non-empty markdown strings."""
+        if not self._enabled or self._app is None:
+            return []
+
         results = await asyncio.gather(
             *[self.scrape_url(u) for u in urls],
             return_exceptions=True,
