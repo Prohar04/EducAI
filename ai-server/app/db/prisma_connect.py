@@ -48,8 +48,12 @@ async def ensure_connected() -> None:
 async def lifespan(app: FastAPI):
     """Connect to the database on startup and disconnect on shutdown."""
     logger.info("Connecting to the database...")
-    await db.connect()
-    logger.info("Database connected.")
+    try:
+        await db.connect()
+        logger.info("Database connected.")
+    except Exception as exc:
+        logger.error(f"Database connection failed at startup: {exc}")
+        logger.warning("Server will start without a live DB connection; retries happen per-request via ensure_connected()")
     try:
         yield
     finally:
