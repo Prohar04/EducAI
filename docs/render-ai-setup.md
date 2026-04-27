@@ -9,15 +9,12 @@
 | Region | Oregon (US West) — same as Express API |
 | Plan | Free |
 | Root Directory | `ai-server` |
-| Build Command | `pip install uv && uv pip install --system fastapi[standard] uvicorn pydantic-settings httpx loguru python-dotenv openai langchain langchain-openai prisma psycopg2-binary sqlmodel firecrawl-py apify-client` |
-| Start Command | `uvicorn app.main:app --host 0.0.0.0 --port 8001` |
+| Build Command | `pip install -r requirements-render.txt && bash scripts/render-prisma-engine.sh` |
+| Start Command | `uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
 | Health Check Path | `/api/v1/health` |
 
-### Alternative: Docker deployment (recommended if build is slow)
-Render can deploy from the `ai-server/Dockerfile` directly:
-- Environment: Docker
-- Dockerfile path: `ai-server/Dockerfile`
-- This is more reliable for complex Python deps with native extensions.
+The native Render Python runtime is the source of truth for this service.
+The build script generates the Prisma client, fetches the engine, and copies the query engine into `.prisma-cache/prisma-query-engine-*` so the runtime can resolve it.
 
 ## Environment variables
 
