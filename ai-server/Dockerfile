@@ -37,7 +37,8 @@ RUN uv pip install --system --no-cache -r pyproject.toml 2>/dev/null \
 
 COPY . .
 
-RUN prisma generate --schema prisma/schema.prisma 2>/dev/null || true
+RUN prisma generate --schema prisma/schema.prisma 2>/dev/null || true \
+    && prisma py fetch 2>/dev/null || true
 
 EXPOSE 8001
 
