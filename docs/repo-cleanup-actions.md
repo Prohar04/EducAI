@@ -86,3 +86,46 @@ These files showed ambiguity and were left untouched:
 | `docs/final-launch-checklist.md` | Historical record of launch state |
 | `docs/openai-migration-plan.md` | Documents the reasoning behind provider migration |
 | `docs/showcase-readiness.md` | Demo flow reference for presentations |
+
+---
+
+## Round 2 Actions — 2026-04-28
+
+### README Rewrite
+
+Rewrote `README.md` with:
+- All three confirmed live URLs filled in (Vercel frontend, Render API, Render AI server)
+- Next.js version updated to 16.1 (precise from `web/package.json`)
+- FastAPI route module count corrected to 6 (verified from `app/main.py`)
+- Free-tier limitations section expanded with Google OAuth and email alert note
+- Health endpoints documented under Deployment section
+- Recommended demo flow added to Live Demo section
+- License section added
+
+### Tracked Artifacts Removed
+
+| File | Reason |
+|------|--------|
+| `ai-server/.coverage` | SQLite pytest coverage database — binary artifact, not source code |
+| `ai-server/app/firstEmbedding.json` | Legacy 33 KB embedding vector; only in commented-out TODO code |
+| `server/prisma/schema_complete.txt` | Entirely commented-out schema from a different project entirely |
+| `skills-lock.json` | Claude Code internal artifact; not part of application |
+
+### Metadata Fix
+
+`server/package.json`: updated `repository`, `bugs`, `homepage`, `author`, `description`, and `keywords` fields — all previously referenced a template project (`hirokr/AI-Shop`).
+
+### Gitignore Updates
+
+- `ai-server/.gitignore`: added `.coverage`, `.coverage.*`, `htmlcov/`
+- `.gitignore` (root): added `skills-lock.json`
+
+### Builds Verified After Changes
+
+| Check | Result |
+|-------|--------|
+| `server/` TypeScript build | ✅ Passes |
+| `server/` ESLint | ✅ Passes |
+| `server/` Jest tests | ✅ Pass |
+| `web/` Next.js production build | ✅ Passes |
+| `web/` ESLint | ✅ Passes |
