@@ -31,13 +31,21 @@ Rather than a static database, EducAI combines live web scraping, LLM reasoning 
 
 ## Live Demo
 
-| Service | Link |
+| Service | URL |
 |---|---|
-| Frontend (Vercel) | `[Add Vercel URL here]` |
-| Express API (Render) | `[Add Render API URL here]` |
-| AI Server (Render) | `[Add Render AI URL here]` |
-| Database | Neon PostgreSQL (serverless) |
-| Demo Video | `[Add demo video link here]` |
+| **Frontend** (Vercel) | [educai-web.vercel.app](https://educai-web.vercel.app/) |
+| **Express API** (Render) | [educai-api-91ai.onrender.com](https://educai-api-91ai.onrender.com) |
+| **AI Server** (Render) | [educai-ai-rd5y.onrender.com](https://educai-ai-rd5y.onrender.com) |
+| **Database** | Neon PostgreSQL (serverless, ap-southeast-1) |
+| **Demo Video** | `[Add demo video link here]` |
+
+> **Free-tier note:** Render services spin down after inactivity. The first request after idle may take 30–60 seconds to wake. Email auth (Resend) and Google OAuth are not configured in this deployment — email/password sign-up and sign-in work normally.
+
+**Recommended demo flow:**
+
+1. Sign up at [educai-web.vercel.app/auth/signup](https://educai-web.vercel.app/auth/signup)
+2. Complete onboarding (e.g. CS/AI · MSc · Canada + UK targets)
+3. AI Program Match → Scholarships → Timeline → SOP → CV → Gap Fix → Career → Chat
 
 ---
 
@@ -48,7 +56,7 @@ Rather than a static database, EducAI combines live web scraping, LLM reasoning 
 | Feature | Description |
 |---|---|
 | **AI Program Match** | Scrapes live university pages via Firecrawl, ranks programs against the student's academic profile with scored fit reasons and admission bands |
-| **Admission Requirement Analyzer** | Extracts GPA threshold, English test requirements, GRE/GMAT, application deadlines, and document checklist from each program page |
+| **Admission Requirement Analyzer** | Extracts GPA thresholds, English test requirements, GRE/GMAT, application deadlines, and document checklists from each program page |
 | **Application Timeline Planner** | Generates a month-by-month roadmap from saved program deadlines, integrated with country-specific visa milestones (US, UK, CA, AU, DE) |
 | **Application Strategy Generator** | LLM-generated report with admission chance band, risk factors, and a prioritized action plan for each saved program |
 
@@ -111,9 +119,9 @@ AI Chatbot (available throughout) · Education Pulse (news sidebar)
 
 | Layer | Technology |
 |---|---|
-| **Frontend** | Next.js 16 · React 19 · TypeScript 5 |
-| **UI / Styling** | Tailwind CSS · shadcn/ui · Radix UI · Framer Motion 12 |
-| **Express API** | Express 5 · Node 22 · TypeScript · Zod |
+| **Frontend** | Next.js 16.1 · React 19 · TypeScript 5 |
+| **UI / Styling** | Tailwind CSS 4 · shadcn/ui · Radix UI · Framer Motion 12 |
+| **Express API** | Express 5 · Node 22 · TypeScript · Zod 4 |
 | **AI Server** | FastAPI · Python 3.13 · Pydantic v2 |
 | **ORM** | Prisma 7 (28 models · 22 migrations) |
 | **Database** | PostgreSQL via Neon (serverless) |
@@ -125,7 +133,7 @@ AI Chatbot (available throughout) · Education Pulse (news sidebar)
 | **Email** | Nodemailer · Resend (production SMTP) |
 | **Logging** | Winston (Express) · Loguru (FastAPI) |
 | **Deployment** | Vercel · Render · Neon · Docker |
-| **CI/CD** | GitHub Actions (5 jobs: server, web, ai-server, migrate, docker-build, deploy) |
+| **CI/CD** | GitHub Actions (6 jobs: server, web, ai-server, migrate, docker-build, deploy) |
 
 ---
 
@@ -147,10 +155,10 @@ AI Chatbot (available throughout) · Education Pulse (news sidebar)
                 │  Internal REST (API-key auth)
 ┌───────────────▼──────────────────┐   ┌───────────────────────────┐
 │  FastAPI AI Server (Python 3.13) │   │  Neon PostgreSQL           │
-│  5 domain modules:               │   │  (Serverless Postgres)     │
-│  · reasoning · scraping          │   │  28 models · 22 migrations │
-│  · searching · embeddings        │   └───────────────────────────┘
-│  · ingestion                     │
+│  6 route modules:                │   │  (Serverless Postgres)     │
+│  · health · chat · recommendations│  │  28 models · 22 migrations │
+│  · module1_sync · scrape_match   │   └───────────────────────────┘
+│  · strategy                      │
 │  OpenAI · Groq · OpenRouter      │
 │  Firecrawl · Serper              │
 └──────────────────────────────────┘
@@ -186,17 +194,17 @@ EducAI/
 │   │   ├── seed.ts             # Base seed
 │   │   ├── seedScholarships.ts # 28 real-world scholarships
 │   │   └── seedVisaTemplates.ts# Visa milestones: US, UK, CA, AU, DE
-│   └── tests/                  # 62 Jest tests across 5 suites
+│   └── tests/                  # Jest tests across 5 suites
 │
 ├── ai-server/                  # FastAPI AI server (Python 3.13)
 │   └── app/
+│       ├── api/v1/             # health · chat · recommendations · module1_sync · scrape_match · strategy
 │       ├── domains/            # reasoning · scraping · searching · embeddings · ingestion
-│       ├── api/v1/             # Versioned route definitions
 │       ├── LLM/                # Provider abstraction (OpenAI, Groq, OpenRouter, Gemini)
 │       └── schemas/            # Pydantic request/response models
 │
-├── docs/                       # Deployment guides, architecture notes, audit docs
-├── scripts/                    # Utility and migration scripts
+├── docs/                       # Deployment guides, live URLs, architecture notes
+├── scripts/                    # Utility scripts
 ├── .github/workflows/          # CI/CD, scholarship alerts, data sync (3 workflows)
 ├── render.yaml                 # Render deployment blueprint (2 services)
 └── docker-compose.yml          # Local multi-service development
@@ -311,7 +319,7 @@ Open [http://localhost:3000](http://localhost:3000)
 cd server
 npm run lint
 npm run build
-npm test                        # 62 Jest tests across auth, module1, chat, app, google-link suites
+npm test
 
 # Prisma
 npx prisma validate
@@ -339,6 +347,15 @@ npm run build
 | FastAPI AI Server | [Render](https://render.com) | Separate service in `render.yaml` |
 | Database | [Neon](https://neon.tech) | Serverless PostgreSQL, free tier |
 
+### Health Endpoints
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /health` | Express API liveness |
+| `GET /health/db` | DB connectivity check |
+| `GET /api/v1/health` | AI server liveness |
+| `GET /api/v1/health/llm` | LLM provider status |
+
 ### First Deploy
 
 ```bash
@@ -364,7 +381,7 @@ Three GitHub Actions workflows run automatically:
 
 | Job | What It Checks |
 |---|---|
-| **Server** | `npm ci` → `prisma generate + validate` → lint → `tsc` → 62 Jest tests |
+| **Server** | `npm ci` → `prisma generate + validate` → lint → `tsc` → Jest tests |
 | **Web** | `npm ci` → lint → production build (27 pages · 6 API handlers) |
 | **AI Server** | `pip install` → `ruff check` → pytest |
 | **DB Migrate** | TCP reachability → `prisma migrate deploy` (gracefully skipped if Neon is paused) |
@@ -407,7 +424,7 @@ Three GitHub Actions workflows run automatically:
 | | AI Advisor Chatbot | ✅ Complete |
 | | Data Sync Agent | ✅ Complete |
 
-**Known free-tier limitations:** Render services spin down after inactivity — cold starts can add 30–60 seconds on the first request. Neon databases auto-pause; the CI migration step handles this gracefully without failing the pipeline.
+**Known free-tier limitations:** Render services spin down after inactivity — cold starts can add 30–60 seconds on the first request. Neon databases auto-pause; the CI migration step handles this gracefully without failing the pipeline. Google OAuth and email alerts are not configured in the live demo deployment.
 
 ---
 
@@ -430,7 +447,7 @@ Most university search tools are static databases. EducAI is a reasoning platfor
 - **Profile-aware intelligence** — every AI call receives the student's full academic context: GPA, test scores, research experience, target countries, and saved programs.
 - **End-to-end coverage** — a student can go from profile setup to a ready-to-submit SOP, CV, cold professor email, and visa roadmap without leaving the platform.
 - **Honest AI** — eligibility scores are deterministic (not LLM-guessed), probability predictions expose their inputs, and AI-generated content is clearly labeled.
-- **Production engineering** — idempotent alert delivery, Arcjet bot protection, JWT + refresh token auth with account lockout, graceful Neon auto-pause handling in CI, 62 backend tests, and a full Docker + Render deployment blueprint.
+- **Production engineering** — idempotent alert delivery, Arcjet bot protection, JWT + refresh token auth with account lockout, graceful Neon auto-pause handling in CI, and a full Docker + Render deployment blueprint.
 
 ---
 
@@ -456,6 +473,11 @@ Most university search tools are static databases. EducAI is a reasoning platfor
 | LinkedIn | `[Add LinkedIn URL here]` |
 | Email | sahaprohar10@gmail.com |
 
+---
+
+## License
+
+`[Add license here]`
 
 ---
 
