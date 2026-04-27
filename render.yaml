@@ -74,7 +74,7 @@ services:
     region: oregon
     plan: free
     rootDir: ai-server
-    buildCommand: pip install -r requirements-render.txt && prisma generate --schema prisma/schema.prisma
+    buildCommand: pip install -r requirements-render.txt && prisma generate --schema prisma/schema.prisma && prisma py fetch
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port 8001
     healthCheckPath: /api/v1/health
     envVars:
