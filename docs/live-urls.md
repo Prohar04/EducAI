@@ -14,20 +14,39 @@
 
 ## Health Endpoints
 
-All `/health` endpoints below are **liveness-only** (no DB or AI dependency) — safe for frequent uptime polling.
+All primary health endpoints are **liveness-only** (no DB or AI dependency) — safe for frequent uptime polling.
 
-### UptimeRobot monitor URLs
+### UptimeRobot monitor URLs (free plan compatible)
 
-| Service | Codebase | UptimeRobot URL |
-|---|---|---|
-| Express API | `server/` | `https://educai-api-91ai.onrender.com/health` |
-| FastAPI AI Server | `ai-server/` | `https://educai-ai-rd5y.onrender.com/api/v1/health` |
-| Next.js Web | `web/` | `https://educai-gday.onrender.com/api/health` |
+> **Free UptimeRobot plan note:** The free plan sends HEAD requests, not GET. All endpoints below explicitly support both GET and HEAD and return HTTP 200 for each.
 
-All three return HTTP 200 with:
+| Service | Deployed URL | Monitor path | HEAD support |
+|---|---|---|---|
+| Express API | `https://educai-api-91ai.onrender.com` | `/health` | ✅ automatic (Express) |
+| FastAPI AI Server | `https://educai-ai-rd5y.onrender.com` | `/api/v1/health` | ✅ explicit HEAD handler |
+| Render Web / gday | `https://educai-gday.onrender.com` | `/api/v1/health` | ✅ explicit HEAD handler |
+
+**Verified live curl results:**
+- `GET  https://educai-api-91ai.onrender.com/health` → 200 ✅
+- `HEAD https://educai-api-91ai.onrender.com/health` → 200 ✅ (Express auto-handles)
+- `GET  https://educai-ai-rd5y.onrender.com/api/v1/health` → 200 ✅
+- `HEAD https://educai-ai-rd5y.onrender.com/api/v1/health` → 200 ✅ (explicit handler added)
+- `GET  https://educai-gday.onrender.com/api/v1/health` → 200 ✅
+- `HEAD https://educai-gday.onrender.com/api/v1/health` → 200 ✅ (same FastAPI codebase)
+
+GET responses return:
 ```json
 { "status": "ok", "service": "<name>", "version": "...", "environment": "production", "uptime": 123, "timestamp": "..." }
 ```
+
+HEAD responses return an empty body with `200 OK` — this is all UptimeRobot needs.
+
+### What was wrong before
+
+| Service | Old (broken) URL | Problem |
+|---|---|---|
+| FastAPI AI Server | `/api/v1/health` | GET worked, HEAD returned 405 — UptimeRobot failed |
+| Render Web / gday | `/api/health` (documented) | Returns 404 — wrong path; actual live path is `/api/v1/health` |
 
 ### Additional diagnostic endpoints (not for uptime monitoring)
 

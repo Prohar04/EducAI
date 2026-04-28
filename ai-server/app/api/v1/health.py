@@ -1,6 +1,7 @@
 import time
 from datetime import datetime, timezone
 from fastapi import APIRouter
+from fastapi.responses import Response
 from ...domains.reasoning.llm_provider import _get_provider, _get_model
 from ...core.config import settings
 
@@ -19,6 +20,11 @@ async def health_check():
         "uptime": int(time.time() - _START_TIME),
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
+
+
+@router.head("/health")
+async def health_check_head():
+    return Response(status_code=200)
 
 
 @router.get("/health/llm")
