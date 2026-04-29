@@ -13,17 +13,26 @@ import {
   Calendar,
   TrendingUp,
   MapPin,
+  ArrowRight,
   DollarSign,
   Award,
   Globe,
   ExternalLink,
   Target,
-  ArrowRight,
 } from "lucide-react";
 import type { SavedProgramItem, MatchLatestResponse, UserProfile, Session } from "@/types/auth.type";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { StaggerChildren, StaggerItem } from "@/components/motion/FadeIn";
 import { AnimatedCard } from "@/components/motion/AnimatedCard";
+
+// ─── UTILITIES ────────────────────────────────────────────────────────────────
+
+function getGreeting(): string {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+}
 
 // ─── TYPE DEFINITIONS ─────────────────────────────────────────────────────────
 
@@ -538,8 +547,11 @@ export default async function StudyPlanPage() {
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <FadeIn>
           <div className="mb-6">
-            <h1 className="text-3xl font-bold tracking-tight">Study Plan</h1>
-            <p className="mt-1 text-muted-foreground">Your application journey at a glance.</p>
+            <p className="text-sm font-medium text-muted-foreground">{getGreeting()}</p>
+            <h1 className="mt-0.5 text-2xl font-bold tracking-tight sm:text-3xl">
+              {sessionData?.user.name?.split(" ")[0] ?? "Study Plan"}
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">Your application journey at a glance.</p>
           </div>
 
           <EmptyState
@@ -554,12 +566,30 @@ export default async function StudyPlanPage() {
     );
   }
 
+  const completeness = getProfileCompleteness(profileData);
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       {/* Header */}
       <FadeIn className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Study Plan</h1>
-        <p className="mt-1 text-muted-foreground">Your application journey at a glance.</p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">{getGreeting()}</p>
+            <h1 className="mt-0.5 text-2xl font-bold tracking-tight sm:text-3xl">
+              {sessionData.user.name?.split(" ")[0] ?? "Your Study Plan"}
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">Your application journey at a glance.</p>
+          </div>
+          {completeness < 80 && (
+            <Link
+              href="/app/profile"
+              className="inline-flex shrink-0 items-center gap-2 self-start rounded-lg border border-primary/20 bg-primary/6 px-4 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+            >
+              <span className="hidden sm:inline">Profile</span> {completeness}% complete
+              <ArrowRight className="size-3.5" />
+            </Link>
+          )}
+        </div>
       </FadeIn>
 
       {/* Grid Layout */}

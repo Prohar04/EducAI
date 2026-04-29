@@ -41,7 +41,7 @@ import type { Session, AlertNotification } from "@/types/auth.type";
 import { getAlertNotifications } from "@/lib/auth/action";
 
 const ACTIVE_PILL_CLASS =
-  "bg-primary/12 text-primary shadow-[0_0_0_1px_rgba(220,161,62,0.24),0_12px_30px_-18px_rgba(220,161,62,0.8)]";
+  "bg-primary/10 text-primary shadow-[inset_0_0_0_1px_rgba(91,120,245,0.3)]";
 const INACTIVE_PILL_CLASS =
   "text-muted-foreground hover:bg-muted/60 hover:text-foreground";
 
@@ -84,6 +84,21 @@ const TOOLS = [
   { href: "/app/career", label: "Career Outlook", icon: TrendingUp, soon: false },
   { href: "/app/immigration", label: "Immigration", icon: Plane, soon: false },
   { href: "/app/data-sync", label: "Data Freshness", icon: RefreshCw, soon: false },
+] as const;
+
+const TOOL_GROUPS = [
+  {
+    label: "Planning",
+    tools: ["/app/timeline", "/app/strategy", "/app/scholarships"],
+  },
+  {
+    label: "Application",
+    tools: ["/app/sop", "/app/cv", "/app/professors", "/app/gap-fix"],
+  },
+  {
+    label: "Guidance",
+    tools: ["/app/career", "/app/immigration", "/app/data-sync"],
+  },
 ] as const;
 
 export function Navbar({ user }: { user: Session["user"] }) {
@@ -152,7 +167,7 @@ export function Navbar({ user }: { user: Session["user"] }) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-md">
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/90 backdrop-blur-xl backdrop-saturate-150">
         <nav
           className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8"
           aria-label="App navigation"
@@ -205,42 +220,45 @@ export function Navbar({ user }: { user: Session["user"] }) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="start"
-                  className="w-60 rounded-2xl border-border/60 bg-background/95 p-2 shadow-[0_20px_48px_-24px_rgba(0,0,0,0.35)]"
+                  className="w-64 rounded-2xl border-border/60 bg-background/97 p-2 shadow-[0_20px_48px_-20px_rgba(0,0,0,0.45)]"
                   sideOffset={6}
                 >
-                  {TOOLS.map(({ href, label, icon: Icon, soon }) => {
-                    const active = isActive(href);
+                  {TOOL_GROUPS.map((group, gi) => {
+                    const groupTools = TOOLS.filter((t) => (group.tools as readonly string[]).includes(t.href));
                     return (
-                      <DropdownMenuItem
-                        key={href}
-                        asChild
-                        className={`rounded-xl p-0 transition-colors ${
-                          active
-                            ? "focus:bg-transparent"
-                            : "focus:bg-muted/60"
-                        }`}
-                      >
-                        <Link
-                          href={href}
-                          className={`flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm transition-all ${
-                            active
-                              ? `${ACTIVE_PILL_CLASS} bg-primary/10`
-                              : "text-foreground/90 hover:bg-muted/60"
-                          }`}
-                        >
-                          <Icon
-                            className={`size-4 shrink-0 ${
-                              active ? "text-primary" : "text-muted-foreground"
-                            }`}
-                          />
-                          <span className="flex-1">{label}</span>
-                          {soon && (
-                            <span className="rounded-full border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-primary">
-                              Soon
-                            </span>
-                          )}
-                        </Link>
-                      </DropdownMenuItem>
+                      <div key={group.label}>
+                        {gi > 0 && <DropdownMenuSeparator className="my-1.5" />}
+                        <p className="mb-1 px-3 pt-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70">
+                          {group.label}
+                        </p>
+                        {groupTools.map(({ href, label, icon: Icon, soon }) => {
+                          const active = isActive(href);
+                          return (
+                            <DropdownMenuItem
+                              key={href}
+                              asChild
+                              className={`rounded-lg p-0 transition-colors ${active ? "focus:bg-transparent" : "focus:bg-muted/60"}`}
+                            >
+                              <Link
+                                href={href}
+                                className={`flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all ${
+                                  active
+                                    ? `${ACTIVE_PILL_CLASS} bg-primary/10`
+                                    : "text-foreground/90 hover:bg-muted/60"
+                                }`}
+                              >
+                                <Icon className={`size-3.5 shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`} />
+                                <span className="flex-1 text-[13px]">{label}</span>
+                                {soon && (
+                                  <span className="rounded-full border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium leading-none text-muted-foreground">
+                                    Soon
+                                  </span>
+                                )}
+                              </Link>
+                            </DropdownMenuItem>
+                          );
+                        })}
+                      </div>
                     );
                   })}
                 </DropdownMenuContent>
