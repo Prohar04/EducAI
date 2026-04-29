@@ -83,7 +83,7 @@ const TOOLS = [
   { href: "/app/gap-fix", label: "Gap Fix", icon: Zap, soon: false },
   { href: "/app/career", label: "Career Outlook", icon: TrendingUp, soon: false },
   { href: "/app/immigration", label: "Immigration", icon: Plane, soon: false },
-  { href: "/app/data-sync", label: "Data Updates", icon: RefreshCw, soon: false },
+  { href: "/app/data-sync", label: "Data Freshness", icon: RefreshCw, soon: false },
 ] as const;
 
 export function Navbar({ user }: { user: Session["user"] }) {

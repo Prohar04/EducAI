@@ -407,9 +407,10 @@ export default function DataUpdatesPage() {
             <Sparkles className="h-6 w-6 text-primary" />
           </div>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold tracking-tight">Data Updates</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Data Freshness</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Your scholarship and program information, always up to date.
+              Your program matches, scholarship eligibility, and AI recommendations are only as good as the underlying data.
+              Keep it fresh to get the most accurate guidance.
             </p>
           </div>
           <Button
@@ -420,7 +421,7 @@ export default function DataUpdatesPage() {
             className="gap-1.5 shrink-0"
           >
             <RefreshCw className={cn("h-3.5 w-3.5", isLoading && "animate-spin")} />
-            Refresh
+            Check status
           </Button>
         </div>
       </FadeIn>
@@ -600,9 +601,10 @@ export default function DataUpdatesPage() {
 
           {/* Manual refresh actions */}
           <div className="rounded-xl border border-border bg-card p-5">
-            <h2 className="text-sm font-semibold mb-1">Refresh Now</h2>
+            <h2 className="text-sm font-semibold mb-1">Refresh Your Data</h2>
             <p className="text-xs text-muted-foreground mb-4">
-              Get the latest scholarship and program information immediately.
+              Pull the latest scholarship openings and program details right now so your eligibility scores,
+              AI matches, and deadline alerts reflect current information.
             </p>
             <div className="flex flex-wrap gap-2">
               <Button
