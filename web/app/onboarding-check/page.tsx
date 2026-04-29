@@ -1,6 +1,11 @@
+import type { Metadata } from "next";
 import { getSession } from "@/lib/auth/session";
 import { getUserProfile } from "@/lib/auth/action";
 import { redirect } from "next/navigation";
+
+export const metadata: Metadata = {
+	robots: { index: false, follow: false },
+};
 
 /**
  * Server-side gating page — decides where to send the user after sign-in:

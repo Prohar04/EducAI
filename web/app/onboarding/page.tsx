@@ -7,6 +7,7 @@ import type { UserProfile } from "@/types/auth.type";
 export const metadata = {
 	title: "Set Up Your Profile | EducAI",
 	description: "Tell us about your study goals to personalise your EducAI experience.",
+	robots: { index: false, follow: false },
 };
 
 export default async function OnboardingPage() {

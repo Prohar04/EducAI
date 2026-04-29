@@ -21,10 +21,73 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["400", "500"],
 });
 
+const BASE_URL = "https://educai-web.vercel.app";
+
 export const metadata: Metadata = {
-  title: "EducAI — AI-Powered Study Abroad Platform",
+  metadataBase: new URL(BASE_URL),
+  title: {
+    default: "EducAI — AI-Powered Study Abroad Platform",
+    template: "%s · EducAI",
+  },
   description:
-    "Find the right university program, discover scholarships, and build your application strategy — powered by real data and AI reasoning.",
+    "Find the right university program, discover scholarships, and build your step-by-step application strategy — powered by live data and AI reasoning.",
+  keywords: [
+    "study abroad",
+    "university programs",
+    "scholarships",
+    "visa guidance",
+    "international education",
+    "AI study planner",
+    "study in Germany",
+    "study in Canada",
+    "study in UK",
+    "study in Australia",
+    "graduate school",
+    "master's programs",
+    "study abroad platform",
+  ],
+  authors: [{ name: "EducAI" }],
+  creator: "EducAI",
+  publisher: "EducAI",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: BASE_URL,
+    siteName: "EducAI",
+    title: "EducAI — AI-Powered Study Abroad Platform",
+    description:
+      "Find the right university program, discover scholarships, and build your step-by-step application strategy — powered by live data and AI reasoning.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "EducAI — AI-Powered Study Abroad Platform",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "EducAI — AI-Powered Study Abroad Platform",
+    description:
+      "Find the right university program, discover scholarships, and build your step-by-step application strategy — powered by live data and AI reasoning.",
+    images: ["/og-image.png"],
+    creator: "@educai",
+  },
+  alternates: {
+    canonical: BASE_URL,
+  },
 };
 
 export default function RootLayout({

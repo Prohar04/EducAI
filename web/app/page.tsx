@@ -1,6 +1,22 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getSession } from "@/lib/auth/session";
+
+export const metadata: Metadata = {
+  title: "EducAI — AI-Powered Study Abroad Platform",
+  description:
+    "Match to the right university programs, discover scholarships you qualify for, get visa guidance, and build a step-by-step application plan — all powered by real data and AI.",
+  alternates: {
+    canonical: "https://educai-web.vercel.app",
+  },
+  openGraph: {
+    url: "https://educai-web.vercel.app",
+    title: "EducAI — AI-Powered Study Abroad Platform",
+    description:
+      "Match to the right university programs, discover scholarships you qualify for, get visa guidance, and build a step-by-step application plan — all powered by real data and AI.",
+  },
+};
 import {
   GraduationCap,
   ArrowRight,
@@ -398,9 +414,14 @@ function Footer() {
             </p>
           </div>
           <div>
-            <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Platform</p>
+            <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Resources</p>
             <ul className="space-y-2.5 text-sm text-muted-foreground">
-              {[["Programs","/app/programs"],["Match","/app/match"],["Scholarships","/app/scholarships"],["Strategy","/app/strategy"]].map(([label, href]) => (
+              {[
+                ["Study Abroad Guide", "/study-abroad"],
+                ["Country Guides", "/countries"],
+                ["Scholarships", "/scholarships"],
+                ["Visa Guide", "/visa"],
+              ].map(([label, href]) => (
                 <li key={label as string}><Link href={href as string} className="transition-colors hover:text-foreground">{label as string}</Link></li>
               ))}
             </ul>
@@ -432,15 +453,136 @@ function Footer() {
   );
 }
 
+const EXPLORE_LINKS = [
+  {
+    href: "/study-abroad",
+    icon: BookOpen,
+    title: "Study Abroad Guide 2025",
+    desc: "Complete step-by-step guide: choosing a country, finding programs, scholarships, visa, and timeline.",
+  },
+  {
+    href: "/countries",
+    icon: Globe,
+    title: "Country Guides",
+    desc: "Compare Germany, Canada, UK, Australia, USA and more — tuition, visa, scholarships, top universities.",
+  },
+  {
+    href: "/scholarships",
+    icon: Award,
+    title: "Scholarship Directory",
+    desc: "28+ verified scholarships — DAAD, Chevening, Fulbright, Australia Awards, Vanier, and more.",
+  },
+  {
+    href: "/visa",
+    icon: FileText,
+    title: "Visa Guide",
+    desc: "Student visa requirements, documents, timelines, and post-study work rights for top destinations.",
+  },
+] as const;
+
+function ExploreSection() {
+  return (
+    <section className="py-20 bg-muted/10 border-t border-border/50">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <Reveal>
+          <div className="mb-12 text-center">
+            <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-primary">Resources</p>
+            <h2 className="text-2xl font-extrabold tracking-tight sm:text-3xl">
+              Free guides for international students
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
+              Planning to study abroad? Start with these free resources — no account needed.
+            </p>
+          </div>
+        </Reveal>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {EXPLORE_LINKS.map((item, i) => {
+            const Icon = item.icon;
+            return (
+              <Reveal key={item.href} delay={i * 0.06}>
+                <Link
+                  href={item.href}
+                  className="group flex flex-col rounded-2xl border border-border bg-card p-5 transition-all duration-200 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 h-full"
+                >
+                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <Icon className="size-5 text-primary" />
+                  </div>
+                  <h3 className="mb-2 font-bold text-foreground group-hover:text-primary transition-colors">{item.title}</h3>
+                  <p className="flex-1 text-xs leading-relaxed text-muted-foreground">{item.desc}</p>
+                  <div className="mt-3 flex items-center gap-1 text-xs font-semibold text-primary">
+                    Explore <ChevronRight className="size-3.5" />
+                  </div>
+                </Link>
+              </Reveal>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 async function TrendingFeedSection() {
   const items = await fetchEducationPulse();
   return <TrendingFeed initialItems={items} />;
 }
 
+const ORGANIZATION_SCHEMA = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "EducAI",
+  url: "https://educai-web.vercel.app",
+  logo: "https://educai-web.vercel.app/og-image.png",
+  description:
+    "AI-powered study abroad platform that helps international students find programs, discover scholarships, plan visa timelines, and build their application strategy.",
+  contactPoint: {
+    "@type": "ContactPoint",
+    email: "hello@educai.app",
+    contactType: "customer support",
+  },
+  sameAs: ["https://github.com/Prohar04/EducAI"],
+};
+
+const WEBSITE_SCHEMA = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "EducAI",
+  url: "https://educai-web.vercel.app",
+  description:
+    "Find the right university program, discover scholarships, and build your study abroad application strategy — powered by real data and AI.",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: "https://educai-web.vercel.app/auth/signup",
+    },
+    "query-input": "required name=search_term_string",
+  },
+};
+
+const SOFTWARE_APP_SCHEMA = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "EducAI",
+  applicationCategory: "EducationApplication",
+  operatingSystem: "Web",
+  url: "https://educai-web.vercel.app",
+  description:
+    "AI-powered study abroad platform for international students. Match to programs, discover scholarships, plan visa timelines, and build your application strategy.",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+  },
+};
+
 export default function HomePage() {
   const dailyQuote = getQuoteForToday();
   return (
     <div className="min-h-screen flex flex-col">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION_SCHEMA) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_SCHEMA) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(SOFTWARE_APP_SCHEMA) }} />
       <PublicNavbar />
       <main className="flex-1">
         <HeroSection />
@@ -449,6 +591,7 @@ export default function HomePage() {
         <HowItWorks />
         <ModulesSection />
         <TrustSection />
+        <ExploreSection />
         <TrendingFeedSection />
         <QuoteStrip quote={dailyQuote} />
         <CTASection />
