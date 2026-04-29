@@ -66,23 +66,23 @@ async function PublicNavbar() {
   const session = await getSession().catch(() => null);
   const isLoggedIn = !!session;
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-lg">
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/85 backdrop-blur-xl backdrop-saturate-150">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8" aria-label="Main navigation">
         <Logo />
-        <ul className="hidden items-center gap-8 md:flex" role="list">
+        <ul className="hidden items-center gap-1 md:flex" role="list">
           {[{ label: "Features", href: "#features" }, { label: "How it works", href: "#how-it-works" }, { label: "Modules", href: "#modules" }].map((item) => (
             <li key={item.label}>
-              <a href={item.href} className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">{item.label}</a>
+              <a href={item.href} className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground">{item.label}</a>
             </li>
           ))}
         </ul>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {isLoggedIn ? (
             <Button size="sm" asChild><Link href="/app">Dashboard <ArrowRight className="ml-1.5 size-3.5" /></Link></Button>
           ) : (
             <>
-              <Button variant="ghost" size="sm" asChild><Link href="/auth/signin">Sign in</Link></Button>
-              <Button size="sm" asChild><Link href="/auth/signup">Get started</Link></Button>
+              <Button variant="ghost" size="sm" asChild className="font-medium"><Link href="/auth/signin">Sign in</Link></Button>
+              <Button size="sm" asChild className="font-semibold"><Link href="/auth/signup">Get started</Link></Button>
             </>
           )}
         </div>
@@ -97,37 +97,39 @@ async function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-background">
       <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
-        <div className="absolute left-1/2 top-0 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute left-1/2 top-0 h-[700px] w-[1000px] -translate-x-1/2 rounded-full bg-primary/6 blur-[120px]" />
         <div className="absolute -right-40 top-20 h-[400px] w-[400px] rounded-full bg-primary/4 blur-[100px]" />
+        {/* Subtle dot-grid overlay */}
+        <div className="absolute inset-0 opacity-[0.025]" style={{ backgroundImage: "radial-gradient(circle, currentColor 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
       </div>
       <div className="mx-auto max-w-7xl px-4 pt-20 pb-16 sm:px-6 sm:pt-28 sm:pb-24 lg:px-8">
         <div className="mx-auto max-w-4xl text-center">
           <FadeIn delay={0}>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-4 py-1.5 text-xs font-semibold text-primary">
-              <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-primary">
+              <span className="flex h-1.5 w-1.5 rounded-full bg-primary" />
               Live · Real university data, updated daily
             </div>
           </FadeIn>
           <FadeIn delay={0.08}>
-            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl xl:text-7xl leading-[1.08]">
+            <h1 className="text-[clamp(2.25rem,5.5vw,4.25rem)] font-bold tracking-[-0.03em] leading-[1.06]">
               The intelligent platform<br />for{" "}
               <span className="text-primary">studying abroad</span>
             </h1>
           </FadeIn>
           <FadeIn delay={0.16}>
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-[1.65] text-muted-foreground sm:text-lg">
               Match to the right programs, discover scholarships you actually qualify for,
               and build a step-by-step application plan — all powered by real data and AI reasoning.
             </p>
           </FadeIn>
           <FadeIn delay={0.24}>
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button size="lg" asChild className="h-12 px-7 text-base font-semibold shadow-lg shadow-primary/20">
+              <Button size="lg" asChild className="h-12 px-8 text-base font-semibold tracking-[-0.01em] shadow-lg shadow-primary/25">
                 <Link href={isLoggedIn ? "/app/programs" : "/auth/signup"}>
                   Start for free <ArrowRight className="ml-2 size-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild className="h-12 px-7 text-base">
+              <Button size="lg" variant="outline" asChild className="h-12 px-8 text-base font-medium">
                 <a href="#how-it-works">See how it works</a>
               </Button>
             </div>
@@ -145,14 +147,15 @@ async function HeroSection() {
 
         <FadeIn delay={0.4}>
           <div className="mx-auto mt-16 max-w-5xl">
-            <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
-              <div className="flex items-center gap-2 border-b border-border bg-background/60 px-5 py-3">
+            <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-[0_32px_64px_-16px_rgba(0,0,0,0.28)]">
+              {/* Window chrome */}
+              <div className="flex items-center gap-2 border-b border-border bg-muted/40 px-5 py-3">
                 <div className="flex gap-1.5">
-                  <div className="h-2.5 w-2.5 rounded-full bg-red-400/70" />
-                  <div className="h-2.5 w-2.5 rounded-full bg-amber-400/70" />
-                  <div className="h-2.5 w-2.5 rounded-full bg-green-400/70" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-red-400/60" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-yellow-400/60" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-green-400/60" />
                 </div>
-                <div className="ml-3 flex-1 rounded-md bg-muted/60 px-3 py-1 text-xs text-muted-foreground">
+                <div className="ml-3 flex-1 rounded-md border border-border/60 bg-background/70 px-3 py-1 text-xs text-muted-foreground">
                   educai.app/app/dashboard
                 </div>
               </div>
@@ -217,12 +220,15 @@ const STATS = [
 
 function StatsStrip() {
   return (
-    <div className="border-y border-border/50 bg-muted/30">
-      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px px-4 sm:grid-cols-4 sm:px-6 lg:px-8">
-        {STATS.map((s) => (
-          <div key={s.label} className="flex flex-col items-center justify-center py-7 text-center">
-            <span className="text-2xl font-extrabold tracking-tight text-primary">{s.value}</span>
-            <span className="mt-1 text-xs text-muted-foreground">{s.label}</span>
+    <div className="border-y border-border/40 bg-muted/20">
+      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px sm:grid-cols-4" style={{ padding: "0" }}>
+        {STATS.map((s, i) => (
+          <div
+            key={s.label}
+            className={`flex flex-col items-center justify-center py-8 text-center ${i < STATS.length - 1 ? "border-r border-border/40" : ""}`}
+          >
+            <span className="text-3xl font-extrabold tracking-tight text-primary sm:text-4xl">{s.value}</span>
+            <span className="mt-1.5 text-xs font-medium text-muted-foreground">{s.label}</span>
           </div>
         ))}
       </div>
@@ -245,9 +251,9 @@ function FeaturesSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Reveal>
           <div className="mb-16 text-center">
-            <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-primary">Platform</p>
-            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Everything you need to study abroad</h2>
-            <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-primary">Platform</p>
+            <h2 className="text-[clamp(1.75rem,4vw,2.5rem)] font-bold tracking-[-0.02em]">Everything you need to study abroad</h2>
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
               EducAI combines live program data, AI matching, and scholarship intelligence into one coherent workflow.
             </p>
           </div>
@@ -257,14 +263,14 @@ function FeaturesSection() {
             const Icon = f.icon;
             return (
               <Reveal key={f.title} delay={i * 0.06}>
-                <div className="group flex flex-col rounded-2xl border border-border bg-card p-6 transition-all duration-200 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
+                <div className="group flex flex-col rounded-xl border border-border bg-card p-6 transition-all duration-200 hover:border-primary/25 hover:shadow-md hover:shadow-primary/8">
                   <div className="mb-4 flex items-start justify-between gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
-                      <Icon className="size-5 text-primary" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                      <Icon className="size-[18px] text-primary" />
                     </div>
-                    <span className="rounded-full border border-primary/20 bg-primary/8 px-2.5 py-1 text-[10px] font-semibold text-primary">{f.badge}</span>
+                    <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-[10px] font-medium text-muted-foreground">{f.badge}</span>
                   </div>
-                  <h3 className="mb-2 font-bold text-foreground">{f.title}</h3>
+                  <h3 className="mb-2 text-sm font-semibold text-foreground">{f.title}</h3>
                   <p className="text-sm leading-relaxed text-muted-foreground">{f.description}</p>
                 </div>
               </Reveal>
@@ -285,13 +291,13 @@ const MODULES = [
 
 function ModulesSection() {
   return (
-    <section id="modules" className="py-24 bg-muted/20">
+    <section id="modules" className="py-24 bg-muted/15">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Reveal>
           <div className="mb-16 text-center">
-            <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-primary">Modules</p>
-            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Four modules. One complete journey.</h2>
-            <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-primary">Modules</p>
+            <h2 className="text-[clamp(1.75rem,4vw,2.5rem)] font-bold tracking-[-0.02em]">Four modules. One complete journey.</h2>
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
               From discovering the right programs to submitting your application — every module is live.
             </p>
           </div>
@@ -343,11 +349,12 @@ function TrustSection() {
   return (
     <section className="py-20 bg-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="rounded-2xl border border-border bg-muted/30 p-8 sm:p-12">
+        <div className="rounded-2xl border border-border bg-card p-8 sm:p-12">
           <Reveal>
             <div className="mb-10 text-center">
-              <h2 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Transparent, trustworthy, data-grounded</h2>
-              <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-primary">Trust</p>
+              <h2 className="text-[clamp(1.5rem,3vw,2rem)] font-bold tracking-[-0.02em]">Transparent, trustworthy, data-grounded</h2>
+              <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
                 We don&apos;t hide behind vague AI scores. Every output tells you where the data came from and why.
               </p>
             </div>
@@ -358,11 +365,11 @@ function TrustSection() {
               return (
                 <Reveal key={point.title} delay={i * 0.08}>
                   <div className="flex flex-col items-center text-center">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-primary/20 bg-primary/8">
+                    <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl border border-primary/20 bg-primary/8">
                       <Icon className="size-5 text-primary" />
                     </div>
-                    <h3 className="mb-2 font-bold">{point.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{point.desc}</p>
+                    <h3 className="mb-2 text-sm font-semibold">{point.title}</h3>
+                    <p className="text-sm leading-relaxed text-muted-foreground">{point.desc}</p>
                   </div>
                 </Reveal>
               );
@@ -378,22 +385,32 @@ async function CTASection() {
   const session = await getSession().catch(() => null);
   const isLoggedIn = !!session;
   return (
-    <section className="py-24 border-y border-primary/10 bg-primary/5">
-      <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+    <section className="relative overflow-hidden py-24">
+      {/* Dark band with blue glow — the signature CTA treatment */}
+      <div className="absolute inset-0 bg-[#08091a] dark:bg-[#080a12]" aria-hidden="true">
+        <div className="absolute left-1/2 top-1/2 h-[500px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/12 blur-[100px]" />
+        <div className="absolute inset-0" style={{ backgroundImage: "linear-gradient(rgba(91,120,245,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(91,120,245,0.04) 1px, transparent 1px)", backgroundSize: "48px 48px" }} />
+      </div>
+      <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
         <Reveal>
-          <GraduationCap className="mx-auto mb-4 size-12 text-primary" />
-          <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Your study abroad journey starts here</h2>
-          <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground">
+          <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/15">
+            <GraduationCap className="size-7 text-primary" />
+          </div>
+          <h2 className="text-[clamp(1.75rem,4vw,2.75rem)] font-bold tracking-[-0.02em] text-white">
+            Your study abroad journey starts here
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-white/55">
             Build your profile in under three minutes and get AI-matched program recommendations,
             scholarship options, and a personalized application timeline — all for free.
           </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button size="lg" asChild className="h-12 px-8 text-base font-semibold shadow-lg shadow-primary/20">
+          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Button size="lg" asChild className="h-12 px-8 text-base font-semibold tracking-[-0.01em] shadow-lg shadow-primary/30">
               <Link href={isLoggedIn ? "/app" : "/auth/signup"}>
                 {isLoggedIn ? "Go to dashboard" : "Create free account"}
                 <ArrowRight className="ml-2 size-4" />
               </Link>
             </Button>
+            <p className="text-xs text-white/40">No credit card required · Free to start</p>
           </div>
         </Reveal>
       </div>

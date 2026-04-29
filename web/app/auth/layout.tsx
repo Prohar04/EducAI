@@ -24,12 +24,14 @@ const AuthLayout = ({ children }: PropsWithChildren) => {
   return (
     <div className="flex min-h-screen">
       {/* Left brand panel */}
-      <aside className="relative hidden w-[44%] flex-col overflow-hidden lg:flex" style={{ background: "linear-gradient(135deg, #1a1408 0%, #0f0f11 60%, #0c1a10 100%)" }}>
+      <aside className="relative hidden w-[44%] flex-col overflow-hidden lg:flex" style={{ background: "linear-gradient(150deg, #080b18 0%, #0c0e15 55%, #0d1128 100%)" }}>
         {/* Decorative glows */}
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-0">
-          <div className="absolute -left-24 -top-24 h-[420px] w-[420px] rounded-full bg-primary/12 blur-[100px]" />
-          <div className="absolute -bottom-24 right-0 h-[360px] w-[360px] rounded-full bg-primary/8 blur-[80px]" />
-          <div className="absolute left-1/2 top-1/2 h-[200px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/4 blur-[120px]" />
+          <div className="absolute -left-24 -top-24 h-[460px] w-[460px] rounded-full bg-primary/10 blur-[110px]" />
+          <div className="absolute -bottom-20 right-0 h-[380px] w-[380px] rounded-full bg-primary/8 blur-[90px]" />
+          <div className="absolute left-1/2 top-1/2 h-[180px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-[130px]" />
+          {/* Subtle grid overlay */}
+          <div className="absolute inset-0" style={{ backgroundImage: "linear-gradient(rgba(91,120,245,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(91,120,245,0.03) 1px, transparent 1px)", backgroundSize: "48px 48px" }} />
         </div>
 
         <div className="relative z-10 flex h-full flex-col justify-between p-10 xl:p-14">
@@ -43,34 +45,34 @@ const AuthLayout = ({ children }: PropsWithChildren) => {
 
           {/* Middle: product value prop */}
           <div className="max-w-sm">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary">
-              <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+            <div className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-primary">
               AI-Powered Study Abroad
             </div>
-            <h2 className="text-2xl font-extrabold leading-snug tracking-tight text-white xl:text-3xl">
-              Find the right university.<br />Get the right scholarship.
+            <h2 className="text-[1.75rem] font-bold leading-[1.2] tracking-tight text-white xl:text-[2.125rem]">
+              Find the right university.<br />
+              <span className="text-primary/90">Get the right scholarship.</span>
             </h2>
-            <p className="mt-3 text-sm leading-relaxed text-white/60">
+            <p className="mt-4 text-sm leading-relaxed text-white/55">
               Real program data, AI-matched recommendations, and a step-by-step application plan — all in one platform.
             </p>
-            <ul className="mt-7 space-y-3">
+            <ul className="mt-8 space-y-3.5">
               {FEATURES.map(({ icon: Icon, text }) => (
                 <li key={text} className="flex items-center gap-3">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/15">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/12">
                     <Icon className="size-3.5 text-primary" />
                   </div>
-                  <span className="text-sm text-white/75">{text}</span>
+                  <span className="text-sm text-white/70">{text}</span>
                 </li>
               ))}
             </ul>
           </div>
 
           {/* Footer: quote */}
-          <div className="max-w-xs rounded-xl border border-white/8 bg-white/4 px-4 py-4 backdrop-blur-sm">
-            <p className="text-sm italic leading-relaxed text-white/70">
+          <div className="max-w-xs rounded-xl border border-white/6 bg-white/[0.03] px-4 py-4 backdrop-blur-sm">
+            <p className="text-sm italic leading-relaxed text-white/60">
               &ldquo;{QUOTE.text}&rdquo;
             </p>
-            <p className="mt-2 text-xs font-semibold text-primary/80">— {QUOTE.author}</p>
+            <p className="mt-2 text-[11px] font-semibold uppercase tracking-wider text-primary/70">— {QUOTE.author}</p>
           </div>
         </div>
       </aside>
