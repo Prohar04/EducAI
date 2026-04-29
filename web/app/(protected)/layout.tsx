@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { getUserProfile } from "@/lib/auth/action";
 import type { ReactNode } from "react";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 import { Navbar } from "@/components/app/Navbar";
 import { ChatbotWidget } from "@/components/app/ChatbotWidget";
 import { TransitionLayout } from "@/components/motion/TransitionLayout";
