@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
+import { getUserProfile } from "@/lib/auth/action";
 import type { ReactNode } from "react";
 import { Navbar } from "@/components/app/Navbar";
 import { ChatbotWidget } from "@/components/app/ChatbotWidget";
@@ -8,6 +9,9 @@ import { TransitionLayout } from "@/components/motion/TransitionLayout";
 export default async function ProtectedLayout({ children }: { children: ReactNode }) {
   const session = await getSession();
   if (!session) redirect("/auth/signin");
+
+  const profile = await getUserProfile();
+  if (!profile?.onboardingDone) redirect("/onboarding");
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
