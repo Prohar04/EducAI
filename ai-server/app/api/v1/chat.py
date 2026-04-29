@@ -28,6 +28,76 @@ MAX_WEB_PAGES = 3
 MAX_INTERNAL_PROGRAMS = 8
 MAX_INTERNAL_MATCHES = 6
 
+# ─── Topic Guardrail ──────────────────────────────────────────────────────────
+
+# Keywords that strongly indicate an education-related question (allow list)
+_EDUCATION_KEYWORDS: frozenset[str] = frozenset(
+    {
+        # core domain
+        "university", "universities", "college", "colleges", "school", "schools",
+        "program", "programs", "programme", "programmes", "degree", "degrees",
+        "major", "majors", "course", "courses", "curriculum", "academic", "academics",
+        "study", "studies", "studying", "student", "students", "education",
+        # admissions
+        "admission", "admissions", "apply", "application", "applications", "applicant",
+        "acceptance", "accepted", "rejected", "waitlist", "defer", "gpa",
+        "gre", "gmat", "ielts", "toefl", "pte", "duolingo", "sat", "act",
+        "sop", "statement of purpose", "recommendation", "lor", "transcript",
+        "deadline", "deadlines", "intake", "semester", "fall", "spring",
+        # countries / study abroad
+        "abroad", "international", "country", "countries", "visa", "immigration",
+        "pr", "permanent residence", "work permit", "student visa", "study permit",
+        "canada", "uk", "usa", "united states", "australia", "germany",
+        "europe", "asia", "scholarship",
+        # scholarships / funding
+        "scholarship", "scholarships", "funding", "fellowship", "grant", "grants",
+        "fulbright", "chevening", "daad", "erasmus", "financial aid", "tuition",
+        "stipend", "bursary",
+        # professors / research
+        "professor", "professors", "supervisor", "supervisors", "faculty", "researcher",
+        "research", "phd", "master", "masters", "msc", "bsc", "mba", "postgrad",
+        "graduate", "undergraduate", "postdoc",
+        # profile / platform
+        "profile", "match", "timeline", "strategy", "gap", "cv", "resume",
+        "career", "employability", "ielts score", "english test",
+        # misc education
+        "campus", "accreditation", "ranking", "qs ranking", "times higher",
+        "alumni", "thesis", "dissertation", "capstone",
+    }
+)
+
+# Keywords that signal clearly off-topic content (block list)
+_OFFOPIC_KEYWORDS: frozenset[str] = frozenset(
+    {
+        "recipe", "cook", "cooking", "bake", "baking", "food", "restaurant",
+        "movie", "movies", "film", "films", "netflix", "series", "tv show",
+        "game", "gaming", "video game", "fortnite", "minecraft", "chess",
+        "sport", "sports", "football", "soccer", "basketball", "cricket",
+        "music", "song", "songs", "band", "artist", "album", "playlist",
+        "celebrity", "celebrities", "actor", "actress",
+        "politics", "political", "election", "president", "government",
+        "stock", "stocks", "crypto", "bitcoin", "ethereum", "invest",
+        "dating", "relationship", "girlfriend", "boyfriend",
+        "joke", "meme", "funny",
+        "weather", "forecast",
+        "write code", "code this", "debug", "programming language",
+        "python tutorial", "javascript tutorial", "react tutorial",
+    }
+)
+
+def _is_off_topic(message: str) -> bool:
+    lowered = message.lower()
+
+    # If any education keyword is present → clearly on-topic
+    if any(kw in lowered for kw in _EDUCATION_KEYWORDS):
+        return False
+
+    # If clearly off-topic domain keyword is present → block
+    if any(kw in lowered for kw in _OFFOPIC_KEYWORDS):
+        return True
+
+    return False
+
 SEARCH_CACHE: Dict[str, Tuple[float, List[Dict[str, Any]]]] = {}
 PAGE_CACHE: Dict[str, Tuple[float, str]] = {}
 
@@ -180,6 +250,26 @@ class ChatAnswerResponse(BaseModel):
     nextSteps: List[str] = Field(default_factory=list)
     sources: List[ChatSource] = Field(default_factory=list)
     confidence: Literal["high", "medium", "low"] = "medium"
+
+
+_OFFOPIC_RESPONSE = ChatAnswerResponse(
+    answer=(
+        "I'm your study-abroad sidekick, not the answer machine for the entire universe 😄 "
+        "I can help with admissions, scholarships, visas, funding, professor outreach, "
+        "profile gaps, program matching, and immigration pathways. "
+        "What would you like to explore?"
+    ),
+    bullets=[
+        "Ask me to compare your saved programs",
+        "Get scholarship options matched to your profile",
+        "Understand your visa requirements",
+        "Find professors in your research area",
+        "Review your application timeline",
+    ],
+    nextSteps=["Try one of the suggested questions above to get started"],
+    sources=[],
+    confidence="high",
+)
 
 
 class WebEvidence(BaseModel):
@@ -640,8 +730,15 @@ def _provider_sequence() -> List[Optional[LLMProvider]]:
 
 async def _generate_structured_answer(prompt: str) -> Dict[str, Any]:
     system_prompt = (
-        "You are EducAI's advice-only admissions consultant. "
-        "Return strict JSON only, grounded in the provided evidence, and always cite source IDs."
+        "You are EducAI's AI Advisor — a professional, advice-only international education consultant. "
+        "Your sole purpose is to assist students with: university program selection, admissions strategy, "
+        "scholarships and funding, visa and immigration pathways, PR routes, study abroad planning, "
+        "academic profile gap analysis, professor outreach, and application documents (SOP, CV). "
+        "You MUST refuse any question outside these domains — do not answer questions about coding, "
+        "entertainment, politics, sports, finance, relationships, or any other unrelated topic. "
+        "For off-topic questions, respond with a short, friendly redirect explaining your scope. "
+        "For on-topic questions: return strict JSON only, grounded in the provided evidence, "
+        "and always cite source IDs."
     )
 
     last_error: Optional[Exception] = None
@@ -709,6 +806,9 @@ async def answer_chat(request: ChatAnswerRequest) -> ChatAnswerResponse:
     message = request.message.strip()
     if not message:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Message is required.")
+
+    if _is_off_topic(message):
+        return _OFFOPIC_RESPONSE
 
     needs_internal, needs_web = _route_intent(message, request.userContext)
 
