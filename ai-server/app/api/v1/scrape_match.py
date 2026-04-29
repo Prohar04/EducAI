@@ -102,6 +102,7 @@ def _url_priority(url: str) -> int:
 
 # ── Major taxonomy — canonical name → list of synonyms/related terms ──────
 
+
 MAJOR_TAXONOMY: Dict[str, List[str]] = {
     "computer science": ["cs", "computing", "software engineering", "information technology", "it", "software development"],
     "artificial intelligence": ["ai", "machine learning", "ml", "deep learning", "neural networks", "data science", "intelligent systems"],
@@ -182,6 +183,7 @@ def _get_major_terms(major: str) -> List[str]:
     return [lower]
 
 # ── Country lookup tables ─────────────────────────────────────────────────
+
 
 _NAME_TO_CODE: Dict[str, str] = {
     "united states": "US",
@@ -401,7 +403,6 @@ def _build_queries(req: ScrapeMatchRequest) -> List[str]:
         countries_str = "worldwide"
     level = req.intended_level
     major = req.intended_major
-    budget = int(req.budget_max_usd)
 
     terms = _get_major_terms(major)
     primary = terms[0]
