@@ -385,32 +385,22 @@ async function CTASection() {
   const session = await getSession().catch(() => null);
   const isLoggedIn = !!session;
   return (
-    <section className="relative overflow-hidden py-24">
-      {/* Dark band with blue glow — the signature CTA treatment */}
-      <div className="absolute inset-0 bg-[#08091a] dark:bg-[#080a12]" aria-hidden="true">
-        <div className="absolute left-1/2 top-1/2 h-[500px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/12 blur-[100px]" />
-        <div className="absolute inset-0" style={{ backgroundImage: "linear-gradient(rgba(91,120,245,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(91,120,245,0.04) 1px, transparent 1px)", backgroundSize: "48px 48px" }} />
-      </div>
-      <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+    <section className="py-24 border-y border-primary/10 bg-primary/5">
+      <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
         <Reveal>
-          <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/15">
-            <GraduationCap className="size-7 text-primary" />
-          </div>
-          <h2 className="text-[clamp(1.75rem,4vw,2.75rem)] font-bold tracking-[-0.02em] text-white">
-            Your study abroad journey starts here
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-white/55">
+          <GraduationCap className="mx-auto mb-4 size-12 text-primary" />
+          <h2 className="text-[clamp(1.75rem,4vw,2.75rem)] font-bold tracking-[-0.02em]">Your study abroad journey starts here</h2>
+          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
             Build your profile in under three minutes and get AI-matched program recommendations,
             scholarship options, and a personalized application timeline — all for free.
           </p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button size="lg" asChild className="h-12 px-8 text-base font-semibold tracking-[-0.01em] shadow-lg shadow-primary/30">
+            <Button size="lg" asChild className="h-12 px-8 text-base font-semibold tracking-[-0.01em] shadow-lg shadow-primary/20">
               <Link href={isLoggedIn ? "/app" : "/auth/signup"}>
                 {isLoggedIn ? "Go to dashboard" : "Create free account"}
                 <ArrowRight className="ml-2 size-4" />
               </Link>
             </Button>
-            <p className="text-xs text-white/40">No credit card required · Free to start</p>
           </div>
         </Reveal>
       </div>
