@@ -24,14 +24,12 @@ const AuthLayout = ({ children }: PropsWithChildren) => {
   return (
     <div className="flex min-h-screen">
       {/* Left brand panel */}
-      <aside className="relative hidden w-[44%] flex-col overflow-hidden lg:flex" style={{ background: "linear-gradient(150deg, #080b18 0%, #0c0e15 55%, #0d1128 100%)" }}>
+      <aside className="relative hidden w-[44%] flex-col overflow-hidden lg:flex" style={{ background: "linear-gradient(135deg, #1a1408 0%, #0f0f11 60%, #0c1a10 100%)" }}>
         {/* Decorative glows */}
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-0">
-          <div className="absolute -left-24 -top-24 h-[460px] w-[460px] rounded-full bg-primary/10 blur-[110px]" />
-          <div className="absolute -bottom-20 right-0 h-[380px] w-[380px] rounded-full bg-primary/8 blur-[90px]" />
-          <div className="absolute left-1/2 top-1/2 h-[180px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-[130px]" />
-          {/* Subtle grid overlay */}
-          <div className="absolute inset-0" style={{ backgroundImage: "linear-gradient(rgba(91,120,245,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(91,120,245,0.03) 1px, transparent 1px)", backgroundSize: "48px 48px" }} />
+          <div className="absolute -left-24 -top-24 h-[420px] w-[420px] rounded-full bg-primary/12 blur-[100px]" />
+          <div className="absolute -bottom-24 right-0 h-[360px] w-[360px] rounded-full bg-primary/8 blur-[80px]" />
+          <div className="absolute left-1/2 top-1/2 h-[200px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/4 blur-[120px]" />
         </div>
 
         <div className="relative z-10 flex h-full flex-col justify-between p-10 xl:p-14">

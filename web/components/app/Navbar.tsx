@@ -41,7 +41,7 @@ import type { Session, AlertNotification } from "@/types/auth.type";
 import { getAlertNotifications } from "@/lib/auth/action";
 
 const ACTIVE_PILL_CLASS =
-  "bg-primary/10 text-primary shadow-[inset_0_0_0_1px_rgba(91,120,245,0.3)]";
+  "bg-primary/12 text-primary shadow-[0_0_0_1px_rgba(220,161,62,0.24),0_12px_30px_-18px_rgba(220,161,62,0.8)]";
 const INACTIVE_PILL_CLASS =
   "text-muted-foreground hover:bg-muted/60 hover:text-foreground";
 
