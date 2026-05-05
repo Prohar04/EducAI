@@ -26,7 +26,7 @@ export type SyncStatus =
   | 'partial_success'
   | 'failed'
   | 'cancelled';
-
+// details about the program crawling pipeline
 export interface CrawlerDetails {
   taskId?: string;
   preferences?: {
@@ -153,7 +153,8 @@ function makeLogger(lines: string[]) {
   };
 }
 
-// ─── Per-Source Sync Functions ───────────────────────────────────────────────
+// Checks existing scholarship records in the database.
+// This does not scrape new scholarship websites; it verifies freshness, active status, and expired deadlines.
 
 async function runScholarshipsSync(log: ReturnType<typeof makeLogger>): Promise<SourceResult> {
   const start = Date.now();
@@ -232,7 +233,8 @@ async function runScholarshipsSync(log: ReturnType<typeof makeLogger>): Promise<
   srcLog.info(`Finished in ${result.durationMs}ms`);
   return result;
 }
-
+// Triggers the AI-server program discovery pipeline.
+// The backend sends user preference data to the AI server, which searches and scrapes program information.
 async function runProgramsSync(log: ReturnType<typeof makeLogger>): Promise<SourceResult> {
   const start = Date.now();
   const rawLogs: string[] = [];
@@ -253,12 +255,12 @@ async function runProgramsSync(log: ReturnType<typeof makeLogger>): Promise<Sour
     crawlerDetails: {},
   };
 
-  const aiServerUrl = process.env.AI_SERVER_URL ?? 'http://localhost:8000';
-  const masterKey = process.env.MASTER_APIKEY;
+  const aiServerUrl = process.env.AI_SERVER_URL ?? 'http://localhost:8000'; //where the AI server is running
+  const masterKey = process.env.MASTER_APIKEY; //secret key needed to call AI server
 
   srcLog.info(`Starting programs pipeline sync — aiServerUrl=${aiServerUrl}`);
   log.info(`[programs] starting pipeline sync target=${aiServerUrl}`);
-
+ // without masterkey, ai will not run
   if (!masterKey) {
     const msg = 'MASTER_APIKEY not configured — ai-server pipeline cannot be triggered';
     result.errors.push(msg);
@@ -426,7 +428,8 @@ function jobToRunResult(j: any): SyncRunResult {
   };
 }
 
-// ─── Main Entry Point ────────────────────────────────────────────────────────
+// Main data sync entry point.
+// It decides whether to refresh scholarship data, university program data, or both.
 
 export async function runDataSync(
   target: SyncTarget = 'all',
