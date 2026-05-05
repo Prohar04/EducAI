@@ -267,6 +267,7 @@ export interface University {
 	name: string;
 	city?: string | null;
 	website?: string | null;
+	description?: string | null;
 	country: Country;
 }
 
