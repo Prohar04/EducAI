@@ -5,6 +5,7 @@
  * - Never invent professors. If search returns nothing credible, return empty array.
  * - Every result must have a real profileUrl from a university or academic domain.
  * - LLM is instructed to return [] when uncertain — no fabrication.
+ * - Profile pages are ranked higher than listing/directory pages.
  * - Obvious nonsense or too-short inputs are rejected before hitting search.
  */
 
@@ -47,9 +48,86 @@ const ACADEMIC_DOMAINS = [
   'faculty', 'staff', 'people', 'lab.', '-lab', 'research',
 ];
 
+// URL segments that strongly indicate a personal profile page
+const PROFILE_SIGNALS = [
+  '/faculty/', '/staff/', '/people/', '/person/', '/researcher/',
+  '/professor/', '/user/', '/member/', '/profile/', '/about/',
+  '~',   // e.g. cs.mit.edu/~jdoe
+];
+
+// URL segments that indicate a listing/directory page (lower confidence)
+const LISTING_SIGNALS = [
+  '/faculty', '/faculty-list', '/directory', '/search', '/browse',
+  '/members', '/team', '/professors', '/researchers', '/all-faculty',
+  '/index', '/list', '/catalog', 'page=', 'query=', '?search',
+];
+
+// Patterns in page title or snippet that indicate a personal bio/profile
+const PROFILE_TITLE_SIGNALS = [
+  'professor', 'associate professor', 'assistant professor', 'faculty',
+  'researcher', 'ph.d', 'phd', 'research interests', 'publications',
+  'lab director', 'curriculum vitae', 'biography', 'bio',
+];
+
+// Patterns that indicate a listing page
+const LISTING_TITLE_SIGNALS = [
+  'faculty directory', 'faculty list', 'faculty members', 'our faculty',
+  'all professors', 'search results', 'browse faculty', 'department faculty',
+  'academic staff', 'meet our', 'faculty & staff',
+];
+
 function isAcademicUrl(url: string): boolean {
   const lower = url.toLowerCase();
   return ACADEMIC_DOMAINS.some(d => lower.includes(d));
+}
+
+/**
+ * Score a search result: higher = more likely to be a personal professor profile page.
+ * Returns a score 0-100 (higher is better).
+ */
+function scoreProfileLikelihood(result: { title: string; link: string; snippet: string }): number {
+  const urlLower = result.link.toLowerCase();
+  const titleLower = result.title.toLowerCase();
+  const snippetLower = result.snippet.toLowerCase();
+  let score = 50; // base
+
+  // Academic domain bonus
+  if (isAcademicUrl(result.link)) score += 15;
+
+  // URL profile signals (strong positive)
+  for (const sig of PROFILE_SIGNALS) {
+    if (urlLower.includes(sig)) { score += 20; break; }
+  }
+
+  // URL listing signals (strong negative)
+  for (const sig of LISTING_SIGNALS) {
+    if (urlLower.includes(sig)) { score -= 25; break; }
+  }
+
+  // PDF penalty (usually not a profile page)
+  if (urlLower.endsWith('.pdf')) score -= 30;
+
+  // Title profile signals
+  const titleProfileMatches = PROFILE_TITLE_SIGNALS.filter(s => titleLower.includes(s)).length;
+  score += titleProfileMatches * 5;
+
+  // Title listing signals (strong penalty)
+  const titleListingMatches = LISTING_TITLE_SIGNALS.filter(s => titleLower.includes(s)).length;
+  score -= titleListingMatches * 20;
+
+  // Snippet quality — personal details indicate profile
+  if (snippetLower.includes('@') && snippetLower.includes('.edu')) score += 10; // email
+  if (snippetLower.includes('research interest')) score += 8;
+  if (snippetLower.includes('ph.d') || snippetLower.includes('phd')) score += 5;
+  if (snippetLower.includes('publication')) score += 5;
+
+  // ResearchGate/ORCID/SemanticScholar are usually individual profiles
+  if (urlLower.includes('researchgate.net/profile/')) score += 25;
+  if (urlLower.includes('orcid.org/')) score += 20;
+  if (urlLower.includes('scholar.google')) score += 10;
+  if (urlLower.includes('semanticscholar.org/author/')) score += 15;
+
+  return Math.max(0, Math.min(100, score));
 }
 
 /**
@@ -58,18 +136,16 @@ function isAcademicUrl(url: string): boolean {
 function isValidQuery(text: string): boolean {
   const trimmed = text.trim();
   if (trimmed.length < 3) return false;
-  // Reject strings that are >80% random chars (no vowels, no spaces)
   const hasVowel = /[aeiouAEIOU]/.test(trimmed);
-  const hasSpace = /\s/.test(trimmed);
   const wordCount = trimmed.split(/\s+/).length;
-  // Single word with no vowels and short = likely nonsense
   if (!hasVowel && wordCount === 1 && trimmed.length < 6) return false;
-  // Pure numbers
   if (/^\d+$/.test(trimmed)) return false;
   return true;
 }
 
-async function serperSearch(query: string): Promise<Array<{ title: string; link: string; snippet: string }>> {
+type RawResult = { title: string; link: string; snippet: string };
+
+async function serperSearch(query: string, numResults = 10): Promise<RawResult[]> {
   const apiKey = process.env.SERPER_APIKEY || process.env.SERPER_API_KEY;
   if (!apiKey) return [];
 
@@ -77,7 +153,7 @@ async function serperSearch(query: string): Promise<Array<{ title: string; link:
     const response = await fetch(SERPER_URL, {
       method: 'POST',
       headers: { 'X-API-KEY': apiKey, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ q: query, num: 10 }),
+      body: JSON.stringify({ q: query, num: numResults }),
       signal: AbortSignal.timeout(8_000),
     });
     if (!response.ok) return [];
@@ -89,7 +165,7 @@ async function serperSearch(query: string): Promise<Array<{ title: string; link:
 }
 
 async function extractProfessors(
-  searchResults: Array<{ title: string; link: string; snippet: string }>,
+  searchResults: RawResult[],
   req: ProfessorSearchRequest,
 ): Promise<ProfessorResult[]> {
   const openaiKey = process.env.OPENAI_API_KEY;
@@ -98,17 +174,29 @@ async function extractProfessors(
   const apiUrl = openaiKey ? OPENAI_URL : OPENROUTER_URL;
   const model = openaiKey ? 'gpt-4o-mini' : 'openai/gpt-4o-mini';
 
-  // Without AI key or search results, we cannot safely extract — return empty
-  if (!apiKey || searchResults.length === 0) {
-    return [];
-  }
+  if (!apiKey || searchResults.length === 0) return [];
 
-  // Only pass results that look like academic pages to reduce hallucination
-  const academicResults = searchResults.filter(r => isAcademicUrl(r.link));
-  const resultsToProcess = academicResults.length >= 2 ? academicResults : searchResults;
+  // Score and sort results — profile pages first
+  const scored = searchResults
+    .map(r => ({ ...r, profileScore: scoreProfileLikelihood(r) }))
+    .sort((a, b) => b.profileScore - a.profileScore);
+
+  // Separate high-confidence profiles from lower-confidence (listing pages, etc.)
+  const highConfidence = scored.filter(r => r.profileScore >= 55);
+  const fallback = scored.filter(r => r.profileScore < 55);
+
+  // Use high-confidence results if we have enough; otherwise include fallback
+  const resultsToProcess = highConfidence.length >= 2
+    ? highConfidence.slice(0, 8)
+    : [...highConfidence, ...fallback].slice(0, 8);
 
   const resultsJson = JSON.stringify(
-    resultsToProcess.slice(0, 8).map(r => ({ title: r.title, url: r.link, snippet: r.snippet })),
+    resultsToProcess.map(r => ({
+      title: r.title,
+      url: r.link,
+      snippet: r.snippet,
+      profileScore: r.profileScore,
+    })),
     null,
     2,
   );
@@ -121,35 +209,39 @@ async function extractProfessors(
     ? `IMPORTANT: Only extract professors from institutions in "${req.country}". Reject professors from other countries.`
     : '';
 
-  const prompt = `You are a strict academic data extractor. Extract professor information ONLY from the provided search result snippets.
+  const prompt = `You are a strict academic data extractor. Extract professor information ONLY from the provided search results.
 
 Research interest: "${req.researchInterest}"
 ${universityFilter}
 ${countryFilter}
 
-Search results:
+Search results (sorted by profile-likelihood score, higher = more likely a personal professor profile):
 ${resultsJson}
 
 STRICT RULES:
-1. Only extract a professor if their name, institution, and research area are CLEARLY mentioned in the search result text or URL.
-2. Do NOT invent, guess, or extrapolate any professor who is not explicitly present in the results.
-3. Do NOT fill in placeholder names like "Professor X" or "Faculty Member".
-4. If a result is not about a real professor, skip it completely.
-5. If you cannot confidently identify ANY real professor from these results, return an empty array [].
-6. The profileUrl MUST be the actual URL from the search result (not a made-up URL).
-7. Email can only be included if it appears verbatim in the snippet.
+1. Only extract a professor if their name, institution, and research area are CLEARLY mentioned in the result.
+2. PREFER results with high profileScore — those are more likely to be actual professor profile pages.
+3. AVOID extracting from listing/directory pages (where multiple professors appear on one page). If a result looks like a faculty directory listing, only extract ONE professor from it at most, and only if their name is clearly in the title or snippet.
+4. Do NOT invent, guess, or extrapolate any professor not explicitly present in the results.
+5. Do NOT fill in placeholder names like "Professor X" or "Faculty Member".
+6. If a result is not about a real, named professor, skip it.
+7. If you cannot confidently identify ANY real professor, return an empty array [].
+8. The profileUrl MUST be the actual URL from the result — never a made-up URL.
+9. Prefer the URL that is most likely the professor's own profile page, not a listing page.
+10. Email can only be included if it appears verbatim in the snippet.
 
 Return ONLY a JSON array (may be empty []):
 [
   {
-    "name": "Exact name as found in results",
+    "name": "Exact full name as found in results",
     "title": "Title as found (Professor/Associate Professor/etc) or null",
     "university": "University name as found in results",
     "department": "Department if mentioned, otherwise null",
     "researchAreas": ["area from results", "..."],
     "email": "exact email if found verbatim, otherwise null",
-    "profileUrl": "exact URL from results",
-    "snippet": "1-2 sentence summary of their work from the results"
+    "profileUrl": "the best URL for this professor's own profile page",
+    "snippet": "1-2 sentence summary of their work from the results",
+    "isProfilePage": true/false — whether the URL appears to be the professor's own profile vs a listing page
   }
 ]
 
@@ -166,7 +258,7 @@ Return ONLY the JSON array. No explanation, no markdown.`;
         model,
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.1,
-        max_tokens: 1200,
+        max_tokens: 1500,
       }),
       signal: AbortSignal.timeout(15_000),
     });
@@ -175,22 +267,17 @@ Return ONLY the JSON array. No explanation, no markdown.`;
 
     const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
     const content = data?.choices?.[0]?.message?.content?.trim() ?? '';
-
-    // Strip markdown code blocks if present
     const cleaned = content.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim();
     const parsed = JSON.parse(cleaned) as unknown;
     if (!Array.isArray(parsed)) return [];
 
-    return (parsed as Array<Record<string, unknown>>)
+    const extracted = (parsed as Array<Record<string, unknown>>)
       .filter(p => {
-        // Require a real name (not empty, not "Unknown", not "Professor N")
         const name = String(p.name ?? '').trim();
         if (!name || name.toLowerCase().startsWith('professor ') || name === 'Unknown Professor') return false;
-        // Require a profileUrl
         if (!p.profileUrl) return false;
         return true;
       })
-      .slice(0, 5)
       .map(p => ({
         name: String(p.name),
         title: p.title ? String(p.title) : 'Faculty',
@@ -203,15 +290,31 @@ Return ONLY the JSON array. No explanation, no markdown.`;
         profileUrl: p.profileUrl ? String(p.profileUrl) : null,
         snippet: String(p.snippet ?? ''),
         sourceVerified: true,
+        isProfilePage: p.isProfilePage === true,
         emailTemplate: buildEmailTemplate({
           name: String(p.name),
           university: String(p.university ?? req.university ?? 'their university'),
           researchInterest: req.researchInterest,
           level: req.level ?? 'phd',
         }),
+        _profileScore: scoreProfileLikelihood({
+          title: '',
+          link: String(p.profileUrl ?? ''),
+          snippet: String(p.snippet ?? ''),
+        }),
       }));
+
+    // Sort extracted results: actual profile pages first
+    extracted.sort((a, b) => {
+      const aScore = (a.isProfilePage ? 30 : 0) + a._profileScore;
+      const bScore = (b.isProfilePage ? 30 : 0) + b._profileScore;
+      return bScore - aScore;
+    });
+
+    return extracted
+      .slice(0, 5)
+      .map(({ _profileScore: _, isProfilePage: __, ...rest }) => rest);
   } catch {
-    // On any error (parse failure, network, etc.) — return empty rather than inventing data
     return [];
   }
 }
@@ -270,34 +373,80 @@ export async function searchProfessors(req: ProfessorSearchRequest): Promise<Pro
     );
   }
 
-  const queryParts: string[] = [];
+  // Build two complementary queries:
+  // 1. Profile-targeted: tries to surface individual professor profile pages directly
+  // 2. Broad fallback: wider search for any mention of professor + topic
+  const profileQuery = buildProfileQuery(req);
+  const broadQuery = buildBroadQuery(req);
 
-  if (req.university) {
-    queryParts.push(`site:${req.university.toLowerCase().replace(/\s+/g, '')}.edu OR "${req.university}" professor`);
-  } else {
-    queryParts.push('professor');
+  // Run both searches in parallel; profile query gets 8 results, broad gets 6
+  const [profileResults, broadResults] = await Promise.all([
+    serperSearch(profileQuery, 8),
+    serperSearch(broadQuery, 6),
+  ]);
+
+  // Deduplicate by URL, keeping profile-query results first (higher priority)
+  const seen = new Set<string>();
+  const combined: RawResult[] = [];
+  for (const r of [...profileResults, ...broadResults]) {
+    if (r.link && !seen.has(r.link)) {
+      seen.add(r.link);
+      combined.push(r);
+    }
   }
 
-  queryParts.push(`"${req.researchInterest}"`);
-  if (req.country) queryParts.push(req.country);
-  queryParts.push('faculty research lab');
+  const professors = await extractProfessors(combined, req);
 
-  const query = queryParts.join(' ');
-  const rawResults = await serperSearch(query);
-  const professors = await extractProfessors(rawResults, req);
-
-  const warning = professors.length === 0 && rawResults.length === 0
+  const warning = professors.length === 0 && combined.length === 0
     ? 'No web results found. Check your search terms or try a different university name.'
-    : professors.length === 0 && rawResults.length > 0
+    : professors.length === 0 && combined.length > 0
     ? 'Search returned results but no verified professors could be extracted. Try a more specific research area or university name.'
     : undefined;
 
   return {
-    query,
+    query: profileQuery,
     results: professors,
     searchedAt: new Date().toISOString(),
     warning,
   };
+}
+
+function buildProfileQuery(req: ProfessorSearchRequest): string {
+  const parts: string[] = [];
+
+  if (req.university) {
+    // Target the specific university's domain for profile pages
+    const uniSlug = req.university.toLowerCase().replace(/\s+/g, '');
+    parts.push(`(site:${uniSlug}.edu OR site:${uniSlug}.ac.uk OR "${req.university}")`);
+    parts.push('professor faculty profile');
+  } else {
+    parts.push('professor faculty profile page');
+  }
+
+  parts.push(`"${req.researchInterest}"`);
+
+  if (req.country) parts.push(req.country);
+
+  // Strongly favour pages that look like personal profile pages
+  parts.push('(inurl:faculty OR inurl:people OR inurl:staff OR inurl:profile OR inurl:researcher)');
+
+  return parts.join(' ');
+}
+
+function buildBroadQuery(req: ProfessorSearchRequest): string {
+  const parts: string[] = [];
+
+  if (req.university) {
+    parts.push(`"${req.university}" professor`);
+  } else {
+    parts.push('professor');
+  }
+
+  parts.push(`"${req.researchInterest}"`);
+  if (req.country) parts.push(req.country);
+  parts.push('faculty research');
+
+  return parts.join(' ');
 }
 
 export { isValidQuery };
