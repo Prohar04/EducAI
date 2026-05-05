@@ -170,4 +170,49 @@ export async function checkScholarshipEligibility(
   }
 }
 
+export async function getScholarshipProbability(
+  req: Request & { userId?: string },
+  res: Response,
+) {
+  const id = String(req.params.id);
+  const userId = req.userId;
+  if (!userId) {
+    res.status(401).json({ message: 'Unauthorised' });
+    return;
+  }
 
+  try {
+    const profile = await getUserProfile(userId);
+    if (!profile) {
+      res.status(200).json({
+        scholarshipId: id,
+        probabilityBand: 'Low',
+        probabilityPct: 20,
+        factors: [],
+        weaknesses: ['Complete your profile for a real assessment'],
+        improvementActions: ['Go to Settings → Profile to fill in your academic details'],
+        confidence: 'low',
+      });
+      return;
+    }
+
+    const result = await predictFundingProbability(id, {
+      gpa: profile.gpa,
+      gpaScale: profile.gpaScale,
+      englishTestType: profile.englishTestType,
+      englishScore: profile.englishScore,
+      fundingNeed: profile.fundingNeed,
+      level: profile.level,
+      intendedLevel: profile.intendedLevel,
+      majorOrTrack: profile.majorOrTrack,
+      intendedMajor: profile.intendedMajor,
+      workExperienceMonths: profile.workExperienceMonths,
+      graduationYear: profile.graduationYear,
+      targetCountries: profile.targetCountries as string[] | null,
+    });
+    res.status(200).json(result);
+  } catch (err) {
+    console.error('[scholarship:probability]', err);
+    res.status(500).json({ message: 'Failed to compute funding probability' });
+  }
+}
