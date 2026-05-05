@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
 	GraduationCap, ArrowRight, ArrowLeft, Check,
 	BookOpen, FlaskConical, Wallet, Globe,
@@ -658,7 +659,9 @@ export default function OnboardingWizard({
 	initialProfile: UserProfile | null;
 }) {
 	const router = useRouter();
+	const reduced = useReducedMotion();
 	const [step, setStep] = useState(0);
+	const [direction, setDirection] = useState<1 | -1>(1);
 	const [error, setError] = useState<string | null>(null);
 	const [isPending, startTransition] = useTransition();
 
@@ -691,11 +694,11 @@ export default function OnboardingWizard({
 	const totalSteps = STEP_META.length;
 
 	const handleNext = () => {
-		if (step < totalSteps - 1) setStep((s) => s + 1);
+		if (step < totalSteps - 1) { setDirection(1); setStep((s) => s + 1); }
 	};
 
 	const handleBack = () => {
-		if (step > 0) setStep((s) => s - 1);
+		if (step > 0) { setDirection(-1); setStep((s) => s - 1); }
 	};
 
 	const handleFinish = () => {
@@ -794,23 +797,46 @@ export default function OnboardingWizard({
 				<div className="flex flex-1 flex-col items-center justify-center p-6 sm:p-10">
 					<div className="w-full max-w-2xl">
 						{/* Step header */}
-						<div className="mb-8">
-							<div className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-								<currentMeta.icon className="size-3.5" />
-								Step {step + 1} of {totalSteps}
-							</div>
-							<h1 className="text-2xl font-bold tracking-tight">{currentMeta.title}</h1>
-							<p className="mt-1 text-muted-foreground">{currentMeta.description}</p>
-						</div>
+						<AnimatePresence mode="wait">
+							<motion.div
+								key={`header-${step}`}
+								initial={reduced ? false : { opacity: 0, y: 10 }}
+								animate={{ opacity: 1, y: 0 }}
+								exit={reduced ? undefined : { opacity: 0, y: -6 }}
+								transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+								className="mb-8"
+							>
+								<div className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+									<currentMeta.icon className="size-3.5" />
+									Step {step + 1} of {totalSteps}
+								</div>
+								<h1 className="text-2xl font-bold tracking-tight">{currentMeta.title}</h1>
+								<p className="mt-1 text-muted-foreground">{currentMeta.description}</p>
+							</motion.div>
+						</AnimatePresence>
 
 						{/* Step content */}
-						<div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-							{step === 0 && <Step1 values={values} set={set} />}
-							{step === 1 && <Step2 values={values} set={set} />}
-							{step === 2 && <Step3 values={values} set={set as StepProps["set"]} />}
-							{step === 3 && <Step4 values={values} set={set} />}
-							{step === 4 && <StepReview values={values} />}
-						</div>
+						<AnimatePresence mode="wait" custom={direction}>
+							<motion.div
+								key={step}
+								custom={direction}
+								variants={reduced ? undefined : {
+									hidden: (dir: number) => ({ opacity: 0, x: dir * 28 }),
+									visible: { opacity: 1, x: 0, transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } },
+									exit: (dir: number) => ({ opacity: 0, x: dir * -20, transition: { duration: 0.18, ease: [0.4, 0, 0.2, 1] } }),
+								}}
+								initial="hidden"
+								animate="visible"
+								exit="exit"
+								className="rounded-2xl border border-border bg-card p-6 shadow-sm"
+							>
+								{step === 0 && <Step1 values={values} set={set} />}
+								{step === 1 && <Step2 values={values} set={set} />}
+								{step === 2 && <Step3 values={values} set={set as StepProps["set"]} />}
+								{step === 3 && <Step4 values={values} set={set} />}
+								{step === 4 && <StepReview values={values} />}
+							</motion.div>
+						</AnimatePresence>
 
 						{/* Error */}
 						{error && (
