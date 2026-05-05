@@ -2,18 +2,30 @@ import { Response } from 'express';
 import { AuthRequest } from '#src/types/authRequest.type.ts';
 import prisma from '#src/config/database.ts';
 import { toUSD } from '#src/utils/exchangeRates.ts';
+import logger from '#src/config/logger.ts';
 
+// ── Controllers ────────────────────────────────────────────────────────────────
+
+/**
+ * GET /users/profile
+ * Retrieve the authenticated user's profile information.
+ */
 export const getUserProfile = async (req: AuthRequest, res: Response) => {
   try {
     const profile = await prisma.userProfile.findUnique({
       where: { userId: req.userId! },
     });
     res.status(200).json({ profile: profile ?? null });
-  } catch {
-    res.status(500).json({ message: 'Failed to fetch profile' });
+  } catch (err) {
+    logger.error(`[user:profile] Failed to fetch profile: ${err}`);
+    res.status(500).json({ message: 'Unable to load your profile. Please try again.' });
   }
 };
 
+/**
+ * PUT /users/profile
+ * Create or update the authenticated user's profile with onboarding and preferences data.
+ */
 export const upsertUserProfile = async (req: AuthRequest, res: Response) => {
   try {
     const body = req.body as {
@@ -103,8 +115,9 @@ export const upsertUserProfile = async (req: AuthRequest, res: Response) => {
     });
 
     res.status(200).json({ profile });
-  } catch {
-    res.status(500).json({ message: 'Failed to save profile' });
+  } catch (err) {
+    logger.error(`[user:upsert] Failed to save profile: ${err}`);
+    res.status(500).json({ message: 'Could not save your profile. Please check your input and try again.' });
   }
 };
 
