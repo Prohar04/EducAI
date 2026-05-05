@@ -2,6 +2,14 @@ import { Response } from 'express';
 import { AuthRequest } from '#src/types/authRequest.type.ts';
 import prisma from '#src/config/database.ts';
 
+// ── Controllers ────────────────────────────────────────────────────────────────
+
+/**
+ * GET /saved-programs
+ * Fetch all programs saved by the authenticated user.
+ * Returns programs with full details: university, country, requirements, and deadlines.
+ * Results ordered by most recently saved first.
+ */
 export const getSavedPrograms = async (req: AuthRequest, res: Response) => {
   try {
     const saved = await prisma.savedProgram.findMany({
@@ -23,6 +31,12 @@ export const getSavedPrograms = async (req: AuthRequest, res: Response) => {
   }
 };
 
+/**
+ * POST /saved-programs
+ * Save a program to the authenticated user's list.
+ * Body: { programId: string }
+ * Returns the saved program record or updates existing.
+ */
 export const saveProgram = async (req: AuthRequest, res: Response) => {
   try {
     const { programId } = req.body as { programId?: string };
@@ -46,6 +60,11 @@ export const saveProgram = async (req: AuthRequest, res: Response) => {
   }
 };
 
+/**
+ * DELETE /saved-programs/:programId
+ * Remove a program from the authenticated user's saved list.
+ * Path parameter: programId
+ */
 export const unsaveProgram = async (req: AuthRequest, res: Response) => {
   try {
     const programId = Array.isArray(req.params.programId)
