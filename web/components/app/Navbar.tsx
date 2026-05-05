@@ -20,7 +20,6 @@ import {
   CalendarDays,
   Target,
   Bell,
-  ExternalLink,
   Menu,
   X,
   TrendingUp,
