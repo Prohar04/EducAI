@@ -2,6 +2,20 @@ import { Request, Response } from 'express';
 import prisma from '#src/config/database.ts';
 import { Prisma, ProgramLevel } from '../generated/client.ts';
 
+// ── Controllers ────────────────────────────────────────────────────────────────
+
+/**
+ * GET /programs/search
+ * Search for academic programs with advanced filtering options.
+ * Query parameters:
+ *   - country: ISO 3166-1 alpha-2 country code
+ *   - level: program level (BSC, MSC, PHD)
+ *   - field: subject field or discipline
+ *   - q: general search term (matches title, field, or university name)
+ *   - page: pagination page number (default 1)
+ *   - limit: results per page, max 100 (default 20)
+ * Returns paginated programs with university and country details.
+ */
 export const searchPrograms = async (req: Request, res: Response) => {
   try {
     const { country, level, field, q, page = '1', limit = '20' } = req.query as Record<string, string>;
@@ -43,6 +57,11 @@ export const searchPrograms = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * GET /programs/:id
+ * Fetch complete program details including requirements and application deadlines.
+ * Returns university information, admission requirements, and all deadline records.
+ */
 export const getProgramById = async (req: Request, res: Response) => {
   try {
     const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
