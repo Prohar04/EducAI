@@ -11,6 +11,9 @@ import {
   DollarSign,
   CheckCircle2,
   Info,
+  Languages,
+  Building2,
+  RefreshCw,
 } from "lucide-react";
 import { getProgramById, getSavedPrograms } from "@/lib/auth/action";
 import SaveButton from "../_components/SaveButton";
@@ -23,6 +26,30 @@ const LEVEL_LABELS: Record<string, string> = {
   MBA: "MBA",
   DIPLOMA: "Diploma",
 };
+
+const LANGUAGE_KEYS = ["ielts", "toefl", "duolingo", "english", "language", "pte", "cambridge"];
+const GRE_KEYS = ["gre", "gmat", "sat", "act"];
+
+function isLanguageReq(key: string) {
+  return LANGUAGE_KEYS.some((k) => key.toLowerCase().includes(k));
+}
+
+function isTestReq(key: string) {
+  return GRE_KEYS.some((k) => key.toLowerCase().includes(k));
+}
+
+function formatRelativeDate(dateStr: string | null | undefined): string | null {
+  if (!dateStr) return null;
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return null;
+  const diffMs = Date.now() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 30) return `${diffDays} days ago`;
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+  return `${Math.floor(diffDays / 365)} year${Math.floor(diffDays / 365) > 1 ? "s" : ""} ago`;
+}
 
 export default async function ProgramDetailPage({
   params,
@@ -47,8 +74,17 @@ export default async function ProgramDetailPage({
       : null;
 
   const levelLabel = LEVEL_LABELS[program.level] ?? program.level;
-  // eslint-disable-next-line react-hooks/purity -- server component: Date.now() runs once at request time, not on re-render
+  // eslint-disable-next-line react-hooks/purity -- server component: Date.now() runs once at request time
   const now = Date.now();
+
+  const allRequirements = program.requirements ?? [];
+  const languageReqs = allRequirements.filter((r) => isLanguageReq(r.key));
+  const testReqs = allRequirements.filter((r) => isTestReq(r.key));
+  const otherReqs = allRequirements.filter(
+    (r) => !isLanguageReq(r.key) && !isTestReq(r.key)
+  );
+
+  const freshnessLabel = formatRelativeDate(program.updatedAt ?? program.createdAt);
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
@@ -66,7 +102,6 @@ export default async function ProgramDetailPage({
       {/* Header card */}
       <FadeIn delay={0.04}>
         <div className="mb-6 overflow-hidden rounded-2xl border border-border bg-card">
-          {/* Accent band */}
           <div className="h-1.5 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/40" />
           <div className="p-6 sm:p-8">
             <div className="flex items-start justify-between gap-4">
@@ -150,25 +185,86 @@ export default async function ProgramDetailPage({
             </FadeIn>
           )}
 
-          {/* Requirements */}
-          {program.requirements && program.requirements.length > 0 && (
+          {/* University description */}
+          {program.university.description && (
+            <FadeIn delay={0.10}>
+              <section className="rounded-2xl border border-border bg-card p-6">
+                <h2 className="mb-3 flex items-center gap-2 font-bold">
+                  <Building2 className="size-4 text-primary" />
+                  About {program.university.name}
+                </h2>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {program.university.description}
+                </p>
+              </section>
+            </FadeIn>
+          )}
+
+          {/* Entry Requirements */}
+          {allRequirements.length > 0 && (
             <FadeIn delay={0.12}>
               <section className="rounded-2xl border border-border bg-card p-6">
                 <h2 className="mb-4 flex items-center gap-2 font-bold">
                   <CheckCircle2 className="size-4 text-primary" />
                   Entry Requirements
                 </h2>
-                <div className="space-y-2">
-                  {program.requirements.map((req) => (
-                    <div
-                      key={req.id}
-                      className="flex items-center justify-between rounded-xl border border-border/70 bg-muted/30 px-4 py-3 text-sm"
-                    >
-                      <span className="font-medium text-foreground">{req.key}</span>
-                      <span className="ml-4 text-right text-muted-foreground">{req.value}</span>
+
+                {/* Academic requirements */}
+                {otherReqs.length > 0 && (
+                  <div className="mb-4">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Academic</p>
+                    <div className="space-y-2">
+                      {otherReqs.map((req) => (
+                        <div
+                          key={req.id}
+                          className="flex items-center justify-between rounded-xl border border-border/70 bg-muted/30 px-4 py-3 text-sm"
+                        >
+                          <span className="font-medium text-foreground">{req.key}</span>
+                          <span className="ml-4 text-right text-muted-foreground">{req.value}</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
+
+                {/* Language requirements */}
+                {languageReqs.length > 0 && (
+                  <div className="mb-4">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
+                      <Languages className="size-3" /> Language
+                    </p>
+                    <div className="space-y-2">
+                      {languageReqs.map((req) => (
+                        <div
+                          key={req.id}
+                          className="flex items-center justify-between rounded-xl border border-blue-500/20 bg-blue-500/5 px-4 py-3 text-sm"
+                        >
+                          <span className="font-medium text-foreground">{req.key}</span>
+                          <span className="ml-4 text-right text-blue-600 dark:text-blue-400 font-semibold">{req.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Test score requirements */}
+                {testReqs.length > 0 && (
+                  <div className="mb-4">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Test Scores</p>
+                    <div className="space-y-2">
+                      {testReqs.map((req) => (
+                        <div
+                          key={req.id}
+                          className="flex items-center justify-between rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm"
+                        >
+                          <span className="font-medium text-foreground">{req.key}</span>
+                          <span className="ml-4 text-right text-amber-600 dark:text-amber-400 font-semibold">{req.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="mt-4 flex items-start gap-2 rounded-xl border border-border/50 bg-muted/20 px-3 py-2.5 text-xs text-muted-foreground">
                   <Info className="mt-0.5 size-3.5 shrink-0 text-primary/60" />
                   Verify requirements directly with the university before applying. Data is scraped and may not reflect the latest changes.
@@ -255,7 +351,7 @@ export default async function ProgramDetailPage({
                   <p className="mt-3 text-xs text-muted-foreground">
                     Source:{" "}
                     <a href={program.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground transition-colors">
-                      {new URL(program.sourceUrl).hostname}
+                      {(() => { try { return new URL(program.sourceUrl).hostname; } catch { return program.sourceUrl; } })()}
                     </a>
                   </p>
                 )}
@@ -263,8 +359,23 @@ export default async function ProgramDetailPage({
             </FadeIn>
           )}
 
+          {/* Data freshness */}
+          {freshnessLabel && (
+            <FadeIn delay={0.16}>
+              <div className="rounded-xl border border-border bg-muted/20 px-4 py-3">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <RefreshCw className="size-3 shrink-0" />
+                  <span>Data last updated: <span className="font-medium text-foreground">{freshnessLabel}</span></span>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Always verify details on the official program page before applying.
+                </p>
+              </div>
+            </FadeIn>
+          )}
+
           {/* Save CTA */}
-          <FadeIn delay={0.16}>
+          <FadeIn delay={0.18}>
             <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5 text-center">
               <GraduationCap className="mx-auto mb-2 size-8 text-primary" />
               <p className="mb-3 text-sm font-semibold">Save this program</p>

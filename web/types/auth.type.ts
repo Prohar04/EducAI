@@ -292,6 +292,8 @@ export interface Program {
 	tuitionMaxUSD?: number | null;
 	description?: string | null;
 	sourceUrl?: string | null;
+	updatedAt?: string | null;
+	createdAt?: string | null;
 	university: University;
 	requirements?: ProgramRequirement[];
 	deadlines?: ProgramDeadline[];
