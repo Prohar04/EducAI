@@ -6,7 +6,6 @@ import {
   listUpcomingDeadlines,
   listEligibleScholarships,
   checkScholarshipEligibility,
-  getScholarshipProbability,
 } from '#src/controllers/scholarship.controller.ts';
 
 const router = Router();
@@ -28,8 +27,5 @@ router.get('/:id', getScholarship);
 
 // POST /scholarships/:id/eligibility — detailed eligibility check
 router.post('/:id/eligibility', checkScholarshipEligibility);
-
-// POST /scholarships/:id/probability — funding probability predictor
-router.post('/:id/probability', getScholarshipProbability);
 
 export default router;
