@@ -23,6 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FadeIn } from "@/components/motion/FadeIn";
+import { StaggerChildren, StaggerItem } from "@/components/motion/FadeIn";
 import { Reveal } from "@/components/motion/Reveal";
 import { COUNTRIES } from "@/lib/data/countries";
 import type {
@@ -980,16 +981,17 @@ export default function ScholarshipsClient({
 						</div>
 					) : (
 						<>
-							<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+							<StaggerChildren stagger={0.05} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
 								{results.items.map((s) => (
-									<ScholarshipCard
-										key={s.id}
-										scholarship={s}
-										eligibility={eligibleMap.get(s.id)}
-										onOpenDetails={setSelectedScholarship}
-									/>
+									<StaggerItem key={s.id}>
+										<ScholarshipCard
+											scholarship={s}
+											eligibility={eligibleMap.get(s.id)}
+											onOpenDetails={setSelectedScholarship}
+										/>
+									</StaggerItem>
 								))}
-							</div>
+							</StaggerChildren>
 
 							{/* Pagination */}
 							{totalPages > 1 && (
@@ -1036,16 +1038,17 @@ export default function ScholarshipsClient({
 							</Button>
 						</div>
 					) : (
-						<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+						<StaggerChildren stagger={0.05} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
 							{eligible.map(({ scholarship, eligibility }) => (
-								<ScholarshipCard
-									key={scholarship.id}
-									scholarship={scholarship}
-									eligibility={eligibility}
-									onOpenDetails={setSelectedScholarship}
-								/>
+								<StaggerItem key={scholarship.id}>
+									<ScholarshipCard
+										scholarship={scholarship}
+										eligibility={eligibility}
+										onOpenDetails={setSelectedScholarship}
+									/>
+								</StaggerItem>
 							))}
-						</div>
+						</StaggerChildren>
 					)}
 				</>
 			)}

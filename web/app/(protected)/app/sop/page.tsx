@@ -16,9 +16,11 @@ import {
 	Sparkles,
 	Target,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FadeIn } from "@/components/motion/FadeIn";
+import { StaggerChildren, StaggerItem } from "@/components/motion/FadeIn";
 import { generateSopAction, type SopTemplate, type SopResult } from "@/lib/auth/action";
 
 const TEMPLATES: { value: SopTemplate; label: string; desc: string; badge?: string }[] = [
@@ -220,35 +222,45 @@ export default function SOPPage() {
 					{/* Template selector */}
 					<div className="rounded-xl border border-border bg-card p-5">
 						<h2 className="mb-3 text-sm font-semibold">SOP Template</h2>
-						<div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
+						<StaggerChildren stagger={0.04} className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
 							{TEMPLATES.map((t) => (
-								<button
-									key={t.value}
-									type="button"
-									onClick={() => setSopTemplate(t.value)}
-									className={`w-full flex items-start gap-2 rounded-lg border px-3 py-2.5 text-left transition-colors ${
-										sopTemplate === t.value
-											? "border-primary bg-primary/5"
-											: "border-border hover:border-primary/30 hover:bg-muted/50"
-									}`}
-								>
-									<div className="flex-1 min-w-0">
-										<div className="flex items-center gap-1.5">
-											<span className={`font-medium text-sm ${sopTemplate === t.value ? "text-primary" : ""}`}>
-												{t.label}
-											</span>
-											{t.badge && (
-												<span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
-													{t.badge}
+								<StaggerItem key={t.value}>
+									<motion.button
+										type="button"
+										onClick={() => setSopTemplate(t.value)}
+										whileHover={{ scale: 1.01 }}
+										whileTap={{ scale: 0.99 }}
+										transition={{ duration: 0.12 }}
+										className={`w-full flex items-start gap-2 rounded-lg border px-3 py-2.5 text-left transition-colors ${
+											sopTemplate === t.value
+												? "border-primary bg-primary/5"
+												: "border-border hover:border-primary/30 hover:bg-muted/50"
+										}`}
+									>
+										<div className="flex-1 min-w-0">
+											<div className="flex items-center gap-1.5">
+												<span className={`font-medium text-sm ${sopTemplate === t.value ? "text-primary" : ""}`}>
+													{t.label}
 												</span>
-											)}
+												{t.badge && (
+													<span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
+														{t.badge}
+													</span>
+												)}
+											</div>
+											<p className="text-xs text-muted-foreground truncate">{t.desc}</p>
 										</div>
-										<p className="text-xs text-muted-foreground truncate">{t.desc}</p>
-									</div>
-									{sopTemplate === t.value && <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />}
-								</button>
+										<AnimatePresence>
+											{sopTemplate === t.value && (
+												<motion.span initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0, opacity: 0 }} transition={{ duration: 0.15 }}>
+													<Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+												</motion.span>
+											)}
+										</AnimatePresence>
+									</motion.button>
+								</StaggerItem>
 							))}
-						</div>
+						</StaggerChildren>
 					</div>
 
 					{/* Target details */}
