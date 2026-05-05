@@ -3,6 +3,9 @@ import { z } from 'zod';
 import { AuthRequest } from '#src/types/authRequest.type.ts';
 import { ChatServiceError, answerChatMessage } from '#src/services/chat.service.ts';
 
+// ── Schemas ────────────────────────────────────────────────────────────────────
+// Validation schemas for chat requests and conversation history
+
 const chatHistorySchema = z.object({
   role: z.enum(['user', 'assistant']),
   content: z.string().trim().min(1).max(4000),
@@ -14,6 +17,12 @@ const chatRequestSchema = z.object({
   history: z.array(chatHistorySchema).max(8).optional(),
 });
 
+// ── Controllers ────────────────────────────────────────────────────────────────
+/**
+ * POST /chat
+ * Answers a user's chat message using the AI server, with optional conversation context.
+ * Requires authentication. Supports conversation history for context-aware responses.
+ */
 export const postChat = async (req: AuthRequest, res: Response) => {
   if (!req.userId) {
     res.status(401).json({ message: 'Unauthorized' });
