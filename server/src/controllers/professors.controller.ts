@@ -44,7 +44,16 @@ export async function searchProfessorsHandler(req: Request, res: Response): Prom
     logger.info(`[professors] found ${result.results.length} verified professors`);
     res.status(200).json(result);
   } catch (err) {
-    logger.error(`[professors] search failed: ${err}`);
+    const message = err instanceof Error ? err.message : String(err);
+    if (message.includes('not configured') || message.includes('Missing env vars')) {
+      logger.warn(`[professors] provider not configured: ${message}`);
+      res.status(503).json({
+        error: 'Professor search is not available in this deployment.',
+        detail: 'The search provider (SERPER_API_KEY) or AI extractor (OPENAI_API_KEY / OPENROUTER_API_KEY) is not configured. Contact the site administrator.',
+      });
+      return;
+    }
+    logger.error(`[professors] search failed: ${message}`);
     res.status(502).json({ error: 'Professor search failed. Please try again.' });
   }
 }

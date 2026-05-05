@@ -569,12 +569,14 @@ export const searchProfessorsAction = async (
 		body: JSON.stringify({ researchInterest, university, country, level }),
 	});
 	if (!response.ok) {
-		// Return structured error if backend returned 400
+		const data = await response.json().catch(() => ({})) as { error?: string; detail?: string };
 		if (response.status === 400) {
-			const data = await response.json().catch(() => ({})) as { error?: string };
 			throw new Error(data.error ?? "Invalid input");
 		}
-		return null;
+		if (response.status === 503) {
+			throw new Error(data.detail ?? data.error ?? "Professor search is not available in this deployment. The search provider is not configured.");
+		}
+		throw new Error(data.error ?? "Search failed. Please try again.");
 	}
 	return response.json();
 };

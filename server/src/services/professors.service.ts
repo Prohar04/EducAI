@@ -245,10 +245,33 @@ Warm regards,
 [Your University]`;
 }
 
+function getProviderStatus(): { searchReady: boolean; extractReady: boolean; missingKeys: string[] } {
+  const serperKey = process.env.SERPER_APIKEY || process.env.SERPER_API_KEY;
+  const openaiKey = process.env.OPENAI_API_KEY;
+  const openrouterKey = process.env.OPENROUTER_API_KEY;
+  const missingKeys: string[] = [];
+  if (!serperKey) missingKeys.push('SERPER_API_KEY');
+  if (!openaiKey && !openrouterKey) missingKeys.push('OPENAI_API_KEY or OPENROUTER_API_KEY');
+  return {
+    searchReady: !!serperKey,
+    extractReady: !!(openaiKey || openrouterKey),
+    missingKeys,
+  };
+}
+
 export async function searchProfessors(req: ProfessorSearchRequest): Promise<ProfessorSearchResponse> {
+  const { searchReady, extractReady, missingKeys } = getProviderStatus();
+
+  if (!searchReady || !extractReady) {
+    const missing = missingKeys.join(', ');
+    throw new Error(
+      `Professor search is not configured for this deployment. Missing env vars: ${missing}. ` +
+      'Set these in your server environment to enable professor search.',
+    );
+  }
+
   const queryParts: string[] = [];
 
-  // Build a targeted search query
   if (req.university) {
     queryParts.push(`site:${req.university.toLowerCase().replace(/\s+/g, '')}.edu OR "${req.university}" professor`);
   } else {
@@ -265,6 +288,8 @@ export async function searchProfessors(req: ProfessorSearchRequest): Promise<Pro
 
   const warning = professors.length === 0 && rawResults.length === 0
     ? 'No web results found. Check your search terms or try a different university name.'
+    : professors.length === 0 && rawResults.length > 0
+    ? 'Search returned results but no verified professors could be extracted. Try a more specific research area or university name.'
     : undefined;
 
   return {
