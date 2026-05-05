@@ -382,6 +382,112 @@ export const getAlertCount = async (): Promise<number> => {
 	return data.count ?? 0;
 };
 
+// ── Unified Notifications ────────────────────────────────────────────────────
+
+export type NotificationType =
+	| "scholarship_alert"
+	| "profile_incomplete"
+	| "match_ready"
+	| "sop_ready"
+	| "cv_ready"
+	| "system";
+
+export interface AppNotification {
+	id: string;
+	type: NotificationType;
+	title: string;
+	body: string;
+	href: string;
+	read: boolean;
+	createdAt: string;
+}
+
+export const getUnifiedNotifications = async (): Promise<AppNotification[]> => {
+	const notifications: AppNotification[] = [];
+
+	// 1. Scholarship deadline alerts from backend
+	try {
+		const alertsResponse = await authFetch(`${BACKEND_URL}/deadline-alerts/recent`);
+		if (alertsResponse.ok) {
+			const data = await alertsResponse.json();
+			const alerts: AlertNotification[] = data.alerts ?? [];
+			for (const alert of alerts.slice(0, 5)) {
+				notifications.push({
+					id: `alert-${alert.id}`,
+					type: "scholarship_alert",
+					title: alert.scholarshipTitle,
+					body: `Deadline alert — ${alert.daysBeforeSent} days before deadline${alert.provider ? ` · ${alert.provider}` : ""}`,
+					href: alert.scholarshipUrl ?? "/app/scholarships",
+					read: false,
+					createdAt: alert.sentAt,
+				});
+			}
+		}
+	} catch {
+		// Non-critical — continue with other notification sources
+	}
+
+	// 2. Profile completeness check
+	try {
+		const profileResponse = await authFetch(`${BACKEND_URL}/users/profile`);
+		if (profileResponse.ok) {
+			const profile = await profileResponse.json() as Record<string, unknown>;
+			const fields = [
+				profile.currentStage, profile.targetIntake, profile.intendedLevel,
+				profile.intendedMajor, profile.targetCountries, profile.gpa,
+				profile.englishTestType, profile.budgetMax,
+			];
+			const filled = fields.filter(f => f !== null && f !== undefined).length;
+			const completeness = Math.round((filled / fields.length) * 100);
+			if (completeness < 80) {
+				notifications.push({
+					id: "profile-incomplete",
+					type: "profile_incomplete",
+					title: "Complete your profile",
+					body: `Your profile is ${completeness}% complete. Add more details to get better match results.`,
+					href: "/app/profile",
+					read: false,
+					createdAt: new Date().toISOString(),
+				});
+			}
+		}
+	} catch {
+		// Non-critical
+	}
+
+	// 3. Match results — notify if a recent run completed
+	try {
+		const matchResponse = await authFetch(`${BACKEND_URL}/match/latest`);
+		if (matchResponse.ok) {
+			const match = await matchResponse.json() as { run?: { status?: string; createdAt?: string } };
+			if (match?.run?.status === "done" && match.run.createdAt) {
+				const ageMs = Date.now() - new Date(match.run.createdAt).getTime();
+				// Show only if completed within the last 48 hours
+				if (ageMs < 48 * 60 * 60 * 1000) {
+					notifications.push({
+						id: "match-ready",
+						type: "match_ready",
+						title: "Match results ready",
+						body: "Your AI program match is complete — view your personalised recommendations.",
+						href: "/app/match",
+						read: false,
+						createdAt: match.run.createdAt,
+					});
+				}
+			}
+		}
+	} catch {
+		// Non-critical
+	}
+
+	// Sort by createdAt descending (most recent first)
+	notifications.sort(
+		(a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+	);
+
+	return notifications;
+};
+
 // ── Intelligent Search ────────────────────────────────────────────────────────
 
 export interface IntelligentSearchResult {
