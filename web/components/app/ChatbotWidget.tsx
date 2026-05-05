@@ -11,8 +11,10 @@ import {
 	Sparkles,
 	X,
 } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { variants, ease } from "@/lib/motion";
 import type { ChatApiResponse, ChatReply } from "@/types/auth.type";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -97,6 +99,7 @@ function confidenceBadge(c: ChatReply["confidence"]) {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function ChatbotWidget() {
+	const reduced = useReducedMotion();
 	const [open, setOpen] = useState(() => {
 		if (typeof window === "undefined") return false;
 		return sessionStorage.getItem("chatbot:open") === "true";
@@ -203,13 +206,16 @@ export function ChatbotWidget() {
 		<div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
 
 			{/* ── Chat panel ── */}
+			<AnimatePresence>
 			{open && (
-				<div
+				<motion.div
+					key="chat-panel"
+					variants={reduced ? undefined : variants.panelOpen}
+					initial="hidden"
+					animate="visible"
+					exit="exit"
 					className="flex w-[min(388px,calc(100vw-2.5rem))] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-xl"
-					style={{
-						height: "min(580px, calc(100vh - 7rem))",
-						animation: "chatWidgetIn 0.22s cubic-bezier(0.34,1.56,0.64,1) both",
-					}}
+					style={{ height: "min(580px, calc(100vh - 7rem))" }}
 				>
 					{/* Header */}
 					<div className="flex items-center justify-between gap-3 border-b border-border bg-card px-4 py-3.5">
@@ -259,14 +265,26 @@ export function ChatbotWidget() {
 						{messages.map((m) =>
 							m.role === "user" ? (
 								/* User bubble */
-								<div key={m.id} className="flex justify-end">
+								<motion.div
+									key={m.id}
+									variants={reduced ? undefined : variants.messageBubble}
+									initial="hidden"
+									animate="visible"
+									className="flex justify-end"
+								>
 									<div className="max-w-[86%] rounded-2xl rounded-br-sm bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-sm">
 										{m.text}
 									</div>
-								</div>
+								</motion.div>
 							) : (
 								/* Assistant bubble */
-								<div key={m.id} className="flex justify-start">
+								<motion.div
+									key={m.id}
+									variants={reduced ? undefined : variants.messageBubble}
+									initial="hidden"
+									animate="visible"
+									className="flex justify-start"
+								>
 									<div
 										className={`max-w-[92%] rounded-2xl rounded-bl-sm border px-4 py-3 text-sm ${
 											m.isError
@@ -356,13 +374,19 @@ export function ChatbotWidget() {
 											</div>
 										)}
 									</div>
-								</div>
+								</motion.div>
 							),
 						)}
 
 						{/* Loading indicator */}
 						{isLoading && (
-							<div className="flex justify-start">
+							<motion.div
+								key="loading"
+								variants={reduced ? undefined : variants.messageBubble}
+								initial="hidden"
+								animate="visible"
+								className="flex justify-start"
+							>
 								<div className="inline-flex items-center gap-2 rounded-2xl rounded-bl-sm border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
 									<span className="flex gap-1">
 										{[0, 100, 200].map((delay) => (
@@ -375,7 +399,7 @@ export function ChatbotWidget() {
 									</span>
 									Thinking…
 								</div>
-							</div>
+							</motion.div>
 						)}
 					</div>
 
@@ -411,22 +435,36 @@ export function ChatbotWidget() {
 							Advice only · Not a substitute for official guidance
 						</p>
 					</form>
-				</div>
+				</motion.div>
 			)}
+			</AnimatePresence>
 
 			{/* ── Toggle button ── */}
-			<Button
-				size="icon"
-				variant={open ? "outline" : "default"}
-				className="size-13 rounded-full shadow-lg"
-				onClick={toggleOpen}
-				aria-label={open ? "Close chat" : "Open AI assistant"}
+			<motion.div
+				whileHover={reduced ? undefined : { scale: 1.06 }}
+				whileTap={reduced ? undefined : { scale: 0.94 }}
+				transition={{ duration: 0.14, ease: ease.spring }}
 			>
-				{open
-					? <X className="size-5" />
-					: <MessageCircle className="size-5" />
-				}
-			</Button>
+				<Button
+					size="icon"
+					variant={open ? "outline" : "default"}
+					className="size-13 rounded-full shadow-lg"
+					onClick={toggleOpen}
+					aria-label={open ? "Close chat" : "Open AI assistant"}
+				>
+					<AnimatePresence mode="wait">
+						{open ? (
+							<motion.span key="close" initial={{ rotate: -45, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 45, opacity: 0 }} transition={{ duration: 0.14 }}>
+								<X className="size-5" />
+							</motion.span>
+						) : (
+							<motion.span key="open" initial={{ rotate: 45, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -45, opacity: 0 }} transition={{ duration: 0.14 }}>
+								<MessageCircle className="size-5" />
+							</motion.span>
+						)}
+					</AnimatePresence>
+				</Button>
+			</motion.div>
 		</div>
 	);
 }
