@@ -28,13 +28,30 @@ jobs:
         run: |
           MISSING=false
 
-          if [ -z "$BACKEND_URL" ]; then
+          # Strip any accidental whitespace/newlines from secrets before checking
+          BACKEND_URL_CLEAN=$(printf '%s' "$BACKEND_URL" | tr -d '[:space:]')
+          CRON_SECRET_CLEAN=$(printf '%s' "$CRON_SECRET" | tr -d '[:space:]')
+
+          if [ -z "$BACKEND_URL_CLEAN" ]; then
             echo "::warning::BACKEND_URL secret is not configured. Skipping sync."
             echo "   To enable: Settings → Secrets → Actions → BACKEND_URL = https://your-backend.onrender.com"
             MISSING=true
+          else
+            # Validate URL format — must start with http:// or https://
+            case "$BACKEND_URL_CLEAN" in
+              http://*|https://*)
+                echo "Backend URL scheme: OK"
+                ;;
+              *)
+                echo "::warning::BACKEND_URL does not start with http:// or https:// — value is malformed. Skipping sync."
+                echo "   Current value prefix: ${BACKEND_URL_CLEAN:0:20}..."
+                echo "   Fix: Settings → Secrets → Actions → BACKEND_URL = https://your-backend.onrender.com"
+                MISSING=true
+                ;;
+            esac
           fi
 
-          if [ -z "$CRON_SECRET" ]; then
+          if [ -z "$CRON_SECRET_CLEAN" ]; then
             echo "::warning::CRON_SECRET secret is not configured. Skipping sync."
             echo "   To enable: Settings → Secrets → Actions → CRON_SECRET = <same value as server CRON_SECRET>"
             MISSING=true
@@ -43,8 +60,10 @@ jobs:
           if [ "$MISSING" = "true" ]; then
             echo "secrets_ready=false" >> "$GITHUB_OUTPUT"
           else
+            # Export trimmed values for the next step
             echo "secrets_ready=true" >> "$GITHUB_OUTPUT"
-            echo "Backend URL configured: ${BACKEND_URL:0:30}..."
+            echo "backend_url=${BACKEND_URL_CLEAN}" >> "$GITHUB_OUTPUT"
+            echo "Backend URL configured: ${BACKEND_URL_CLEAN:0:30}..."
           fi
         env:
           BACKEND_URL: ${{ secrets.BACKEND_URL }}
@@ -53,14 +72,17 @@ jobs:
       - name: Trigger data sync
         if: steps.validate.outputs.secrets_ready == 'true'
         run: |
+          # Use sanitised URL from the validate step output
+          CLEAN_URL="${{ steps.validate.outputs.backend_url }}"
           TARGET="${{ github.event.inputs.target || 'all' }}"
           echo "Triggering data sync for target: $TARGET"
           echo "Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
           echo "Run ID: $GITHUB_RUN_ID"
 
+          CURL_EXIT=0
           HTTP_STATUS=$(curl -s -o /tmp/sync_response.json -w "%{http_code}" \
             --fail-with-body \
-            -X POST "${BACKEND_URL}/data-sync/run" \
+            -X POST "${CLEAN_URL}/data-sync/run" \
             -H "Authorization: Bearer ${CRON_SECRET}" \
             -H "Content-Type: application/json" \
             -H "X-GitHub-Run-Id: ${GITHUB_RUN_ID}" \
@@ -70,17 +92,23 @@ jobs:
             --retry-delay 5 \
             --retry-connrefused) || CURL_EXIT=$?
 
-          CURL_EXIT="${CURL_EXIT:-0}"
           echo "HTTP Status: $HTTP_STATUS"
           echo "Curl exit code: $CURL_EXIT"
           echo ""
           echo "=== Response body ==="
-          python3 -m json.tool /tmp/sync_response.json 2>/dev/null || cat /tmp/sync_response.json
+          python3 -m json.tool /tmp/sync_response.json 2>/dev/null || cat /tmp/sync_response.json 2>/dev/null || echo "(empty)"
           echo "=== End response ==="
 
+          # curl exit 3 = URL malformat — should not happen after validation above, but handle defensively
+          if [ "$CURL_EXIT" -eq 3 ]; then
+            echo "::error::curl reported URL malformed (exit 3). BACKEND_URL may contain invalid characters."
+            echo "   Sanitised URL prefix used: ${CLEAN_URL:0:50}"
+            exit 1
+          fi
+
           if [ "$CURL_EXIT" -ne 0 ]; then
-            echo "::error::Curl failed (exit $CURL_EXIT). Check BACKEND_URL is reachable: ${BACKEND_URL:0:50}..."
-            exit "$CURL_EXIT"
+            echo "::error::curl failed (exit $CURL_EXIT). Check BACKEND_URL is reachable: ${CLEAN_URL:0:50}..."
+            exit 1
           fi
 
           # 200 = success, 207 = partial success (some targets failed, others succeeded)
@@ -105,14 +133,13 @@ jobs:
             exit 1
           fi
         env:
-          BACKEND_URL: ${{ secrets.BACKEND_URL }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           GITHUB_RUN_ID: ${{ github.run_id }}
 
-      - name: Sync skipped (secrets not configured)
+      - name: Sync skipped (secrets not configured or invalid)
         if: steps.validate.outputs.secrets_ready == 'false'
         run: |
-          echo "Data sync skipped — required secrets not configured."
+          echo "Data sync skipped — required secrets not configured or BACKEND_URL is malformed."
           echo "This is expected in forks and developer branches."
           echo "Configure BACKEND_URL and CRON_SECRET in repo secrets to enable scheduled sync."
           exit 0
