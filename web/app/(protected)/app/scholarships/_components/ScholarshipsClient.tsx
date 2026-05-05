@@ -772,6 +772,26 @@ export default function ScholarshipsClient({
 				</div>
 			</FadeIn>
 
+			{/* Data freshness notice */}
+			{results && results.items.length > 0 && (() => {
+				const latestUpdate = results.items
+					.map(s => s.updatedAt ? new Date(s.updatedAt).getTime() : 0)
+					.reduce((a, b) => Math.max(a, b), 0);
+				if (!latestUpdate) return null;
+				const daysAgo = Math.floor((Date.now() - latestUpdate) / (1000 * 60 * 60 * 24));
+				const label = daysAgo === 0 ? "today" : daysAgo === 1 ? "yesterday" : `${daysAgo} days ago`;
+				return (
+					<div className="mb-4 flex items-start gap-2 rounded-lg border border-blue-500/20 bg-blue-500/5 px-4 py-2.5">
+						<RefreshCw className="mt-0.5 size-3.5 shrink-0 text-blue-500" />
+						<p className="text-xs text-blue-700 dark:text-blue-400">
+							Scholarship data last synced <span className="font-medium">{label}</span>.
+							Individual scholarship cards show source verification dates.
+							Always confirm deadlines on the official scholarship website before applying.
+						</p>
+					</div>
+				);
+			})()}
+
 			{/* Upcoming Deadlines */}
 			{deadlines.length > 0 && (
 				<Reveal className="mb-6">
