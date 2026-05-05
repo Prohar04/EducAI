@@ -24,15 +24,7 @@ import type { SavedProgramItem, MatchLatestResponse, UserProfile, Session } from
 import { FadeIn } from "@/components/motion/FadeIn";
 import { StaggerChildren, StaggerItem } from "@/components/motion/FadeIn";
 import { AnimatedCard } from "@/components/motion/AnimatedCard";
-
-// ─── UTILITIES ────────────────────────────────────────────────────────────────
-
-function getGreeting(): string {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-  return "Good evening";
-}
+import { DynamicGreeting } from "@/components/app/DynamicGreeting";
 
 // ─── TYPE DEFINITIONS ─────────────────────────────────────────────────────────
 
@@ -549,10 +541,7 @@ export default async function StudyPlanPage() {
       <FadeIn className="mb-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-sm font-medium text-muted-foreground">{getGreeting()}</p>
-            <h1 className="mt-0.5 text-2xl font-bold tracking-tight sm:text-3xl">
-              {sessionData.user.name?.split(" ")[0] ?? "Your Study Plan"}
-            </h1>
+            <DynamicGreeting name={sessionData.user.name} />
             <p className="mt-1 text-sm text-muted-foreground">Your application journey at a glance.</p>
           </div>
           {completeness < 80 && (
