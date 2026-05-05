@@ -1,3 +1,13 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# EducAI AI Server — FastAPI Microservice
+# ═══════════════════════════════════════════════════════════════════════════════
+# This FastAPI server handles all AI-driven operations for the EducAI platform:
+# - Conversational chatbot with profile context
+# - LLM-powered recommendations and scoring
+# - University program scraping and matching
+# - Application strategy generation
+# ═══════════════════════════════════════════════════════════════════════════════
+
 # BASE
 from fastapi import FastAPI, Depends, APIRouter
 
@@ -14,41 +24,64 @@ from .api.v1.scrape_match import router as scrape_match_router
 from .api.v1.strategy import router as strategy_router
 from .middleware.audit_log import AuditLogMiddleware
 
+# ─────────────────────────────────────────────────────────────────────────────
+# FastAPI Application Initialization
+# ─────────────────────────────────────────────────────────────────────────────
 # Init FastAPI app
 app = FastAPI(
-    title="Educai AI server",
-    description="A server for managing AI operations for the Educai platform",
+    title="EducAI AI Server",
+    description="A microservice for AI-powered operations: chat, recommendations, program matching, and strategy generation",
     version="1.0.0",
     lifespan=lifespan,
 )
 
+# Add audit logging middleware
 app.add_middleware(AuditLogMiddleware)
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Public Routes
+# ─────────────────────────────────────────────────────────────────────────────
+# Health check endpoints (unauthenticated, used by deployment orchestration)
 app.include_router(health_router, prefix="/api/v1")
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Protected Routes (Require API Key Authentication)
+# ─────────────────────────────────────────────────────────────────────────────
+# AI Chatbot: Conversational interface with full user profile context
 app.include_router(chat_router, prefix="/api/v1")
 
-
+# Data utility endpoint
 @app.get("/data")
 async def get_data(server_name: str = Depends(checkApiKey)):
+    """Protected data endpoint - requires valid API key via checkApiKey dependency."""
     return {"message": f"Hello {server_name}, here is your data."}
 
 
+# AI Recommendations: Personalized suggestions based on user profile
 app.include_router(recommendations_router, prefix="/api/v1/edu")
+
+# Module 1 Operations: Program matching, scraping, and synchronization
 app.include_router(module1_sync_router, prefix="/api/v1/module1")
+# Web scraping for live university program data
 app.include_router(scrape_match_router, prefix="/api/v1/module1")
+# Application strategy and planning
 app.include_router(strategy_router, prefix="/api/v1/module1")
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Root & Health Endpoints
+# ─────────────────────────────────────────────────────────────────────────────
 
 @app.get("/")
 async def get():
-    return {"message": "Hello, here is your data."}
+    """Root endpoint - basic connectivity check."""
+    return {"message": "EducAI AI Server is running", "version": "1.0.0"}
 
 
-# ---------------------------------------------------------------------------
-# All routes and routers registered below this line require a valid API key.
-# The dependency runs once per request and raises 403 if the key is missing
-# or invalid, before any route handler is executed.
-# ---------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
+# Protected Router Setup
+# ─────────────────────────────────────────────────────────────────────────────
+# All routes registered via protected_router require API key validation
+# The checkApiKey dependency is executed once per request before route handling
 protected_router = APIRouter(dependencies=[Depends(checkApiKey)])
 
 
