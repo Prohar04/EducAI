@@ -533,38 +533,13 @@ export default async function StudyPlanPage() {
   // Auth check
   if (!sessionData) redirect("/auth/signin");
 
-  // Onboarding check - redirect to onboarding if not complete
-  if (profileData && !profileData.onboardingDone) {
+  // Onboarding check — redirect to onboarding if profile is missing or incomplete
+  if (!profileData || !profileData.onboardingDone) {
     redirect("/onboarding");
   }
 
   // Compute real deadlines from saved programs using server-side utility
   const upcomingDeadlines = buildUpcomingDeadlines(savedProgramsData, new Date().getTime());
-
-  // No profile fallback
-  if (!profileData) {
-    return (
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <FadeIn>
-          <div className="mb-6">
-            <p className="text-sm font-medium text-muted-foreground">{getGreeting()}</p>
-            <h1 className="mt-0.5 text-2xl font-bold tracking-tight sm:text-3xl">
-              {sessionData?.user.name?.split(" ")[0] ?? "Study Plan"}
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">Your application journey at a glance.</p>
-          </div>
-
-          <EmptyState
-            icon={GraduationCap}
-            title="Complete your profile to get started"
-            description="Set up your profile to unlock personalized recommendations and insights"
-            ctaText="Set Up Profile"
-            ctaHref="/onboarding"
-          />
-        </FadeIn>
-      </div>
-    );
-  }
 
   const completeness = getProfileCompleteness(profileData);
 

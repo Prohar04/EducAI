@@ -62,21 +62,27 @@ export default async function VerifyEmailPage({
 			<AuthCard>
 				<AuthHeader
 					title="Email verified!"
-					description="Your email has been verified. You can now sign in."
+					description="Your account is confirmed. Sign in to complete your profile setup."
 				/>
 				<div className="mt-8 space-y-4">
 					<div className="flex items-center gap-2 rounded-lg border border-green-500/50 bg-green-500/10 px-3 py-2 text-sm text-green-600 dark:text-green-400">
 						<CheckCircle2 className="size-4 shrink-0" />
 						{result.message}
 					</div>
-					<div className="text-center">
-						<Link
-							href="/auth/signin"
-							className="inline-flex items-center gap-1 font-medium text-primary transition-colors hover:text-primary/80"
-						>
-							Go to Sign In
-						</Link>
+					<div className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+						<p className="font-medium text-foreground mb-1">What happens next?</p>
+						<ol className="list-decimal list-inside space-y-1 text-xs">
+							<li>Sign in with your email and password</li>
+							<li>Complete your profile setup (takes ~2 minutes)</li>
+							<li>Access your personalized study plan</li>
+						</ol>
 					</div>
+					<Link
+						href="/auth/signin"
+						className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+					>
+						Sign In and Continue
+					</Link>
 				</div>
 			</AuthCard>
 		);
