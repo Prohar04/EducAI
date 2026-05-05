@@ -1,3 +1,9 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Health Check Endpoints
+# ═══════════════════════════════════════════════════════════════════════════════
+# These endpoints are used by orchestration systems (Docker, Kubernetes, Render)
+# to verify service health and readiness. They do not require authentication.
+
 import time
 from datetime import datetime, timezone
 from fastapi import APIRouter
@@ -7,11 +13,21 @@ from ...core.config import settings
 
 router = APIRouter()
 
+# Track server uptime from module load
 _START_TIME = time.time()
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Liveness & Readiness Probes
+# ─────────────────────────────────────────────────────────────────────────────
+
 @router.get("/health")
 async def health_check():
+    """
+    GET /health
+    General health check endpoint. Returned by orchestration systems to verify
+    service is alive and able to respond. Includes uptime and environment info.
+    """
     return {
         "status": "ok",
         "service": "educai-ai",
@@ -24,6 +40,11 @@ async def health_check():
 
 @router.head("/health")
 async def health_check_head():
+    """
+    HEAD /health
+    Lightweight health check used by load balancers. Responds with 200 OK.
+    Does not return a body, only HTTP status.
+    """
     return Response(status_code=200)
 
 
