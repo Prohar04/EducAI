@@ -23,30 +23,96 @@ jobs:
     timeout-minutes: 10
 
     steps:
+      - name: Validate required secrets
+        id: validate
+        run: |
+          MISSING=false
+
+          if [ -z "$BACKEND_URL" ]; then
+            echo "::warning::BACKEND_URL secret is not configured. Skipping sync."
+            echo "   To enable: Settings → Secrets → Actions → BACKEND_URL = https://your-backend.onrender.com"
+            MISSING=true
+          fi
+
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::warning::CRON_SECRET secret is not configured. Skipping sync."
+            echo "   To enable: Settings → Secrets → Actions → CRON_SECRET = <same value as server CRON_SECRET>"
+            MISSING=true
+          fi
+
+          if [ "$MISSING" = "true" ]; then
+            echo "secrets_ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "secrets_ready=true" >> "$GITHUB_OUTPUT"
+            echo "Backend URL configured: ${BACKEND_URL:0:30}..."
+          fi
+        env:
+          BACKEND_URL: ${{ secrets.BACKEND_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
       - name: Trigger data sync
+        if: steps.validate.outputs.secrets_ready == 'true'
         run: |
           TARGET="${{ github.event.inputs.target || 'all' }}"
           echo "Triggering data sync for target: $TARGET"
+          echo "Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo "Run ID: $GITHUB_RUN_ID"
 
-          RESPONSE=$(curl -s -o /tmp/sync_response.json -w "%{http_code}" \
-            -X POST "${{ secrets.BACKEND_URL }}/data-sync/run" \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+          HTTP_STATUS=$(curl -s -o /tmp/sync_response.json -w "%{http_code}" \
+            --fail-with-body \
+            -X POST "${BACKEND_URL}/data-sync/run" \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
             -H "Content-Type: application/json" \
+            -H "X-GitHub-Run-Id: ${GITHUB_RUN_ID}" \
             -d "{\"target\": \"$TARGET\"}" \
-            --max-time 120)
+            --max-time 120 \
+            --retry 2 \
+            --retry-delay 5 \
+            --retry-connrefused) || CURL_EXIT=$?
 
-          echo "HTTP Status: $RESPONSE"
-          echo "Response body:"
-          cat /tmp/sync_response.json | python3 -m json.tool 2>/dev/null || cat /tmp/sync_response.json
+          CURL_EXIT="${CURL_EXIT:-0}"
+          echo "HTTP Status: $HTTP_STATUS"
+          echo "Curl exit code: $CURL_EXIT"
+          echo ""
+          echo "=== Response body ==="
+          python3 -m json.tool /tmp/sync_response.json 2>/dev/null || cat /tmp/sync_response.json
+          echo "=== End response ==="
 
-          # Treat 200 and 207 (partial) as acceptable
-          if [ "$RESPONSE" -eq 200 ] || [ "$RESPONSE" -eq 207 ]; then
-            echo "Sync completed successfully (status $RESPONSE)"
+          if [ "$CURL_EXIT" -ne 0 ]; then
+            echo "::error::Curl failed (exit $CURL_EXIT). Check BACKEND_URL is reachable: ${BACKEND_URL:0:50}..."
+            exit "$CURL_EXIT"
+          fi
+
+          # 200 = success, 207 = partial success (some targets failed, others succeeded)
+          if [ "$HTTP_STATUS" -eq 200 ] || [ "$HTTP_STATUS" -eq 207 ]; then
+            if [ "$HTTP_STATUS" -eq 207 ]; then
+              echo "::warning::Sync completed with partial failures (207). Check response body for details."
+            else
+              echo "Sync completed successfully (200)."
+            fi
             exit 0
+          elif [ "$HTTP_STATUS" -eq 409 ]; then
+            echo "::warning::Sync already running (409). Another sync job is in progress — this run is a no-op."
+            exit 0
+          elif [ "$HTTP_STATUS" -eq 403 ]; then
+            echo "::error::Authorization failed (403). Verify CRON_SECRET matches server configuration."
+            exit 1
+          elif [ "$HTTP_STATUS" -eq 000 ]; then
+            echo "::error::Could not connect to backend. Verify BACKEND_URL is correct and the server is running."
+            exit 1
           else
-            echo "Sync failed with status $RESPONSE"
+            echo "::error::Sync failed with HTTP $HTTP_STATUS. See response body above for details."
             exit 1
           fi
         env:
           BACKEND_URL: ${{ secrets.BACKEND_URL }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+
+      - name: Sync skipped (secrets not configured)
+        if: steps.validate.outputs.secrets_ready == 'false'
+        run: |
+          echo "Data sync skipped — required secrets not configured."
+          echo "This is expected in forks and developer branches."
+          echo "Configure BACKEND_URL and CRON_SECRET in repo secrets to enable scheduled sync."
+          exit 0
