@@ -431,7 +431,10 @@ export const getLatestMatch = async (req: AuthRequest, res: Response) => {
           orderBy: { score: 'desc' },
           include: {
             program: {
-              include: { university: { include: { country: true } } },
+              include: {
+                university: { include: { country: true } },
+                deadlines:  { orderBy: { deadline: 'asc' }, take: 3 },
+              },
             },
           },
         },
@@ -449,14 +452,23 @@ export const getLatestMatch = async (req: AuthRequest, res: Response) => {
       createdAt: r.createdAt,
       rawData: r.program
         ? {
-            program_title:        r.program.title,
-            university_name:      r.program.university.name,
-            country:              r.program.university.country.code,
-            level:                r.program.level,
-            field:                r.program.field,
-            tuition_usd_per_year: r.program.tuitionMinUSD,
-            application_url:      r.program.sourceUrl,
-            description:          r.program.description,
+            program_title:           r.program.title,
+            university_name:         r.program.university.name,
+            country:                 r.program.university.country.name,
+            country_code:            r.program.university.country.code,
+            city:                    r.program.university.city ?? null,
+            university_website:      r.program.university.website ?? null,
+            university_description:  r.program.university.description ?? null,
+            level:                   r.program.level,
+            field:                   r.program.field,
+            duration_months:         r.program.durationMonths ?? null,
+            tuition_usd_per_year:    r.program.tuitionMinUSD ?? null,
+            tuition_max_usd:         r.program.tuitionMaxUSD ?? null,
+            application_url:         r.program.sourceUrl ?? null,
+            description:             r.program.description ?? null,
+            next_deadline:           r.program.deadlines[0]?.deadline ?? null,
+            next_deadline_term:      r.program.deadlines[0]?.term ?? null,
+            updated_at:              r.program.updatedAt,
           }
         : (r.rawData as Record<string, unknown> | null),
     }));
