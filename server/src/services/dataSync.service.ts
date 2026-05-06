@@ -118,8 +118,8 @@ const SOURCES: Array<{
   {
     key: 'scholarships',
     label: 'Scholarships',
-    description: 'Checks scholarship freshness, counts active records, flags expired deadlines',
-    staleHours: 48,
+    description: 'Expires scholarships with past deadlines, updates lastVerified on active records',
+    staleHours: 24,
     category: 'Funding',
   },
   {
@@ -175,53 +175,89 @@ async function runScholarshipsSync(log: ReturnType<typeof makeLogger>): Promise<
   };
 
   try {
-    srcLog.info('Starting scholarship freshness check');
+    srcLog.info('Starting scholarship freshness check and expiry sweep');
     log.info('[scholarships] starting freshness check');
 
-    const [total, active, withDeadlines, expiredDeadlines, recentlyUpdated] = await Promise.all([
-      prisma.scholarship.count(),
-      prisma.scholarship.count({ where: { isActive: true } }),
-      prisma.scholarship.count({ where: { deadlines: { some: {} } } }),
-      prisma.scholarshipDeadline.count({ where: { deadline: { lt: new Date() } } }),
-      prisma.scholarship.count({
-        where: { updatedAt: { gte: new Date(Date.now() - 7 * 86400_000) } },
-      }),
-    ]);
+    const now = new Date();
 
-    srcLog.info(`Database query complete — total=${total} active=${active} withDeadlines=${withDeadlines}`);
-    srcLog.info(`Expired deadlines=${expiredDeadlines} updatedLast7d=${recentlyUpdated}`);
-    log.info(`[scholarships] total=${total} active=${active} expired=${expiredDeadlines}`);
+    // ── Step 1: Count overall state before changes ───────────────────────────
+    const totalBefore = await prisma.scholarship.count();
+    const activeBefore = await prisma.scholarship.count({ where: { isActive: true } });
 
-    if (total === 0) {
+    srcLog.info(`Before sweep — total=${totalBefore} active=${activeBefore}`);
+    log.info(`[scholarships] before sweep: total=${totalBefore} active=${activeBefore}`);
+
+    if (totalBefore === 0) {
       srcLog.error('No scholarships found in database');
       srcLog.warn('Populate via: npm run seed:scholarships');
       result.errors.push('No scholarships in database — run `npm run seed:scholarships` to populate');
       result.status = 'failed';
-    } else {
-      result.recordsProcessed = total;
-      result.recordsUpdated = recentlyUpdated;
-
-      result.notes.push(`${total} total scholarships (${active} active)`);
-      result.notes.push(`${withDeadlines} have deadline records; ${expiredDeadlines} deadlines are past`);
-
-      srcLog.info(`${total} total scholarships, ${active} active, ${withDeadlines} with deadlines`);
-
-      if (recentlyUpdated > 0) {
-        const note = `${recentlyUpdated} updated in the last 7 days`;
-        result.notes.push(note);
-        srcLog.info(note);
-      }
-      if (expiredDeadlines > 0) {
-        const note = `⚠ ${expiredDeadlines} expired deadlines — consider refreshing scholarship data`;
-        result.notes.push(note);
-        srcLog.warn(`${expiredDeadlines} expired deadlines detected`);
-      }
-
-      result.status = 'success';
-      srcLog.info('Scholarship check complete — status=success');
+      result.durationMs = Date.now() - start;
+      return result;
     }
+
+    // ── Step 2: Expire scholarships where ALL deadlines are in the past ──────
+    // Find active scholarships that have at least one deadline and no future deadline.
+    const toExpire = await prisma.scholarship.findMany({
+      where: {
+        isActive: true,
+        deadlines: { some: {} },
+        NOT: { deadlines: { some: { deadline: { gte: now } } } },
+      },
+      select: { id: true, title: true },
+    });
+
+    let expiredCount = 0;
+    if (toExpire.length > 0) {
+      await prisma.scholarship.updateMany({
+        where: { id: { in: toExpire.map(s => s.id) } },
+        data: { isActive: false },
+      });
+      expiredCount = toExpire.length;
+      srcLog.warn(`Expired ${expiredCount} scholarships (all deadlines past): ${toExpire.slice(0, 3).map(s => s.title).join(', ')}${toExpire.length > 3 ? '...' : ''}`);
+      log.info(`[scholarships] expired ${expiredCount} scholarships`);
+      result.notes.push(`${expiredCount} scholarships marked inactive — all application deadlines have passed`);
+    } else {
+      srcLog.info('No scholarships to expire — all active scholarships have at least one future deadline');
+    }
+
+    // ── Step 3: Update lastVerified on all still-active scholarships ─────────
+    const verifyResult = await prisma.scholarship.updateMany({
+      where: { isActive: true },
+      data: { lastVerified: now },
+    });
+    srcLog.info(`Updated lastVerified on ${verifyResult.count} active scholarships`);
+    log.info(`[scholarships] verified ${verifyResult.count} active scholarships`);
+
+    // ── Step 4: Count upcoming vs no-deadline scholarships ───────────────────
+    const [activeAfter, withFutureDeadlines, noDeadlines] = await Promise.all([
+      prisma.scholarship.count({ where: { isActive: true } }),
+      prisma.scholarship.count({
+        where: { isActive: true, deadlines: { some: { deadline: { gte: now } } } },
+      }),
+      prisma.scholarship.count({
+        where: { isActive: true, deadlines: { none: {} } },
+      }),
+    ]);
+
+    srcLog.info(`After sweep — active=${activeAfter} withFutureDeadlines=${withFutureDeadlines} noDeadlines=${noDeadlines}`);
+
+    result.recordsProcessed = totalBefore;
+    result.recordsUpdated = verifyResult.count + expiredCount;
+    result.recordsSkipped = noDeadlines;
+
+    result.notes.push(`${activeAfter} active scholarships (${withFutureDeadlines} with upcoming deadlines)`);
+    if (noDeadlines > 0) {
+      result.notes.push(`${noDeadlines} active scholarships have no deadline listed — deadline unknown`);
+    }
+    if (expiredCount > 0) {
+      result.notes.push(`${expiredCount} scholarships removed from active listings (all deadlines past)`);
+    }
+
+    result.status = 'success';
+    srcLog.info(`Scholarship sweep complete — expired=${expiredCount} verified=${verifyResult.count} status=success`);
   } catch (err) {
-    const msg = `Scholarship check failed: ${String(err)}`;
+    const msg = `Scholarship sync failed: ${String(err)}`;
     result.errors.push(msg);
     result.status = 'failed';
     srcLog.error(msg);

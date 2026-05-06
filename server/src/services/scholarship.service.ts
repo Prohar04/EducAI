@@ -82,9 +82,22 @@ export async function searchScholarships(filters: ScholarshipFilters) {
   const { q, countryCode, level, field, fundingType, financialNeed, page = 1, limit = 20 } = filters;
 
   const skip = (page - 1) * limit;
+  const now = new Date();
 
   // Build the where clause with proper Prisma types
-  const andClauses: Prisma.ScholarshipWhereInput[] = [{ isActive: true }];
+  // Belt-and-suspenders: exclude any scholarship where every deadline is past,
+  // even if isActive was not yet swept by the sync job.
+  const andClauses: Prisma.ScholarshipWhereInput[] = [
+    { isActive: true },
+    {
+      OR: [
+        // Has at least one future deadline
+        { deadlines: { some: { deadline: { gte: now } } } },
+        // OR has no deadlines at all (deadline unknown — keep showing)
+        { deadlines: { none: {} } },
+      ],
+    },
+  ];
 
   if (countryCode) {
     andClauses.push({ OR: [{ countryCode }, { countryCode: null }] });
@@ -485,11 +498,18 @@ export async function predictFundingProbability(
 // ── Eligible Scholarships ─────────────────────────────────────────────────────
 
 export async function getEligibleScholarships(profile: UserProfileSnapshot, limit = 10) {
+  const now = new Date();
   const scholarships = await prisma.scholarship.findMany({
-    where: { isActive: true },
+    where: {
+      isActive: true,
+      OR: [
+        { deadlines: { some: { deadline: { gte: now } } } },
+        { deadlines: { none: {} } },
+      ],
+    },
     include: { deadlines: { orderBy: { deadline: 'asc' }, take: 1 } },
     orderBy: { createdAt: 'desc' },
-    take: 50, // check top 50 for eligibility
+    take: 50,
   });
 
   const results = await Promise.all(
