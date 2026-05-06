@@ -573,11 +573,19 @@ export default function DataUpdatesPage() {
                     <span className="h-1.5 w-1.5 rounded-full bg-blue-500 shrink-0" />
                     {recentSuccessfulRun.recordsUpdated}{" "}
                     {recentSuccessfulRun.target === "scholarships" ? "scholarships" : "items"}{" "}
-                    refreshed with new information
+                    verified and updated
                   </p>
                 )}
+                {/* Per-source notes from this run */}
+                {recentSuccessfulRun.sources.flatMap(s => s.notes).map((note, i) => (
+                  <p key={i} className="flex items-start gap-2">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground/60" />
+                    {note}
+                  </p>
+                ))}
                 {recentSuccessfulRun.recordsAdded === 0 &&
-                  recentSuccessfulRun.recordsUpdated === 0 && (
+                  recentSuccessfulRun.recordsUpdated === 0 &&
+                  recentSuccessfulRun.sources.flatMap(s => s.notes).length === 0 && (
                     <p className="flex items-center gap-2">
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
                       {sourceNiceLabel(recentSuccessfulRun.target)} data was verified and is up to
