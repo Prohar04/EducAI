@@ -322,6 +322,8 @@ export interface ProgramListResult {
 	page: number;
 	limit: number;
 	total: number;
+	freshOnlyMode?: boolean;
+	staleHiddenCount?: number;
 	hasStaleData?: boolean;
 	staleCount?: number;
 }
