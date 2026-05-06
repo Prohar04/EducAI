@@ -3,10 +3,11 @@ import { searchPrograms, getSavedPrograms } from "@/lib/auth/action";
 import ProgramFilters from "./_components/ProgramFilters";
 import SaveButton from "./_components/SaveButton";
 import NlpSearchPanel from "./_components/NlpSearchPanel";
-import type { Program } from "@/types/auth.type";
+import type { Program, FreshnessStatus } from "@/types/auth.type";
 import { ProgramsIllustration } from "@/components/illustrations";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { StaggerChildren, StaggerItem } from "@/components/motion/FadeIn";
+import { AlertTriangle } from "lucide-react";
 
 function levelLabel(level: string) {
 	const map: Record<string, string> = {
@@ -24,6 +25,27 @@ function tuitionRange(program: Program) {
 	const min = `$${program.tuitionMinUSD.toLocaleString()}`;
 	const max = program.tuitionMaxUSD != null ? `$${program.tuitionMaxUSD.toLocaleString()}` : null;
 	return max ? `${min} – ${max}/yr` : `From ${min}/yr`;
+}
+
+const FRESHNESS_CONFIG: Record<
+	FreshnessStatus,
+	{ label: string; className: string }
+> = {
+	live:               { label: "Live",     className: "bg-green-500/15 text-green-700 dark:text-green-400" },
+	recent:             { label: "Recent",   className: "bg-blue-500/15 text-blue-700 dark:text-blue-400" },
+	cached:             { label: "Cached",   className: "bg-amber-500/15 text-amber-700 dark:text-amber-400" },
+	stale:              { label: "Stale",    className: "bg-red-500/15 text-red-700 dark:text-red-400" },
+	source_unavailable: { label: "Offline",  className: "bg-muted text-muted-foreground" },
+};
+
+function FreshnessBadge({ status }: { status: FreshnessStatus | undefined }) {
+	if (!status) return null;
+	const cfg = FRESHNESS_CONFIG[status];
+	return (
+		<span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${cfg.className}`}>
+			{cfg.label}
+		</span>
+	);
 }
 
 export default async function ProgramsPage({
@@ -44,6 +66,8 @@ export default async function ProgramsPage({
 		return `/app/programs?${p.toString()}`;
 	};
 
+	const hasStaleData = result?.hasStaleData ?? false;
+
 	return (
 		<div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 			<FadeIn className="mb-8">
@@ -56,6 +80,20 @@ export default async function ProgramsPage({
 			<NlpSearchPanel />
 
 			<ProgramFilters current={params} />
+
+			{/* Stale data warning */}
+			{hasStaleData && (
+				<FadeIn>
+					<div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/8 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
+						<AlertTriangle className="mt-0.5 size-4 shrink-0" />
+						<div>
+							<span className="font-semibold">Some data may be outdated.</span>{" "}
+							{result?.staleCount ?? 0} programme{(result?.staleCount ?? 0) !== 1 ? "s" : ""} were last verified more than 30 days ago.
+							Visit the official programme page to confirm current details before applying.
+						</div>
+					</div>
+				</FadeIn>
+			)}
 
 			{result == null ? (
 				<p className="mt-8 text-destructive">
@@ -88,6 +126,7 @@ export default async function ProgramsPage({
 												<span className="inline-block rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
 													{program.field}
 												</span>
+												<FreshnessBadge status={program.freshnessStatus} />
 											</div>
 											<SaveButton
 												programId={program.id}
