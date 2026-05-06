@@ -110,6 +110,43 @@ function countryFlag(code: string | null | undefined) {
 	return c?.flag ?? "🌍";
 }
 
+function getFreshnessBadge(
+	lastVerified: string | null | undefined,
+	tags: string[] | null | undefined,
+	hasDeadline: boolean,
+): { label: string; className: string } | null {
+	if (!hasDeadline) {
+		return {
+			label: "Deadline unknown",
+			className: "bg-yellow-500/15 text-yellow-700 dark:text-yellow-400 border-yellow-500/30",
+		};
+	}
+	if (!lastVerified) {
+		return {
+			label: "Cached",
+			className: "bg-muted/60 text-muted-foreground border-border",
+		};
+	}
+	const ageMs = Date.now() - new Date(lastVerified).getTime();
+	const isLiveSourced = Array.isArray(tags) && tags.includes("live-sourced");
+	if (ageMs < 24 * 60 * 60 * 1000 && isLiveSourced) {
+		return {
+			label: "Live",
+			className: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
+		};
+	}
+	if (ageMs < 72 * 60 * 60 * 1000) {
+		return {
+			label: "Recent",
+			className: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30",
+		};
+	}
+	return {
+		label: "Cached",
+		className: "bg-muted/60 text-muted-foreground border-border",
+	};
+}
+
 const LEVEL_LABELS: Record<string, string> = { BSC: "Bachelor's", MSC: "Master's", PHD: "PhD" };
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
@@ -495,6 +532,21 @@ function ScholarshipCard({
 							{eligibilityLabel(eligibility.status)}
 						</span>
 					)}
+					{(() => {
+						const badge = getFreshnessBadge(
+							scholarship.lastVerified,
+							scholarship.tags,
+							(scholarship.deadlines?.length ?? 0) > 0,
+						);
+						if (!badge) return null;
+						return (
+							<span
+								className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${badge.className}`}
+							>
+								{badge.label}
+							</span>
+						);
+					})()}
 				</div>
 			</div>
 

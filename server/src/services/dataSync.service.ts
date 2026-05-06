@@ -15,6 +15,7 @@
 
 import prisma from '#src/config/database.ts';
 import logger from '#src/config/logger.ts';
+import { runLiveScholarshipRefresh, isLiveRefreshAvailable } from '#src/services/liveScholarship.service.ts';
 
 // ─── Public Types ────────────────────────────────────────────────────────────
 
@@ -103,6 +104,10 @@ export interface SyncStatusResponse {
     failedLastRun: number;
     running: number;
     totalRecordsManaged: number;
+  };
+  providers: {
+    scholarshipLive: boolean;
+    programsCrawler: boolean;
   };
 }
 
@@ -256,6 +261,36 @@ async function runScholarshipsSync(log: ReturnType<typeof makeLogger>): Promise<
 
     result.status = 'success';
     srcLog.info(`Scholarship sweep complete — expired=${expiredCount} verified=${verifyResult.count} status=success`);
+
+    // ── Step 5: Live scholarship refresh via Serper + OpenAI ────────────────
+    if (isLiveRefreshAvailable()) {
+      srcLog.info('Live refresh available — running Serper search + LLM extraction');
+      log.info('[scholarships] starting live scholarship refresh');
+      try {
+        const liveResult = await runLiveScholarshipRefresh({ force: false });
+        if (liveResult.errors.length === 1 && liveResult.errors[0]?.includes('Recently refreshed')) {
+          srcLog.info('Live refresh skipped — data was refreshed recently');
+          result.notes.push('Live refresh skipped — scholarship data was already refreshed within the last 6 hours');
+        } else {
+          srcLog.info(`Live refresh done — discovered=${liveResult.discovered} upserted=${liveResult.upserted} skipped=${liveResult.skipped} duration=${liveResult.durationMs}ms`);
+          result.notes.push(
+            `Live search: ${liveResult.discovered} results discovered via ${liveResult.sourcesUsed.join(' + ')}`,
+          );
+          result.notes.push(`Live upsert: ${liveResult.upserted} scholarships added/updated from live search`);
+          result.recordsAdded += liveResult.upserted;
+          if (liveResult.errors.length > 0) {
+            result.notes.push(`Live refresh encountered ${liveResult.errors.length} non-fatal errors`);
+          }
+        }
+      } catch (liveErr) {
+        const msg = `Live scholarship refresh error: ${String(liveErr)}`;
+        srcLog.warn(msg);
+        result.notes.push(msg);
+      }
+    } else {
+      srcLog.info('Live refresh not configured (SERPER_API_KEY missing) — using cached DB data only');
+      result.notes.push('Live refresh not configured (SERPER_API_KEY missing) — using cached DB data only');
+    }
   } catch (err) {
     const msg = `Scholarship sync failed: ${String(err)}`;
     result.errors.push(msg);
@@ -744,6 +779,10 @@ export async function getSyncStatus(): Promise<SyncStatusResponse> {
         running: activeJobRow ? 1 : 0,
         totalRecordsManaged: scholarshipCount + programCount,
       },
+      providers: {
+        scholarshipLive: isLiveRefreshAvailable(),
+        programsCrawler: !!process.env.AI_SERVER_URL,
+      },
     };
   } catch (err) {
     logger.error(`[dataSync] getSyncStatus failed: ${err}`);
@@ -759,6 +798,10 @@ export async function getSyncStatus(): Promise<SyncStatusResponse> {
       successRate: 0,
       nextScheduledRun: nextRun.toISOString(),
       summary: { totalSources: 0, healthySources: 0, staleSources: 0, failedLastRun: 0, running: 0, totalRecordsManaged: 0 },
+      providers: {
+        scholarshipLive: isLiveRefreshAvailable(),
+        programsCrawler: !!process.env.AI_SERVER_URL,
+      },
     };
   }
 }
