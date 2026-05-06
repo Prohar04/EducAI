@@ -48,7 +48,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null, // most countries — managed per country
     tags: ['merit', 'research', 'government', 'prestigious'],
     deadlines: [
-      { term: 'Fall 2026', deadline: '2025-10-15T00:00:00Z' },
+      { term: 'Fall 2027', deadline: '2026-10-15T00:00:00Z' },
     ],
   },
   {
@@ -68,7 +68,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: ['US'],
     tags: ['STEM', 'research', 'PhD', 'government'],
     deadlines: [
-      { term: 'Fall 2026', deadline: '2025-10-18T00:00:00Z' },
+      { term: 'Fall 2027', deadline: '2026-10-18T00:00:00Z' },
     ],
   },
   {
@@ -88,7 +88,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null,
     tags: ['prestigious', 'leadership', 'interdisciplinary'],
     deadlines: [
-      { term: 'Fall 2026', deadline: '2025-10-02T00:00:00Z' },
+      { term: 'Fall 2027', deadline: '2026-10-02T00:00:00Z' },
     ],
   },
   {
@@ -108,7 +108,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null,
     tags: ['merit', 'PhD', 'Ivy League'],
     deadlines: [
-      { term: 'Fall 2026', deadline: '2025-12-15T00:00:00Z' },
+      { term: 'Fall 2027', deadline: '2026-12-15T00:00:00Z' },
     ],
   },
 
@@ -130,7 +130,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null, // 160+ countries
     tags: ['government', 'UK', 'leadership', 'prestigious', 'merit'],
     deadlines: [
-      { term: 'Fall 2026', deadline: '2025-11-05T00:00:00Z' },
+      { term: 'Fall 2027', deadline: '2026-11-05T00:00:00Z' },
     ],
   },
   {
@@ -150,7 +150,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null, // Commonwealth countries
     tags: ['commonwealth', 'development', 'government', 'international'],
     deadlines: [
-      { term: 'Fall 2026', deadline: '2025-12-12T00:00:00Z' },
+      { term: 'Fall 2027', deadline: '2026-12-12T00:00:00Z' },
     ],
   },
   {
@@ -170,7 +170,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null,
     tags: ['Oxford', 'prestigious', 'merit', 'PhD', 'research'],
     deadlines: [
-      { term: 'Fall 2026', deadline: '2026-01-15T00:00:00Z' },
+      { term: 'Fall 2027', deadline: '2027-01-15T00:00:00Z' },
     ],
   },
 
@@ -192,7 +192,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null,
     tags: ['Canada', 'government', 'PhD', 'research', 'leadership'],
     deadlines: [
-      { term: 'Fall 2026', deadline: '2025-11-01T00:00:00Z' },
+      { term: 'Fall 2027', deadline: '2026-11-01T00:00:00Z' },
     ],
   },
   {
@@ -212,7 +212,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: ['CA'],
     tags: ['Canada', 'government', 'MSc', 'merit'],
     deadlines: [
-      { term: 'Fall 2026', deadline: '2025-12-01T00:00:00Z' },
+      { term: 'Fall 2027', deadline: '2026-12-01T00:00:00Z' },
     ],
   },
   {
@@ -232,7 +232,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null,
     tags: ['Canada', 'university', 'international', 'merit'],
     deadlines: [
-      { term: 'Fall 2026', deadline: '2026-02-01T00:00:00Z' },
+      { term: 'Fall 2027', deadline: '2027-02-01T00:00:00Z' },
     ],
   },
 
@@ -254,7 +254,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null, // Asia Pacific and Africa focus
     tags: ['Australia', 'government', 'development', 'international'],
     deadlines: [
-      { term: 'Fall 2026', deadline: '2025-04-30T00:00:00Z' },
+      { term: 'Fall 2027', deadline: '2026-08-31T00:00:00Z' },
     ],
   },
   {
@@ -274,8 +274,8 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null,
     tags: ['Australia', 'research', 'PhD', 'government'],
     deadlines: [
-      { term: 'Semester 1 2026', deadline: '2025-10-31T00:00:00Z' },
-      { term: 'Semester 2 2026', deadline: '2026-04-30T00:00:00Z' },
+      { term: 'Semester 1 2027', deadline: '2026-10-31T00:00:00Z' },
+      { term: 'Semester 2 2027', deadline: '2027-04-30T00:00:00Z' },
     ],
   },
   {
@@ -295,7 +295,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null,
     tags: ['Australia', 'university', 'research', 'merit'],
     deadlines: [
-      { term: 'Semester 1 2027', deadline: '2026-10-31T00:00:00Z' },
+      { term: 'Semester 1 2028', deadline: '2027-10-31T00:00:00Z' },
     ],
   },
 
@@ -317,7 +317,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null, // developing countries
     tags: ['Germany', 'DAAD', 'development', 'government', 'international'],
     deadlines: [
-      { term: 'Winter 2026/27', deadline: '2026-07-15T00:00:00Z' },
+      { term: 'Winter 2027/28', deadline: '2027-07-15T00:00:00Z' },
     ],
   },
   {
@@ -337,7 +337,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null,
     tags: ['Germany', 'politics', 'social sciences', 'merit', 'leadership'],
     deadlines: [
-      { term: 'Winter 2026/27', deadline: '2026-01-15T00:00:00Z' },
+      { term: 'Winter 2027/28', deadline: '2027-01-15T00:00:00Z' },
     ],
   },
   {
@@ -357,8 +357,8 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null,
     tags: ['Germany', 'environment', 'sustainability', 'merit', 'politics'],
     deadlines: [
-      { term: 'Spring 2026', deadline: '2025-09-01T00:00:00Z' },
-      { term: 'Fall 2026', deadline: '2026-03-01T00:00:00Z' },
+      { term: 'Spring 2027', deadline: '2026-09-01T00:00:00Z' },
+      { term: 'Fall 2027', deadline: '2027-03-01T00:00:00Z' },
     ],
   },
 
@@ -380,8 +380,8 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null, // non-UK citizens
     tags: ['Cambridge', 'prestigious', 'leadership', 'research', 'global'],
     deadlines: [
-      { term: 'Fall 2026', deadline: '2025-10-15T00:00:00Z' },
-      { term: 'Fall 2026 (US citizens)', deadline: '2025-12-04T00:00:00Z' },
+      { term: 'Fall 2027', deadline: '2026-10-15T00:00:00Z' },
+      { term: 'Fall 2027 (US citizens)', deadline: '2026-12-04T00:00:00Z' },
     ],
   },
   {
@@ -401,7 +401,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null,
     tags: ['China', 'leadership', 'global', 'prestigious', 'business'],
     deadlines: [
-      { term: 'Fall 2026', deadline: '2025-09-18T00:00:00Z' },
+      { term: 'Fall 2027', deadline: '2026-09-18T00:00:00Z' },
     ],
   },
   {
@@ -421,7 +421,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null,
     tags: ['Europe', 'EU', 'joint degree', 'international', 'multi-country'],
     deadlines: [
-      { term: 'Fall 2026', deadline: '2026-02-15T00:00:00Z' },
+      { term: 'Fall 2027', deadline: '2027-02-15T00:00:00Z' },
     ],
   },
   {
@@ -441,7 +441,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null, // non-US women
     tags: ['women', 'US', 'merit', 'gender', 'research'],
     deadlines: [
-      { term: 'Fall 2026', deadline: '2025-11-15T00:00:00Z' },
+      { term: 'Fall 2027', deadline: '2026-11-15T00:00:00Z' },
     ],
   },
   {
@@ -461,7 +461,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null, // developing country citizens
     tags: ['development', 'global', 'financial need', 'international'],
     deadlines: [
-      { term: 'Fall 2026', deadline: '2026-03-31T00:00:00Z' },
+      { term: 'Fall 2027', deadline: '2027-03-31T00:00:00Z' },
     ],
   },
   {
@@ -481,7 +481,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null,
     tags: ['Japan', 'government', 'MEXT', 'international', 'research'],
     deadlines: [
-      { term: 'Fall 2026', deadline: '2026-05-15T00:00:00Z' },
+      { term: 'Fall 2027', deadline: '2026-09-15T00:00:00Z' },
     ],
   },
   {
@@ -501,7 +501,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null,
     tags: ['South Korea', 'government', 'Asia', 'STEM', 'research'],
     deadlines: [
-      { term: 'Fall 2026', deadline: '2026-02-28T00:00:00Z' },
+      { term: 'Fall 2027', deadline: '2027-02-28T00:00:00Z' },
     ],
   },
 
@@ -523,7 +523,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null,
     tags: ['undergraduate', 'global', 'merit', 'partial'],
     deadlines: [
-      { term: 'Fall 2026', deadline: '2026-04-30T00:00:00Z' },
+      { term: 'Fall 2027', deadline: '2027-04-30T00:00:00Z' },
     ],
   },
   {
@@ -543,7 +543,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null, // Sub-Saharan African students
     tags: ['Africa', 'undergraduate', 'financial need', 'leadership', 'development'],
     deadlines: [
-      { term: 'Fall 2026', deadline: '2026-01-31T00:00:00Z' },
+      { term: 'Fall 2027', deadline: '2027-01-31T00:00:00Z' },
     ],
   },
   {
@@ -563,7 +563,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null,
     tags: ['pre-university', 'Yale', 'leadership', 'summer', 'merit'],
     deadlines: [
-      { term: 'Summer 2026', deadline: '2026-03-10T00:00:00Z' },
+      { term: 'Summer 2027', deadline: '2027-03-10T00:00:00Z' },
     ],
   },
   {
@@ -583,7 +583,7 @@ const SCHOLARSHIPS: ScholarshipSeed[] = [
     eligibleNationalities: null, // specified countries only
     tags: ['Sweden', 'leadership', 'professional', 'merit', 'Europe'],
     deadlines: [
-      { term: 'Fall 2026', deadline: '2026-02-10T00:00:00Z' },
+      { term: 'Fall 2027', deadline: '2027-02-10T00:00:00Z' },
     ],
   },
 ];
@@ -615,7 +615,7 @@ async function main() {
       eligibleNationalities: seed.eligibleNationalities ?? undefined,
       tags: seed.tags,
       isActive: true,
-      lastVerified: new Date('2026-04-12'),
+      lastVerified: new Date('2026-05-06'),
     };
 
     if (existing) {
