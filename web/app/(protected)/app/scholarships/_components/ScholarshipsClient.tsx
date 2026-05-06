@@ -17,6 +17,7 @@ import {
 	Search,
 	ShieldCheck,
 	SlidersHorizontal,
+	Sparkles,
 	TrendingUp,
 	X,
 } from "lucide-react";
@@ -602,6 +603,23 @@ function ScholarshipCard({
 				)}
 			</div>
 
+			{/* Profile match reasons */}
+			{scholarship.matchReasons && scholarship.matchReasons.length > 0 && (
+				<div className="mt-3 rounded-lg border border-emerald-500/15 bg-emerald-500/5 px-3 py-2">
+					<p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
+						Why it matches you
+					</p>
+					<ul className="space-y-0.5">
+						{scholarship.matchReasons.slice(0, 3).map((r, i) => (
+							<li key={i} className="flex items-center gap-1.5 text-[11px] text-emerald-700 dark:text-emerald-300">
+								<span className="h-1 w-1 shrink-0 rounded-full bg-emerald-500" />
+								{r}
+							</li>
+						))}
+					</ul>
+				</div>
+			)}
+
 			{/* Data provenance */}
 			{scholarship.lastVerified && (
 				<p className="mt-3 text-[10px] text-muted-foreground/60 border-t border-border/50 pt-2">
@@ -766,9 +784,16 @@ export default function ScholarshipsClient({
 						</p>
 					</div>
 					{results && (
-						<p className="mt-1 text-xs text-muted-foreground sm:mt-2 shrink-0">
-							{results.total.toLocaleString()} scholarships found
-						</p>
+						<div className="flex flex-col items-end gap-1">
+							<p className="text-xs text-muted-foreground">
+								{results.total.toLocaleString()} scholarships found
+							</p>
+							{results.personalised && (
+								<span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+									<Sparkles className="size-2.5" /> Ranked for your profile
+								</span>
+							)}
+						</div>
 					)}
 				</div>
 			</FadeIn>

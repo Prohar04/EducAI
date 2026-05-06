@@ -39,6 +39,9 @@ export async function listScholarships(req: Request & { userId?: string }, res: 
   const { q, countryCode, level, field, fundingType, financialNeed, page, limit } = parsed.data;
 
   try {
+    // Optionally load user profile for personalised ranking
+    const userProfile = req.userId ? await getUserProfile(req.userId) : null;
+
     const result = await searchScholarships({
       q,
       countryCode,
@@ -48,6 +51,17 @@ export async function listScholarships(req: Request & { userId?: string }, res: 
       financialNeed: financialNeed === 'true' ? true : undefined,
       page,
       limit,
+      userProfile: userProfile
+        ? {
+          intendedLevel: userProfile.intendedLevel,
+          intendedMajor: userProfile.intendedMajor,
+          majorOrTrack: userProfile.majorOrTrack,
+          targetCountries: userProfile.targetCountries as string[] | null,
+          fundingNeed: userProfile.fundingNeed,
+          gpa: userProfile.gpa,
+          gpaScale: userProfile.gpaScale,
+        }
+        : null,
     });
     res.status(200).json(result);
   } catch (err) {

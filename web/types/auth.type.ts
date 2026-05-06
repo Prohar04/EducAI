@@ -366,6 +366,9 @@ export interface ScholarshipItem {
 	deadlines: ScholarshipDeadlineItem[];
 	createdAt: string;
 	updatedAt: string;
+	// Profile-based match metadata (present when user is logged in)
+	userMatchScore?: number;
+	matchReasons?: string[];
 }
 
 export interface ScholarshipListResult {
@@ -373,6 +376,7 @@ export interface ScholarshipListResult {
 	page: number;
 	limit: number;
 	total: number;
+	personalised?: boolean;
 }
 
 export interface EligibilityResult {
