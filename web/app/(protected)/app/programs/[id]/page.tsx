@@ -19,6 +19,7 @@ import {
   Users,
   CreditCard,
   Monitor,
+  AlertTriangle,
 } from "lucide-react";
 import { getProgramById, getSavedPrograms } from "@/lib/auth/action";
 import SaveButton from "../_components/SaveButton";
@@ -168,6 +169,36 @@ export default async function ProgramDetailPage({
           Back to Programs
         </Link>
       </FadeIn>
+
+      {/* Stale/cached data warning banner */}
+      {(freshnessStatus === "stale" || freshnessStatus === "cached") && (
+        <FadeIn delay={0.02}>
+          <div className="mb-5 flex items-start gap-3 rounded-xl border border-amber-500/50 bg-amber-500/12 px-4 py-3.5 text-sm text-amber-800 dark:text-amber-200">
+            <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-500" />
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold">
+                {freshnessStatus === "stale" ? "This programme data is outdated" : "This programme data may be outdated"}
+              </p>
+              <p className="mt-0.5 text-xs text-amber-700 dark:text-amber-300">
+                {freshnessCfg.desc}.{" "}
+                {freshnessLabel && <>Last verified: <span className="font-semibold">{freshnessLabel}</span>. </>}
+                Always verify on the official programme page before applying.
+              </p>
+              {program.sourceUrl && (
+                <a
+                  href={program.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium underline underline-offset-2 hover:no-underline"
+                >
+                  View official page
+                  <ExternalLink className="size-3" />
+                </a>
+              )}
+            </div>
+          </div>
+        </FadeIn>
+      )}
 
       {/* Header card */}
       <FadeIn delay={0.04}>
@@ -482,7 +513,7 @@ export default async function ProgramDetailPage({
                   <p className="font-semibold text-sm">International Students</p>
                 </div>
                 <p className="text-xs text-muted-foreground mb-3">
-                  Find visa requirements, support services, and arrival guides on the university's international students page.
+                  Find visa requirements, support services, and arrival guides on the university&apos;s international students page.
                 </p>
                 <ExternalLinkItem href={uni.internationalUrl} label="View International Info" />
               </div>
