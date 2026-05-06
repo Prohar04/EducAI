@@ -14,10 +14,16 @@ import {
   Languages,
   Building2,
   RefreshCw,
+  Globe,
+  Award,
+  Users,
+  CreditCard,
+  Monitor,
 } from "lucide-react";
 import { getProgramById, getSavedPrograms } from "@/lib/auth/action";
 import SaveButton from "../_components/SaveButton";
 import { FadeIn } from "@/components/motion/FadeIn";
+import type { FreshnessStatus } from "@/types/auth.type";
 
 const LEVEL_LABELS: Record<string, string> = {
   BSC: "Bachelor's",
@@ -49,6 +55,52 @@ function formatRelativeDate(dateStr: string | null | undefined): string | null {
   if (diffDays < 30) return `${diffDays} days ago`;
   if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
   return `${Math.floor(diffDays / 365)} year${Math.floor(diffDays / 365) > 1 ? "s" : ""} ago`;
+}
+
+const FRESHNESS_CONFIG: Record<
+  FreshnessStatus,
+  { label: string; desc: string; className: string }
+> = {
+  live:               { label: "Live",     desc: "Verified within the last 24 hours",   className: "border-green-500/30 bg-green-500/8 text-green-700 dark:text-green-400" },
+  recent:             { label: "Recent",   desc: "Verified within the last 7 days",      className: "border-blue-500/30 bg-blue-500/8 text-blue-700 dark:text-blue-400" },
+  cached:             { label: "Cached",   desc: "Verified within the last 30 days",     className: "border-amber-500/30 bg-amber-500/8 text-amber-700 dark:text-amber-400" },
+  stale:              { label: "Stale",    desc: "Last verified more than 30 days ago",  className: "border-red-500/30 bg-red-500/8 text-red-700 dark:text-red-400" },
+  source_unavailable: { label: "Offline",  desc: "Source currently unavailable",         className: "border-border bg-muted/30 text-muted-foreground" },
+};
+
+function ExternalLinkItem({
+  href,
+  label,
+  variant = "default",
+}: {
+  href: string;
+  label: string;
+  variant?: "primary" | "default";
+}) {
+  if (variant === "primary") {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex w-full items-center justify-between gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90"
+      >
+        {label}
+        <ExternalLink className="size-4 shrink-0" />
+      </a>
+    );
+  }
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex w-full items-center justify-between gap-2 rounded-xl border border-border px-4 py-3 text-sm font-medium transition-all hover:border-primary/30 hover:bg-muted/40"
+    >
+      {label}
+      <ExternalLink className="size-4 shrink-0 text-muted-foreground" />
+    </a>
+  );
 }
 
 export default async function ProgramDetailPage({
@@ -84,7 +136,25 @@ export default async function ProgramDetailPage({
     (r) => !isLanguageReq(r.key) && !isTestReq(r.key)
   );
 
-  const freshnessLabel = formatRelativeDate(program.updatedAt ?? program.createdAt);
+  const freshnessLabel = formatRelativeDate(program.lastVerifiedAt ?? program.updatedAt ?? program.createdAt);
+  const freshnessStatus = program.freshnessStatus ?? "source_unavailable";
+  const freshnessCfg = FRESHNESS_CONFIG[freshnessStatus];
+  const uni = program.university;
+
+  // Collect all university links
+  const uniLinks: { href: string; label: string }[] = [
+    uni.website             ? { href: uni.website,             label: "University Website" }        : null,
+    uni.admissionsUrl       ? { href: uni.admissionsUrl,       label: "Admissions Office" }         : null,
+    uni.applicationPortalUrl ? { href: uni.applicationPortalUrl, label: "Application Portal" }      : null,
+    uni.tuitionUrl          ? { href: uni.tuitionUrl,          label: "Tuition & Fees" }            : null,
+    uni.scholarshipsUrl     ? { href: uni.scholarshipsUrl,     label: "Scholarships & Funding" }    : null,
+    uni.internationalUrl    ? { href: uni.internationalUrl,    label: "International Students" }    : null,
+  ].filter((x): x is { href: string; label: string } => x !== null);
+
+  const programLinks: { href: string; label: string; primary?: boolean }[] = [
+    program.sourceUrl           ? { href: program.sourceUrl,           label: "Official Programme Page", primary: true } : null,
+    program.applicationPortalUrl ? { href: program.applicationPortalUrl, label: "Application Portal" }                   : null,
+  ].filter((x): x is { href: string; label: string; primary?: boolean } => x !== null);
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
@@ -113,6 +183,9 @@ export default async function ProgramDetailPage({
                   <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
                     {program.field}
                   </span>
+                  <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${freshnessCfg.className}`}>
+                    {freshnessCfg.label}
+                  </span>
                 </div>
                 <h1 className="text-2xl font-extrabold tracking-tight leading-snug sm:text-3xl">
                   {program.title}
@@ -120,11 +193,11 @@ export default async function ProgramDetailPage({
                 <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1.5">
                     <GraduationCap className="size-4 text-primary/70" />
-                    {program.university.name}
+                    {uni.name}
                   </span>
                   <span className="flex items-center gap-1.5">
                     <MapPin className="size-4 text-primary/70" />
-                    {program.university.city ? `${program.university.city}, ` : ""}{program.university.country.name}
+                    {uni.city ? `${uni.city}, ` : ""}{uni.country.name}
                   </span>
                   {program.durationMonths != null && (
                     <span className="flex items-center gap-1.5">
@@ -160,9 +233,28 @@ export default async function ProgramDetailPage({
               <QuickStat
                 icon={MapPin}
                 label="Country"
-                value={program.university.country.name}
+                value={uni.country.name}
               />
             </div>
+
+            {/* Secondary details row */}
+            {(program.studyMode || program.languageOfInstruction || program.applicationFeeUSD != null) && (
+              <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {program.studyMode && (
+                  <QuickStat icon={Monitor} label="Study Mode" value={program.studyMode} />
+                )}
+                {program.languageOfInstruction && (
+                  <QuickStat icon={Languages} label="Language" value={program.languageOfInstruction} />
+                )}
+                {program.applicationFeeUSD != null && (
+                  <QuickStat
+                    icon={CreditCard}
+                    label="Application Fee"
+                    value={`$${program.applicationFeeUSD.toLocaleString()}`}
+                  />
+                )}
+              </div>
+            )}
           </div>
         </div>
       </FadeIn>
@@ -170,31 +262,16 @@ export default async function ProgramDetailPage({
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main content */}
         <div className="space-y-6 lg:col-span-2">
-          {/* Description */}
+          {/* Programme description */}
           {program.description && (
             <FadeIn delay={0.08}>
               <section className="rounded-2xl border border-border bg-card p-6">
                 <h2 className="mb-3 flex items-center gap-2 font-bold">
                   <BookOpen className="size-4 text-primary" />
-                  About this program
+                  About this programme
                 </h2>
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   {program.description}
-                </p>
-              </section>
-            </FadeIn>
-          )}
-
-          {/* University description */}
-          {program.university.description && (
-            <FadeIn delay={0.10}>
-              <section className="rounded-2xl border border-border bg-card p-6">
-                <h2 className="mb-3 flex items-center gap-2 font-bold">
-                  <Building2 className="size-4 text-primary" />
-                  About {program.university.name}
-                </h2>
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  {program.university.description}
                 </p>
               </section>
             </FadeIn>
@@ -209,7 +286,6 @@ export default async function ProgramDetailPage({
                   Entry Requirements
                 </h2>
 
-                {/* Academic requirements */}
                 {otherReqs.length > 0 && (
                   <div className="mb-4">
                     <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Academic</p>
@@ -227,7 +303,6 @@ export default async function ProgramDetailPage({
                   </div>
                 )}
 
-                {/* Language requirements */}
                 {languageReqs.length > 0 && (
                   <div className="mb-4">
                     <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
@@ -247,7 +322,6 @@ export default async function ProgramDetailPage({
                   </div>
                 )}
 
-                {/* Test score requirements */}
                 {testReqs.length > 0 && (
                   <div className="mb-4">
                     <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Test Scores</p>
@@ -272,6 +346,41 @@ export default async function ProgramDetailPage({
               </section>
             </FadeIn>
           )}
+
+          {/* University information */}
+          <FadeIn delay={0.14}>
+            <section className="rounded-2xl border border-border bg-card p-6">
+              <h2 className="mb-4 flex items-center gap-2 font-bold">
+                <Building2 className="size-4 text-primary" />
+                University Information
+              </h2>
+
+              <div className="space-y-3">
+                <InfoRow label="Name"    value={uni.name} />
+                <InfoRow label="Country" value={uni.country.name} />
+                {uni.city          && <InfoRow label="City"    value={uni.city} />}
+                {uni.ranking       && <InfoRow label="Ranking" value={uni.ranking} icon={<Award className="size-3.5 text-amber-500" />} />}
+                {uni.universityType && <InfoRow label="Type"   value={uni.universityType.charAt(0).toUpperCase() + uni.universityType.slice(1)} />}
+                {uni.description && (
+                  <div className="pt-1">
+                    <p className="mb-1 text-xs font-semibold text-muted-foreground">About</p>
+                    <p className="text-sm leading-relaxed text-muted-foreground">{uni.description}</p>
+                  </div>
+                )}
+              </div>
+
+              {uniLinks.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
+                    <Globe className="size-3" /> University Links
+                  </p>
+                  {uniLinks.map((link) => (
+                    <ExternalLinkItem key={link.href} href={link.href} label={link.label} />
+                  ))}
+                </div>
+              )}
+            </section>
+          </FadeIn>
         </div>
 
         {/* Sidebar */}
@@ -318,34 +427,20 @@ export default async function ProgramDetailPage({
             </FadeIn>
           )}
 
-          {/* Links */}
-          {(program.sourceUrl || program.university.website) && (
-            <FadeIn delay={0.14}>
+          {/* Programme links */}
+          {programLinks.length > 0 && (
+            <FadeIn delay={0.16}>
               <section className="rounded-2xl border border-border bg-card p-6">
-                <h2 className="mb-4 font-bold">Official Links</h2>
+                <h2 className="mb-4 font-bold">Programme Links</h2>
                 <div className="space-y-2.5">
-                  {program.sourceUrl && (
-                    <a
-                      href={program.sourceUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex w-full items-center justify-between gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90"
-                    >
-                      Official Program Page
-                      <ExternalLink className="size-4 shrink-0" />
-                    </a>
-                  )}
-                  {program.university.website && (
-                    <a
-                      href={program.university.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex w-full items-center justify-between gap-2 rounded-xl border border-border px-4 py-3 text-sm font-medium transition-all hover:border-primary/30 hover:bg-muted/40"
-                    >
-                      University Website
-                      <ExternalLink className="size-4 shrink-0 text-muted-foreground" />
-                    </a>
-                  )}
+                  {programLinks.map((link) => (
+                    <ExternalLinkItem
+                      key={link.href}
+                      href={link.href}
+                      label={link.label}
+                      variant={link.primary ? "primary" : "default"}
+                    />
+                  ))}
                 </div>
                 {program.sourceUrl && (
                   <p className="mt-3 text-xs text-muted-foreground">
@@ -360,25 +455,45 @@ export default async function ProgramDetailPage({
           )}
 
           {/* Data freshness */}
-          {freshnessLabel && (
-            <FadeIn delay={0.16}>
-              <div className="rounded-xl border border-border bg-muted/20 px-4 py-3">
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <RefreshCw className="size-3 shrink-0" />
-                  <span>Data last updated: <span className="font-medium text-foreground">{freshnessLabel}</span></span>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Always verify details on the official program page before applying.
+          <FadeIn delay={0.18}>
+            <div className={`rounded-xl border px-4 py-4 ${freshnessCfg.className}`}>
+              <div className="flex items-center gap-2 mb-2">
+                <RefreshCw className="size-3.5 shrink-0" />
+                <span className="text-xs font-semibold uppercase tracking-wide">{freshnessCfg.label} data</span>
+              </div>
+              <p className="text-xs">{freshnessCfg.desc}.</p>
+              {freshnessLabel && (
+                <p className="mt-1.5 text-xs">
+                  Last verified: <span className="font-semibold">{freshnessLabel}</span>
                 </p>
+              )}
+              <p className="mt-2 text-xs opacity-80">
+                Always confirm details on the official programme page before applying.
+              </p>
+            </div>
+          </FadeIn>
+
+          {/* University international students page */}
+          {uni.internationalUrl && (
+            <FadeIn delay={0.2}>
+              <div className="rounded-2xl border border-border bg-card p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Users className="size-4 text-primary" />
+                  <p className="font-semibold text-sm">International Students</p>
+                </div>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Find visa requirements, support services, and arrival guides on the university's international students page.
+                </p>
+                <ExternalLinkItem href={uni.internationalUrl} label="View International Info" />
               </div>
             </FadeIn>
           )}
 
           {/* Save CTA */}
-          <FadeIn delay={0.18}>
+          <FadeIn delay={0.22}>
             <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5 text-center">
               <GraduationCap className="mx-auto mb-2 size-8 text-primary" />
-              <p className="mb-3 text-sm font-semibold">Save this program</p>
+              <p className="mb-3 text-sm font-semibold">Save this programme</p>
               <p className="mb-4 text-xs text-muted-foreground">
                 Saving adds it to your timeline, strategy analysis, and deadline tracker.
               </p>
@@ -409,6 +524,26 @@ function QuickStat({
         <span className="text-[11px] font-medium text-muted-foreground">{label}</span>
       </div>
       <p className={`text-sm font-semibold leading-snug ${highlight ? "text-primary" : "text-foreground"}`}>{value}</p>
+    </div>
+  );
+}
+
+function InfoRow({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: string;
+  icon?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-4 text-sm">
+      <span className="font-medium text-muted-foreground shrink-0">{label}</span>
+      <span className="text-right text-foreground flex items-center gap-1">
+        {icon}
+        {value}
+      </span>
     </div>
   );
 }
