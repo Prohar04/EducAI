@@ -269,6 +269,14 @@ export interface University {
 	website?: string | null;
 	description?: string | null;
 	sourceUrl?: string | null;
+	ranking?: string | null;
+	universityType?: string | null;
+	admissionsUrl?: string | null;
+	tuitionUrl?: string | null;
+	scholarshipsUrl?: string | null;
+	internationalUrl?: string | null;
+	applicationPortalUrl?: string | null;
+	lastVerifiedAt?: string | null;
 	country: Country;
 }
 
@@ -284,6 +292,8 @@ export interface ProgramDeadline {
 	deadline: string;
 }
 
+export type FreshnessStatus = "live" | "recent" | "cached" | "stale" | "source_unavailable";
+
 export interface Program {
 	id: string;
 	title: string;
@@ -294,8 +304,14 @@ export interface Program {
 	tuitionMaxUSD?: number | null;
 	description?: string | null;
 	sourceUrl?: string | null;
+	applicationFeeUSD?: number | null;
+	studyMode?: string | null;
+	languageOfInstruction?: string | null;
+	applicationPortalUrl?: string | null;
+	lastVerifiedAt?: string | null;
 	updatedAt?: string | null;
 	createdAt?: string | null;
+	freshnessStatus?: FreshnessStatus;
 	university: University;
 	requirements?: ProgramRequirement[];
 	deadlines?: ProgramDeadline[];
@@ -306,6 +322,8 @@ export interface ProgramListResult {
 	page: number;
 	limit: number;
 	total: number;
+	hasStaleData?: boolean;
+	staleCount?: number;
 }
 
 export interface SavedProgramItem {
