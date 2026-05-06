@@ -12,25 +12,36 @@ export interface RequirementInput { key: string; value: string; }
 export interface DeadlineInput    { term: string; deadline: string; }
 
 export interface ProgramInput {
-  title:          string;
-  field:          string;
-  level:          string;
-  durationMonths?: number | null;
-  tuitionMinUSD?:  number | null;
-  tuitionMaxUSD?:  number | null;
-  description?:    string | null;
-  sourceUrl?:      string | null;
-  requirements?:   RequirementInput[];
-  deadlines?:      DeadlineInput[];
+  title:                 string;
+  field:                 string;
+  level:                 string;
+  durationMonths?:       number | null;
+  tuitionMinUSD?:        number | null;
+  tuitionMaxUSD?:        number | null;
+  description?:          string | null;
+  sourceUrl?:            string | null;
+  applicationFeeUSD?:    number | null;
+  studyMode?:            string | null;
+  languageOfInstruction?: string | null;
+  applicationPortalUrl?: string | null;
+  requirements?:         RequirementInput[];
+  deadlines?:            DeadlineInput[];
 }
 
 export interface UniversityInput {
-  name:         string;
-  city?:        string | null;
-  website?:     string | null;
-  description?: string | null;
-  sourceUrl?:   string | null;
-  programs?:    ProgramInput[];
+  name:                  string;
+  city?:                 string | null;
+  website?:              string | null;
+  description?:          string | null;
+  sourceUrl?:            string | null;
+  ranking?:              string | null;
+  universityType?:       string | null;
+  admissionsUrl?:        string | null;
+  tuitionUrl?:           string | null;
+  scholarshipsUrl?:      string | null;
+  internationalUrl?:     string | null;
+  applicationPortalUrl?: string | null;
+  programs?:             ProgramInput[];
 }
 
 export interface CountryInput {
@@ -91,21 +102,38 @@ export async function performIngest(
     for (const u of c.universities ?? []) {
       if (!u.name) continue;
 
+      const now = new Date();
       const university = await prisma.university.upsert({
         where:  { countryId_name: { countryId: country.id, name: u.name } },
         create: {
-          name:        u.name,
-          countryId:   country.id,
-          city:        u.city        ?? null,
-          website:     u.website     ?? null,
-          description: u.description ?? null,
-          sourceUrl:   u.sourceUrl   ?? null,
+          name:                u.name,
+          countryId:           country.id,
+          city:                u.city                ?? null,
+          website:             u.website             ?? null,
+          description:         u.description         ?? null,
+          sourceUrl:           u.sourceUrl           ?? null,
+          ranking:             u.ranking             ?? null,
+          universityType:      u.universityType      ?? null,
+          admissionsUrl:       u.admissionsUrl        ?? null,
+          tuitionUrl:          u.tuitionUrl           ?? null,
+          scholarshipsUrl:     u.scholarshipsUrl      ?? null,
+          internationalUrl:    u.internationalUrl     ?? null,
+          applicationPortalUrl: u.applicationPortalUrl ?? null,
+          lastVerifiedAt:      now,
         },
         update: {
-          city:        u.city        ?? undefined,
-          website:     u.website     ?? undefined,
-          description: u.description ?? undefined,
-          sourceUrl:   u.sourceUrl   ?? undefined,
+          city:                u.city                ?? undefined,
+          website:             u.website             ?? undefined,
+          description:         u.description         ?? undefined,
+          sourceUrl:           u.sourceUrl           ?? undefined,
+          ranking:             u.ranking             ?? undefined,
+          universityType:      u.universityType      ?? undefined,
+          admissionsUrl:       u.admissionsUrl        ?? undefined,
+          tuitionUrl:          u.tuitionUrl           ?? undefined,
+          scholarshipsUrl:     u.scholarshipsUrl      ?? undefined,
+          internationalUrl:    u.internationalUrl     ?? undefined,
+          applicationPortalUrl: u.applicationPortalUrl ?? undefined,
+          lastVerifiedAt:      now,
         },
       });
       counts.universities++;
@@ -131,24 +159,34 @@ export async function performIngest(
               },
             },
             create: {
-              universityId:   university.id,
-              title:          p.title,
-              field:          p.field,
+              universityId:          university.id,
+              title:                 p.title,
+              field:                 p.field,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              level:          level as any,
-              durationMonths: p.durationMonths ?? null,
-              tuitionMinUSD:  p.tuitionMinUSD  ?? null,
-              tuitionMaxUSD:  p.tuitionMaxUSD  ?? null,
-              description:    p.description    ?? null,
-              sourceUrl:      p.sourceUrl      ?? null,
+              level:                 level as any,
+              durationMonths:        p.durationMonths        ?? null,
+              tuitionMinUSD:         p.tuitionMinUSD         ?? null,
+              tuitionMaxUSD:         p.tuitionMaxUSD         ?? null,
+              description:           p.description           ?? null,
+              sourceUrl:             p.sourceUrl             ?? null,
+              applicationFeeUSD:     p.applicationFeeUSD     ?? null,
+              studyMode:             p.studyMode             ?? null,
+              languageOfInstruction: p.languageOfInstruction ?? null,
+              applicationPortalUrl:  p.applicationPortalUrl  ?? null,
+              lastVerifiedAt:        now,
             },
             update: {
-              field:          p.field,
-              durationMonths: p.durationMonths ?? undefined,
-              tuitionMinUSD:  p.tuitionMinUSD  ?? undefined,
-              tuitionMaxUSD:  p.tuitionMaxUSD  ?? undefined,
-              description:    p.description    ?? undefined,
-              sourceUrl:      p.sourceUrl      ?? undefined,
+              field:                 p.field,
+              durationMonths:        p.durationMonths        ?? undefined,
+              tuitionMinUSD:         p.tuitionMinUSD         ?? undefined,
+              tuitionMaxUSD:         p.tuitionMaxUSD         ?? undefined,
+              description:           p.description           ?? undefined,
+              sourceUrl:             p.sourceUrl             ?? undefined,
+              applicationFeeUSD:     p.applicationFeeUSD     ?? undefined,
+              studyMode:             p.studyMode             ?? undefined,
+              languageOfInstruction: p.languageOfInstruction ?? undefined,
+              applicationPortalUrl:  p.applicationPortalUrl  ?? undefined,
+              lastVerifiedAt:        now,
             },
           });
           counts.programs++;

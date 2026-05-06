@@ -220,15 +220,23 @@ model Country {
 }
 
 model University {
-  id          String    @id @default(cuid())
-  name        String    @db.VarChar(200)
-  countryId   String    @map("country_id")
-  city        String?   @db.VarChar(100)
-  website     String?   @db.Text
-  description String?   @db.Text
-  sourceUrl   String?   @map("source_url") @db.Text
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamp
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamp
+  id                   String    @id @default(cuid())
+  name                 String    @db.VarChar(200)
+  countryId            String    @map("country_id")
+  city                 String?   @db.VarChar(100)
+  website              String?   @db.Text
+  description          String?   @db.Text
+  sourceUrl            String?   @map("source_url") @db.Text
+  ranking              String?   @db.VarChar(200)
+  universityType       String?   @map("university_type") @db.VarChar(50)
+  admissionsUrl        String?   @map("admissions_url") @db.Text
+  tuitionUrl           String?   @map("tuition_url") @db.Text
+  scholarshipsUrl      String?   @map("scholarships_url") @db.Text
+  internationalUrl     String?   @map("international_url") @db.Text
+  applicationPortalUrl String?   @map("application_portal_url") @db.Text
+  lastVerifiedAt       DateTime? @map("last_verified_at") @db.Timestamp
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamp
+  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamp
 
   country  Country   @relation(fields: [countryId], references: [id], onDelete: Restrict)
   programs Program[]
@@ -246,18 +254,23 @@ enum ProgramLevel {
 }
 
 model Program {
-  id             String       @id @default(cuid())
-  universityId   String       @map("university_id")
-  title          String       @db.VarChar(200)
-  field          String       @db.VarChar(100)
-  level          ProgramLevel
-  durationMonths Int?         @map("duration_months")
-  tuitionMinUSD  Int?         @map("tuition_min_usd")
-  tuitionMaxUSD  Int?         @map("tuition_max_usd")
-  description    String?      @db.Text
-  sourceUrl      String?      @map("source_url") @db.Text
-  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamp
-  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamp
+  id                    String       @id @default(cuid())
+  universityId          String       @map("university_id")
+  title                 String       @db.VarChar(200)
+  field                 String       @db.VarChar(100)
+  level                 ProgramLevel
+  durationMonths        Int?         @map("duration_months")
+  tuitionMinUSD         Int?         @map("tuition_min_usd")
+  tuitionMaxUSD         Int?         @map("tuition_max_usd")
+  description           String?      @db.Text
+  sourceUrl             String?      @map("source_url") @db.Text
+  applicationFeeUSD     Int?         @map("application_fee_usd")
+  studyMode             String?      @map("study_mode") @db.VarChar(50)
+  languageOfInstruction String?      @map("language_of_instruction") @db.VarChar(100)
+  applicationPortalUrl  String?      @map("application_portal_url") @db.Text
+  lastVerifiedAt        DateTime?    @map("last_verified_at") @db.Timestamp
+  createdAt             DateTime     @default(now()) @map("created_at") @db.Timestamp
+  updatedAt             DateTime     @updatedAt @map("updated_at") @db.Timestamp
 
   university   University           @relation(fields: [universityId], references: [id], onDelete: Cascade)
   requirements ProgramRequirement[]
