@@ -268,6 +268,7 @@ export interface University {
 	city?: string | null;
 	website?: string | null;
 	description?: string | null;
+	sourceUrl?: string | null;
 	country: Country;
 }
 
@@ -307,34 +308,12 @@ export interface ProgramListResult {
 	total: number;
 }
 
-export interface MatchResult {
-	programId: string;
-	score: number;
-	reasons: string[];
-	programSummary: {
-		title: string;
-		level: string;
-		field: string;
-		tuitionRange: string;
-		universityName: string;
-		country: string;
-	};
-}
-
 export interface SavedProgramItem {
 	id: string;
 	programId: string;
 	program: Program;
 	createdAt: string;
 }
-
-export type MatchFormState =
-	| {
-			success?: boolean;
-			message?: string;
-			results?: MatchResult[];
-	  }
-	| undefined;
 
 // ─── Module 2: Scholarships ──────────────────────────────────────────────────
 
