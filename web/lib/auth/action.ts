@@ -161,6 +161,22 @@ export const unsaveProgram = async (programId: string): Promise<boolean> => {
 	return response.ok;
 };
 
+export const triggerProgramsRefresh = async (): Promise<{ success: boolean; message: string }> => {
+	const response = await authFetch(`${BACKEND_URL}/data-sync/run`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ target: "programs" }),
+	});
+	if (response.status === 409) {
+		return { success: false, message: "A refresh is already in progress. Check back shortly." };
+	}
+	if (!response.ok) {
+		return { success: false, message: "Failed to start refresh. Please try again." };
+	}
+	revalidatePath("/app/programs");
+	return { success: true, message: "Refresh started. Fresh data will appear once the pipeline completes." };
+};
+
 // ─── Match Run ────────────────────────────────────────────────────────────────
 
 export const triggerMatchRun = async (): Promise<MatchRunFormState> => {
