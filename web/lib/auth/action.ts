@@ -1042,6 +1042,10 @@ export interface SyncStatusResponse {
 		running: number;
 		totalRecordsManaged: number;
 	};
+	providers?: {
+		scholarshipLive: boolean;
+		programsCrawler: boolean;
+	};
 }
 
 export const getDataSyncStatusAction = async (): Promise<SyncStatusResponse | null> => {

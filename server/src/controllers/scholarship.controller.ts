@@ -8,6 +8,7 @@ import {
   predictFundingProbability,
   getEligibleScholarships,
 } from '#src/services/scholarship.service.ts';
+import { runLiveScholarshipRefresh } from '#src/services/liveScholarship.service.ts';
 import prisma from '#src/config/database.ts';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -181,6 +182,19 @@ export async function checkScholarshipEligibility(
   } catch (err) {
     console.error('[scholarship:eligibility]', err);
     res.status(500).json({ message: 'Failed to check eligibility' });
+  }
+}
+
+export async function refreshScholarships(
+  req: Request & { userId?: string },
+  res: Response,
+) {
+  try {
+    const result = await runLiveScholarshipRefresh({ force: true });
+    res.status(200).json(result);
+  } catch (err) {
+    console.error('[scholarship:refresh]', err);
+    res.status(500).json({ message: 'Live scholarship refresh failed' });
   }
 }
 

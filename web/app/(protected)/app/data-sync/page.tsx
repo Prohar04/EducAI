@@ -13,6 +13,8 @@ import {
   ArrowUpCircle,
   CalendarClock,
   ChevronDown,
+  XCircle,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/motion/FadeIn";
@@ -549,6 +551,87 @@ export default function DataUpdatesPage() {
               </div>
             )}
           </div>
+
+          {/* Live data provider status */}
+          {status.providers && (
+            <div className="rounded-xl border border-border bg-card p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <Zap className="h-4 w-4 text-primary" />
+                <h2 className="text-sm font-semibold">Live Data Providers</h2>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-3 rounded-lg bg-muted/30 px-3 py-2.5">
+                  <div className="flex items-center gap-2.5">
+                    <BookOpen className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium">Live Provider: Serper Search</p>
+                      <p className="text-xs text-muted-foreground">
+                        Discovers new scholarships via web search
+                      </p>
+                    </div>
+                  </div>
+                  {status.providers.scholarshipLive ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400 shrink-0">
+                      <CheckCircle2 className="h-3 w-3" />
+                      Configured
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-700 dark:text-red-400 shrink-0">
+                      <XCircle className="h-3 w-3" />
+                      Not configured
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center justify-between gap-3 rounded-lg bg-muted/30 px-3 py-2.5">
+                  <div className="flex items-center gap-2.5">
+                    <Sparkles className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium">AI Extraction: OpenAI / OpenRouter</p>
+                      <p className="text-xs text-muted-foreground">
+                        Extracts structured data from search results
+                      </p>
+                    </div>
+                  </div>
+                  {(typeof window !== "undefined"
+                    ? false
+                    : false) ||
+                  status.providers.scholarshipLive ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:text-blue-400 shrink-0">
+                      <CheckCircle2 className="h-3 w-3" />
+                      Active
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs font-semibold text-muted-foreground shrink-0">
+                      <Clock className="h-3 w-3" />
+                      Inactive
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center justify-between gap-3 rounded-lg bg-muted/30 px-3 py-2.5">
+                  <div className="flex items-center gap-2.5">
+                    <GraduationCap className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium">Programs Crawler: AI Server</p>
+                      <p className="text-xs text-muted-foreground">
+                        Firecrawl pipeline for program discovery
+                      </p>
+                    </div>
+                  </div>
+                  {status.providers.programsCrawler ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400 shrink-0">
+                      <CheckCircle2 className="h-3 w-3" />
+                      Configured
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-700 dark:text-red-400 shrink-0">
+                      <XCircle className="h-3 w-3" />
+                      Not configured
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Latest update summary */}
           {recentSuccessfulRun && (
