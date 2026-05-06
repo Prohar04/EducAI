@@ -12,6 +12,15 @@ export interface ScholarshipFilters {
   financialNeed?: boolean;
   page?: number;
   limit?: number;
+  userProfile?: {
+    intendedLevel?: string | null;
+    intendedMajor?: string | null;
+    majorOrTrack?: string | null;
+    targetCountries?: string[] | null;
+    fundingNeed?: boolean | null;
+    gpa?: number | null;
+    gpaScale?: string | null;
+  } | null;
 }
 
 export interface EligibilityResult {
@@ -78,22 +87,70 @@ function gpaLabel(gpa: number | null | undefined, scale: string | null | undefin
 
 // ── Scholarship Search ────────────────────────────────────────────────────────
 
+// ── Profile-based match scoring ────────────────────────────────────────────────
+
+function computeMatchScore(
+  scholarship: { level: string | null; countryCode: string | null; fundingType: string | null; minGpa: number | null; field: string | null },
+  profile: NonNullable<ScholarshipFilters['userProfile']>,
+): { score: number; reasons: string[] } {
+  let score = 0;
+  const reasons: string[] = [];
+
+  const profileLevel = (profile.intendedLevel ?? '').toUpperCase();
+  if (scholarship.level && profileLevel && scholarship.level === profileLevel) {
+    score += 30;
+    reasons.push(`Matches your degree level (${scholarship.level})`);
+  } else if (!scholarship.level) {
+    score += 15;
+    reasons.push('Open to all degree levels');
+  }
+
+  const targetCountries = profile.targetCountries ?? [];
+  if (scholarship.countryCode && targetCountries.includes(scholarship.countryCode)) {
+    score += 35;
+    reasons.push(`In your target country`);
+  } else if (!scholarship.countryCode) {
+    score += 20;
+    reasons.push('Global scholarship — open to your target country');
+  }
+
+  if (scholarship.fundingType === 'full' && profile.fundingNeed === true) {
+    score += 20;
+    reasons.push('Full funding matches your stated financial need');
+  } else if (scholarship.fundingType === 'full') {
+    score += 10;
+    reasons.push('Full funding available');
+  }
+
+  const profileMajor = (profile.majorOrTrack ?? profile.intendedMajor ?? '').toLowerCase();
+  const schField = (scholarship.field ?? '').toLowerCase();
+  if (schField && profileMajor && (schField.includes(profileMajor) || profileMajor.includes(schField) || schField === 'all fields')) {
+    score += 15;
+    if (schField !== 'all fields') reasons.push(`Field matches your major (${scholarship.field})`);
+  }
+
+  const normGpa = normalizeGpa(profile.gpa, profile.gpaScale);
+  if (scholarship.minGpa && normGpa !== null && normGpa >= scholarship.minGpa) {
+    score += 10;
+    reasons.push('Your GPA meets the minimum requirement');
+  }
+
+  return { score, reasons };
+}
+
 export async function searchScholarships(filters: ScholarshipFilters) {
-  const { q, countryCode, level, field, fundingType, financialNeed, page = 1, limit = 20 } = filters;
+  const { q, countryCode, level, field, fundingType, financialNeed, page = 1, limit = 20, userProfile } = filters;
 
   const skip = (page - 1) * limit;
   const now = new Date();
 
-  // Build the where clause with proper Prisma types
   // Belt-and-suspenders: exclude any scholarship where every deadline is past,
   // even if isActive was not yet swept by the sync job.
   const andClauses: Prisma.ScholarshipWhereInput[] = [
     { isActive: true },
     {
       OR: [
-        // Has at least one future deadline
         { deadlines: { some: { deadline: { gte: now } } } },
-        // OR has no deadlines at all (deadline unknown — keep showing)
         { deadlines: { none: {} } },
       ],
     },
@@ -134,7 +191,12 @@ export async function searchScholarships(filters: ScholarshipFilters) {
     ? andClauses[0]
     : { AND: andClauses };
 
-  const [items, total] = await Promise.all([
+  // When a user profile is available and no explicit filters narrow the query much,
+  // fetch a larger pool so we can re-rank by profile relevance.
+  const fetchLimit = userProfile ? Math.max(limit * 3, 60) : limit;
+  const fetchSkip = userProfile ? 0 : skip;
+
+  const [rawItems, total] = await Promise.all([
     prisma.scholarship.findMany({
       where,
       include: {
@@ -144,13 +206,32 @@ export async function searchScholarships(filters: ScholarshipFilters) {
         },
       },
       orderBy: { createdAt: 'desc' },
-      skip,
-      take: limit,
+      skip: fetchSkip,
+      take: fetchLimit,
     }),
     prisma.scholarship.count({ where }),
   ]);
 
-  return { items, total, page, limit };
+  // If we have a profile, annotate and re-rank by match score
+  if (userProfile) {
+    const annotated = rawItems.map(item => {
+      const { score, reasons } = computeMatchScore(item, userProfile);
+      return { ...item, userMatchScore: score, matchReasons: reasons };
+    });
+
+    // Sort: higher match score first, then by upcoming deadline
+    annotated.sort((a, b) => {
+      if (b.userMatchScore !== a.userMatchScore) return b.userMatchScore - a.userMatchScore;
+      const aDeadline = a.deadlines[0]?.deadline?.getTime() ?? Infinity;
+      const bDeadline = b.deadlines[0]?.deadline?.getTime() ?? Infinity;
+      return aDeadline - bDeadline;
+    });
+
+    const pageItems = annotated.slice(skip, skip + limit);
+    return { items: pageItems, total, page, limit, personalised: true };
+  }
+
+  return { items: rawItems, total, page, limit, personalised: false };
 }
 
 export async function getScholarshipById(id: string) {
