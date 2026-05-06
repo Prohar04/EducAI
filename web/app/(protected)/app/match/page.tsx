@@ -11,6 +11,10 @@ import {
   Bookmark,
   BookmarkCheck,
   ExternalLink,
+  MapPin,
+  Clock,
+  CalendarDays,
+  Database,
 } from "lucide-react";
 import { triggerMatchRun, getMatchLatest, getMatchRunStatus, saveProgram } from "@/lib/auth/action";
 import type { MatchLatestResponse } from "@/types/auth.type";
@@ -46,6 +50,29 @@ function fitBand(score: number): { label: string; scoreColor: string; bandClass:
 
 // ─ Individual program card ─────────────────────────────────────────────────
 
+function freshnessLabel(updatedAt: unknown): { text: string; cls: string } | null {
+  if (!updatedAt || typeof updatedAt !== "string") return null;
+  const date = new Date(updatedAt);
+  if (isNaN(date.getTime())) return null;
+  const ageDays = Math.floor((Date.now() - date.getTime()) / 86_400_000);
+  if (ageDays === 0) return { text: "Live", cls: "bg-green-500/10 text-green-600 dark:text-green-400" };
+  if (ageDays <= 1)  return { text: "Recent", cls: "bg-green-500/10 text-green-600 dark:text-green-400" };
+  if (ageDays <= 7)  return { text: "This week", cls: "bg-amber-500/10 text-amber-600 dark:text-amber-400" };
+  if (ageDays <= 30) return { text: `${ageDays}d ago`, cls: "bg-amber-500/10 text-amber-600 dark:text-amber-400" };
+  return { text: `${Math.floor(ageDays / 30)}mo ago`, cls: "bg-muted text-muted-foreground" };
+}
+
+function deadlineLabel(dl: unknown): string | null {
+  if (!dl || typeof dl !== "string") return null;
+  const date = new Date(dl);
+  if (isNaN(date.getTime())) return null;
+  const daysLeft = Math.ceil((date.getTime() - Date.now()) / 86_400_000);
+  if (daysLeft < 0) return null;
+  return daysLeft <= 30
+    ? `Deadline in ${daysLeft}d`
+    : date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
 function ResultCard({
   result,
   onSave,
@@ -63,27 +90,29 @@ function ResultCard({
 }) {
   const [saving, setSaving] = useState(false);
 
-  // Prefer DB program data; fall back to rawData from scrape
   const raw = result.rawData ?? {};
-  const title =
-    (raw.program_title as string) ??
-    (raw.title as string) ??
-    "Unnamed Programme";
-  const university =
-    (raw.university_name as string) ??
-    (raw.universityName as string) ??
-    "Unknown University";
-  const country = (raw.country as string) ?? "";
-  const level =
-    (raw.level as string) ?? "";
-  const field =
-    (raw.field as string) ??
-    (raw.program_title as string) ??
-    "";
-  const tuitionRaw = raw.tuition_usd_per_year as number | null;
-  const tuition = tuitionRaw != null ? `$${tuitionRaw.toLocaleString()}/yr` : null;
-  const applicationUrl = (raw.application_url as string) ?? null;
-  const description = (raw.description as string) ?? null;
+  const title        = (raw.program_title as string) ?? (raw.title as string) ?? "Unnamed Programme";
+  const university   = (raw.university_name as string) ?? (raw.universityName as string) ?? "Unknown University";
+  const country      = (raw.country as string) ?? "";
+  const city         = (raw.city as string) ?? null;
+  const level        = (raw.level as string) ?? "";
+  const field        = (raw.field as string) ?? "";
+  const durationMo   = raw.duration_months as number | null | undefined;
+  const tuitionMin   = raw.tuition_usd_per_year as number | null | undefined;
+  const tuitionMax   = raw.tuition_max_usd as number | null | undefined;
+  const tuition      = tuitionMin != null
+    ? tuitionMax != null
+      ? `$${tuitionMin.toLocaleString()}–$${tuitionMax.toLocaleString()}/yr`
+      : `From $${tuitionMin.toLocaleString()}/yr`
+    : null;
+  const applicationUrl  = (raw.application_url as string) ?? (raw.university_website as string) ?? null;
+  const description     = (raw.description as string) ?? null;
+  const updatedAt       = raw.updated_at ?? null;
+  const nextDeadline    = raw.next_deadline ?? null;
+  const nextDeadlineTerm = raw.next_deadline_term as string | null ?? null;
+
+  const freshness   = freshnessLabel(updatedAt);
+  const dlLabel     = deadlineLabel(nextDeadline);
 
   const handleSave = async () => {
     if (!result.programId || saved) return;
@@ -104,7 +133,7 @@ function ResultCard({
       <div className={`h-1 w-full bg-gradient-to-r ${bandClass}`} />
 
       <div className="flex flex-col flex-1 p-5">
-        {/* Header: level/country badges + score */}
+        {/* Header: badges + score */}
         <div className="mb-3 flex items-start justify-between gap-3">
           <div className="flex flex-wrap gap-1.5">
             {level && (
@@ -115,6 +144,12 @@ function ResultCard({
             {country && (
               <span className="inline-block rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
                 {country}
+              </span>
+            )}
+            {freshness && (
+              <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${freshness.cls}`}>
+                <Database className="size-2.5" />
+                {freshness.text}
               </span>
             )}
           </div>
@@ -131,11 +166,39 @@ function ResultCard({
         {/* Title + university */}
         <h3 className="font-semibold leading-snug">{title}</h3>
         <p className="mt-0.5 text-sm text-muted-foreground">{university}</p>
+
+        {/* Location + duration */}
+        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+          {(city || country) && (
+            <span className="flex items-center gap-1">
+              <MapPin className="size-3 shrink-0" />
+              {[city, country].filter(Boolean).join(", ")}
+            </span>
+          )}
+          {durationMo != null && (
+            <span className="flex items-center gap-1">
+              <Clock className="size-3 shrink-0" />
+              {durationMo} month{durationMo !== 1 ? "s" : ""}
+            </span>
+          )}
+        </div>
+
+        {/* Field + tuition */}
         {(field || tuition) && (
-          <p className="mt-0.5 text-xs text-muted-foreground">
+          <p className="mt-1 text-xs text-muted-foreground">
             {[field, tuition].filter(Boolean).join(" · ")}
           </p>
         )}
+
+        {/* Deadline */}
+        {dlLabel && (
+          <p className="mt-1 flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-400">
+            <CalendarDays className="size-3 shrink-0" />
+            {nextDeadlineTerm ? `${nextDeadlineTerm}: ` : ""}{dlLabel}
+          </p>
+        )}
+
+        {/* Description */}
         {description && (
           <p className="mt-2 text-xs leading-relaxed text-muted-foreground line-clamp-2">{description}</p>
         )}
