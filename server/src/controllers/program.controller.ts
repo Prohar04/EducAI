@@ -38,26 +38,50 @@ function attachFreshness<T extends { lastVerifiedAt: Date | null; updatedAt: Dat
  */
 export const searchPrograms = async (req: Request, res: Response) => {
   try {
-    const { country, level, field, q, page = '1', limit = '20' } = req.query as Record<string, string>;
+    const { country, level, field, q, page = '1', limit = '20', showStale = 'false' } = req.query as Record<string, string>;
+    const freshOnly = showStale !== 'true';
     const pageNum = Math.max(1, parseInt(page) || 1);
     const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20));
     const skip = (pageNum - 1) * limitNum;
 
-    const where: Prisma.ProgramWhereInput = {};
-    if (country) where.university = { country: { code: country.toUpperCase() } };
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    // Base filters (country, level, field, text search)
+    const baseWhere: Prisma.ProgramWhereInput = {};
+    if (country) baseWhere.university = { country: { code: country.toUpperCase() } };
     if (level && Object.values(ProgramLevel).includes(level as ProgramLevel)) {
-      where.level = level as ProgramLevel;
+      baseWhere.level = level as ProgramLevel;
     }
-    if (field) where.field = { contains: field, mode: 'insensitive' };
+    if (field) baseWhere.field = { contains: field, mode: 'insensitive' };
     if (q) {
-      where.OR = [
+      baseWhere.OR = [
         { title: { contains: q, mode: 'insensitive' } },
         { field: { contains: q, mode: 'insensitive' } },
         { university: { name: { contains: q, mode: 'insensitive' } } },
       ];
     }
 
-    const [items, total] = await Promise.all([
+    // Fresh = lastVerifiedAt within 7 days, or updatedAt within 7 days when lastVerifiedAt is null
+    const freshFilter: Prisma.ProgramWhereInput = {
+      OR: [
+        { lastVerifiedAt: { gte: sevenDaysAgo } },
+        { AND: [{ lastVerifiedAt: null }, { updatedAt: { gte: sevenDaysAgo } }] },
+      ],
+    };
+
+    // Stale = NOT fresh (used to count hidden programs)
+    const staleFilter: Prisma.ProgramWhereInput = {
+      OR: [
+        { AND: [{ lastVerifiedAt: { not: null } }, { lastVerifiedAt: { lt: sevenDaysAgo } }] },
+        { AND: [{ lastVerifiedAt: null }, { updatedAt: { lt: sevenDaysAgo } }] },
+      ],
+    };
+
+    const where: Prisma.ProgramWhereInput = freshOnly
+      ? { AND: [baseWhere, freshFilter] }
+      : baseWhere;
+
+    const [items, total, staleHiddenCount] = await Promise.all([
       prisma.program.findMany({
         where,
         skip,
@@ -68,27 +92,28 @@ export const searchPrograms = async (req: Request, res: Response) => {
         orderBy: [{ university: { name: 'asc' } }, { title: 'asc' }],
       }),
       prisma.program.count({ where }),
+      freshOnly
+        ? prisma.program.count({ where: { AND: [baseWhere, staleFilter] } })
+        : Promise.resolve(0),
     ]);
 
     const enriched = items.map(attachFreshness);
 
-    // Staleness summary: fraction of results that are stale helps the UI decide
-    // whether to show a global refresh prompt.
-    const staleCount = enriched.filter(
-      (p) => p.freshnessStatus === 'stale' || p.freshnessStatus === 'source_unavailable',
+    // Among shown results, count how many are cached/stale (relevant only when showStale=true)
+    const shownStaleCount = enriched.filter(
+      (p) => p.freshnessStatus === 'stale' || p.freshnessStatus === 'cached' || p.freshnessStatus === 'source_unavailable',
     ).length;
-    const hasStaleData = staleCount > 0 && total > 0;
-
-    const noDataMessage = total === 0 ? 'No program data yet. Trigger a sync to discover programmes.' : undefined;
+    const hasStaleData = shownStaleCount > 0 && !freshOnly;
 
     res.status(200).json({
       items: enriched,
       page: pageNum,
       limit: limitNum,
       total,
+      freshOnlyMode: freshOnly,
+      staleHiddenCount,
       hasStaleData,
-      staleCount,
-      ...(noDataMessage && { noDataMessage }),
+      staleCount: shownStaleCount,
     });
   } catch {
     res.status(500).json({ message: 'Failed to search programs' });
