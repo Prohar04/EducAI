@@ -17,7 +17,7 @@ function toSignin(req: NextRequest, reason?: string, clearSession?: boolean) {
   return res;
 }
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   const cookie = req.cookies.get("session")?.value;
