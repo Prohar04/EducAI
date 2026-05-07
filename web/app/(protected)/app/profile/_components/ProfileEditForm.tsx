@@ -135,11 +135,18 @@ export default function ProfileEditForm({ initialProfile }: Props) {
 							placeholder="Select level"
 						/>
 					</Field>
-					<Field label="Intended major / field">
+					<Field label="Intended abroad program">
 						<Input
-							name="intendedMajor"
-							defaultValue={p?.intendedMajor ?? p?.majorOrTrack ?? ""}
-							placeholder="e.g. Computer Science"
+							name="intendedAbroadMajor"
+							defaultValue={p?.intendedAbroadMajor ?? p?.intendedMajor ?? ""}
+							placeholder="e.g. Data Science, Cybersecurity…"
+						/>
+					</Field>
+					<Field label="Career goal">
+						<Input
+							name="careerGoal"
+							defaultValue={p?.careerGoal ?? ""}
+							placeholder="e.g. Data Scientist at a tech company"
 						/>
 					</Field>
 				</div>
@@ -156,7 +163,7 @@ export default function ProfileEditForm({ initialProfile }: Props) {
 							placeholder="University / school name"
 						/>
 					</Field>
-					<Field label="Major / track">
+					<Field label="Current major / track">
 						<Input
 							name="majorOrTrack"
 							defaultValue={p?.majorOrTrack ?? ""}
@@ -199,6 +206,13 @@ export default function ProfileEditForm({ initialProfile }: Props) {
 							defaultValue={p?.workExperienceMonths?.toString() ?? ""}
 							placeholder="0"
 							min="0"
+						/>
+					</Field>
+					<Field label="Research interest (optional)">
+						<Input
+							name="researchInterest"
+							defaultValue={p?.researchInterest ?? ""}
+							placeholder="e.g. NLP, climate policy, bioinformatics"
 						/>
 					</Field>
 				</div>
