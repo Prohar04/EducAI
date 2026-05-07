@@ -33,7 +33,7 @@ EducAI is a full-stack AI platform that guides international students through ev
 | **Express API** (Render) | [educai-api-91ai.onrender.com](https://educai-api-91ai.onrender.com) |
 | **AI Server** (Render) | [educai-ai-rd5y.onrender.com](https://educai-ai-rd5y.onrender.com) |
 | **Database** | Neon PostgreSQL — serverless, ap-southeast-1 |
-| **Demo Video** | `[Add demo video link]` |
+| **Demo Video** | Coming soon |
 
 > **Free-tier note:** Render services spin down after inactivity. The first request after idle may take 30–60 seconds. Email auth and Google OAuth are not configured in the demo deployment — email/password sign-up works normally.
 
