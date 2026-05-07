@@ -45,6 +45,7 @@ model User {
   strategyReports          StrategyReport[]
   scholarshipAlertLogs     ScholarshipAlertLog[]
   gapFixSessions           GapFixSession[]
+  jobSearches              JobSearch[]
 
   @@index([email])
   @@index([oauthProvider, oauthId])
@@ -589,6 +590,59 @@ model GapFixEvidence {
   @@index([sessionId])
   @@index([userId])
   @@map("gap_fix_evidences")
+}
+
+// ── JOB FINDER ────────────────────────────────────────────────────
+enum JobType {
+  PART_TIME
+  FULL_TIME
+  INTERNSHIP
+  REMOTE
+}
+
+model JobSearch {
+  id          String      @id @default(cuid())
+  userId      String      @map("user_id") @db.Uuid
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  country     String      @db.VarChar(100)
+  countryCode String      @default("") @map("country_code") @db.VarChar(2)
+  city        String      @db.VarChar(100)
+  jobType     JobType     @map("job_type")
+  field       String      @db.VarChar(100)
+  visaType    String?     @map("visa_type") @db.VarChar(100)
+  cachedAt    DateTime?   @map("cached_at") @db.Timestamp
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamp
+  updatedAt   DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamp
+  results     JobResult[]
+
+  @@index([userId])
+  @@index([updatedAt])
+  @@map("job_searches")
+}
+
+model JobResult {
+  id              String    @id @default(cuid())
+  jobSearchId     String    @map("job_search_id")
+  jobSearch       JobSearch @relation(fields: [jobSearchId], references: [id], onDelete: Cascade)
+  title           String    @db.VarChar(255)
+  company         String    @db.VarChar(255)
+  companyLogo     String?   @map("company_logo") @db.Text
+  location        String    @db.VarChar(255)
+  jobType         JobType   @map("job_type")
+  salary          String?   @db.VarChar(200)
+  salaryMin       Float?    @map("salary_min")
+  salaryMax       Float?    @map("salary_max")
+  currency        String?   @db.VarChar(10)
+  postedAt        String?   @map("posted_at") @db.VarChar(100)
+  visaSponsorship String?   @map("visa_sponsorship") @db.Text
+  applyUrl        String    @map("apply_url") @db.Text
+  description     String?   @db.Text
+  source          String    @db.VarChar(100)
+  isRemote        Boolean   @default(false) @map("is_remote")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamp
+
+  @@index([jobSearchId])
+  @@map("job_results")
 }
 
 // ── GOOGLE OAUTH ONE-TIME CODES ────────────────────────────────────
