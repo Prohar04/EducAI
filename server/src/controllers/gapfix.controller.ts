@@ -148,8 +148,11 @@ export async function gapFixGenerateHandler(req: Request, res: Response): Promis
       gmat: profileRecord?.gmat ?? undefined,
       workExperienceMonths: profileRecord?.workExperienceMonths ?? undefined,
       intendedLevel: profileRecord?.intendedLevel ?? undefined,
-      // Use majorOrTrack as fallback for intendedMajor (handles both legacy and current profile saves)
-      intendedMajor: profileRecord?.intendedMajor ?? profileRecord?.majorOrTrack ?? undefined,
+      // Priority: intendedAbroadMajor (study abroad target) → intendedMajor → majorOrTrack
+      intendedMajor: (profileRecord as unknown as { intendedAbroadMajor?: string }).intendedAbroadMajor
+                    ?? profileRecord?.intendedMajor
+                    ?? profileRecord?.majorOrTrack
+                    ?? undefined,
       targetCountries: (profileRecord?.targetCountries as string[]) ?? undefined,
       targetIntake: profileRecord?.targetIntake ?? undefined,
       currentStage: profileRecord?.currentStage ?? undefined,
@@ -369,7 +372,11 @@ export async function gapFixReanalyzeHandler(req: Request, res: Response): Promi
       gmat: profileRecord.gmat ?? undefined,
       workExperienceMonths: profileRecord.workExperienceMonths ?? undefined,
       intendedLevel: profileRecord.intendedLevel ?? undefined,
-      intendedMajor: profileRecord.intendedMajor ?? profileRecord.majorOrTrack ?? undefined,
+      // Priority: intendedAbroadMajor (study abroad target) → intendedMajor → majorOrTrack
+      intendedMajor: (profileRecord as unknown as { intendedAbroadMajor?: string }).intendedAbroadMajor
+                    ?? profileRecord.intendedMajor
+                    ?? profileRecord.majorOrTrack
+                    ?? undefined,
       targetCountries: (profileRecord.targetCountries as string[]) ?? undefined,
       targetIntake: profileRecord.targetIntake ?? undefined,
       currentStage: profileRecord.currentStage ?? undefined,

@@ -74,6 +74,12 @@ export async function cvGenerateHandler(req: Request, res: Response): Promise<vo
 
     logger.info(`[cv] generating for userId=${userId} template=${cvTemplate}`);
 
+    // Resolve intended abroad program — primary signal for CV targeting
+    const intendedAbroadMajor =
+      (profile as unknown as { intendedAbroadMajor?: string }).intendedAbroadMajor
+      ?? profile?.intendedMajor
+      ?? undefined;
+
     const result = await generateCv({
       name: user?.name ?? undefined,
       email: user?.email ?? undefined,
@@ -81,10 +87,11 @@ export async function cvGenerateHandler(req: Request, res: Response): Promise<vo
       linkedin,
       github,
       summary,
-      targetDegree,
+      targetDegree: targetDegree ?? profile?.intendedLevel ?? undefined,
       targetCountry: bodyTargetCountry ?? (profile?.targetCountries as string[] | null)?.[0] ?? undefined,
       targetUniversity,
-      targetProgram,
+      // Default targetProgram to intendedAbroadMajor if not explicitly provided
+      targetProgram: targetProgram ?? intendedAbroadMajor,
       currentDegree: profile?.currentStage ?? undefined,
       currentInstitution: profile?.currentInstitution ?? undefined,
       majorOrTrack: profile?.majorOrTrack ?? undefined,
@@ -109,7 +116,7 @@ export async function cvGenerateHandler(req: Request, res: Response): Promise<vo
       volunteering,
       references,
       intendedLevel: profile?.intendedLevel ?? undefined,
-      intendedMajor: profile?.intendedMajor ?? undefined,
+      intendedMajor: intendedAbroadMajor,
       highlights,
       cvTemplate,
     });
