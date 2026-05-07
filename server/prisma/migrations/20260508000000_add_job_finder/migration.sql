@@ -1,8 +1,12 @@
 -- CreateEnum
-CREATE TYPE "JobType" AS ENUM ('PART_TIME', 'FULL_TIME', 'INTERNSHIP', 'REMOTE');
+DO $$ BEGIN
+  CREATE TYPE "JobType" AS ENUM ('PART_TIME', 'FULL_TIME', 'INTERNSHIP', 'REMOTE');
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
 
 -- CreateTable
-CREATE TABLE "job_searches" (
+CREATE TABLE IF NOT EXISTS "job_searches" (
     "id" TEXT NOT NULL,
     "user_id" UUID NOT NULL,
     "country" VARCHAR(100) NOT NULL,
@@ -19,7 +23,7 @@ CREATE TABLE "job_searches" (
 );
 
 -- CreateTable
-CREATE TABLE "job_results" (
+CREATE TABLE IF NOT EXISTS "job_results" (
     "id" TEXT NOT NULL,
     "job_search_id" TEXT NOT NULL,
     "title" VARCHAR(255) NOT NULL,
@@ -43,16 +47,24 @@ CREATE TABLE "job_results" (
 );
 
 -- CreateIndex
-CREATE INDEX "job_searches_user_id_idx" ON "job_searches"("user_id");
+CREATE INDEX IF NOT EXISTS "job_searches_user_id_idx" ON "job_searches"("user_id");
 
 -- CreateIndex
-CREATE INDEX "job_searches_updated_at_idx" ON "job_searches"("updated_at");
+CREATE INDEX IF NOT EXISTS "job_searches_updated_at_idx" ON "job_searches"("updated_at");
 
 -- CreateIndex
-CREATE INDEX "job_results_job_search_id_idx" ON "job_results"("job_search_id");
+CREATE INDEX IF NOT EXISTS "job_results_job_search_id_idx" ON "job_results"("job_search_id");
 
 -- AddForeignKey
-ALTER TABLE "job_searches" ADD CONSTRAINT "job_searches_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "job_searches" ADD CONSTRAINT "job_searches_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "job_results" ADD CONSTRAINT "job_results_job_search_id_fkey" FOREIGN KEY ("job_search_id") REFERENCES "job_searches"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "job_results" ADD CONSTRAINT "job_results_job_search_id_fkey" FOREIGN KEY ("job_search_id") REFERENCES "job_searches"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
