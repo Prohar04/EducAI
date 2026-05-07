@@ -64,6 +64,13 @@ services:
         sync: false
       - key: CHAT_RATE_LIMIT_PER_MIN
         value: "20"
+      # ── Job Finder API Keys ───────────────────────────────────────────────────
+      - key: ADZUNA_APP_ID
+        sync: false
+      - key: ADZUNA_APP_KEY
+        sync: false
+      - key: RAPIDAPI_KEY
+        sync: false
 
   # ─────────────────────────────────────────────────────────────────────────────
   # FastAPI AI Server
@@ -116,4 +123,11 @@ services:
       - key: CHROMADB_HOST
         sync: false   # leave empty to disable vector search on free tier
       - key: CHROMADB_PORT
+        sync: false
+      # ── Job Finder API Keys ───────────────────────────────────────────────────
+      - key: ADZUNA_APP_ID
+        sync: false
+      - key: ADZUNA_APP_KEY
+        sync: false
+      - key: RAPIDAPI_KEY
         sync: false
