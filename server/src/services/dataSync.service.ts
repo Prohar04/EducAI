@@ -710,11 +710,22 @@ export async function getSyncStatus(): Promise<SyncStatusResponse> {
       }),
     ]);
 
-    // Next scheduled run — daily 06:00 UTC
+    // Next scheduled run — twice daily: 06:00 and 18:00 UTC
     const now = new Date();
-    const nextRun = new Date(now);
-    nextRun.setUTCHours(6, 0, 0, 0);
-    if (nextRun <= now) nextRun.setUTCDate(nextRun.getUTCDate() + 1);
+    const candidate06 = new Date(now);
+    candidate06.setUTCHours(6, 0, 0, 0);
+    const candidate18 = new Date(now);
+    candidate18.setUTCHours(18, 0, 0, 0);
+    // Pick the next future slot (06:00 or 18:00 today, or 06:00 tomorrow)
+    let nextRun: Date;
+    if (candidate06 > now) {
+      nextRun = candidate06;
+    } else if (candidate18 > now) {
+      nextRun = candidate18;
+    } else {
+      nextRun = new Date(candidate06);
+      nextRun.setUTCDate(nextRun.getUTCDate() + 1);
+    }
 
     // Per-source health
     const sourceHealthList: SyncSourceHealth[] = await Promise.all(

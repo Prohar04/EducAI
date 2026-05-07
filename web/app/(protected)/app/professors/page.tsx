@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import {
 	AlertCircle,
 	BookOpen,
@@ -17,11 +17,30 @@ import {
 	X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { StaggerChildren, StaggerItem } from "@/components/motion/FadeIn";
-import { searchProfessorsAction, type ProfessorResult } from "@/lib/auth/action";
+import { SmartAutocomplete, type SuggestionItem } from "@/components/forms/SmartAutocomplete";
+import { searchProfessorsAction, getUserProfile, type ProfessorResult } from "@/lib/auth/action";
 import { COUNTRIES } from "@/lib/data/countries";
+
+const RESEARCH_TOPIC_SUGGESTIONS: SuggestionItem[] = [
+	{ value: "nlp", label: "Natural Language Processing" },
+	{ value: "computer_vision", label: "Computer Vision" },
+	{ value: "machine_learning", label: "Machine Learning" },
+	{ value: "deep_learning", label: "Deep Learning" },
+	{ value: "reinforcement_learning", label: "Reinforcement Learning" },
+	{ value: "quantum_computing", label: "Quantum Computing" },
+	{ value: "robotics", label: "Robotics & Automation" },
+	{ value: "bioinformatics", label: "Bioinformatics" },
+	{ value: "climate_science", label: "Climate Science / Sustainability" },
+	{ value: "cybersecurity", label: "Cybersecurity" },
+	{ value: "data_science", label: "Data Science & Analytics" },
+	{ value: "fintech", label: "FinTech & Algorithmic Trading" },
+	{ value: "public_health", label: "Public Health & Epidemiology" },
+	{ value: "neuroscience", label: "Neuroscience" },
+	{ value: "renewable_energy", label: "Renewable Energy" },
+	{ value: "drug_discovery", label: "Drug Discovery & Biotech" },
+];
 
 function SkeletonCard() {
 	return (
@@ -184,6 +203,30 @@ export default function ProfessorsPage() {
 	const [emailModal, setEmailModal] = useState<ProfessorResult | null>(null);
 	const [isPending, startTransition] = useTransition();
 
+	// Pre-fill from user profile: intendedAbroadMajor + researchInterest
+	useEffect(() => {
+		getUserProfile().then(profile => {
+			if (!profile) return;
+			const p = profile as unknown as Record<string, unknown>;
+			const intendedField =
+				(p.intendedAbroadMajor as string | undefined)
+				?? profile.intendedMajor
+				?? undefined;
+			const ri = (p.researchInterest as string | undefined) ?? undefined;
+			// Build default research topic: combine intended field + research interest
+			const defaultTopic = ri
+				? ri
+				: intendedField
+				? intendedField
+				: "";
+			if (defaultTopic) setResearchInterest(defaultTopic);
+			// Set level from profile
+			const lvl = profile.intendedLevel ?? profile.level ?? "";
+			if (lvl.toUpperCase().includes("PHD")) setLevel("phd");
+			else if (lvl.toUpperCase().includes("MSC") || lvl.toUpperCase().includes("MASTER")) setLevel("masters");
+		}).catch(() => {});
+	}, []);
+
 	function handleSearch(e: React.FormEvent) {
 		e.preventDefault();
 		if (!researchInterest.trim()) return;
@@ -240,21 +283,22 @@ export default function ProfessorsPage() {
 				<form onSubmit={handleSearch} className="space-y-4">
 					<div>
 						<label className="mb-1 block text-sm font-medium">Research Interest *</label>
-						<Input
+						<SmartAutocomplete
 							value={researchInterest}
-							onChange={(e) => setResearchInterest(e.target.value)}
+							onChange={setResearchInterest}
 							placeholder="e.g. Natural Language Processing, Computer Vision, Quantum Computing"
-							className="text-sm"
+							localSuggestions={RESEARCH_TOPIC_SUGGESTIONS}
+							allowFreeText
 						/>
 					</div>
 					<div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
 						<div>
 							<label className="mb-1 block text-xs text-muted-foreground">University (optional)</label>
-							<Input
+							<SmartAutocomplete
 								value={university}
-								onChange={(e) => setUniversity(e.target.value)}
+								onChange={setUniversity}
 								placeholder="e.g. MIT, Oxford, TU Munich"
-								className="text-sm"
+								allowFreeText
 							/>
 						</div>
 						<div>

@@ -7,7 +7,53 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import { convert, toUSD, RATES_ARE_LIVE } from "@/lib/utils/exchangeRates";
+import { SmartAutocomplete, type SuggestionItem } from "@/components/forms/SmartAutocomplete";
+import { MAJORS } from "@/lib/data/majors";
 import type { UserProfile, OnboardingFormState } from "@/types/auth.type";
+
+// ─── Suggestion lists ─────────────────────────────────────────────────────────
+
+const MAJOR_SUGGESTIONS: SuggestionItem[] = MAJORS.map(m => ({
+	value: m.value,
+	label: m.label,
+	meta: m.field,
+}));
+
+const CAREER_GOAL_SUGGESTIONS: SuggestionItem[] = [
+	{ value: "data_scientist", label: "Data Scientist" },
+	{ value: "software_engineer", label: "Software Engineer" },
+	{ value: "ml_engineer", label: "Machine Learning Engineer" },
+	{ value: "product_manager", label: "Product Manager" },
+	{ value: "research_scientist", label: "Research Scientist" },
+	{ value: "phd_academia", label: "PhD / Academia" },
+	{ value: "consultant", label: "Management Consultant" },
+	{ value: "investment_banker", label: "Investment Banker" },
+	{ value: "ux_designer", label: "UX Designer" },
+	{ value: "policy_analyst", label: "Policy Analyst" },
+	{ value: "public_health_officer", label: "Public Health Officer" },
+	{ value: "entrepreneur", label: "Entrepreneur / Startup Founder" },
+	{ value: "data_analyst", label: "Data Analyst" },
+	{ value: "cybersecurity_analyst", label: "Cybersecurity Analyst" },
+	{ value: "financial_analyst", label: "Financial Analyst" },
+];
+
+const RESEARCH_INTEREST_SUGGESTIONS: SuggestionItem[] = [
+	{ value: "nlp", label: "Natural Language Processing" },
+	{ value: "computer_vision", label: "Computer Vision" },
+	{ value: "machine_learning", label: "Machine Learning" },
+	{ value: "deep_learning", label: "Deep Learning" },
+	{ value: "bioinformatics", label: "Bioinformatics" },
+	{ value: "climate_science", label: "Climate Science / Sustainability" },
+	{ value: "quantum_computing", label: "Quantum Computing" },
+	{ value: "robotics", label: "Robotics & Automation" },
+	{ value: "cybersecurity_research", label: "Cybersecurity Research" },
+	{ value: "drug_discovery", label: "Drug Discovery & Biotech" },
+	{ value: "fintech", label: "FinTech & Algorithmic Trading" },
+	{ value: "public_policy_research", label: "Public Policy Research" },
+	{ value: "renewable_energy", label: "Renewable Energy" },
+	{ value: "neuroscience", label: "Neuroscience" },
+	{ value: "operations_research", label: "Operations Research" },
+];
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -83,6 +129,15 @@ export default function ProfileEditForm({ initialProfile }: Props) {
 	const [budgetCurrency, setBudgetCurrency] = useState<string>(p?.budgetCurrency ?? "USD");
 	const [budgetMax, setBudgetMax] = useState<string>(p?.budgetMax?.toString() ?? "");
 
+	// Controlled state for SmartAutocomplete fields
+	const [currentInstitution, setCurrentInstitution] = useState(p?.currentInstitution ?? "");
+	const [majorOrTrack, setMajorOrTrack] = useState(p?.majorOrTrack ?? "");
+	const [intendedAbroadMajor, setIntendedAbroadMajor] = useState(
+		p?.intendedAbroadMajor ?? p?.intendedMajor ?? "",
+	);
+	const [careerGoal, setCareerGoal] = useState(p?.careerGoal ?? "");
+	const [researchInterest, setResearchInterest] = useState(p?.researchInterest ?? "");
+
 	const budgetNum = parseFloat(budgetMax);
 	const budgetUSD = !isNaN(budgetNum) && budgetNum > 0
 		? toUSD(budgetNum, budgetCurrency)
@@ -106,6 +161,13 @@ export default function ProfileEditForm({ initialProfile }: Props) {
 
 			{/* Pass back targetCountries as JSON (unchanged unless user edits) */}
 			<input type="hidden" name="targetCountries" value={defaultCountries} />
+
+			{/* Hidden inputs for SmartAutocomplete-controlled fields */}
+			<input type="hidden" name="currentInstitution" value={currentInstitution} />
+			<input type="hidden" name="majorOrTrack" value={majorOrTrack} />
+			<input type="hidden" name="intendedAbroadMajor" value={intendedAbroadMajor} />
+			<input type="hidden" name="careerGoal" value={careerGoal} />
+			<input type="hidden" name="researchInterest" value={researchInterest} />
 
 			{/* ── Section 1: Academic Stage ── */}
 			<section className="rounded-xl border border-border bg-card p-6 space-y-5">
@@ -136,17 +198,21 @@ export default function ProfileEditForm({ initialProfile }: Props) {
 						/>
 					</Field>
 					<Field label="Intended abroad program">
-						<Input
-							name="intendedAbroadMajor"
-							defaultValue={p?.intendedAbroadMajor ?? p?.intendedMajor ?? ""}
+						<SmartAutocomplete
+							value={intendedAbroadMajor}
+							onChange={setIntendedAbroadMajor}
 							placeholder="e.g. Data Science, Cybersecurity…"
+							localSuggestions={MAJOR_SUGGESTIONS}
+							allowFreeText
 						/>
 					</Field>
 					<Field label="Career goal">
-						<Input
-							name="careerGoal"
-							defaultValue={p?.careerGoal ?? ""}
+						<SmartAutocomplete
+							value={careerGoal}
+							onChange={setCareerGoal}
 							placeholder="e.g. Data Scientist at a tech company"
+							localSuggestions={CAREER_GOAL_SUGGESTIONS}
+							allowFreeText
 						/>
 					</Field>
 				</div>
@@ -157,18 +223,20 @@ export default function ProfileEditForm({ initialProfile }: Props) {
 				<h2 className="font-semibold text-base">Academic Record</h2>
 				<div className="grid gap-5 sm:grid-cols-2">
 					<Field label="Current institution">
-						<Input
-							name="currentInstitution"
-							defaultValue={p?.currentInstitution ?? ""}
+						<SmartAutocomplete
+							value={currentInstitution}
+							onChange={setCurrentInstitution}
 							placeholder="University / school name"
+							allowFreeText
 						/>
 					</Field>
 					<Field label="Current major / track">
-						<Input
-							name="majorOrTrack"
-							defaultValue={p?.majorOrTrack ?? ""}
+						<SmartAutocomplete
+							value={majorOrTrack}
+							onChange={setMajorOrTrack}
 							placeholder="e.g. Computer Engineering"
-							autoComplete="off"
+							localSuggestions={MAJOR_SUGGESTIONS}
+							allowFreeText
 						/>
 					</Field>
 					<Field label="GPA">
@@ -209,10 +277,12 @@ export default function ProfileEditForm({ initialProfile }: Props) {
 						/>
 					</Field>
 					<Field label="Research interest (optional)">
-						<Input
-							name="researchInterest"
-							defaultValue={p?.researchInterest ?? ""}
+						<SmartAutocomplete
+							value={researchInterest}
+							onChange={setResearchInterest}
 							placeholder="e.g. NLP, climate policy, bioinformatics"
+							localSuggestions={RESEARCH_INTEREST_SUGGESTIONS}
+							allowFreeText
 						/>
 					</Field>
 				</div>

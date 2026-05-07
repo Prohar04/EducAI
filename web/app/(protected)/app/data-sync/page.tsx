@@ -683,7 +683,7 @@ export default function DataUpdatesPage() {
           <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/30 px-4 py-3 text-xs text-muted-foreground">
             <CalendarClock className="h-3.5 w-3.5 shrink-0" />
             <span>
-              Data is automatically refreshed every day.{" "}
+              Data is automatically refreshed twice daily (06:00 and 18:00 UTC).{" "}
               <span className="font-medium text-foreground">
                 Next automatic refresh: {formatTime(status.nextScheduledRun)}
               </span>
