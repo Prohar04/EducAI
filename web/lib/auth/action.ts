@@ -1120,3 +1120,120 @@ export const cancelJobAction = async (jobId: string): Promise<{ ok: boolean; mes
 	return response.json();
 };
 
+// ── JOB FINDER ────────────────────────────────────────────────────────────────
+
+export type JobSearchPayload = {
+	country: string;
+	countryCode: string;
+	city: string;
+	field: string;
+	jobType: "PART_TIME" | "FULL_TIME" | "INTERNSHIP" | "REMOTE";
+	visaType?: string;
+	page?: number;
+};
+
+export type JobListing = {
+	title: string;
+	company: string;
+	company_logo?: string | null;
+	location: string;
+	job_type: string;
+	salary?: string | null;
+	salary_min?: number | null;
+	salary_max?: number | null;
+	currency?: string | null;
+	posted_at?: string | null;
+	visa_sponsorship?: string | null;
+	apply_url: string;
+	description?: string | null;
+	source: string;
+	is_remote?: boolean;
+};
+
+export type JobSearchResult = {
+	listings: JobListing[];
+	work_hour_limit?: string;
+	post_grad_permit_steps?: string[];
+	total: number;
+	query_used: string;
+	source_used: string;
+	ai_fallback_used: boolean;
+	searchId: string;
+	cachedAt?: string;
+	fromCache?: boolean;
+};
+
+export type JobHistoryItem = {
+	id: string;
+	country: string;
+	countryCode: string;
+	city: string;
+	jobType: string;
+	field: string;
+	createdAt: string;
+	updatedAt: string;
+	results: {
+		id: string;
+		title: string;
+		company: string;
+		companyLogo?: string | null;
+		location: string;
+		jobType: string;
+		salary?: string | null;
+		postedAt?: string | null;
+		visaSponsorship?: string | null;
+		applyUrl: string;
+		source: string;
+		isRemote: boolean;
+	}[];
+};
+
+export type JobRefreshStatus = {
+	hasSearch: boolean;
+	needsRefresh: boolean;
+	cachedAt?: string | null;
+	lastUpdated?: string;
+	lastSearch?: { country: string; city: string; field: string; jobType: string };
+};
+
+export const searchJobsAction = async (
+	payload: JobSearchPayload,
+): Promise<{ ok: boolean; data: JobSearchResult } | null> => {
+	const response = await authFetch(`${BACKEND_URL}/api/jobs/search`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(payload),
+	});
+	if (!response.ok) return null;
+	return response.json();
+};
+
+export const getJobHistoryAction = async (): Promise<{ ok: boolean; data: JobHistoryItem[] } | null> => {
+	const response = await authFetch(`${BACKEND_URL}/api/jobs/history`);
+	if (!response.ok) return null;
+	return response.json();
+};
+
+export const getJobSuggestionsAction = async (
+	type: string,
+	query: string,
+	context?: string,
+): Promise<string[]> => {
+	const params = new URLSearchParams({ type, query });
+	if (context) params.set("context", context);
+	try {
+		const response = await fetch(`${BACKEND_URL}/api/jobs/suggest?${params.toString()}`);
+		if (!response.ok) return [];
+		const data = await response.json() as { ok: boolean; data: { suggestions: string[] } };
+		return data?.data?.suggestions ?? [];
+	} catch {
+		return [];
+	}
+};
+
+export const getJobRefreshStatusAction = async (): Promise<{ ok: boolean; data: JobRefreshStatus } | null> => {
+	const response = await authFetch(`${BACKEND_URL}/api/jobs/refresh-status`);
+	if (!response.ok) return null;
+	return response.json();
+};
+
