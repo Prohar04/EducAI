@@ -180,6 +180,10 @@ export interface UserProfile {
         englishScore?: number | null;
         gre?: number | null;
         gmat?: number | null;
+        // Intended abroad program (separate from majorOrTrack which is current program)
+        intendedAbroadMajor?: string | null;
+        careerGoal?: string | null;
+        researchInterest?: string | null;
         // Step 4: Budget & Preferences
         budgetCurrency?: string | null;
         budgetMax?: number | null;

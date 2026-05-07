@@ -180,7 +180,11 @@ async function runMatchBackground(runId: string, userId: string, profile: Profil
 
     const targetCountries = Array.isArray(profile.targetCountries) ? (profile.targetCountries as string[]) : [];
     const intendedLevel   = profile.intendedLevel ?? profile.level ?? 'MSc';
-    const intendedMajor   = profile.intendedMajor ?? profile.majorOrTrack ?? 'Computer Science';
+    // Prefer intendedAbroadMajor (what user wants to study abroad) over current major
+    const intendedMajor   = (profile as unknown as { intendedAbroadMajor?: string }).intendedAbroadMajor
+                            ?? profile.intendedMajor
+                            ?? profile.majorOrTrack
+                            ?? 'Computer Science';
 
     // ── 24-hour cache check ────────────────────────────────────────────────
     const cacheKey   = `${[...targetCountries].sort().join(',')}:${intendedMajor}:${intendedLevel}`;

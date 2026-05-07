@@ -14,6 +14,7 @@ export interface ScholarshipFilters {
   limit?: number;
   userProfile?: {
     intendedLevel?: string | null;
+    intendedAbroadMajor?: string | null; // primary: what user wants to study abroad
     intendedMajor?: string | null;
     majorOrTrack?: string | null;
     targetCountries?: string[] | null;
@@ -60,6 +61,7 @@ interface UserProfileSnapshot {
   fundingNeed?: boolean | null;
   level?: string | null;
   intendedLevel?: string | null;
+  intendedAbroadMajor?: string | null; // primary: what user wants to study abroad
   majorOrTrack?: string | null;
   intendedMajor?: string | null;
   workExperienceMonths?: number | null;
@@ -122,7 +124,8 @@ function computeMatchScore(
     reasons.push('Full funding available');
   }
 
-  const profileMajor = (profile.majorOrTrack ?? profile.intendedMajor ?? '').toLowerCase();
+  // Prefer intendedAbroadMajor (what user wants to study abroad) for scholarship matching
+  const profileMajor = (profile.intendedAbroadMajor ?? profile.majorOrTrack ?? profile.intendedMajor ?? '').toLowerCase();
   const schField = (scholarship.field ?? '').toLowerCase();
   if (schField && profileMajor && (schField.includes(profileMajor) || profileMajor.includes(schField) || schField === 'all fields')) {
     score += 15;

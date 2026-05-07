@@ -71,6 +71,10 @@ export const upsertUserProfile = async (
 		englishScore: formData.get("englishScore") ? Number(formData.get("englishScore")) : undefined,
 		gre: formData.get("gre") ? Number(formData.get("gre")) : undefined,
 		gmat: formData.get("gmat") ? Number(formData.get("gmat")) : undefined,
+		// Intended abroad program
+		intendedAbroadMajor: (formData.get("intendedAbroadMajor") as string) || undefined,
+		careerGoal: (formData.get("careerGoal") as string) || undefined,
+		researchInterest: (formData.get("researchInterest") as string) || undefined,
 		// Step 4
 		budgetCurrency: (formData.get("budgetCurrency") as string) || undefined,
 		budgetMax: formData.get("budgetMax") ? Number(formData.get("budgetMax")) : undefined,

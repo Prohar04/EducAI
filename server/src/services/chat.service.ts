@@ -75,7 +75,10 @@ interface CompactProfileContext {
   targetIntake: string | null;
   targetCountries: string[];
   level: string | null;
-  major: string | null;
+  currentMajor: string | null;
+  major: string | null; // intended abroad major (primary)
+  careerGoal: string | null;
+  researchInterest: string | null;
   budget: {
     currency: string | null;
     max: number | null;
@@ -323,7 +326,14 @@ function buildProfileContext(profile: UserProfileForChat): CompactProfileContext
     targetIntake: profile.targetIntake ?? null,
     targetCountries,
     level: profile.intendedLevel ?? profile.level ?? null,
-    major: profile.intendedMajor ?? profile.majorOrTrack ?? null,
+    currentMajor: profile.majorOrTrack ?? null,
+    // intendedAbroadMajor = what user wants to study abroad (primary signal)
+    major: (profile as unknown as { intendedAbroadMajor?: string }).intendedAbroadMajor
+           ?? profile.intendedMajor
+           ?? profile.majorOrTrack
+           ?? null,
+    careerGoal: (profile as unknown as { careerGoal?: string }).careerGoal ?? null,
+    researchInterest: (profile as unknown as { researchInterest?: string }).researchInterest ?? null,
     budget: {
       currency: profile.budgetCurrency ?? null,
       max: profile.budgetMax ?? null,
@@ -619,7 +629,9 @@ function formatContextForPrompt(ctx: CompactUserContext): string {
       .join(', ') || 'None';
     parts.push(
       `[STUDENT PROFILE]`,
-      `Stage: ${p.stage ?? '—'} | Intake: ${p.targetIntake ?? '—'} | Countries: ${p.targetCountries.join(', ') || '—'} | Level: ${p.level ?? '—'} | Major: ${p.major ?? '—'}`,
+      `Stage: ${p.stage ?? '—'} | Intake: ${p.targetIntake ?? '—'} | Countries: ${p.targetCountries.join(', ') || '—'} | Level: ${p.level ?? '—'}`,
+      `Intended Abroad Program: ${p.major ?? '—'} | Current Major: ${p.currentMajor ?? '—'}`,
+      `Career Goal: ${p.careerGoal ?? '—'} | Research Interest: ${p.researchInterest ?? '—'}`,
       `GPA: ${gpaStr} | Tests: ${testStr} | Budget: ${budgetStr} | Funding needed: ${p.fundingNeed === true ? 'Yes' : p.fundingNeed === false ? 'No' : '—'}`,
     );
   }

@@ -82,6 +82,13 @@ model UserProfile {
   gre              Float?  @db.Real
   gmat             Float?  @db.Real
 
+  // ── Intended Abroad Study (separate from current major) ───────────
+  // majorOrTrack = current academic major/program
+  // intendedAbroadMajor = what the user wants to study abroad (primary signal for matching)
+  intendedAbroadMajor  String? @map("intended_abroad_major") @db.VarChar(100)
+  careerGoal           String? @map("career_goal") @db.VarChar(200)
+  researchInterest     String? @map("research_interest") @db.VarChar(200)
+
   // ── Step 4: Budget & Preferences ──────────
   budgetCurrency  String?  @map("budget_currency") @db.VarChar(10) @default("USD")
   budgetMax       Float?   @map("budget_max") @db.Real
