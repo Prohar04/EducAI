@@ -116,6 +116,10 @@ export const generateStrategy = async (req: AuthRequest, res: Response) => {
         intendedLevel: profile.intendedLevel,
         majorOrTrack: profile.majorOrTrack,
         intendedMajor: profile.intendedMajor,
+        // Primary signal: what the user wants to study abroad
+        intendedAbroadMajor: (profile as unknown as { intendedAbroadMajor?: string }).intendedAbroadMajor,
+        careerGoal: (profile as unknown as { careerGoal?: string }).careerGoal,
+        researchInterest: (profile as unknown as { researchInterest?: string }).researchInterest,
         gpa: profile.gpa,
         gpaScale: profile.gpaScale,
         englishTestType: profile.englishTestType,

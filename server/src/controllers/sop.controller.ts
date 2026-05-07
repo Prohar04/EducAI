@@ -72,21 +72,28 @@ export async function sopGenerateHandler(req: Request, res: Response): Promise<v
 
     logger.info(`[sop] generating for userId=${userId} template=${sopTemplate}`);
 
+    // Resolve intended abroad program — primary signal for SOP target
+    const profileIntendedAbroadMajor =
+      (profileRecord as unknown as { intendedAbroadMajor?: string }).intendedAbroadMajor
+      ?? profileRecord?.intendedMajor
+      ?? undefined;
+
     const result = await generateSop({
       currentDegree: profileRecord?.currentStage ?? undefined,
       gpa: profileRecord?.gpa ?? undefined,
       gpaScale: profileRecord?.gpaScale ?? undefined,
       majorOrTrack: profileRecord?.majorOrTrack ?? undefined,
-      intendedMajor: profileRecord?.intendedMajor ?? undefined,
+      intendedMajor: profileIntendedAbroadMajor,
       intendedLevel: profileRecord?.intendedLevel ?? undefined,
       workExperienceMonths: profileRecord?.workExperienceMonths ?? undefined,
       englishTestType: profileRecord?.englishTestType ?? undefined,
       englishScore: profileRecord?.englishScore ?? undefined,
-      targetProgram,
+      // Default targetProgram to intendedAbroadMajor if not explicitly provided
+      targetProgram: targetProgram ?? profileIntendedAbroadMajor,
       targetUniversity,
-      targetCountry,
-      targetIntake,
-      degreeLevel,
+      targetCountry: targetCountry ?? ((profileRecord?.targetCountries as string[] | null)?.[0]),
+      targetIntake: targetIntake ?? profileRecord?.targetIntake ?? undefined,
+      degreeLevel: degreeLevel ?? profileRecord?.intendedLevel ?? undefined,
       sopTemplate,
       highlights,
       sopPurpose,
@@ -95,8 +102,9 @@ export async function sopGenerateHandler(req: Request, res: Response): Promise<v
       whySubject,
       whyUniversity,
       whyCountry,
-      careerGoals,
-      researchInterests,
+      // Inject careerGoal and researchInterest from profile if not provided by caller
+      careerGoals: careerGoals ?? (profileRecord as unknown as { careerGoal?: string }).careerGoal ?? undefined,
+      researchInterests: researchInterests ?? (profileRecord as unknown as { researchInterest?: string }).researchInterest ?? undefined,
       achievements,
       workExperience,
       projects,
