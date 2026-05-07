@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 import { Navbar } from "@/components/app/Navbar";
-import { ChatbotWidget } from "@/components/app/ChatbotWidget";
+import { LazyChatbotWidget } from "@/components/app/LazyChatbotWidget";
 import { TransitionLayout } from "@/components/motion/TransitionLayout";
 
 export default async function ProtectedLayout({ children }: { children: ReactNode }) {
@@ -24,7 +24,7 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
       <main className="flex-1">
         <TransitionLayout>{children}</TransitionLayout>
       </main>
-      <ChatbotWidget />
+      <LazyChatbotWidget />
     </div>
   );
 }
