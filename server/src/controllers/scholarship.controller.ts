@@ -55,6 +55,7 @@ export async function listScholarships(req: Request & { userId?: string }, res: 
       userProfile: userProfile
         ? {
           intendedLevel: userProfile.intendedLevel,
+          intendedAbroadMajor: (userProfile as unknown as { intendedAbroadMajor?: string }).intendedAbroadMajor,
           intendedMajor: userProfile.intendedMajor,
           majorOrTrack: userProfile.majorOrTrack,
           targetCountries: userProfile.targetCountries as string[] | null,
@@ -117,6 +118,7 @@ export async function listEligibleScholarships(req: Request & { userId?: string 
       fundingNeed: profile.fundingNeed,
       level: profile.level,
       intendedLevel: profile.intendedLevel,
+      intendedAbroadMajor: (profile as unknown as { intendedAbroadMajor?: string }).intendedAbroadMajor,
       majorOrTrack: profile.majorOrTrack,
       intendedMajor: profile.intendedMajor,
       workExperienceMonths: profile.workExperienceMonths,
@@ -170,6 +172,7 @@ export async function checkScholarshipEligibility(
       fundingNeed: parsed.data.profileOverride?.fundingNeed ?? profile?.fundingNeed,
       level: profile?.level,
       intendedLevel: parsed.data.profileOverride?.intendedLevel ?? profile?.intendedLevel,
+      intendedAbroadMajor: (profile as unknown as { intendedAbroadMajor?: string } | null)?.intendedAbroadMajor,
       majorOrTrack: profile?.majorOrTrack,
       intendedMajor: profile?.intendedMajor,
       workExperienceMonths: profile?.workExperienceMonths,
@@ -232,6 +235,7 @@ export async function getScholarshipProbability(
       fundingNeed: profile.fundingNeed,
       level: profile.level,
       intendedLevel: profile.intendedLevel,
+      intendedAbroadMajor: (profile as unknown as { intendedAbroadMajor?: string }).intendedAbroadMajor,
       majorOrTrack: profile.majorOrTrack,
       intendedMajor: profile.intendedMajor,
       workExperienceMonths: profile.workExperienceMonths,

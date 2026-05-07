@@ -16,6 +16,8 @@ import { STAGES, TARGET_INTAKES, LEVELS } from "@/lib/data/stages";
 import { COUNTRIES, COUNTRY_TESTS } from "@/lib/data/countries";
 import { MAJORS } from "@/lib/data/majors";
 import { TUITION_RANGES, PRIORITIES, CURRENCIES } from "@/lib/data/tuitionRanges";
+import { SmartAutocomplete } from "@/components/forms/SmartAutocomplete";
+import type { SuggestionItem } from "@/components/forms/SmartAutocomplete";
 import { convert, toUSD, RATES_ARE_LIVE } from "@/lib/utils/exchangeRates";
 import type { UserProfile, Session } from "@/types/auth.type";
 
@@ -27,6 +29,8 @@ type WizardValues = {
 	targetIntake: string;
 	targetCountries: string[];
 	intendedLevel: string;
+	intendedAbroadMajor: string;
+	careerGoal: string;
 	// Step 2
 	currentInstitution: string;
 	majorOrTrack: string;
@@ -35,6 +39,7 @@ type WizardValues = {
 	graduationYear: string;
 	backlogs: string;
 	workExperienceMonths: string;
+	researchInterest: string;
 	// Step 3
 	englishTestType: string;
 	englishScore: string;
@@ -49,6 +54,14 @@ type WizardValues = {
 };
 
 type StepProps = { values: WizardValues; set: <K extends keyof WizardValues>(k: K, v: WizardValues[K]) => void };
+
+// ─── Major suggestions as SuggestionItems ────────────────────────────────────
+
+const MAJOR_SUGGESTIONS: SuggestionItem[] = MAJORS.map((m) => ({
+	value: m.value,
+	label: m.label,
+	meta: m.field,
+}));
 
 // ─── Step 1: Student Stage ────────────────────────────────────────────────────
 
@@ -128,6 +141,32 @@ function Step1({ values, set }: StepProps) {
 				</div>
 			</div>
 
+			{/* Intended abroad program */}
+			<div>
+				<Label htmlFor="intendedAbroad" className="mb-1.5 block text-sm font-medium">
+					Intended Abroad Program / Field <span className="text-destructive">*</span>
+				</Label>
+				<p className="mb-2 text-xs text-muted-foreground">What do you want to study abroad? This may differ from your current major.</p>
+				<SmartAutocomplete
+					id="intendedAbroad"
+					value={values.intendedAbroadMajor}
+					onChange={(v) => set("intendedAbroadMajor", v)}
+					placeholder="e.g. Data Science, Cybersecurity, Public Health…"
+					localSuggestions={MAJOR_SUGGESTIONS}
+				/>
+			</div>
+
+			{/* Career goal */}
+			<div>
+				<Label htmlFor="careerGoal" className="mb-1.5 block text-sm font-medium">Career Goal <span className="text-xs text-muted-foreground">(optional)</span></Label>
+				<Input
+					id="careerGoal"
+					placeholder="e.g. Data Scientist at a tech company, Research in AI"
+					value={values.careerGoal}
+					onChange={(e) => set("careerGoal", e.target.value)}
+				/>
+			</div>
+
 			{/* Country multi-select */}
 			<div>
 				<Label className="mb-2 block text-sm font-medium">Target Countries <span className="text-destructive">*</span></Label>
@@ -162,8 +201,6 @@ function Step1({ values, set }: StepProps) {
 // ─── Step 2: Academic Profile ─────────────────────────────────────────────────
 
 function Step2({ values, set }: StepProps) {
-	const [showMajorSuggestions, setShowMajorSuggestions] = useState(false);
-
 	const gpa4Estimate = () => {
 		if (!values.gpa || !values.gpaScale) return null;
 		const n = parseFloat(values.gpa);
@@ -175,12 +212,6 @@ function Step2({ values, set }: StepProps) {
 		return null;
 	};
 	const estimate = gpa4Estimate();
-
-	const majorSuggestions = showMajorSuggestions
-		? MAJORS.filter((m) =>
-				values.majorOrTrack && m.label.toLowerCase().includes(values.majorOrTrack.toLowerCase()),
-		  ).slice(0, 5)
-		: [];
 
 	return (
 		<div className="space-y-5">
@@ -195,35 +226,15 @@ function Step2({ values, set }: StepProps) {
 			</div>
 
 			<div>
-				<Label htmlFor="major" className="mb-1.5 block text-sm font-medium">Major / Field of Study <span className="text-destructive">*</span></Label>
-				<Input
+				<Label htmlFor="major" className="mb-1.5 block text-sm font-medium">Current Major / Field of Study <span className="text-destructive">*</span></Label>
+				<p className="mb-1.5 text-xs text-muted-foreground">The program you are currently enrolled in (or most recently completed).</p>
+				<SmartAutocomplete
 					id="major"
-					placeholder="e.g. Computer Science, Economics…"
 					value={values.majorOrTrack}
-					onChange={(e) => {
-						set("majorOrTrack", e.target.value);
-						setShowMajorSuggestions(true);
-					}}
-					autoComplete="off"
+					onChange={(v) => set("majorOrTrack", v)}
+					placeholder="e.g. Computer Science, Economics…"
+					localSuggestions={MAJOR_SUGGESTIONS}
 				/>
-				{majorSuggestions.length > 0 && values.majorOrTrack && showMajorSuggestions && (
-					<div className="mt-1 overflow-hidden rounded-md border border-border bg-popover shadow-md">
-						{majorSuggestions.map((m) => (
-							<button
-								key={m.value}
-								type="button"
-								className="w-full px-3 py-2 text-left text-sm hover:bg-accent"
-								onClick={() => {
-									set("majorOrTrack", m.label);
-									setShowMajorSuggestions(false);
-								}}
-							>
-								<span className="font-medium">{m.label}</span>
-								<span className="ml-2 text-xs text-muted-foreground">{m.field}</span>
-							</button>
-						))}
-					</div>
-				)}
 			</div>
 
 			{/* GPA */}
@@ -290,6 +301,16 @@ function Step2({ values, set }: StepProps) {
 					min="0"
 					value={values.workExperienceMonths}
 					onChange={(e) => set("workExperienceMonths", e.target.value)}
+				/>
+			</div>
+
+			<div>
+				<Label htmlFor="researchInterest" className="mb-1.5 block text-sm font-medium">Research Interest <span className="text-xs text-muted-foreground">(optional, for PhD/research applicants)</span></Label>
+				<Input
+					id="researchInterest"
+					placeholder="e.g. NLP, climate policy, computational biology…"
+					value={values.researchInterest}
+					onChange={(e) => set("researchInterest", e.target.value)}
 				/>
 			</div>
 		</div>
@@ -567,7 +588,9 @@ function StepReview({ values }: { values: WizardValues }) {
 		["Target Intake", values.targetIntake || "—"],
 		["Degree Level", values.intendedLevel || "—"],
 		["Target Countries", countryNames || "—"],
-		["Major", values.majorOrTrack || "—"],
+		["Intended Abroad Program", values.intendedAbroadMajor || "—"],
+		["Career Goal", values.careerGoal || "—"],
+		["Current Major", values.majorOrTrack || "—"],
 		["GPA", values.gpa ? `${values.gpa} / ${values.gpaScale}` : "—"],
 		["English Test", values.englishTestType && values.englishTestType !== "None"
 			? `${values.englishTestType} ${values.englishScore || ""}`
@@ -622,13 +645,16 @@ function buildPayload(values: WizardValues): FormData {
 	fd.append("targetCountries", JSON.stringify(values.targetCountries));
 	fd.append("intendedLevel", values.intendedLevel);
 	fd.append("level", values.intendedLevel); // legacy compat
+	if (values.intendedAbroadMajor) fd.append("intendedAbroadMajor", values.intendedAbroadMajor);
+	if (values.careerGoal) fd.append("careerGoal", values.careerGoal);
 	if (values.currentInstitution) fd.append("currentInstitution", values.currentInstitution);
 	fd.append("majorOrTrack", values.majorOrTrack);
-	fd.append("intendedMajor", values.majorOrTrack); // legacy compat
+	fd.append("intendedMajor", values.intendedAbroadMajor || values.majorOrTrack); // legacy compat: prefer abroad major
 	if (values.gpa) { fd.append("gpa", values.gpa); fd.append("gpaScale", values.gpaScale); }
 	if (values.graduationYear) fd.append("graduationYear", values.graduationYear);
 	if (values.backlogs) fd.append("backlogs", values.backlogs);
 	if (values.workExperienceMonths) fd.append("workExperienceMonths", values.workExperienceMonths);
+	if (values.researchInterest) fd.append("researchInterest", values.researchInterest);
 	if (values.englishTestType) fd.append("englishTestType", values.englishTestType);
 	if (values.englishScore) fd.append("englishScore", values.englishScore);
 	if (values.gre) fd.append("gre", values.gre);
@@ -646,7 +672,7 @@ function buildPayload(values: WizardValues): FormData {
 }
 
 function canAdvance(step: number, values: WizardValues): boolean {
-	if (step === 0) return !!(values.currentStage && values.targetIntake && values.intendedLevel && values.targetCountries.length > 0);
+	if (step === 0) return !!(values.currentStage && values.targetIntake && values.intendedLevel && values.intendedAbroadMajor && values.targetCountries.length > 0);
 	if (step === 1) return !!values.majorOrTrack;
 	return true;
 }
@@ -670,6 +696,8 @@ export default function OnboardingWizard({
 		targetIntake: initialProfile?.targetIntake ?? "",
 		targetCountries: (initialProfile?.targetCountries as string[]) ?? [],
 		intendedLevel: initialProfile?.intendedLevel ?? initialProfile?.level ?? "",
+		intendedAbroadMajor: initialProfile?.intendedAbroadMajor ?? "",
+		careerGoal: initialProfile?.careerGoal ?? "",
 		currentInstitution: initialProfile?.currentInstitution ?? "",
 		majorOrTrack: initialProfile?.majorOrTrack ?? initialProfile?.intendedMajor ?? "",
 		gpa: initialProfile?.gpa?.toString() ?? "",
@@ -677,6 +705,7 @@ export default function OnboardingWizard({
 		graduationYear: initialProfile?.graduationYear?.toString() ?? "",
 		backlogs: initialProfile?.backlogs?.toString() ?? "",
 		workExperienceMonths: initialProfile?.workExperienceMonths?.toString() ?? "",
+		researchInterest: initialProfile?.researchInterest ?? "",
 		englishTestType: initialProfile?.englishTestType ?? "",
 		englishScore: initialProfile?.englishScore?.toString() ?? "",
 		gre: initialProfile?.gre?.toString() ?? "",

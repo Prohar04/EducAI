@@ -54,6 +54,10 @@ export const upsertUserProfile = async (req: AuthRequest, res: Response) => {
       englishScore?: number;
       gre?: number;
       gmat?: number;
+      // Intended abroad program (separate from current majorOrTrack)
+      intendedAbroadMajor?: string;
+      careerGoal?: string;
+      researchInterest?: string;
       // Step 4
       budgetCurrency?: string;
       budgetMax?: number;
@@ -88,6 +92,10 @@ export const upsertUserProfile = async (req: AuthRequest, res: Response) => {
       ...(body.englishScore !== undefined && { englishScore: body.englishScore }),
       ...(body.gre !== undefined && { gre: body.gre }),
       ...(body.gmat !== undefined && { gmat: body.gmat }),
+      // Intended abroad program
+      ...(body.intendedAbroadMajor !== undefined && { intendedAbroadMajor: body.intendedAbroadMajor }),
+      ...(body.careerGoal !== undefined && { careerGoal: body.careerGoal }),
+      ...(body.researchInterest !== undefined && { researchInterest: body.researchInterest }),
       // Step 4
       ...(body.budgetCurrency !== undefined && { budgetCurrency: body.budgetCurrency }),
       ...(body.budgetMax !== undefined && { budgetMax: body.budgetMax }),
