@@ -1,0 +1,102 @@
+name: Job Data Hourly Sync
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+
+jobs:
+  sync:
+    name: Refresh Job Listings Cache
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Validate required secrets
+        id: validate
+        run: |
+          MISSING=false
+
+          BACKEND_URL_CLEAN=$(printf '%s' "$BACKEND_URL" | tr -d '[:space:]')
+          CRON_SECRET_CLEAN=$(printf '%s' "$CRON_SECRET" | tr -d '[:space:]')
+
+          if [ -z "$BACKEND_URL_CLEAN" ]; then
+            echo "::warning::BACKEND_URL secret is not configured. Skipping job sync."
+            MISSING=true
+          else
+            case "$BACKEND_URL_CLEAN" in
+              http://*|https://*)
+                echo "Backend URL scheme: OK"
+                ;;
+              *)
+                echo "::warning::BACKEND_URL does not start with http:// or https://"
+                MISSING=true
+                ;;
+            esac
+          fi
+
+          if [ -z "$CRON_SECRET_CLEAN" ]; then
+            echo "::warning::CRON_SECRET secret is not configured. Skipping job sync."
+            MISSING=true
+          fi
+
+          if [ "$MISSING" = "true" ]; then
+            echo "secrets_ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "secrets_ready=true" >> "$GITHUB_OUTPUT"
+            echo "backend_url=${BACKEND_URL_CLEAN}" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          BACKEND_URL: ${{ secrets.BACKEND_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
+      - name: Refresh job listings cache
+        if: steps.validate.outputs.secrets_ready == 'true'
+        run: |
+          CLEAN_URL="${{ steps.validate.outputs.backend_url }}"
+          echo "Triggering job data refresh at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+          CURL_EXIT=0
+          HTTP_STATUS=$(curl -s -o /tmp/job_sync_response.json -w "%{http_code}" \
+            -X POST "${CLEAN_URL}/api/jobs/background-refresh" \
+            -H "x-cron-secret: ${CRON_SECRET}" \
+            -H "Content-Type: application/json" \
+            --max-time 90 \
+            --retry 2 \
+            --retry-delay 5 \
+            --retry-connrefused) || CURL_EXIT=$?
+
+          echo "HTTP Status: $HTTP_STATUS"
+          echo "Curl exit code: $CURL_EXIT"
+          echo ""
+          echo "=== Response body ==="
+          python3 -m json.tool /tmp/job_sync_response.json 2>/dev/null || cat /tmp/job_sync_response.json 2>/dev/null || echo "(empty)"
+          echo "=== End response ==="
+
+          if [ "$CURL_EXIT" -ne 0 ]; then
+            echo "::error::curl failed (exit $CURL_EXIT). Check BACKEND_URL is reachable."
+            exit 1
+          fi
+
+          if [ "$HTTP_STATUS" -eq 200 ]; then
+            echo "Job sync completed successfully (200)."
+            exit 0
+          elif [ "$HTTP_STATUS" -eq 401 ]; then
+            echo "::error::Authorization failed (401). Verify CRON_SECRET matches server CRON_SECRET env var."
+            exit 1
+          elif [ "$HTTP_STATUS" -eq 000 ]; then
+            echo "::error::Could not connect to backend. Verify BACKEND_URL is correct and the server is running."
+            exit 1
+          else
+            echo "::error::Job sync failed with HTTP $HTTP_STATUS."
+            exit 1
+          fi
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
+      - name: Sync skipped (secrets not configured)
+        if: steps.validate.outputs.secrets_ready == 'false'
+        run: |
+          echo "Job sync skipped — required secrets not configured."
+          echo "Configure BACKEND_URL and CRON_SECRET in repo secrets to enable hourly job refresh."
+          exit 0
