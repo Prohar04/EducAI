@@ -26,6 +26,7 @@ import {
   Plane,
   RefreshCw,
   Zap,
+  Briefcase,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -82,6 +83,7 @@ const TOOLS = [
   { href: "/app/gap-fix", label: "Gap Fix", icon: Zap, soon: false },
   { href: "/app/career", label: "Career Outlook", icon: TrendingUp, soon: false },
   { href: "/app/immigration", label: "Immigration", icon: Plane, soon: false },
+  { href: "/app/jobs", label: "Job Finder", icon: Briefcase, soon: false },
   { href: "/app/data-sync", label: "Data Freshness", icon: RefreshCw, soon: false },
 ] as const;
 
@@ -96,7 +98,7 @@ const TOOL_GROUPS = [
   },
   {
     label: "Guidance",
-    tools: ["/app/career", "/app/immigration", "/app/data-sync"],
+    tools: ["/app/career", "/app/immigration", "/app/jobs", "/app/data-sync"],
   },
 ] as const;
 

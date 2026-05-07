@@ -22,6 +22,7 @@ from .api.v1.recommendations import router as recommendations_router
 from .api.v1.module1_sync import router as module1_sync_router
 from .api.v1.scrape_match import router as scrape_match_router
 from .api.v1.strategy import router as strategy_router
+from .api.v1.jobs import router as jobs_router
 from .middleware.audit_log import AuditLogMiddleware
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -66,6 +67,8 @@ app.include_router(module1_sync_router, prefix="/api/v1/module1")
 app.include_router(scrape_match_router, prefix="/api/v1/module1")
 # Application strategy and planning
 app.include_router(strategy_router, prefix="/api/v1/module1")
+# Job Finder: live job search for international students
+app.include_router(jobs_router, prefix="/api/v1")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Root & Health Endpoints
