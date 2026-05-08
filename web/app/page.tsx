@@ -54,7 +54,7 @@ async function PublicNavbar() {
   const session = await getSession().catch(() => null);
   const isLoggedIn = !!session;
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-white/[0.06] bg-[#0a0a0f]/85 backdrop-blur-xl backdrop-saturate-150">
+    <header className="sticky top-0 z-50 w-full border-b border-white/[0.06] bg-[#080C14]/90 backdrop-blur-xl backdrop-saturate-150">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8" aria-label="Main navigation">
         <Logo />
         <ul className="hidden items-center gap-1 md:flex" role="list">
@@ -72,7 +72,7 @@ async function PublicNavbar() {
         </ul>
         <div className="flex items-center gap-2">
           {isLoggedIn ? (
-            <Link href="/app" className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-primary px-4 text-sm font-semibold text-white hover:bg-primary/90 transition-colors">
+            <Link href="/app" className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity">
               Dashboard <ArrowRight className="size-3.5" aria-hidden="true" />
             </Link>
           ) : (
@@ -80,7 +80,7 @@ async function PublicNavbar() {
               <Link href="/auth/signin" className="rounded-xl px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                 Sign in
               </Link>
-              <Link href="/auth/signup" className="inline-flex h-9 items-center rounded-xl bg-primary px-4 text-sm font-semibold text-white hover:bg-primary/90 transition-colors shadow-md shadow-primary/20">
+              <Link href="/auth/signup" className="inline-flex h-9 items-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity shadow-md shadow-primary/20">
                 Get started
               </Link>
             </>
@@ -114,7 +114,7 @@ async function HeroSection() {
           <FadeIn delay={0.08}>
             <h1 className="text-[clamp(2.4rem,5.5vw,4.5rem)] font-bold tracking-[-0.03em] leading-[1.04]">
               Study abroad,{" "}
-              <GradientText from="#6366f1" to="#8b5cf6">without the chaos</GradientText>
+              <GradientText>without the chaos</GradientText>
             </h1>
           </FadeIn>
           <FadeIn delay={0.16}>
@@ -124,7 +124,7 @@ async function HeroSection() {
           </FadeIn>
           <FadeIn delay={0.24}>
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Link href={isLoggedIn ? "/app/programs" : "/auth/signup"} className="inline-flex h-12 items-center gap-2 rounded-xl bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-7 text-base font-semibold text-white shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-shadow">
+              <Link href={isLoggedIn ? "/app/programs" : "/auth/signup"} className="inline-flex h-12 items-center gap-2 rounded-xl bg-gradient-to-r from-[#00C9A7] to-[#007A65] px-7 text-base font-semibold text-[#080C14] shadow-lg shadow-primary/25 hover:from-[#00E5C4] hover:to-[#00C9A7] transition-all">
                 Start for free <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
               <a
@@ -150,7 +150,7 @@ async function HeroSection() {
         {/* Dashboard preview mockup */}
         <FadeIn delay={0.4}>
           <div className="mx-auto mt-20 max-w-5xl">
-            <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#111118] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.6),0_0_80px_rgba(99,102,241,0.06)]">
+            <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0D1117] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.6),0_0_80px_rgba(0,201,167,0.06)]">
               {/* Window chrome */}
               <div className="flex items-center gap-2 border-b border-white/[0.06] bg-white/[0.02] px-5 py-3">
                 <div className="flex gap-1.5">
@@ -393,7 +393,7 @@ async function CTASection() {
             Build your profile in under three minutes and get AI-matched program recommendations, scholarship options, and a personalized application timeline — all for free.
           </p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link href={isLoggedIn ? "/app" : "/auth/signup"} className="inline-flex h-12 items-center gap-2 rounded-xl bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-8 text-base font-semibold text-white shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-shadow">
+            <Link href={isLoggedIn ? "/app" : "/auth/signup"} className="inline-flex h-12 items-center gap-2 rounded-xl bg-gradient-to-r from-[#00C9A7] to-[#007A65] px-8 text-base font-semibold text-[#080C14] shadow-lg shadow-primary/25 hover:from-[#00E5C4] hover:to-[#00C9A7] transition-all">
               {isLoggedIn ? "Go to dashboard" : "Start for free — no credit card"}
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>

@@ -22,7 +22,7 @@ const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(
             ? {
                 y: -3,
                 boxShadow: glow
-                  ? "0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(99,102,241,0.2)"
+                  ? "0 20px 60px rgba(0,0,0,0.6), 0 0 30px rgba(0,201,167,0.12)"
                   : "0 20px 60px rgba(0,0,0,0.6)",
               }
             : undefined
@@ -32,9 +32,9 @@ const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(
           "relative overflow-hidden rounded-xl",
           "border border-white/[0.08] backdrop-blur-xl",
           gradient
-            ? "bg-gradient-to-br from-white/[0.04] to-white/[0.01]"
-            : "bg-white/[0.03]",
-          glow && "hover:border-[rgba(99,102,241,0.4)] transition-colors duration-300",
+            ? "bg-gradient-to-br from-[rgba(19,26,36,0.9)] to-[rgba(19,26,36,0.7)]"
+            : "bg-[rgba(19,26,36,0.8)]",
+          glow && "hover:border-[rgba(0,201,167,0.30)] transition-colors duration-300",
           className
         )}
         {...(props as React.ComponentProps<typeof motion.div>)}

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { GraduationCap, Sparkles, BookOpen, Award, CalendarDays, Target, CheckCircle } from "lucide-react";
-import { FloatingCards3D } from "@/components/3d/floating-cards-3d";
+import HeroVisual from "@/components/ui/hero-visual";
 import { GradientText } from "@/components/ui/gradient-text";
 
 const FEATURES = [
@@ -19,13 +19,13 @@ export function AuthBrandPanel() {
     <aside
       className="relative hidden w-[50%] flex-col overflow-hidden lg:flex"
       style={{
-        background: "linear-gradient(135deg, #0a0a14 0%, #0e0e1e 50%, #0a0a14 100%)",
+        background: "linear-gradient(135deg, #080C14 0%, #0D1F35 50%, #080C14 100%)",
       }}
     >
       {/* Decorative glows */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-32 -top-32 h-[500px] w-[500px] rounded-full bg-[#6366f1]/10 blur-[120px]" />
-        <div className="absolute -bottom-32 right-0 h-[400px] w-[400px] rounded-full bg-[#8b5cf6]/8 blur-[100px]" />
+        <div className="absolute -left-32 -top-32 h-[500px] w-[500px] rounded-full bg-[#00C9A7]/10 blur-[120px]" />
+        <div className="absolute -bottom-32 right-0 h-[400px] w-[400px] rounded-full bg-[#00E5C4]/8 blur-[100px]" />
       </div>
 
       {/* Grid pattern */}
@@ -46,17 +46,17 @@ export function AuthBrandPanel() {
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         >
           <Link href="/" className="flex items-center gap-2.5" aria-label="Go to homepage">
-            <GraduationCap className="size-7 text-[#6366f1]" aria-hidden="true" />
+            <GraduationCap className="size-7 text-primary" aria-hidden="true" />
             <span className="text-xl font-bold tracking-tight text-white">
               Educ<GradientText>AI</GradientText>
             </span>
           </Link>
         </motion.div>
 
-        {/* 3D floating cards */}
+        {/* Visual */}
         <div className="flex-1 flex items-center justify-center my-8">
           <div className="w-full h-64">
-            <FloatingCards3D className="w-full h-full" />
+            <HeroVisual />
           </div>
         </div>
 
