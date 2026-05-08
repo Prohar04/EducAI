@@ -62,7 +62,7 @@ export default function PrivacyPage() {
           </h1>
 
           <p style={{ fontSize: 13, color: "#3D4F6B", marginBottom: 24 }}>
-            Effective Date: January 1, 2025 · Last Updated: May 2026
+            Effective Date: February 1, 2026 · Last Updated: May 2026
           </p>
 
           <div style={{ height: 1, background: "linear-gradient(90deg, rgba(74,144,217,0.20) 0%, transparent 100%)", marginBottom: 32 }} />
@@ -78,7 +78,7 @@ export default function PrivacyPage() {
             <p style={{ fontSize: 13, color: "#7A8BA8", margin: 0 }}>
               <span style={{ marginRight: 8 }}>📋</span>
               <strong style={{ color: "#B8CCE8", fontWeight: 500 }}>Last Updated: May 2026</strong>
-              {" · "}This document is effective as of January 1, 2025.
+              {" · "}This document is effective as of February 1, 2026.
             </p>
           </div>
         </div>
@@ -317,14 +317,14 @@ export default function PrivacyPage() {
               <h3 style={h3Style}>6.3 Delete Your Account</h3>
               <p style={bodyStyle}>
                 You can request permanent deletion of your account and all associated data by emailing{" "}
-                <a href="mailto:privacy@educai.app" style={linkStyle}>privacy@educai.app</a>.
+                <a href="mailto:support.educai@gmail.com" style={linkStyle}>support.educai@gmail.com</a>.
                 We will process deletion requests within 30 days.
               </p>
 
               <h3 style={h3Style}>6.4 Data Portability</h3>
               <p style={bodyStyle}>
                 You can request an export of your personal data in JSON format by contacting{" "}
-                <a href="mailto:privacy@educai.app" style={linkStyle}>privacy@educai.app</a>.
+                <a href="mailto:support.educai@gmail.com" style={linkStyle}>support.educai@gmail.com</a>.
               </p>
 
               <h3 style={h3Style}>6.5 Email Preferences</h3>
@@ -401,7 +401,7 @@ export default function PrivacyPage() {
               </p>
               <p style={bodyStyle}>
                 If you are a parent or guardian and believe your child has provided us with personal information, please contact us at{" "}
-                <a href="mailto:privacy@educai.app" style={linkStyle}>privacy@educai.app</a>.
+                <a href="mailto:support.educai@gmail.com" style={linkStyle}>support.educai@gmail.com</a>.
               </p>
             </section>
 
@@ -448,10 +448,10 @@ export default function PrivacyPage() {
                 <p style={{ fontSize: 14, fontWeight: 500, color: "#E8EEF8", marginBottom: 16 }}>Questions?</p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {[
-                    { label: "Privacy inquiries", href: "privacy@educai.app" },
-                    { label: "Data deletion", href: "privacy@educai.app" },
-                    { label: "General support", href: "support@educai.app" },
-                    { label: "Legal inquiries", href: "legal@educai.app" },
+                    { label: "Privacy inquiries", href: "support.educai@gmail.com" },
+                    { label: "Data deletion", href: "support.educai@gmail.com" },
+                    { label: "General support", href: "support.educai@gmail.com" },
+                    { label: "Legal inquiries", href: "support.educai@gmail.com" },
                   ].map(({ label, href }) => (
                     <div key={label} style={{ display: "flex", alignItems: "center", gap: 12 }}>
                       <span style={{ fontSize: 12, color: "#3D4F6B", minWidth: 130 }}>{label}</span>
