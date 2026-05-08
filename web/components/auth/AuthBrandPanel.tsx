@@ -2,107 +2,92 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { GraduationCap, Sparkles, BookOpen, Award, CalendarDays, Target } from "lucide-react";
+import { GraduationCap, Sparkles, BookOpen, Award, CalendarDays, Target, CheckCircle } from "lucide-react";
+import { FloatingCards3D } from "@/components/3d/floating-cards-3d";
+import { GradientText } from "@/components/ui/gradient-text";
 
 const FEATURES = [
-  { icon: Sparkles, text: "AI-matched programs from real university data" },
-  { icon: Award, text: "28+ verified scholarships with eligibility scoring" },
-  { icon: CalendarDays, text: "Month-by-month application timeline planner" },
-  { icon: Target, text: "Admission strategy with honest chance bands" },
-  { icon: BookOpen, text: "SOP Builder, CV Builder & Professor Finder" },
+  { icon: Sparkles, text: "Match programs in minutes" },
+  { icon: Award, text: "AI-generated SOP and CV" },
+  { icon: CalendarDays, text: "Visa timeline and job finder" },
 ];
-
-const QUOTE = {
-  text: "Education is the most powerful weapon you can use to change the world.",
-  author: "Nelson Mandela",
-};
 
 export function AuthBrandPanel() {
   const reduced = useReducedMotion();
 
   return (
     <aside
-      className="relative hidden w-[44%] flex-col overflow-hidden lg:flex"
-      style={{ background: "linear-gradient(135deg, #1a1408 0%, #0f0f11 60%, #0c1a10 100%)" }}
+      className="relative hidden w-[50%] flex-col overflow-hidden lg:flex"
+      style={{
+        background: "linear-gradient(135deg, #0a0a14 0%, #0e0e1e 50%, #0a0a14 100%)",
+      }}
     >
       {/* Decorative glows */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-0">
-        <div className="absolute -left-24 -top-24 h-[420px] w-[420px] rounded-full bg-primary/12 blur-[100px]" />
-        <div className="absolute -bottom-24 right-0 h-[360px] w-[360px] rounded-full bg-primary/8 blur-[80px]" />
-        <div className="absolute left-1/2 top-1/2 h-[200px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/4 blur-[120px]" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <div className="absolute -left-32 -top-32 h-[500px] w-[500px] rounded-full bg-[#6366f1]/10 blur-[120px]" />
+        <div className="absolute -bottom-32 right-0 h-[400px] w-[400px] rounded-full bg-[#8b5cf6]/8 blur-[100px]" />
       </div>
 
-      <div className="relative z-10 flex h-full flex-col justify-between p-10 xl:p-14">
+      {/* Grid pattern */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-[0.02]"
+        style={{
+          backgroundImage: "linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)",
+          backgroundSize: "48px 48px",
+        }}
+      />
+
+      <div className="relative z-10 flex h-full flex-col p-10 xl:p-14">
         {/* Logo */}
         <motion.div
-          initial={reduced ? false : { opacity: 0, y: -12 }}
+          initial={reduced ? false : { opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         >
           <Link href="/" className="flex items-center gap-2.5" aria-label="Go to homepage">
-            <GraduationCap className="size-8 text-primary" />
+            <GraduationCap className="size-7 text-[#6366f1]" aria-hidden="true" />
             <span className="text-xl font-bold tracking-tight text-white">
-              Educ<span className="text-primary">AI</span>
+              Educ<GradientText>AI</GradientText>
             </span>
           </Link>
         </motion.div>
 
-        {/* Middle: product value prop */}
-        <div className="max-w-sm">
-          <motion.div
-            initial={reduced ? false : { opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-            className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-primary"
-          >
-            AI-Powered Study Abroad
-          </motion.div>
-          <motion.h2
-            initial={reduced ? false : { opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.16, ease: [0.22, 1, 0.36, 1] }}
-            className="text-[1.75rem] font-bold leading-[1.2] tracking-tight text-white xl:text-[2.125rem]"
-          >
-            Find the right university.<br />
-            <span className="text-primary/90">Get the right scholarship.</span>
-          </motion.h2>
-          <motion.p
-            initial={reduced ? false : { opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.22, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-4 text-sm leading-relaxed text-white/55"
-          >
-            Real program data, AI-matched recommendations, and a step-by-step application plan — all in one platform.
-          </motion.p>
-          <ul className="mt-8 space-y-3.5">
+        {/* 3D floating cards */}
+        <div className="flex-1 flex items-center justify-center my-8">
+          <div className="w-full h-64">
+            <FloatingCards3D className="w-full h-full" />
+          </div>
+        </div>
+
+        {/* Value prop */}
+        <motion.div
+          initial={reduced ? false : { opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <h2 className="text-2xl font-bold tracking-tight text-white xl:text-3xl">
+            Study abroad,{" "}
+            <GradientText>without the chaos</GradientText>
+          </h2>
+          <p className="mt-3 text-sm leading-relaxed text-white/50">
+            EducAI handles program matching, scholarships, documents, visas, and job search — so you can focus on getting in.
+          </p>
+
+          <ul className="mt-6 space-y-2.5" aria-label="Platform features">
             {FEATURES.map(({ icon: Icon, text }, i) => (
               <motion.li
                 key={text}
-                initial={reduced ? false : { opacity: 0, x: -16 }}
+                initial={reduced ? false : { opacity: 0, x: -12 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.35, delay: 0.28 + i * 0.07, ease: [0.22, 1, 0.36, 1] }}
-                className="flex items-center gap-3"
+                transition={{ duration: 0.35, delay: 0.2 + i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                className="flex items-center gap-2.5"
               >
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/12">
-                  <Icon className="size-3.5 text-primary" />
-                </div>
-                <span className="text-sm text-white/70">{text}</span>
+                <CheckCircle className="size-4 shrink-0 text-emerald-400" aria-hidden="true" />
+                <span className="text-sm text-white/65">{text}</span>
               </motion.li>
             ))}
           </ul>
-        </div>
-
-        {/* Footer: quote */}
-        <motion.div
-          initial={reduced ? false : { opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.65, ease: [0.22, 1, 0.36, 1] }}
-          className="max-w-xs rounded-xl border border-white/6 bg-white/[0.03] px-4 py-4 backdrop-blur-sm"
-        >
-          <p className="text-sm italic leading-relaxed text-white/60">
-            &ldquo;{QUOTE.text}&rdquo;
-          </p>
-          <p className="mt-2 text-[11px] font-semibold uppercase tracking-wider text-primary/70">— {QUOTE.author}</p>
         </motion.div>
       </div>
     </aside>

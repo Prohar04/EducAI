@@ -66,7 +66,7 @@ function getFreshnessStatus(
 
 const FRESHNESS_CONFIG: Record<
   FreshnessStatus,
-  { label: string; badge: string; icon: React.ElementType; dot: string; cardBorder: string; iconBg: string; iconColor: string }
+  { label: string; badge: string; icon: React.ComponentType<{ className?: string }>; dot: string; cardBorder: string; iconBg: string; iconColor: string }
 > = {
   fresh: {
     label: "Fresh",

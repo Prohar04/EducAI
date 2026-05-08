@@ -1,0 +1,62 @@
+export const tokens = {
+  colors: {
+    background: {
+      base: "#0a0a0f",
+      elevated: "#111118",
+      overlay: "#16161f",
+      surface: "#1c1c27",
+      hover: "#22222f",
+    },
+    border: {
+      subtle: "rgba(255,255,255,0.06)",
+      default: "rgba(255,255,255,0.10)",
+      strong: "rgba(255,255,255,0.18)",
+      focus: "rgba(99,102,241,0.60)",
+    },
+    text: {
+      primary: "#f0f0ff",
+      secondary: "#9090b0",
+      muted: "#5a5a7a",
+      inverse: "#0a0a0f",
+    },
+    accent: {
+      primary: "#6366f1",
+      primaryHover: "#5558e8",
+      primaryMuted: "rgba(99,102,241,0.12)",
+      primaryGlow: "rgba(99,102,241,0.25)",
+      emerald: "#10b981",
+      emeraldMuted: "rgba(16,185,129,0.12)",
+      amber: "#f59e0b",
+      amberMuted: "rgba(245,158,11,0.12)",
+      rose: "#f43f5e",
+      roseMuted: "rgba(244,63,94,0.12)",
+    },
+    gradient: {
+      hero: "linear-gradient(135deg, #0a0a0f 0%, #111128 50%, #0a0a0f 100%)",
+      card: "linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)",
+      accent: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+      success: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+    },
+  },
+  radius: {
+    sm: "6px",
+    md: "10px",
+    lg: "14px",
+    xl: "20px",
+    "2xl": "28px",
+    full: "9999px",
+  },
+  shadow: {
+    sm: "0 1px 3px rgba(0,0,0,0.4)",
+    md: "0 4px 16px rgba(0,0,0,0.5)",
+    lg: "0 8px 32px rgba(0,0,0,0.6)",
+    xl: "0 20px 60px rgba(0,0,0,0.7)",
+    glow: "0 0 40px rgba(99,102,241,0.15)",
+    glowStrong: "0 0 80px rgba(99,102,241,0.25)",
+  },
+  animation: {
+    fast: "150ms ease",
+    default: "250ms ease",
+    slow: "400ms ease",
+  },
+} as const;
