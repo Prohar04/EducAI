@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
+import { NoiseTexture } from "@/components/ui/noise-texture";
+import { NavProgress } from "@/components/ui/nav-progress";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -138,6 +140,9 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
+          <a href="#main-content" className="skip-to-content">Skip to content</a>
+          <NoiseTexture />
+          <NavProgress />
           {children}
         </ThemeProvider>
       </body>

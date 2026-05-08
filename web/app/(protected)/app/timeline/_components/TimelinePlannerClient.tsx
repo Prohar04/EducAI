@@ -73,7 +73,7 @@ interface TimelineInputs {
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const ITEM_ICONS: Record<RoadmapItemType, React.ElementType> = {
+const ITEM_ICONS: Record<RoadmapItemType, React.ComponentType<{ className?: string }>> = {
 	preparation: BookOpen,
 	application: CheckCircle2,
 	scholarship: Award,
