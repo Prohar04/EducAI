@@ -1,81 +1,111 @@
-"use client";
+"use client"
+import { forwardRef } from "react"
+import { motion, useReducedMotion } from "framer-motion"
+import { cn } from "@/lib/utils"
 
-import { forwardRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
-import { cn } from "@/lib/utils";
+const sizeStyles = {
+  sm: { padding: "8px 16px", fontSize: 13, borderRadius: 8 },
+  md: { padding: "11px 22px", fontSize: 14, borderRadius: 10 },
+  lg: { padding: "14px 28px", fontSize: 15, borderRadius: 12 },
+}
 
-const sizeClasses = {
-  sm: "h-8 px-4 text-sm rounded-lg gap-1.5",
-  md: "h-10 px-5 text-sm rounded-xl gap-2",
-  lg: "h-12 px-7 text-base rounded-xl gap-2",
-};
+const variantStyles = {
+  primary: {
+    background: "rgba(74,144,217,0.88)",
+    color: "#080D18",
+    border: "none",
+    fontWeight: 500,
+  },
+  ghost: {
+    background: "rgba(255,255,255,0.04)",
+    color: "#E8EEF8",
+    border: "1px solid rgba(255,255,255,0.09)",
+    fontWeight: 400,
+  },
+  outline: {
+    background: "transparent",
+    color: "#4A90D9",
+    border: "1px solid rgba(74,144,217,0.35)",
+    fontWeight: 400,
+  },
+}
 
 interface ShimmerButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  size?: "sm" | "md" | "lg";
-  loading?: boolean;
-  variant?: "primary" | "outline";
+  size?: "sm" | "md" | "lg"
+  loading?: boolean
+  variant?: "primary" | "ghost" | "outline"
 }
 
 const ShimmerButton = forwardRef<HTMLButtonElement, ShimmerButtonProps>(
-  ({ className, size = "md", loading = false, variant = "primary", children, disabled, ...props }, ref) => {
-    const [hovered, setHovered] = useState(false);
-    const reduced = useReducedMotion();
-
-    const isPrimary = variant === "primary";
+  ({ className, size = "md", loading = false, variant = "primary",
+     children, disabled, ...props }, ref) => {
+    const reduced = useReducedMotion()
+    const isDisabled = disabled || loading
 
     return (
-      <button
+      <motion.button
         ref={ref}
-        disabled={disabled || loading}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        className={cn(
-          "relative inline-flex items-center justify-center font-semibold overflow-hidden",
-          "transition-all duration-200 cursor-pointer select-none",
-          "focus-visible:outline-2 focus-visible:outline-primary/70 focus-visible:outline-offset-2",
-          "active:scale-[0.97]",
-          isPrimary
-            ? "bg-gradient-to-r from-[#00C9A7] to-[#007A65] text-[#080C14] shadow-lg shadow-primary/25 hover:from-[#00E5C4] hover:to-[#00C9A7]"
-            : "border border-white/10 bg-white/[0.03] text-foreground hover:bg-white/[0.06]",
-          (disabled || loading) && "opacity-50 cursor-not-allowed",
-          sizeClasses[size],
-          className
-        )}
-        {...props}
+        whileHover={(!isDisabled && !reduced) ? {
+          scale: variant === "primary" ? 1.01 : 1,
+          background: variant === "primary"
+            ? "rgba(74,144,217,1.0)"
+            : variant === "ghost"
+            ? "rgba(255,255,255,0.07)"
+            : "rgba(74,144,217,0.08)",
+        } : {}}
+        whileTap={(!isDisabled && !reduced) ? { scale: 0.98 } : {}}
+        transition={{ duration: 0.18 }}
+        style={{
+          ...sizeStyles[size],
+          ...variantStyles[variant],
+          cursor: isDisabled ? "not-allowed" : "pointer",
+          opacity: isDisabled ? 0.45 : 1,
+          letterSpacing: "0.01em",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 8,
+          position: "relative",
+          overflow: "hidden",
+          outline: "none",
+          transition: "opacity 200ms",
+        }}
+        disabled={isDisabled}
+        className={cn("select-none", className)}
+        {...(props as React.ComponentProps<typeof motion.button>)}
       >
-        {/* Shimmer sweep */}
-        {isPrimary && !reduced && (
+        {/* Shimmer sweep — only primary, only on hover */}
+        {variant === "primary" && !reduced && (
           <motion.span
-            className="pointer-events-none absolute inset-0"
-            initial={{ x: "-100%", opacity: 0 }}
-            animate={hovered && !(disabled || loading) ? { x: "100%", opacity: 1 } : { x: "-100%", opacity: 0 }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
+            aria-hidden="true"
+            initial={{ x: "-110%" }}
+            whileHover={{ x: "110%" }}
+            transition={{ duration: 0.55, ease: "easeInOut" }}
             style={{
-              background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%)",
+              position: "absolute",
+              inset: 0,
+              background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.09) 50%, transparent 100%)",
+              pointerEvents: "none",
             }}
           />
         )}
 
-        {loading ? (
-          <span className="flex items-center gap-2">
-            <svg
-              className="size-4 animate-spin"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden="true"
-            >
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-            Loading…
-          </span>
-        ) : (
-          children
+        {loading && (
+          <span style={{
+            width: 14, height: 14, borderRadius: "50%",
+            border: "2px solid rgba(8,13,24,0.3)",
+            borderTopColor: "#080D18",
+            animation: "spin 0.7s linear infinite",
+            display: "inline-block",
+            flexShrink: 0,
+          }} />
         )}
-      </button>
-    );
-  }
-);
 
-ShimmerButton.displayName = "ShimmerButton";
-export { ShimmerButton };
+        {children}
+      </motion.button>
+    )
+  }
+)
+
+ShimmerButton.displayName = "ShimmerButton"
+export { ShimmerButton }
+export default ShimmerButton

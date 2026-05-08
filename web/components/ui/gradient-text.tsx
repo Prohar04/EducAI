@@ -1,60 +1,49 @@
-"use client";
-
-import { motion, useReducedMotion } from "framer-motion";
-import { cn } from "@/lib/utils";
-
-const gradientStyle = (from: string, to: string): React.CSSProperties => ({
-  background: `linear-gradient(135deg, ${from}, ${to})`,
-  WebkitBackgroundClip: "text",
-  backgroundClip: "text",
-  WebkitTextFillColor: "transparent",
-  color: "transparent",
-  display: "inline",
-});
-
-const animatedGradientStyle = (from: string, to: string): React.CSSProperties => ({
-  background: `linear-gradient(135deg, ${from}, ${to}, ${from})`,
-  backgroundSize: "200% 200%",
-  WebkitBackgroundClip: "text",
-  backgroundClip: "text",
-  WebkitTextFillColor: "transparent",
-  color: "transparent",
-  display: "inline",
-});
+"use client"
+import { cn } from "@/lib/utils"
 
 interface GradientTextProps {
-  children: React.ReactNode;
-  from?: string;
-  to?: string;
-  animate?: boolean;
-  className?: string;
+  children: React.ReactNode
+  variant?: "hero" | "accent" | "subtle"
+  from?: string
+  to?: string
+  animate?: boolean
+  className?: string
+  as?: "span" | "h1" | "h2" | "h3" | "p"
+}
+
+const gradients = {
+  hero:   "linear-gradient(135deg, #FFFFFF 0%, #B8CCE8 100%)",
+  accent: "linear-gradient(135deg, #4A90D9 0%, #B8CCE8 100%)",
+  subtle: "linear-gradient(135deg, #E8EEF8 0%, #7A8BA8 100%)",
 }
 
 export function GradientText({
   children,
-  from = "#00C9A7",
-  to = "#38BDF8",
-  animate: shouldAnimate = false,
+  variant = "hero",
+  from,
+  to,
+  animate: _a,
   className,
+  as: Tag = "span",
 }: GradientTextProps) {
-  const reduced = useReducedMotion();
-
-  if (shouldAnimate && !reduced) {
-    return (
-      <motion.span
-        animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-        transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-        style={animatedGradientStyle(from, to)}
-        className={cn(className)}
-      >
-        {children}
-      </motion.span>
-    );
-  }
+  const gradient = (from && to)
+    ? `linear-gradient(135deg, ${from} 0%, ${to} 100%)`
+    : gradients[variant]
 
   return (
-    <span style={gradientStyle(from, to)} className={cn(className)}>
+    <Tag
+      className={cn(className)}
+      style={{
+        background: gradient,
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        backgroundClip: "text",
+        display: "inline",
+      }}
+    >
       {children}
-    </span>
-  );
+    </Tag>
+  )
 }
+
+export default GradientText

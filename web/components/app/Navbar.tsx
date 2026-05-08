@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  GraduationCap,
   LayoutDashboard,
   BookOpen,
   Sparkles,
@@ -41,9 +40,9 @@ import type { Session } from "@/types/auth.type";
 import { getUnifiedNotifications, type AppNotification, type NotificationType } from "@/lib/auth/action";
 
 const ACTIVE_PILL_CLASS =
-  "bg-primary/12 text-primary shadow-[0_0_0_1px_rgba(0,201,167,0.24),0_8px_24px_-12px_rgba(0,201,167,0.4)]";
+  "bg-[rgba(74,144,217,0.09)] text-[#E8EEF8] shadow-[0_0_0_1px_rgba(74,144,217,0.20)]";
 const INACTIVE_PILL_CLASS =
-  "text-muted-foreground hover:bg-muted/60 hover:text-foreground";
+  "text-[#3D4F6B] hover:text-[#7A8BA8] hover:bg-[rgba(255,255,255,0.04)]";
 
 function getInitials(name: string): string {
   return name
@@ -193,17 +192,15 @@ export function Navbar({ user }: { user: Session["user"] }) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/90 backdrop-blur-xl backdrop-saturate-150">
+      <header className="sticky top-0 z-50 w-full" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)", background: "rgba(8,13,24,0.92)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)" }}>
         <nav
           className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8"
           aria-label="App navigation"
         >
           {/* Logo */}
           <Link href="/" className="group flex items-center gap-2 shrink-0">
-            <GraduationCap className="size-7 text-primary transition-transform duration-200 group-hover:scale-110" />
-            <span className="text-lg font-bold tracking-tight">
-              Educ<span className="text-primary">AI</span>
-            </span>
+            <span style={{ fontSize: 16, fontWeight: 300, color: "#E8EEF8", letterSpacing: "-0.01em" }}>Educ</span>
+            <span style={{ fontSize: 16, fontWeight: 700, color: "#4A90D9" }}>AI</span>
           </Link>
 
           {/* Desktop nav */}

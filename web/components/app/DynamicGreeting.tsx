@@ -1,37 +1,42 @@
-"use client";
-
-function computeGreeting(hours: number): string {
-  if (hours < 12) return "Good morning";
-  if (hours < 17) return "Good afternoon";
-  return "Good evening";
-}
+"use client"
 
 interface Props {
-  name?: string | null;
+  name?: string | null
 }
 
 export function DynamicGreeting({ name }: Props) {
-  const greeting = computeGreeting(new Date().getHours());
-  const firstName = name?.split(" ")[0] ?? "there";
+  const hour = new Date().getHours()
+  const timeOfDay = hour < 12 ? "Morning" : hour < 17 ? "Afternoon" : "Evening"
+  const firstName = name?.split(" ")[0] ?? "there"
 
   return (
     <div suppressHydrationWarning>
-      <p className="text-sm font-medium" style={{ color: "#8896B0" }}>
-        {greeting}
+      <p style={{
+        fontSize: 11,
+        fontWeight: 500,
+        letterSpacing: "0.10em",
+        textTransform: "uppercase",
+        color: "#2A3A52",
+        marginBottom: 10,
+      }}>
+        Good {timeOfDay}
       </p>
-      <h1 className="mt-0.5 text-2xl font-bold tracking-tight sm:text-3xl" style={{ lineHeight: 1.2 }}>
-        <span style={{ color: "#E8EDF5" }}>{firstName}</span>
-        <span
-          style={{
-            background: "linear-gradient(135deg, #00C9A7, #38BDF8)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
-          }}
-        >
-          , let&apos;s make progress today
-        </span>
+      <h1 style={{
+        fontSize: "clamp(28px, 4vw, 48px)",
+        fontWeight: 300,
+        lineHeight: 1.12,
+        letterSpacing: "-0.025em",
+        color: "#E8EEF8",
+        display: "block",
+      }}>
+        {firstName}<span style={{
+          background: "linear-gradient(135deg, #FFFFFF 0%, #B8CCE8 100%)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundClip: "text",
+          fontWeight: 700,
+        }}>, let&apos;s make progress today</span>
       </h1>
     </div>
-  );
+  )
 }

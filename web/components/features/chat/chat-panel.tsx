@@ -70,11 +70,10 @@ export function ChatPanel({
         className={cn(
           "fixed bottom-6 right-6 z-50",
           "flex size-14 items-center justify-center rounded-full",
-          "bg-gradient-to-br from-[#00C9A7] to-[#007A65]",
-          "text-white shadow-xl shadow-primary/30",
-          "hover:shadow-primary/50 transition-shadow duration-300",
+          "text-[#080D18] shadow-xl transition-shadow duration-300",
           !isOpen && "pulse-ring"
         )}
+        style={{ background: "rgba(74,144,217,0.88)" }}
         whileHover={reduced ? undefined : { scale: 1.05 }}
         whileTap={reduced ? undefined : { scale: 0.95 }}
         animate={isOpen ? { rotate: 0 } : { rotate: 0 }}
@@ -112,7 +111,7 @@ export function ChatPanel({
                   </div>
                   <div>
                     <p className="text-sm font-semibold">EducAI Advisor</p>
-                    <p className="text-xs text-emerald-400">Online · Profile-aware</p>
+                    <p className="text-xs" style={{ color: "#3D9970" }}>Online · Profile-aware</p>
                   </div>
                 </div>
                 <button

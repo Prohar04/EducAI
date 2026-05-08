@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { GraduationCap, Sparkles, BookOpen, Award, CalendarDays, Target, CheckCircle } from "lucide-react";
+import { GraduationCap, Sparkles, Award, CalendarDays, CheckCircle } from "lucide-react";
 import HeroVisual from "@/components/ui/hero-visual";
 import { GradientText } from "@/components/ui/gradient-text";
 
@@ -19,13 +19,13 @@ export function AuthBrandPanel() {
     <aside
       className="relative hidden w-[50%] flex-col overflow-hidden lg:flex"
       style={{
-        background: "linear-gradient(135deg, #080C14 0%, #0D1F35 50%, #080C14 100%)",
+        background: "linear-gradient(135deg, #080D18 0%, #0D1F35 50%, #080D18 100%)",
       }}
     >
       {/* Decorative glows */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-32 -top-32 h-[500px] w-[500px] rounded-full bg-[#00C9A7]/10 blur-[120px]" />
-        <div className="absolute -bottom-32 right-0 h-[400px] w-[400px] rounded-full bg-[#00E5C4]/8 blur-[100px]" />
+        <div className="absolute -left-32 -top-32 h-[500px] w-[500px] rounded-full blur-[120px]" style={{ background: "rgba(74,144,217,0.10)" }} />
+        <div className="absolute -bottom-32 right-0 h-[400px] w-[400px] rounded-full blur-[100px]" style={{ background: "rgba(27,61,107,0.12)" }} />
       </div>
 
       {/* Grid pattern */}
@@ -75,7 +75,7 @@ export function AuthBrandPanel() {
           </p>
 
           <ul className="mt-6 space-y-2.5" aria-label="Platform features">
-            {FEATURES.map(({ icon: Icon, text }, i) => (
+            {FEATURES.map(({ text }, i) => (
               <motion.li
                 key={text}
                 initial={reduced ? false : { opacity: 0, x: -12 }}
@@ -83,7 +83,7 @@ export function AuthBrandPanel() {
                 transition={{ duration: 0.35, delay: 0.2 + i * 0.06, ease: [0.22, 1, 0.36, 1] }}
                 className="flex items-center gap-2.5"
               >
-                <CheckCircle className="size-4 shrink-0 text-emerald-400" aria-hidden="true" />
+                <CheckCircle className="size-4 shrink-0" style={{ color: "#3D9970" }} aria-hidden="true" />
                 <span className="text-sm text-white/65">{text}</span>
               </motion.li>
             ))}
