@@ -35,7 +35,7 @@ const ShimmerButton = forwardRef<HTMLButtonElement, ShimmerButtonProps>(
           "focus-visible:outline-2 focus-visible:outline-primary/70 focus-visible:outline-offset-2",
           "active:scale-[0.97]",
           isPrimary
-            ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white shadow-lg shadow-primary/25"
+            ? "bg-gradient-to-r from-[#00C9A7] to-[#007A65] text-[#080C14] shadow-lg shadow-primary/25 hover:from-[#00E5C4] hover:to-[#00C9A7]"
             : "border border-white/10 bg-white/[0.03] text-foreground hover:bg-white/[0.06]",
           (disabled || loading) && "opacity-50 cursor-not-allowed",
           sizeClasses[size],

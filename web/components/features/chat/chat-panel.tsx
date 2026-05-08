@@ -70,7 +70,7 @@ export function ChatPanel({
         className={cn(
           "fixed bottom-6 right-6 z-50",
           "flex size-14 items-center justify-center rounded-full",
-          "bg-gradient-to-br from-[#6366f1] to-[#8b5cf6]",
+          "bg-gradient-to-br from-[#00C9A7] to-[#007A65]",
           "text-white shadow-xl shadow-primary/30",
           "hover:shadow-primary/50 transition-shadow duration-300",
           !isOpen && "pulse-ring"

@@ -11,10 +11,10 @@ interface EmptyStateProps {
 function DefaultIllustration() {
   return (
     <svg width="80" height="80" viewBox="0 0 80 80" fill="none" aria-hidden="true">
-      <circle cx="40" cy="40" r="39" stroke="rgba(99,102,241,0.2)" strokeWidth="1" />
-      <circle cx="40" cy="40" r="26" stroke="rgba(99,102,241,0.3)" strokeWidth="1.5" strokeDasharray="4 4" />
-      <circle cx="40" cy="40" r="8" fill="rgba(99,102,241,0.15)" stroke="rgba(99,102,241,0.4)" strokeWidth="1.5" />
-      <circle cx="40" cy="40" r="3" fill="#6366f1" />
+      <circle cx="40" cy="40" r="39" stroke="rgba(0,201,167,0.2)" strokeWidth="1" />
+      <circle cx="40" cy="40" r="26" stroke="rgba(0,201,167,0.3)" strokeWidth="1.5" strokeDasharray="4 4" />
+      <circle cx="40" cy="40" r="8" fill="rgba(0,201,167,0.15)" stroke="rgba(0,201,167,0.4)" strokeWidth="1.5" />
+      <circle cx="40" cy="40" r="3" fill="#00C9A7" />
     </svg>
   );
 }

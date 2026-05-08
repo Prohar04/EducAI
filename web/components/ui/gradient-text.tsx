@@ -32,8 +32,8 @@ interface GradientTextProps {
 
 export function GradientText({
   children,
-  from = "#6366f1",
-  to = "#8b5cf6",
+  from = "#00C9A7",
+  to = "#38BDF8",
   animate: shouldAnimate = false,
   className,
 }: GradientTextProps) {

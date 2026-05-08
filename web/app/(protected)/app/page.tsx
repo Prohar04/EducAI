@@ -33,7 +33,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { DataSkeleton } from "@/components/shared/data-skeleton";
 import { DynamicGreeting } from "@/components/app/DynamicGreeting";
-import { Globe3D } from "@/components/3d/globe-3d";
+import HeroVisual from "@/components/ui/hero-visual";
 
 // ─── TYPE DEFINITIONS ─────────────────────────────────────────────────────────
 
@@ -391,9 +391,10 @@ interface HeroSectionProps {
 function HeroSection({ session, profile, savedCount, deadlineCount }: HeroSectionProps) {
   const completeness = getProfileCompleteness(profile);
   const countries = getTargetCountriesDisplay(profile.targetCountries);
+  const firstName = session.user.name?.split(" ")[0] ?? "there";
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-[#111128] to-[#0a0a14] p-6 sm:p-8" aria-label="Welcome section">
+    <section className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-[#0D1117] to-[#080C14] p-6 sm:p-8" aria-label="Welcome section">
       {/* Background glow */}
       <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/10 blur-[80px]" aria-hidden="true" />
 
@@ -407,10 +408,9 @@ function HeroSection({ session, profile, savedCount, deadlineCount }: HeroSectio
             </div>
           </RevealAnimation>
           <RevealAnimation variant="fadeUp" delay={0.05}>
-            <h1 className="text-2xl font-bold sm:text-3xl tracking-tight">
-              <DynamicGreeting name={session.user.name} />,{" "}
-              <GradientText>let&apos;s make progress today</GradientText>
-            </h1>
+            <div>
+              <DynamicGreeting name={firstName} />
+            </div>
           </RevealAnimation>
           <RevealAnimation variant="fadeUp" delay={0.1}>
             <p className="mt-2 text-sm text-muted-foreground max-w-lg">
@@ -424,7 +424,7 @@ function HeroSection({ session, profile, savedCount, deadlineCount }: HeroSectio
             <div className="mt-5 flex flex-wrap gap-3">
               <Link
                 href="/app/programs"
-                className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-white hover:bg-primary/90 transition-colors shadow-lg shadow-primary/25"
+                className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity shadow-lg shadow-primary/25"
               >
                 Explore Programs <ArrowRight className="size-3.5" aria-hidden="true" />
               </Link>
@@ -441,9 +441,9 @@ function HeroSection({ session, profile, savedCount, deadlineCount }: HeroSectio
           </RevealAnimation>
         </div>
 
-        {/* Right: globe */}
+        {/* Right: visual */}
         <div className="relative hidden lg:flex items-center justify-center h-[220px]">
-          <Globe3D className="w-full h-full" />
+          <HeroVisual />
         </div>
       </div>
     </section>
