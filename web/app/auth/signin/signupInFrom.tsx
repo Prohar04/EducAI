@@ -139,6 +139,12 @@ const SignInForm = () => {
 					Sign Up
 				</Link>
 			</p>
+			<p style={{ textAlign: "center", fontSize: 11, color: "#3D4F6B", marginTop: 4 }}>
+				By signing in, you agree to our{" "}
+				<Link href="/terms" style={{ color: "#7A8BA8", textDecoration: "underline" }}>Terms of Service</Link>
+				{" "}and{" "}
+				<Link href="/privacy" style={{ color: "#7A8BA8", textDecoration: "underline" }}>Privacy Policy</Link>
+			</p>
 		</form>
 	);
 };
