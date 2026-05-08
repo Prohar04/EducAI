@@ -1,5 +1,5 @@
 "use client"
-import { forwardRef } from "react"
+import { forwardRef, memo } from "react"
 import { motion, useReducedMotion } from "framer-motion"
 import { cn } from "@/lib/utils"
 
@@ -65,5 +65,7 @@ const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(
 )
 
 GlassCard.displayName = "GlassCard"
-export { GlassCard }
-export default GlassCard
+const MemoGlassCard = memo(GlassCard)
+MemoGlassCard.displayName = "GlassCard"
+export { MemoGlassCard as GlassCard }
+export default MemoGlassCard

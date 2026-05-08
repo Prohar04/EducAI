@@ -26,9 +26,10 @@ export default function StarField({ className, density = 8000, style }: StarFiel
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext("2d")
+    const ctx = canvas.getContext("2d", { willReadFrequently: false })
     if (!ctx) return
 
+    const dpr = Math.min(window.devicePixelRatio || 1, 2)
     let W = 0
     let H = 0
     let stars: Star[] = []
@@ -36,9 +37,9 @@ export default function StarField({ className, density = 8000, style }: StarFiel
     const init = () => {
       W = canvas.offsetWidth
       H = canvas.offsetHeight
-      canvas.width = W * window.devicePixelRatio
-      canvas.height = H * window.devicePixelRatio
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
+      canvas.width = W * dpr
+      canvas.height = H * dpr
+      ctx.scale(dpr, dpr)
 
       const count = Math.floor((W * H) / density)
       stars = Array.from({ length: count }, () => ({
@@ -55,8 +56,13 @@ export default function StarField({ className, density = 8000, style }: StarFiel
     init()
 
     let time = 0
+    let lastFrame = 0
 
-    const render = () => {
+    const render = (now: number = 0) => {
+      rafRef.current = requestAnimationFrame(render)
+      if (now - lastFrame < 50) return // ~20fps — stars barely move, imperceptible at 20fps
+      lastFrame = now
+
       ctx.clearRect(0, 0, W, H)
       time += 0.016
 
@@ -78,16 +84,18 @@ export default function StarField({ className, density = 8000, style }: StarFiel
           }
         }
       }
-
-      rafRef.current = requestAnimationFrame(render)
     }
 
     render()
 
+    let resizeTimer: ReturnType<typeof setTimeout>
     const onResize = () => {
-      cancelAnimationFrame(rafRef.current)
-      init()
-      render()
+      clearTimeout(resizeTimer)
+      resizeTimer = setTimeout(() => {
+        cancelAnimationFrame(rafRef.current)
+        init()
+        render()
+      }, 250)
     }
 
     const onVisibility = () => {
@@ -103,6 +111,7 @@ export default function StarField({ className, density = 8000, style }: StarFiel
 
     return () => {
       cancelAnimationFrame(rafRef.current)
+      clearTimeout(resizeTimer)
       window.removeEventListener("resize", onResize)
       document.removeEventListener("visibilitychange", onVisibility)
     }

@@ -1,5 +1,5 @@
 "use client"
-import { forwardRef } from "react"
+import { forwardRef, memo } from "react"
 import { motion, useReducedMotion } from "framer-motion"
 import { cn } from "@/lib/utils"
 
@@ -107,5 +107,7 @@ const ShimmerButton = forwardRef<HTMLButtonElement, ShimmerButtonProps>(
 )
 
 ShimmerButton.displayName = "ShimmerButton"
-export { ShimmerButton }
-export default ShimmerButton
+const MemoShimmerButton = memo(ShimmerButton)
+MemoShimmerButton.displayName = "ShimmerButton"
+export { MemoShimmerButton as ShimmerButton }
+export default MemoShimmerButton

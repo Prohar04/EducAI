@@ -448,7 +448,7 @@ export default function AuthVisual({ className }: { className?: string }) {
         cancelAnimationFrame(rafRef.current)
         init()
         render()
-      }, 200)
+      }, 250)
     }
 
     const onVis = () => {
