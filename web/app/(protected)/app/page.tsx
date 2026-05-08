@@ -535,6 +535,7 @@ export default async function StudyPlanPage() {
   if (!sessionData) redirect("/auth/signin");
   if (!profileData || !profileData.onboardingDone) redirect("/onboarding");
 
+  // eslint-disable-next-line react-hooks/purity
   const upcomingDeadlines = buildUpcomingDeadlines(savedProgramsData, Date.now());
   const matchCount = matchData?.run?.status === "done" ? (matchData.run.results?.length ?? 0) : 0;
 

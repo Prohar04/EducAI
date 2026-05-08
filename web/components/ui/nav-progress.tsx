@@ -10,6 +10,7 @@ export function NavProgress() {
   const reduced = useReducedMotion();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     const t = setTimeout(() => setLoading(false), 600);
     return () => clearTimeout(t);
