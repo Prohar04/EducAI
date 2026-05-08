@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getSession } from "@/lib/auth/session";
-import { ArrowRight, CheckCircle2, ChevronRight } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { fetchEducationPulse } from "@/lib/data/fetchEducationPulse";
-import quotesData from "@/lib/data/quotes.json";
 import { GradientText } from "@/components/ui/gradient-text";
 import LandingClient from "@/components/home/LandingClient";
+import DailyQuote from "@/components/home/DailyQuote";
+import EducationNews from "@/components/home/EducationNews";
 
 export const metadata: Metadata = {
   title: "EducAI — AI-Powered Study Abroad Platform",
@@ -21,12 +22,6 @@ export const metadata: Metadata = {
 };
 
 export const revalidate = 86_400;
-
-function getQuoteForToday(): string {
-  const dateKey = new Date().toISOString().slice(0, 10);
-  const idx = dateKey.split("").reduce((a, c) => a + c.charCodeAt(0), 0) % (quotesData as string[]).length;
-  return (quotesData as string[])[idx];
-}
 
 const FEATURES = [
   {
@@ -99,6 +94,7 @@ const WEBSITE_SCHEMA = {
 export default async function HomePage() {
   const session = await getSession().catch(() => null);
   const isLoggedIn = !!session;
+  const feedItems = await fetchEducationPulse().catch(() => []);
 
   return (
     <div style={{ minHeight: "100vh", position: "relative", overflow: "hidden" }}>
@@ -279,6 +275,34 @@ export default async function HomePage() {
                   <p style={{ fontSize: 13, fontWeight: 300, color: "#7A8BA8", lineHeight: 1.65 }}>{f.description}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── STAY INFORMED ───────────────────────────────────────────── */}
+        <section aria-labelledby="news-heading" style={{ paddingTop: 100, paddingBottom: 100 }}>
+          <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px" }}>
+            <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "#2A3A52", marginBottom: 16 }}>
+              DAILY UPDATES
+            </p>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 48 }} className="news-grid">
+              {/* Left column: heading + quote */}
+              <div>
+                <h2 id="news-heading" style={{ fontSize: "clamp(24px, 3.5vw, 40px)", fontWeight: 300, letterSpacing: "-0.02em", color: "#E8EEF8", lineHeight: 1.15, marginBottom: 8 }}>
+                  Your daily{" "}
+                  <GradientText variant="hero">education briefing</GradientText>
+                </h2>
+                <p style={{ fontSize: 15, fontWeight: 300, color: "#7A8BA8", lineHeight: 1.7, marginBottom: 28, maxWidth: 420 }}>
+                  Real news from universities, embassies, and scholarship boards — curated daily so you never miss what matters.
+                </p>
+                <DailyQuote />
+              </div>
+
+              {/* Right column: news grid */}
+              <div>
+                <EducationNews items={feedItems} />
+              </div>
             </div>
           </div>
         </section>

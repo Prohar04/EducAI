@@ -270,6 +270,34 @@ body {
   color: #7A8BA8 !important;
 }
 
+/* ── Nav items — remove all focus outlines ───────────────────────────────── */
+.nav-item:focus,
+.nav-item:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* ── News grid responsive layout ────────────────────────────────────────── */
+@media (min-width: 1024px) {
+  .news-grid {
+    grid-template-columns: 2fr 3fr !important;
+  }
+}
+
+/* ── Responsive: mobile text + layout ───────────────────────────────────── */
+@media (max-width: 767px) {
+  body {
+    background-size: 100% 100%, 40px 40px, 40px 40px;
+  }
+}
+
+/* ── Auth page: hide left panel on mobile ────────────────────────────────── */
+@media (max-width: 1023px) {
+  .auth-brand-panel {
+    display: none !important;
+  }
+}
+
 /* ── Skip to content (accessibility) ────────────────────────────────────── */
 .skip-to-content {
   position: fixed;
