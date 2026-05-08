@@ -430,8 +430,8 @@ export default async function HomePage() {
             {/* Links */}
             <div style={{ display: "flex", gap: 20 }}>
               {[
-                { label: "Privacy", href: "#" },
-                { label: "Terms", href: "#" },
+                { label: "Privacy", href: "/privacy" },
+                { label: "Terms", href: "/terms" },
                 { label: "GitHub", href: "https://github.com/Prohar04/EducAI" },
               ].map((item) => (
                 <a key={item.label} href={item.href} className="footer-link" style={{ fontSize: 12, color: "#2A3A52", textDecoration: "none", transition: "color 200ms" }}>
