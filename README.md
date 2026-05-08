@@ -356,7 +356,7 @@ the best available real-time job data regardless of their country.
 ### How the cascade works
 
 | Priority | Source | Countries | Quality |
-|----------|--------|-----------|---------|
+| --- | --- | --- | --- |
 | 1st | **Adzuna API** | 16 countries (see below) | ⭐⭐⭐⭐⭐ Official |
 | 2nd | **JSearch (RapidAPI)** | All other countries | ⭐⭐⭐⭐ Aggregated |
 | 3rd | **OpenAI GPT-4o-mini** | Anywhere (last resort) | ⭐⭐⭐ AI-generated |
@@ -364,6 +364,7 @@ the best available real-time job data regardless of their country.
 OpenAI is already configured in EducAI — no extra key needed for fallback.
 
 ### Adzuna countries (Source 1)
+
 🇬🇧 UK · 🇺🇸 USA · 🇦🇺 Australia · 🇨🇦 Canada · 🇩🇪 Germany · 🇫🇷 France ·
 🇮🇳 India · 🇵🇱 Poland · 🇷🇺 Russia · 🇿🇦 South Africa · 🇧🇷 Brazil ·
 🇳🇱 Netherlands · 🇳🇿 New Zealand · 🇸🇬 Singapore · 🇦🇹 Austria · 🇮🇹 Italy
@@ -371,7 +372,8 @@ OpenAI is already configured in EducAI — no extra key needed for fallback.
 ### Step-by-step key setup
 
 **Adzuna (Source 1 — recommended, free):**
-1. Go to https://developer.adzuna.com
+
+1. Go to <https://developer.adzuna.com>
 2. Register for a free account
 3. Go to "API Access Details" in your dashboard
 4. Copy your App ID → paste as `ADZUNA_APP_ID`
@@ -379,7 +381,8 @@ OpenAI is already configured in EducAI — no extra key needed for fallback.
 6. Add both to `server/.env` AND `ai-server/.env`
 
 **JSearch (Source 2 — recommended for global coverage):**
-1. Go to https://rapidapi.com and sign up
+
+1. Go to <https://rapidapi.com> and sign up
 2. Search "JSearch" → open result by letscrape
 3. Subscribe to FREE plan (200 req/month)
 4. Go to Endpoints tab → copy X-RapidAPI-Key
@@ -392,7 +395,7 @@ Only activates when both Adzuna and JSearch are unavailable.
 ### What happens without keys
 
 | Keys configured | Behavior |
-|----------------|----------|
+| --- | --- |
 | Adzuna + JSearch + OpenAI | Full cascade — best experience |
 | Adzuna + OpenAI only | Adzuna for 16 countries, AI fallback elsewhere |
 | JSearch + OpenAI only | JSearch for all countries, AI fallback on failure |
@@ -402,7 +405,7 @@ Only activates when both Adzuna and JSearch are unavailable.
 ### Pricing reference
 
 | API | Free Tier | Paid |
-|-----|-----------|------|
+| --- | --- | --- |
 | Adzuna | 1,000 req/day free | Contact for higher limits |
 | JSearch | 200 req/month | $10/mo = 2,000 req |
 | OpenAI | Pay per token | ~$0.001 per job search |
