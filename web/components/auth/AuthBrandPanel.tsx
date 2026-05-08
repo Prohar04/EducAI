@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { GraduationCap, Sparkles, Award, CalendarDays, CheckCircle } from "lucide-react";
-import HeroVisual from "@/components/ui/hero-visual";
+import AuthVisual from "@/components/ui/auth-visual";
 import { GradientText } from "@/components/ui/gradient-text";
 
 const FEATURES = [
@@ -28,15 +28,10 @@ export function AuthBrandPanel() {
         <div className="absolute -bottom-32 right-0 h-[400px] w-[400px] rounded-full blur-[100px]" style={{ background: "rgba(27,61,107,0.12)" }} />
       </div>
 
-      {/* Grid pattern */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-[0.02]"
-        style={{
-          backgroundImage: "linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)",
-          backgroundSize: "48px 48px",
-        }}
-      />
+      {/* AuthVisual canvas — fills the entire panel */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <AuthVisual className="w-full h-full" />
+      </div>
 
       <div className="relative z-10 flex h-full flex-col p-10 xl:p-14">
         {/* Logo */}
@@ -53,12 +48,8 @@ export function AuthBrandPanel() {
           </Link>
         </motion.div>
 
-        {/* Visual */}
-        <div className="flex-1 flex items-center justify-center my-8">
-          <div className="w-full h-64">
-            <HeroVisual />
-          </div>
-        </div>
+        {/* Spacer */}
+        <div className="flex-1" />
 
         {/* Value prop */}
         <motion.div

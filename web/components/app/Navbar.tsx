@@ -40,7 +40,7 @@ import type { Session } from "@/types/auth.type";
 import { getUnifiedNotifications, type AppNotification, type NotificationType } from "@/lib/auth/action";
 
 const ACTIVE_PILL_CLASS =
-  "bg-[rgba(74,144,217,0.09)] text-[#E8EEF8] shadow-[0_0_0_1px_rgba(74,144,217,0.20)]";
+  "bg-[rgba(74,144,217,0.09)] text-[#E8EEF8]";
 const INACTIVE_PILL_CLASS =
   "text-[#3D4F6B] hover:text-[#7A8BA8] hover:bg-[rgba(255,255,255,0.04)]";
 
@@ -107,7 +107,7 @@ function NotifIcon({ type }: { type: NotificationType }) {
     case "scholarship_alert":
       return <Award className={`${classes} text-amber-500`} />;
     case "profile_incomplete":
-      return <User className={`${classes} text-blue-500`} />;
+      return <User className={`${classes} text-primary`} />;
     case "match_ready":
       return <Sparkles className={`${classes} text-primary`} />;
     case "sop_ready":
