@@ -64,7 +64,7 @@ export default function TermsPage() {
           </h1>
 
           <p style={{ fontSize: 13, color: "#3D4F6B", marginBottom: 24 }}>
-            Effective Date: January 1, 2025 · Last Updated: May 2026
+            Effective Date: February 1, 2026 · Last Updated: May 2026
           </p>
 
           <div style={{ height: 1, background: "linear-gradient(90deg, rgba(74,144,217,0.20) 0%, transparent 100%)", marginBottom: 32 }} />
@@ -80,7 +80,7 @@ export default function TermsPage() {
             <p style={{ fontSize: 13, color: "#7A8BA8", margin: 0 }}>
               <span style={{ marginRight: 8 }}>📋</span>
               <strong style={{ color: "#B8CCE8", fontWeight: 500 }}>Last Updated: May 2026</strong>
-              {" · "}This document is effective as of January 1, 2025.
+              {" · "}This document is effective as of February 1, 2026.
             </p>
           </div>
         </div>
@@ -141,7 +141,7 @@ export default function TermsPage() {
               <h3 style={h3Style}>3.2 Account Security</h3>
               <p style={bodyStyle}>
                 You must notify us immediately at{" "}
-                <a href="mailto:support@educai.app" style={linkStyle}>support@educai.app</a>{" "}
+                <a href="mailto:support.educai@gmail.com" style={linkStyle}>support.educai@gmail.com</a>{" "}
                 of any unauthorized use of your account. We implement industry-standard security measures including JWT authentication, bcrypt password hashing, and rate limiting.
               </p>
               <h3 style={h3Style}>3.3 Accurate Information</h3>
@@ -325,10 +325,10 @@ export default function TermsPage() {
                 <p style={{ fontSize: 14, fontWeight: 500, color: "#E8EEF8", marginBottom: 16 }}>Questions?</p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {[
-                    { label: "Legal inquiries", href: "legal@educai.app" },
-                    { label: "General support", href: "support@educai.app" },
+                    { label: "Legal inquiries", href: "support.educai@gmail.com" },
+                    { label: "General support", href: "support.educai@gmail.com" },
                   ].map(({ label, href }) => (
-                    <div key={href} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <div key={label} style={{ display: "flex", alignItems: "center", gap: 12 }}>
                       <span style={{ fontSize: 12, color: "#3D4F6B", minWidth: 120 }}>{label}</span>
                       <a
                         href={`mailto:${href}`}
