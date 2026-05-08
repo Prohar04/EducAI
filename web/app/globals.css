@@ -191,6 +191,15 @@ body {
   border-radius: 6px;
 }
 
+/* Mouse click should not show focus ring — only keyboard Tab navigation should */
+button:focus:not(:focus-visible) {
+  outline: none;
+}
+
+a:focus:not(:focus-visible) {
+  outline: none;
+}
+
 /* ── Reduced motion ───────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -275,6 +284,20 @@ body {
 .nav-item:focus-visible {
   outline: none;
   box-shadow: none;
+}
+
+/* ── Auth form — scoped ring suppression for mouse interactions ───────────── */
+.auth-form button:focus:not(:focus-visible),
+.auth-form a:focus:not(:focus-visible),
+.auth-form input:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
+.auth-form input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(74,144,217,0.25);
+  border-color: rgba(74,144,217,0.45) !important;
 }
 
 /* ── News grid responsive layout ────────────────────────────────────────── */
