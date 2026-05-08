@@ -33,10 +33,22 @@ const SignInPage = async ({ searchParams }: SignInPageProps) => {
 				{sessionExpired && (
 					<div
 						role="alert"
-						className="mb-4 flex items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400"
+						className="mb-4"
+						style={{
+							background: "rgba(74,144,217,0.08)",
+							border: "1px solid rgba(74,144,217,0.25)",
+							borderRadius: "10px",
+							padding: "12px 16px",
+							display: "flex",
+							alignItems: "center",
+							gap: "10px",
+							width: "100%",
+						}}
 					>
-						<Clock className="size-4 shrink-0" />
-						Session expired. Please sign in again.
+						<Clock size={16} style={{ color: "#4A90D9", flexShrink: 0 }} />
+						<span style={{ color: "#7A8BA8", fontSize: "14px", fontWeight: 300 }}>
+							Session expired. Please sign in again.
+						</span>
 					</div>
 				)}
 				{errorMessage && (

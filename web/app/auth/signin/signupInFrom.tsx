@@ -33,9 +33,15 @@ const SignInForm = () => {
 
 			{/* Email not verified banner */}
 			{isUnverified && (
-				<div className="space-y-3 rounded-lg border border-amber-500/50 bg-amber-500/10 px-4 py-3">
-					<div className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-400">
-						<Mail className="size-4 shrink-0" />
+				<div
+					className="space-y-3 rounded-lg px-4 py-3"
+					style={{
+						background: "rgba(74,144,217,0.08)",
+						border: "1px solid rgba(74,144,217,0.25)",
+					}}
+				>
+					<div className="flex items-center gap-2 text-sm" style={{ color: "#7A8BA8" }}>
+						<Mail className="size-4 shrink-0" style={{ color: "#4A90D9" }} />
 						{state?.message}
 					</div>
 					{/* Inline resend form */}
@@ -51,7 +57,8 @@ const SignInForm = () => {
 						/>
 						<button
 							type="submit"
-							className="whitespace-nowrap rounded-md bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-700"
+							className="whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium text-white"
+							style={{ background: "rgba(74,144,217,0.88)" }}
 						>
 							Resend
 						</button>
@@ -128,7 +135,7 @@ const SignInForm = () => {
 				</Label>
 			</div>
 
-			<SubmitButton>Sign In</SubmitButton>
+			<SubmitButton className="w-full mt-2 bg-[rgba(74,144,217,0.88)] text-[#080D18] hover:bg-[rgba(74,144,217,0.75)]">Sign In</SubmitButton>
 
 			<p className="text-center text-sm text-muted-foreground">
 				Don&apos;t have an account?{" "}
