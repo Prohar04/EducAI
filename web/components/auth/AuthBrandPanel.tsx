@@ -1,9 +1,14 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { CheckCircle } from "lucide-react";
-import AuthVisual from "@/components/ui/auth-visual";
+
+const AuthVisual = dynamic(
+  () => import("@/components/ui/auth-visual"),
+  { loading: () => <div style={{ width: "100%", height: "100%", background: "rgba(8,13,24,0.98)" }} />, ssr: false }
+);
 
 const FEATURES = [
   "Match universities to your profile",

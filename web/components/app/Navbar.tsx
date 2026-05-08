@@ -211,6 +211,7 @@ export function Navbar({ user }: { user: Session["user"] }) {
                 <li key={href}>
                   <Link
                     href={href}
+                    prefetch={href === "/app/programs"}
                     aria-current={active ? "page" : undefined}
                     className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
                       active ? ACTIVE_PILL_CLASS : INACTIVE_PILL_CLASS
@@ -264,6 +265,7 @@ export function Navbar({ user }: { user: Session["user"] }) {
                             >
                               <Link
                                 href={href}
+                                prefetch={["/app/programs", "/app/scholarships", "/app/jobs"].includes(href)}
                                 className={`flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all ${
                                   active
                                     ? `${ACTIVE_PILL_CLASS} bg-primary/10`

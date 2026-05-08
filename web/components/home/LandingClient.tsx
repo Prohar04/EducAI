@@ -1,9 +1,20 @@
 "use client"
 import { useEffect, useState } from "react"
+import dynamic from "next/dynamic"
 import Link from "next/link"
-import StarField from "@/components/ui/star-field"
-import HeroVisual from "@/components/ui/hero-visual"
-import GlowOrb from "@/components/ui/glow-orb"
+
+const StarField = dynamic(
+  () => import("@/components/ui/star-field"),
+  { loading: () => null, ssr: false }
+)
+const HeroVisual = dynamic(
+  () => import("@/components/ui/hero-visual"),
+  { loading: () => null, ssr: false }
+)
+const GlowOrb = dynamic(
+  () => import("@/components/ui/glow-orb"),
+  { loading: () => null, ssr: false }
+)
 
 interface LandingClientProps {
   isLoggedIn: boolean
@@ -117,6 +128,7 @@ export default function LandingClient({ isLoggedIn }: LandingClientProps) {
             <>
               <Link
                 href="/auth/signin"
+                prefetch={true}
                 style={{
                   fontSize: 13,
                   fontWeight: 300,
@@ -132,6 +144,7 @@ export default function LandingClient({ isLoggedIn }: LandingClientProps) {
               </Link>
               <Link
                 href="/auth/signup"
+                prefetch={true}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",

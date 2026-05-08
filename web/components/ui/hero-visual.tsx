@@ -24,7 +24,7 @@ export default function HeroVisual({ className }: { className?: string }) {
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
-    const dpr = window.devicePixelRatio || 1
+    const dpr = Math.min(window.devicePixelRatio || 1, 2)
 
     const init = () => {
       const w = canvas.offsetWidth
@@ -140,10 +140,14 @@ export default function HeroVisual({ className }: { className?: string }) {
 
     render()
 
+    let resizeTimer: ReturnType<typeof setTimeout>
     const onResize = () => {
-      cancelAnimationFrame(rafRef.current)
-      init()
-      render()
+      clearTimeout(resizeTimer)
+      resizeTimer = setTimeout(() => {
+        cancelAnimationFrame(rafRef.current)
+        init()
+        render()
+      }, 250)
     }
     const onVisibility = () => {
       if (document.hidden) cancelAnimationFrame(rafRef.current)
@@ -155,6 +159,7 @@ export default function HeroVisual({ className }: { className?: string }) {
 
     return () => {
       cancelAnimationFrame(rafRef.current)
+      clearTimeout(resizeTimer)
       window.removeEventListener("resize", onResize)
       document.removeEventListener("visibilitychange", onVisibility)
     }

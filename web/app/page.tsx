@@ -1,12 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { getSession } from "@/lib/auth/session";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { fetchEducationPulse } from "@/lib/data/fetchEducationPulse";
 import { GradientText } from "@/components/ui/gradient-text";
 import LandingClient from "@/components/home/LandingClient";
-import DailyQuote from "@/components/home/DailyQuote";
-import EducationNews from "@/components/home/EducationNews";
+
+const DailyQuote = dynamic(
+  () => import("@/components/home/DailyQuote"),
+  { loading: () => <div style={{ height: 120 }} /> }
+);
+const EducationNews = dynamic(
+  () => import("@/components/home/EducationNews"),
+  { loading: () => <div style={{ height: 400 }} /> }
+);
 
 export const metadata: Metadata = {
   title: "EducAI — AI-Powered Study Abroad Platform",
@@ -333,15 +341,17 @@ export default async function HomePage() {
                   )}
                   {/* Step number background decoration */}
                   <div style={{
-                    fontSize: 96,
+                    fontSize: "clamp(80px, 12vw, 120px)",
                     fontWeight: 900,
-                    color: "rgba(74,144,217,0.05)",
+                    color: "rgba(74,144,217,0.22)",
                     lineHeight: 1,
+                    letterSpacing: "-0.04em",
                     position: "absolute",
                     left: -12,
                     top: -16,
                     userSelect: "none",
                     pointerEvents: "none",
+                    filter: "blur(0.5px)",
                   }}>
                     {step.number}
                   </div>
