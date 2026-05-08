@@ -57,11 +57,11 @@ export function ProgramCard({
 
   return (
     <motion.div
-      whileHover={reduced ? undefined : { y: -3, boxShadow: "0 16px 40px rgba(0,0,0,0.5), 0 0 30px rgba(0,201,167,0.1)" }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
+      whileHover={reduced ? undefined : { y: -2, boxShadow: "0 8px 32px rgba(0,0,0,0.45), 0 0 24px rgba(74,144,217,0.08)" }}
+      transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
       className={cn(
-        "group relative overflow-hidden rounded-xl border border-white/[0.08] bg-[rgba(19,26,36,0.8)] backdrop-blur-xl p-5",
-        "hover:border-[rgba(0,201,167,0.3)] transition-colors duration-300",
+        "group relative overflow-hidden rounded-xl border border-white/[0.06] bg-[rgba(13,22,37,0.65)] backdrop-blur-xl p-5",
+        "hover:border-[rgba(74,144,217,0.20)] transition-colors duration-300",
         className
       )}
     >
@@ -75,7 +75,7 @@ export function ProgramCard({
           <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
             <motion.div
               className="h-full rounded-full"
-              style={{ background: "linear-gradient(90deg, #00C9A7, #38BDF8)" }}
+              style={{ background: "linear-gradient(90deg, #4A90D9, #B8CCE8)" }}
               initial={reduced ? false : { scaleX: 0, originX: 0 }}
               whileInView={{ scaleX: fitScore / 100 }}
               viewport={{ once: true }}

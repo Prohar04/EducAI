@@ -1,59 +1,57 @@
-"use client";
-
-import { useEffect, useRef } from "react";
-import { motion, useInView, useMotionValue, useTransform, animate, useReducedMotion } from "framer-motion";
-import { cn } from "@/lib/utils";
+"use client"
+import { useEffect, useRef } from "react"
+import { useInView, useMotionValue, animate, useReducedMotion } from "framer-motion"
+import { cn } from "@/lib/utils"
 
 interface AnimatedCounterProps {
-  target: number;
-  duration?: number;
-  prefix?: string;
-  suffix?: string;
-  className?: string;
-  decimals?: number;
+  target: number
+  prefix?: string
+  suffix?: string
+  duration?: number
+  decimals?: number
+  className?: string
 }
 
 export function AnimatedCounter({
   target,
-  duration = 1.5,
   prefix = "",
   suffix = "",
-  className,
+  duration = 1.8,
   decimals = 0,
+  className,
 }: AnimatedCounterProps) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true });
-  const reduced = useReducedMotion();
-  const motionValue = useMotionValue(0);
-
-  const formatted = useTransform(motionValue, (v) => {
-    const n = parseFloat(v.toFixed(decimals));
-    return prefix + n.toLocaleString("en-US", {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
-    }) + suffix;
-  });
+  const ref = useRef<HTMLSpanElement>(null)
+  const inView = useInView(ref, { once: true })
+  const count = useMotionValue(0)
+  const reduced = useReducedMotion()
 
   useEffect(() => {
-    if (!inView) return;
+    if (!inView) return
     if (reduced) {
-      motionValue.set(target);
-      return;
+      if (ref.current) ref.current.textContent = `${prefix}${target.toLocaleString()}${suffix}`
+      return
     }
-    const controls = animate(motionValue, target, {
+    const controls = animate(count, target, {
       duration,
-      ease: "easeOut",
-    });
-    return () => controls.stop();
-  }, [inView, target, duration, reduced, motionValue]);
+      ease: [0.25, 0.1, 0.25, 1],
+      onUpdate: (v) => {
+        if (ref.current) {
+          const n = parseFloat(v.toFixed(decimals))
+          ref.current.textContent = `${prefix}${n.toLocaleString("en-US", {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals,
+          })}${suffix}`
+        }
+      },
+    })
+    return () => controls.stop()
+  }, [inView, target, prefix, suffix, duration, count, reduced, decimals])
 
   return (
     <span ref={ref} className={cn(className)}>
-      {inView || reduced ? (
-        <motion.span>{formatted}</motion.span>
-      ) : (
-        `${prefix}0${suffix}`
-      )}
+      {prefix}0{suffix}
     </span>
-  );
+  )
 }
+
+export default AnimatedCounter

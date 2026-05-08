@@ -1,174 +1,175 @@
-"use client";
+"use client"
+import { useEffect, useRef } from "react"
+import { useReducedMotion } from "framer-motion"
 
-import { motion, useReducedMotion } from "framer-motion";
+interface Ring {
+  rx: number
+  ry: number
+  angle: number
+  speed: number
+  dotSize: number
+  dotAlpha: number
+  ringAlpha: number
+  tilt: number
+}
 
-export default function HeroVisual() {
-  const reduced = useReducedMotion();
+export default function HeroVisual({ className }: { className?: string }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const rafRef = useRef<number>(0)
+  const reduced = useReducedMotion()
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+
+    const dpr = window.devicePixelRatio || 1
+
+    const init = () => {
+      const w = canvas.offsetWidth
+      const h = canvas.offsetHeight
+      canvas.width = w * dpr
+      canvas.height = h * dpr
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    }
+
+    init()
+
+    const rings: Ring[] = [
+      { rx: 90,  ry: 28, angle: 0,              speed:  0.007, dotSize: 3.5, dotAlpha: 0.85, ringAlpha: 0.09, tilt: 0.18 },
+      { rx: 145, ry: 46, angle: Math.PI / 2.5,  speed: -0.005, dotSize: 2.8, dotAlpha: 0.60, ringAlpha: 0.06, tilt: 0.18 },
+      { rx: 200, ry: 65, angle: Math.PI * 0.9,  speed:  0.003, dotSize: 2.2, dotAlpha: 0.38, ringAlpha: 0.045, tilt: 0.18 },
+      { rx: 255, ry: 82, angle: Math.PI * 1.5,  speed: -0.0018, dotSize: 1.8, dotAlpha: 0.22, ringAlpha: 0.030, tilt: 0.18 },
+      { rx: 310, ry: 98, angle: Math.PI * 0.3,  speed:  0.0012, dotSize: 1.4, dotAlpha: 0.14, ringAlpha: 0.018, tilt: 0.18 },
+    ]
+
+    let t = 0
+
+    const render = () => {
+      const W = canvas.offsetWidth
+      const H = canvas.offsetHeight
+      ctx.clearRect(0, 0, W, H)
+
+      const cx = W / 2
+      const cy = H / 2
+
+      // Core glow
+      const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, 55)
+      core.addColorStop(0, "rgba(74,144,217,0.22)")
+      core.addColorStop(0.45, "rgba(74,144,217,0.07)")
+      core.addColorStop(1, "rgba(74,144,217,0)")
+      ctx.beginPath()
+      ctx.arc(cx, cy, 55, 0, Math.PI * 2)
+      ctx.fillStyle = core
+      ctx.fill()
+
+      // Core dot
+      ctx.beginPath()
+      ctx.arc(cx, cy, 3, 0, Math.PI * 2)
+      ctx.fillStyle = "rgba(74,144,217,0.75)"
+      ctx.fill()
+
+      // Rings
+      for (const ring of rings) {
+        const a = ring.angle + (reduced ? 0 : t * ring.speed * 60)
+
+        ctx.save()
+        ctx.translate(cx, cy)
+        ctx.rotate(ring.tilt)
+
+        // Ring ellipse
+        ctx.beginPath()
+        ctx.ellipse(0, 0, ring.rx, ring.ry, 0, 0, Math.PI * 2)
+        ctx.strokeStyle = `rgba(74,144,217,${ring.ringAlpha})`
+        ctx.lineWidth = 0.8
+        ctx.stroke()
+
+        // Traveling dot
+        const dx = ring.rx * Math.cos(a)
+        const dy = ring.ry * Math.sin(a)
+
+        // Dot glow halo
+        const halo = ctx.createRadialGradient(dx, dy, 0, dx, dy, ring.dotSize * 5)
+        halo.addColorStop(0, `rgba(74,144,217,${(ring.dotAlpha * 0.35).toFixed(3)})`)
+        halo.addColorStop(1, "rgba(74,144,217,0)")
+        ctx.beginPath()
+        ctx.arc(dx, dy, ring.dotSize * 5, 0, Math.PI * 2)
+        ctx.fillStyle = halo
+        ctx.fill()
+
+        // Dot core
+        ctx.beginPath()
+        ctx.arc(dx, dy, ring.dotSize, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(74,144,217,${ring.dotAlpha})`
+        ctx.fill()
+
+        // Trailing arc — comet tail
+        if (!reduced) {
+          const tailLength = 0.4
+          const tailStart = a - tailLength
+          ctx.beginPath()
+          ctx.ellipse(0, 0, ring.rx, ring.ry, 0, tailStart, a)
+          const tailGrad = ctx.createLinearGradient(
+            ring.rx * Math.cos(tailStart),
+            ring.ry * Math.sin(tailStart),
+            dx, dy
+          )
+          tailGrad.addColorStop(0, "rgba(74,144,217,0)")
+          tailGrad.addColorStop(1, `rgba(74,144,217,${(ring.dotAlpha * 0.25).toFixed(3)})`)
+          ctx.strokeStyle = tailGrad
+          ctx.lineWidth = ring.dotSize * 0.8
+          ctx.stroke()
+        }
+
+        ctx.restore()
+      }
+
+      // Outer ambient
+      const amb = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(W, H) * 0.52)
+      amb.addColorStop(0, "rgba(27,61,107,0.14)")
+      amb.addColorStop(1, "rgba(27,61,107,0)")
+      ctx.beginPath()
+      ctx.arc(cx, cy, Math.min(W, H) * 0.52, 0, Math.PI * 2)
+      ctx.fillStyle = amb
+      ctx.fill()
+
+      t += 0.016
+      rafRef.current = requestAnimationFrame(render)
+    }
+
+    render()
+
+    const onResize = () => {
+      cancelAnimationFrame(rafRef.current)
+      init()
+      render()
+    }
+    const onVisibility = () => {
+      if (document.hidden) cancelAnimationFrame(rafRef.current)
+      else render()
+    }
+
+    window.addEventListener("resize", onResize)
+    document.addEventListener("visibilitychange", onVisibility)
+
+    return () => {
+      cancelAnimationFrame(rafRef.current)
+      window.removeEventListener("resize", onResize)
+      document.removeEventListener("visibilitychange", onVisibility)
+    }
+  }, [reduced])
 
   return (
     <div
-      className="relative w-full h-full flex items-center justify-center"
-      style={{ minHeight: 320 }}
+      aria-hidden="true"
+      className={className}
+      style={{ position: "relative", width: "100%", height: "100%" }}
     >
-      {/* Outer glow */}
-      <div
-        style={{
-          position: "absolute",
-          width: 400,
-          height: 400,
-          borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(0,201,167,0.12) 0%, transparent 70%)",
-          filter: "blur(40px)",
-        }}
+      <canvas
+        ref={canvasRef}
+        style={{ width: "100%", height: "100%", display: "block" }}
       />
-
-      {/* Main orb */}
-      <motion.div
-        animate={reduced ? {} : { scale: [1, 1.05, 1] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-        style={{
-          width: 200,
-          height: 200,
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle at 35% 35%, rgba(0,201,167,0.25) 0%, rgba(0,229,196,0.08) 50%, transparent 70%)",
-          border: "1px solid rgba(0,201,167,0.25)",
-          boxShadow:
-            "0 0 80px rgba(0,201,167,0.15), inset 0 0 40px rgba(0,201,167,0.05)",
-          position: "relative",
-          zIndex: 2,
-        }}
-      />
-
-      {/* Orbital ring 1 */}
-      <motion.div
-        animate={reduced ? {} : { rotate: 360 }}
-        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-        style={{
-          position: "absolute",
-          width: 280,
-          height: 280,
-          borderRadius: "50%",
-          border: "1px solid rgba(0,201,167,0.15)",
-        }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            top: -4,
-            left: "50%",
-            width: 8,
-            height: 8,
-            borderRadius: "50%",
-            background: "#00C9A7",
-            boxShadow: "0 0 10px #00C9A7",
-            transform: "translateX(-50%)",
-          }}
-        />
-      </motion.div>
-
-      {/* Orbital ring 2 */}
-      <motion.div
-        animate={reduced ? {} : { rotate: -360 }}
-        transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
-        style={{
-          position: "absolute",
-          width: 360,
-          height: 180,
-          borderRadius: "50%",
-          border: "1px solid rgba(0,201,167,0.08)",
-          transform: "rotateX(75deg)",
-        }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            top: -3,
-            left: "25%",
-            width: 6,
-            height: 6,
-            borderRadius: "50%",
-            background: "#38BDF8",
-            boxShadow: "0 0 8px #38BDF8",
-          }}
-        />
-      </motion.div>
-
-      {/* Orbital ring 3 */}
-      <motion.div
-        animate={reduced ? {} : { rotate: 360 }}
-        transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
-        style={{
-          position: "absolute",
-          width: 440,
-          height: 220,
-          borderRadius: "50%",
-          border: "1px solid rgba(56,189,248,0.08)",
-          transform: "rotateX(75deg) rotateY(30deg)",
-        }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            bottom: -3,
-            right: "30%",
-            width: 5,
-            height: 5,
-            borderRadius: "50%",
-            background: "#00E5C4",
-            boxShadow: "0 0 6px #00E5C4",
-          }}
-        />
-      </motion.div>
-
-      {/* Floating stat pills */}
-      {[
-        { label: "🎓 Programs", x: -160, y: -80, delay: 0 },
-        { label: "💰 Scholarships", x: 140, y: -60, delay: 0.5 },
-        { label: "📄 Documents", x: -140, y: 80, delay: 1 },
-        { label: "✈️ Visa Guide", x: 130, y: 90, delay: 1.5 },
-      ].map((pill) => (
-        <motion.div
-          key={pill.label}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={
-            reduced
-              ? { opacity: 1 }
-              : {
-                  opacity: 1,
-                  scale: 1,
-                  y: [0, -6, 0],
-                }
-          }
-          transition={{
-            opacity: { delay: pill.delay, duration: 0.5 },
-            scale: { delay: pill.delay, duration: 0.5 },
-            y: {
-              delay: pill.delay,
-              duration: 3,
-              repeat: Infinity,
-              ease: "easeInOut",
-            },
-          }}
-          style={{
-            position: "absolute",
-            left: `calc(50% + ${pill.x}px)`,
-            top: `calc(50% + ${pill.y}px)`,
-            transform: "translate(-50%, -50%)",
-            background: "rgba(19,26,36,0.9)",
-            border: "1px solid rgba(0,201,167,0.25)",
-            borderRadius: 20,
-            padding: "6px 14px",
-            fontSize: 12,
-            color: "#E8EDF5",
-            whiteSpace: "nowrap",
-            backdropFilter: "blur(10px)",
-            zIndex: 3,
-          }}
-        >
-          {pill.label}
-        </motion.div>
-      ))}
     </div>
-  );
+  )
 }
