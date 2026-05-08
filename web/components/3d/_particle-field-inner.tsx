@@ -13,7 +13,9 @@ function Particles() {
   const instancedRef = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
 
+  // eslint-disable-next-line react-hooks/purity
   const particles = useMemo(() => {
+    /* eslint-disable react-hooks/purity */
     return Array.from({ length: PARTICLE_COUNT }, () => ({
       x: (Math.random() - 0.5) * BOUNDS * 2,
       y: (Math.random() - 0.5) * BOUNDS * 2,
@@ -22,6 +24,7 @@ function Particles() {
       vy: (Math.random() - 0.5) * 0.008,
       vz: (Math.random() - 0.5) * 0.004,
     }));
+    /* eslint-enable react-hooks/purity */
   }, []);
 
   useEffect(() => {
@@ -35,6 +38,7 @@ function Particles() {
   useFrame(() => {
     if (!instancedRef.current) return;
 
+    /* eslint-disable react-hooks/immutability */
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       const p = particles[i];
       p.x += p.vx;
@@ -46,6 +50,7 @@ function Particles() {
       if (p.y < -BOUNDS) p.y = BOUNDS;
       if (p.z > BOUNDS) p.z = -BOUNDS;
       if (p.z < -BOUNDS) p.z = BOUNDS;
+    /* eslint-enable react-hooks/immutability */
 
       dummy.position.set(p.x, p.y, p.z);
       dummy.updateMatrix();

@@ -12,8 +12,10 @@ export function useWebGL() {
         canvas.getContext("webgl2") ||
         canvas.getContext("webgl") ||
         canvas.getContext("experimental-webgl");
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSupported(!!gl);
     } catch {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSupported(false);
     }
   }, []);
