@@ -125,7 +125,7 @@ function ProfessorCard({
 					<div className="flex items-center gap-2 flex-wrap">
 						<h3 className="font-semibold leading-snug truncate">{professor.name}</h3>
 						{professor.sourceVerified && (
-							<span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+							<span className="inline-flex items-center gap-1 rounded-full bg-[#3D9970]/10 px-1.5 py-0.5 text-[10px] font-medium text-[#3D9970]">
 								<CheckCircle className="h-2.5 w-2.5" />
 								Source-backed
 							</span>
@@ -347,9 +347,9 @@ export default function ProfessorsPage() {
 			</div>
 
 			{/* Trust notice */}
-			<div className="mb-6 flex items-start gap-2 rounded-lg border border-blue-500/20 bg-blue-500/5 px-4 py-3">
-				<Info className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
-				<p className="text-xs text-blue-700 dark:text-blue-400">
+			<div className="mb-6 flex items-start gap-2 rounded-lg border border-[#4A90D9]/20 bg-[#4A90D9]/5 px-4 py-3">
+				<Info className="h-4 w-4 text-[#4A90D9] shrink-0 mt-0.5" />
+				<p className="text-xs text-[#4A90D9]">
 					This tool only shows professors it can find evidence for via live web search. If your search returns no results, the university name may not be indexed, or try broadening your research area.
 				</p>
 			</div>
@@ -377,9 +377,9 @@ export default function ProfessorsPage() {
 					</div>
 
 					{warning && (
-						<div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2">
-							<AlertCircle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-							<p className="text-sm text-amber-700 dark:text-amber-400">{warning}</p>
+						<div className="mb-4 flex items-start gap-2 rounded-lg border border-[#C49A3C]/20 bg-[#C49A3C]/5 px-3 py-2">
+							<AlertCircle className="h-4 w-4 text-[#C49A3C] shrink-0 mt-0.5" />
+							<p className="text-sm text-[#C49A3C]">{warning}</p>
 						</div>
 					)}
 
@@ -407,10 +407,10 @@ export default function ProfessorsPage() {
 							</p>
 							<div className="mt-4 rounded-lg border border-border bg-card p-4 text-left text-sm space-y-1.5 max-w-sm">
 								<p className="font-medium text-sm mb-2">Try these refinements:</p>
-								<div className="flex items-start gap-2"><Check className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" /><span className="text-muted-foreground">Use a broader or alternative research area term</span></div>
-								<div className="flex items-start gap-2"><Check className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" /><span className="text-muted-foreground">Check university name spelling (e.g. &ldquo;MIT&rdquo; not &ldquo;Massachusetts Inst&rdquo;)</span></div>
-								<div className="flex items-start gap-2"><Check className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" /><span className="text-muted-foreground">Remove the university filter to search more broadly</span></div>
-								<div className="flex items-start gap-2"><Check className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" /><span className="text-muted-foreground">Try related field terms (e.g. &ldquo;machine learning&rdquo; instead of &ldquo;AI&rdquo;)</span></div>
+								<div className="flex items-start gap-2"><Check className="h-3.5 w-3.5 text-[#3D9970] mt-0.5 shrink-0" /><span className="text-muted-foreground">Use a broader or alternative research area term</span></div>
+								<div className="flex items-start gap-2"><Check className="h-3.5 w-3.5 text-[#3D9970] mt-0.5 shrink-0" /><span className="text-muted-foreground">Check university name spelling (e.g. &ldquo;MIT&rdquo; not &ldquo;Massachusetts Inst&rdquo;)</span></div>
+								<div className="flex items-start gap-2"><Check className="h-3.5 w-3.5 text-[#3D9970] mt-0.5 shrink-0" /><span className="text-muted-foreground">Remove the university filter to search more broadly</span></div>
+								<div className="flex items-start gap-2"><Check className="h-3.5 w-3.5 text-[#3D9970] mt-0.5 shrink-0" /><span className="text-muted-foreground">Try related field terms (e.g. &ldquo;machine learning&rdquo; instead of &ldquo;AI&rdquo;)</span></div>
 							</div>
 						</div>
 					)}

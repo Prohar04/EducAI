@@ -35,7 +35,7 @@ function GlobeFallback() {
         ].map((pos, i) => (
           <div
             key={i}
-            className="absolute w-2 h-2 rounded-full bg-emerald-400/80"
+            className="absolute w-2 h-2 rounded-full bg-[#3D9970]/80"
             style={{
               top: pos.top,
               left: pos.left,

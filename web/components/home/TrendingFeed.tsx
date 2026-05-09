@@ -8,12 +8,12 @@ import { Clock, ExternalLink } from "lucide-react";
 import type { FeedItem } from "@/lib/data/fetchEducationPulse";
 
 const TOPIC_COLORS: Record<string, string> = {
-  Scholarship: "bg-amber-500/15 text-amber-400 border-amber-500/25",
-  Admissions:  "bg-blue-500/15 text-blue-400 border-blue-500/25",
-  Visa:        "bg-purple-500/15 text-purple-400 border-purple-500/25",
-  Ranking:     "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
-  Research:    "bg-rose-500/15 text-rose-400 border-rose-500/25",
-  Career:      "bg-cyan-500/15 text-cyan-400 border-cyan-500/25",
+  Scholarship: "bg-[#C49A3C]/15 text-[#C49A3C] border-[#C49A3C]/25",
+  Admissions:  "bg-[#4A90D9]/15 text-[#4A90D9] border-[#4A90D9]/25",
+  Visa:        "bg-[#C49A3C]/15 text-[#C49A3C] border-[#C49A3C]/25",
+  Ranking:     "bg-[#4A90D9]/15 text-[#4A90D9] border-[#4A90D9]/25",
+  Research:    "bg-[#4A90D9]/15 text-[#4A90D9] border-[#4A90D9]/25",
+  Career:      "bg-[#4A90D9]/15 text-[#4A90D9] border-[#4A90D9]/25",
 };
 
 const FILTERS = ["All", "Scholarships", "Admissions", "Visa", "Career"] as const;

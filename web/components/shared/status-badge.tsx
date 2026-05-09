@@ -4,10 +4,10 @@ type BadgeVariant = "default" | "success" | "warning" | "danger" | "info" | "mut
 
 const variantClasses: Record<BadgeVariant, string> = {
   default: "bg-primary/12 text-primary border-primary/20",
-  success: "bg-emerald-500/12 text-emerald-400 border-emerald-500/20",
-  warning: "bg-amber-500/12 text-amber-400 border-amber-500/20",
-  danger: "bg-rose-500/12 text-rose-400 border-rose-500/20",
-  info: "bg-blue-500/12 text-blue-400 border-blue-500/20",
+  success: "bg-[#3D9970]/12 text-[#3D9970] border-[#3D9970]/20",
+  warning: "bg-[#C49A3C]/12 text-[#C49A3C] border-[#C49A3C]/20",
+  danger: "bg-[#C0392B]/12 text-[#C0392B] border-[#C0392B]/20",
+  info: "bg-[#4A90D9]/12 text-[#4A90D9] border-[#4A90D9]/20",
   muted: "bg-white/[0.04] text-muted-foreground border-white/[0.06]",
 };
 

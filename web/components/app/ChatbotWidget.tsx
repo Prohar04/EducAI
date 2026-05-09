@@ -91,8 +91,8 @@ function normalizeReply(payload: unknown): ChatReply | null {
 }
 
 function confidenceBadge(c: ChatReply["confidence"]) {
-	if (c === "high")   return "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
-	if (c === "low")    return "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400";
+	if (c === "high")   return "border-[#3D9970]/40 bg-[#3D9970]/10 text-[#3D9970]";
+	if (c === "low")    return "border-[#C49A3C]/40 bg-[#C49A3C]/10 text-[#C49A3C]";
 	return "border-border bg-muted/60 text-muted-foreground";
 }
 

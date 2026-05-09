@@ -82,25 +82,25 @@ const ITEM_ICONS: Record<RoadmapItemType, React.ComponentType<{ className?: stri
 };
 
 const ITEM_ICON_COLOURS: Record<RoadmapItemType, string> = {
-	preparation: "text-blue-500 bg-blue-500/15 border-blue-500/30",
+	preparation: "text-[#4A90D9] bg-[#4A90D9]/15 border-[#4A90D9]/30",
 	application: "text-primary bg-primary/15 border-primary/30",
-	scholarship: "text-amber-500 bg-amber-500/15 border-amber-500/30",
-	visa: "text-purple-500 bg-purple-500/15 border-purple-500/30",
-	deadline: "text-red-500 bg-red-500/15 border-red-500/30",
+	scholarship: "text-[#C49A3C] bg-[#C49A3C]/15 border-[#C49A3C]/30",
+	visa: "text-[#4A90D9] bg-[#4A90D9]/15 border-[#4A90D9]/30",
+	deadline: "text-[#C0392B] bg-[#C0392B]/15 border-[#C0392B]/30",
 };
 
 const BADGE_COLOURS: Record<RoadmapItemType, string> = {
-	preparation: "text-blue-400 bg-blue-500/20 border-blue-500/40",
+	preparation: "text-[#4A90D9] bg-[#4A90D9]/20 border-[#4A90D9]/40",
 	application: "text-primary bg-primary/20 border-primary/40",
-	scholarship: "text-amber-400 bg-amber-500/20 border-amber-500/40",
-	visa: "text-purple-400 bg-purple-500/20 border-purple-500/40",
-	deadline: "text-red-400 bg-red-500/20 border-red-500/40",
+	scholarship: "text-[#C49A3C] bg-[#C49A3C]/20 border-[#C49A3C]/40",
+	visa: "text-[#4A90D9] bg-[#4A90D9]/20 border-[#4A90D9]/40",
+	deadline: "text-[#C0392B] bg-[#C0392B]/20 border-[#C0392B]/40",
 };
 
 const PRIORITY_COLOURS: Record<TaskPriority, string> = {
-	critical: "text-red-500",
-	high: "text-orange-500",
-	medium: "text-yellow-500",
+	critical: "text-[#C0392B]",
+	high: "text-[#C49A3C]",
+	medium: "text-[#7A8BA8]",
 	low: "text-muted-foreground",
 };
 
@@ -147,9 +147,9 @@ function filterPlan(plan: RoadmapMonth[], tab: FilterTab): RoadmapMonth[] {
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 function StatusIcon({ status }: { status: TaskStatus }) {
-	if (status === "completed") return <CheckCheck className="size-3.5 text-emerald-500" />;
-	if (status === "overdue") return <XCircle className="size-3.5 text-red-500" />;
-	if (status === "in_progress") return <TrendingUp className="size-3.5 text-blue-500" />;
+	if (status === "completed") return <CheckCheck className="size-3.5 text-[#3D9970]" />;
+	if (status === "overdue") return <XCircle className="size-3.5 text-[#C0392B]" />;
+	if (status === "in_progress") return <TrendingUp className="size-3.5 text-[#4A90D9]" />;
 	return <Circle className="size-3.5 text-muted-foreground/50" />;
 }
 
@@ -184,9 +184,9 @@ function TaskItem({
 				onClick={() => onStatusChange(roadmapId, item.id, nextStatus)}
 				className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all
 					${isDone
-						? "border-emerald-500 bg-emerald-500/20 hover:bg-emerald-500/30"
+						? "border-[#3D9970] bg-[#3D9970]/20 hover:bg-[#3D9970]/30"
 						: isOverdue
-							? "border-red-400/60 bg-red-500/10 hover:bg-red-500/15"
+							? "border-[#C0392B]/60 bg-[#C0392B]/10 hover:bg-[#C0392B]/15"
 							: "border-border hover:border-primary/50 hover:bg-primary/5"
 					}
 				`}
@@ -212,12 +212,12 @@ function TaskItem({
 						{item.title}
 					</p>
 					{isOverdue && (
-						<span className="inline-flex items-center gap-1 rounded border border-red-500/30 bg-red-500/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-red-500">
+						<span className="inline-flex items-center gap-1 rounded border border-[#C0392B]/30 bg-[#C0392B]/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#C0392B]">
 							<AlertTriangle className="size-2.5" /> Overdue
 						</span>
 					)}
 					{item.status === "in_progress" && (
-						<span className="inline-flex items-center gap-1 rounded border border-blue-500/30 bg-blue-500/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-500">
+						<span className="inline-flex items-center gap-1 rounded border border-[#4A90D9]/30 bg-[#4A90D9]/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#4A90D9]">
 							In Progress
 						</span>
 					)}
@@ -300,17 +300,17 @@ function MonthCard({
 						{totalCount} task{totalCount !== 1 ? "s" : ""}
 					</span>
 					{overdueCount > 0 && (
-						<span className="rounded-full bg-red-500/15 px-2 py-0.5 text-xs font-medium text-red-500">
+						<span className="rounded-full bg-[#C0392B]/15 px-2 py-0.5 text-xs font-medium text-[#C0392B]">
 							{overdueCount} overdue
 						</span>
 					)}
 					{completedCount > 0 && completedCount < totalCount && (
-						<span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-500">
+						<span className="rounded-full bg-[#3D9970]/15 px-2 py-0.5 text-xs font-medium text-[#3D9970]">
 							{completedCount}/{totalCount} done
 						</span>
 					)}
 					{completedCount === totalCount && totalCount > 0 && (
-						<span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-600">
+						<span className="rounded-full bg-[#3D9970]/15 px-2 py-0.5 text-xs font-medium text-[#3D9970]">
 							✓ All done
 						</span>
 					)}
@@ -622,7 +622,7 @@ export default function TimelinePlannerClient({
 
 			{/* Informational banner (non-blocking) */}
 			{!isPending && !error && infoMessage && (
-				<div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
+				<div className="mb-4 flex items-start gap-2 rounded-lg border border-[#C49A3C]/25 bg-[#C49A3C]/10 px-4 py-3 text-sm text-[#C49A3C]">
 					<Info className="mt-0.5 size-4 shrink-0" />
 					<p>{infoMessage}</p>
 					<Button asChild variant="ghost" size="sm" className="ml-auto shrink-0 h-auto py-0 text-xs">
@@ -633,11 +633,11 @@ export default function TimelinePlannerClient({
 
 			{/* Visa template warning */}
 			{!isPending && !error && !infoMessage && hasTimelineInputs && !visaTemplateAvailable && (
-				<div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
+				<div className="mb-4 flex items-start gap-2 rounded-lg border border-[#C49A3C]/25 bg-[#C49A3C]/10 px-4 py-3 text-sm text-[#C49A3C]">
 					<AlertCircle className="mt-0.5 size-4 shrink-0" />
 					<div>
 						<p className="font-medium">No visa template for {countryName}</p>
-						<p className="text-xs text-amber-700/80 dark:text-amber-300/80">
+						<p className="text-xs text-[#C49A3C]/80">
 							Roadmap will be built from your program deadlines without country-specific visa milestones.
 						</p>
 					</div>
@@ -692,12 +692,12 @@ export default function TimelinePlannerClient({
 									<p className="text-2xl font-bold">{stats.total}</p>
 									<p className="text-xs text-muted-foreground mt-0.5">Total tasks</p>
 								</div>
-								<div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-center">
-									<p className="text-2xl font-bold text-emerald-500">{stats.completed}</p>
+								<div className="rounded-xl border border-[#3D9970]/20 bg-[#3D9970]/5 px-4 py-3 text-center">
+									<p className="text-2xl font-bold text-[#3D9970]">{stats.completed}</p>
 									<p className="text-xs text-muted-foreground mt-0.5">Completed</p>
 								</div>
-								<div className={`rounded-xl border px-4 py-3 text-center ${stats.overdue > 0 ? "border-red-500/20 bg-red-500/5" : "border-border bg-card"}`}>
-									<p className={`text-2xl font-bold ${stats.overdue > 0 ? "text-red-500" : "text-muted-foreground"}`}>
+								<div className={`rounded-xl border px-4 py-3 text-center ${stats.overdue > 0 ? "border-[#C0392B]/20 bg-[#C0392B]/5" : "border-border bg-card"}`}>
+									<p className={`text-2xl font-bold ${stats.overdue > 0 ? "text-[#C0392B]" : "text-muted-foreground"}`}>
 										{stats.overdue}
 									</p>
 									<p className="text-xs text-muted-foreground mt-0.5">Overdue</p>
@@ -727,8 +727,8 @@ export default function TimelinePlannerClient({
 					{/* Overdue callout */}
 					{stats && stats.overdue > 0 && activeFilter === "all" && (
 						<Reveal>
-							<div className="mb-6 rounded-xl border border-red-500/25 bg-red-500/8 px-4 py-3">
-								<div className="flex items-center gap-2 text-red-500 font-medium text-sm">
+							<div className="mb-6 rounded-xl border border-[#C0392B]/25 bg-[#C0392B]/8 px-4 py-3">
+								<div className="flex items-center gap-2 text-[#C0392B] font-medium text-sm">
 									<AlertTriangle className="size-4 shrink-0" />
 									{stats.overdue} overdue task{stats.overdue !== 1 ? "s" : ""} require attention
 								</div>
@@ -737,7 +737,7 @@ export default function TimelinePlannerClient({
 								</p>
 								<button
 									type="button"
-									className="mt-2 text-xs font-medium text-red-500 underline"
+									className="mt-2 text-xs font-medium text-[#C0392B] underline"
 									onClick={() => setActiveFilter("overdue")}
 								>
 									View overdue tasks →

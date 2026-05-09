@@ -255,8 +255,8 @@ export default function PublicScholarshipsPage() {
                     <span
                       className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
                         s.type === "Full Funding"
-                          ? "border border-green-500/30 bg-green-500/10 text-green-500"
-                          : "border border-amber-500/30 bg-amber-500/10 text-amber-500"
+                          ? "border border-[#3D9970]/30 bg-[#3D9970]/10 text-[#3D9970]"
+                          : "border border-[#C49A3C]/30 bg-[#C49A3C]/10 text-[#C49A3C]"
                       }`}
                     >
                       {s.type}

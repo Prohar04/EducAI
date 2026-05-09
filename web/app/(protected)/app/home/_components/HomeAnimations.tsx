@@ -43,32 +43,32 @@ const ACTION_CARDS = [
     icon: BookOpen,
     title: "Find Programmes",
     description: "Browse universities worldwide filtered by your profile.",
-    color: "from-blue-500/10 to-blue-500/5",
-    border: "border-blue-500/20",
+    color: "from-[#4A90D9]/10 to-[#4A90D9]/5",
+    border: "border-[#4A90D9]/20",
   },
   {
     href: "/app/match",
     icon: Sparkles,
     title: "Match Programmes",
     description: "AI ranks every programme by your admission likelihood.",
-    color: "from-violet-500/10 to-violet-500/5",
-    border: "border-violet-500/20",
+    color: "from-[#4A90D9]/10 to-[#4A90D9]/5",
+    border: "border-[#4A90D9]/20",
   },
   {
     href: "/app/saved",
     icon: Bookmark,
     title: "Saved",
     description: "Review and compare your bookmarked programmes.",
-    color: "from-emerald-500/10 to-emerald-500/5",
-    border: "border-emerald-500/20",
+    color: "from-[#4A90D9]/10 to-[#4A90D9]/5",
+    border: "border-[#4A90D9]/20",
   },
   {
     href: "/app/scholarships",
     icon: Award,
     title: "Scholarships",
     description: "Funding opportunities for international students.",
-    color: "from-amber-500/10 to-amber-500/5",
-    border: "border-amber-500/20",
+    color: "from-[#4A90D9]/10 to-[#4A90D9]/5",
+    border: "border-[#4A90D9]/20",
   },
 ] as const;
 
@@ -95,9 +95,9 @@ const staggerItem = {
 };
 
 const TAG_STYLES = {
-  warn:    "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  info:    "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-  success: "bg-green-500/10 text-green-600 dark:text-green-400",
+  warn:    "bg-[#C49A3C]/10 text-[#C49A3C]",
+  info:    "bg-[#4A90D9]/10 text-[#4A90D9]",
+  success: "bg-[#3D9970]/10 text-[#3D9970]",
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -137,8 +137,8 @@ export default function HomeAnimations({
       {/* ── Profile completion banner ── */}
       {!profileComplete && (
         <motion.div {...(reduced ? {} : fadeUp(0.05))}>
-          <div className="flex items-start gap-4 rounded-xl border border-amber-500/30 bg-amber-500/5 px-5 py-4">
-            <AlertCircle className="mt-0.5 size-4 shrink-0 text-amber-500" />
+          <div className="flex items-start gap-4 rounded-xl border border-[#C49A3C]/30 bg-[#C49A3C]/5 px-5 py-4">
+            <AlertCircle className="mt-0.5 size-4 shrink-0 text-[#C49A3C]" />
             <div className="flex-1">
               <p className="text-sm font-medium">Your profile is incomplete</p>
               <p className="mt-0.5 text-xs text-muted-foreground">
@@ -147,7 +147,7 @@ export default function HomeAnimations({
             </div>
             <Link
               href="/onboarding?edit=true"
-              className="shrink-0 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-600 transition-colors hover:bg-amber-500/20 dark:text-amber-400"
+              className="shrink-0 rounded-lg border border-[#C49A3C]/40 bg-[#C49A3C]/10 px-3 py-1.5 text-xs font-medium text-[#C49A3C] transition-colors hover:bg-[#C49A3C]/20"
             >
               Complete now
             </Link>
@@ -336,7 +336,7 @@ export default function HomeAnimations({
             </motion.div>
           ) : (
             <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border p-10 text-center">
-              <CheckCircle2 className="mb-2 size-8 text-green-500" />
+              <CheckCircle2 className="mb-2 size-8 text-[#3D9970]" />
               <p className="font-medium">You&apos;re on track!</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 No immediate actions needed. Keep exploring programmes.

@@ -100,7 +100,7 @@ function Step1({ values, set }: StepProps) {
 					))}
 				</div>
 				{selectedStage && (
-					<div className="mt-3 flex items-start gap-2 rounded-lg border border-blue-500/30 bg-blue-500/5 px-3 py-2 text-xs text-blue-600 dark:text-blue-400">
+					<div className="mt-3 flex items-start gap-2 rounded-lg border border-[#4A90D9]/30 bg-[#4A90D9]/5 px-3 py-2 text-xs text-[#4A90D9]">
 						<Info className="mt-0.5 size-3.5 shrink-0" />
 						{selectedStage.tip}
 					</div>
@@ -188,7 +188,7 @@ function Step1({ values, set }: StepProps) {
 					))}
 				</div>
 				{recommendedTests.length > 0 && (
-					<div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+					<div className="mt-3 flex items-start gap-2 rounded-lg border border-[#C49A3C]/30 bg-[#C49A3C]/5 px-3 py-2 text-xs text-[#C49A3C]">
 						<Info className="mt-0.5 size-3.5 shrink-0" />
 						Recommended tests for your destinations: <strong className="ml-1">{recommendedTests.join(", ")}</strong>
 					</div>
@@ -262,8 +262,8 @@ function Step2({ values, set }: StepProps) {
 				</div>
 				{estimate && (
 					<p className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-						<Info className="size-3.5 text-blue-500" />
-						Estimated 4.0-scale GPA: <strong className="text-blue-600 dark:text-blue-400">~{estimate}</strong> (estimate only)
+						<Info className="size-3.5 text-[#4A90D9]" />
+						Estimated 4.0-scale GPA: <strong className="text-[#4A90D9]">~{estimate}</strong> (estimate only)
 					</p>
 				)}
 			</div>
@@ -337,7 +337,7 @@ function Step3({ values, set }: StepProps) {
 	return (
 		<div className="space-y-5">
 			{recommendedTests.length > 0 && (
-				<div className="flex items-start gap-2 rounded-lg border border-blue-500/30 bg-blue-500/5 px-3 py-2 text-xs text-blue-600 dark:text-blue-400">
+				<div className="flex items-start gap-2 rounded-lg border border-[#4A90D9]/30 bg-[#4A90D9]/5 px-3 py-2 text-xs text-[#4A90D9]">
 					<Info className="mt-0.5 size-3.5 shrink-0" />
 					Based on your target countries, consider: <strong className="ml-1">{recommendedTests.join(", ")}</strong>
 				</div>
@@ -379,7 +379,7 @@ function Step3({ values, set }: StepProps) {
 						className="max-w-[160px]"
 					/>
 					{threshold && (
-						<p className={`mt-1.5 flex items-center gap-1.5 text-xs ${belowThreshold ? "text-amber-600" : "text-muted-foreground"}`}>
+						<p className={`mt-1.5 flex items-center gap-1.5 text-xs ${belowThreshold ? "text-[#C49A3C]" : "text-muted-foreground"}`}>
 							{belowThreshold
 								? <AlertTriangle className="size-3.5" />
 								: <Info className="size-3.5" />}
@@ -487,7 +487,7 @@ function Step4({ values, set }: StepProps) {
 					</p>
 				)}
 				{lowBudget && (
-					<div className="mt-2 flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+					<div className="mt-2 flex items-start gap-2 rounded-lg border border-[#C49A3C]/30 bg-[#C49A3C]/5 px-3 py-2 text-xs text-[#C49A3C]">
 						<AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
 						Your budget may be below the typical range for your target countries. Consider scholarships or Germany/Netherlands.
 					</div>
@@ -531,7 +531,7 @@ function Step4({ values, set }: StepProps) {
 					))}
 				</div>
 				{values.fundingNeed === "true" && (
-					<div className="mt-2 flex items-center gap-2 rounded-lg border border-green-500/30 bg-green-500/5 px-3 py-2 text-xs text-green-600 dark:text-green-400">
+					<div className="mt-2 flex items-center gap-2 rounded-lg border border-[#3D9970]/30 bg-[#3D9970]/5 px-3 py-2 text-xs text-[#3D9970]">
 						<CheckCircle2 className="size-3.5 shrink-0" />
 						Great — we&apos;ll highlight scholarship-eligible programmes for you.
 					</div>
@@ -620,7 +620,7 @@ function StepReview({ values }: { values: WizardValues }) {
 					</div>
 				))}
 			</div>
-			<div className="flex items-center gap-2 rounded-lg border border-green-500/30 bg-green-500/5 px-3 py-2 text-xs text-green-600 dark:text-green-400">
+			<div className="flex items-center gap-2 rounded-lg border border-[#3D9970]/30 bg-[#3D9970]/5 px-3 py-2 text-xs text-[#3D9970]">
 				<CheckCircle2 className="size-3.5 shrink-0" />
 				You&apos;re all set! Click &ldquo;Finish Setup&rdquo; to enter your workspace.
 			</div>

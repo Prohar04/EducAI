@@ -16,8 +16,8 @@ export function ErrorState({
 }: ErrorStateProps) {
   return (
     <div className={cn("flex flex-col items-center justify-center py-12 text-center", className)}>
-      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-rose-500/10 border border-rose-500/20">
-        <AlertTriangle className="size-6 text-rose-400" aria-hidden="true" />
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#C0392B]/10 border border-[#C0392B]/20">
+        <AlertTriangle className="size-6 text-[#C0392B]" aria-hidden="true" />
       </div>
       <h3 className="text-sm font-semibold text-foreground">{title}</h3>
       <p className="mt-1.5 max-w-xs text-xs text-muted-foreground">{description}</p>

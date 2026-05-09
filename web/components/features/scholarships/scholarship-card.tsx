@@ -70,8 +70,8 @@ export function ScholarshipCard({
 
       {/* Amount */}
       {amount && (
-        <div className="mb-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1">
-          <span className="text-xs font-bold text-emerald-400">{amount}</span>
+        <div className="mb-3 inline-flex items-center gap-1.5 rounded-lg bg-[#3D9970]/10 border border-[#3D9970]/20 px-2.5 py-1">
+          <span className="text-xs font-bold text-[#3D9970]">{amount}</span>
         </div>
       )}
 

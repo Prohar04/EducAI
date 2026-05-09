@@ -42,7 +42,7 @@ export default function RefreshProgramsButton() {
 
 	if (status === "success") {
 		return (
-			<span className="inline-flex items-center gap-1.5 rounded-lg border border-green-500/30 bg-green-500/10 px-3 py-1.5 text-xs font-medium text-green-700 dark:text-green-400">
+			<span className="inline-flex items-center gap-1.5 rounded-lg border border-[#3D9970]/30 bg-[#3D9970]/10 px-3 py-1.5 text-xs font-medium text-[#3D9970]">
 				<CheckCircle2 className="size-3.5" />
 				{message}
 			</span>
@@ -51,7 +51,7 @@ export default function RefreshProgramsButton() {
 
 	if (status === "error") {
 		return (
-			<span className="inline-flex items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-700 dark:text-red-400">
+			<span className="inline-flex items-center gap-1.5 rounded-lg border border-[#C0392B]/30 bg-[#C0392B]/10 px-3 py-1.5 text-xs font-medium text-[#C0392B]">
 				<XCircle className="size-3.5" />
 				{message}
 			</span>

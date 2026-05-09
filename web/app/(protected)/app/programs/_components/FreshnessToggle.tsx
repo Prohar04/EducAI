@@ -30,7 +30,7 @@ export default function FreshnessToggle({
 		return (
 			<button
 				onClick={toggle}
-				className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-700 transition-colors hover:bg-amber-500/20 dark:text-amber-300"
+				className="inline-flex items-center gap-1.5 rounded-lg border border-[#C49A3C]/40 bg-[#C49A3C]/10 px-3 py-1.5 text-xs font-medium text-[#C49A3C] transition-colors hover:bg-[#C49A3C]/20"
 			>
 				<EyeOff className="size-3.5" />
 				Hide cached/stale programs

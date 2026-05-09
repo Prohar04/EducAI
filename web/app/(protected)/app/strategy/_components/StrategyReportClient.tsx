@@ -54,15 +54,15 @@ interface StrategyReport {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const SEVERITY_CLASSES: Record<string, string> = {
-	High: "border-red-500/30 bg-red-500/10 text-red-500",
-	Medium: "border-amber-500/30 bg-amber-500/10 text-amber-500",
-	Low: "border-blue-500/30 bg-blue-500/10 text-blue-500",
+	High: "border-[#C0392B]/30 bg-[#C0392B]/10 text-[#C0392B]",
+	Medium: "border-[#C49A3C]/30 bg-[#C49A3C]/10 text-[#C49A3C]",
+	Low: "border-[#4A90D9]/30 bg-[#4A90D9]/10 text-[#4A90D9]",
 };
 
 const BAND_CLASSES: Record<string, string> = {
-	High: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-	Medium: "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400",
-	Low: "border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400",
+	High: "border-[#3D9970]/30 bg-[#3D9970]/10 text-[#3D9970]",
+	Medium: "border-[#C49A3C]/30 bg-[#C49A3C]/10 text-[#C49A3C]",
+	Low: "border-[#C0392B]/30 bg-[#C0392B]/10 text-[#C0392B]",
 };
 
 const INTAKES = [

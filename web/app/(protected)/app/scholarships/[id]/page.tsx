@@ -25,10 +25,10 @@ function countryName(code: string | null | undefined) {
 
 function fundingBadge(type: ScholarshipItem["fundingType"]) {
 	const map: Record<string, { label: string; cls: string }> = {
-		full: { label: "Full Funding", cls: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
-		partial: { label: "Partial Funding", cls: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30" },
-		living: { label: "Living Allowance", cls: "bg-violet-500/15 text-violet-600 dark:text-violet-400 border-violet-500/30" },
-		research: { label: "Research Grant", cls: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30" },
+		full: { label: "Full Funding", cls: "bg-[#3D9970]/15 text-[#3D9970] border-[#3D9970]/30" },
+		partial: { label: "Partial Funding", cls: "bg-[#4A90D9]/15 text-[#4A90D9] border-[#4A90D9]/30" },
+		living: { label: "Living Allowance", cls: "bg-[#4A90D9]/15 text-[#4A90D9] border-[#4A90D9]/30" },
+		research: { label: "Research Grant", cls: "bg-[#C49A3C]/15 text-[#C49A3C] border-[#C49A3C]/30" },
 	};
 	return map[type ?? ""] ?? { label: type ?? "Funding", cls: "bg-muted/50 text-muted-foreground border-border" };
 }
@@ -136,17 +136,17 @@ export default async function ScholarshipDetailPage({
 								<h2 className="mb-3 font-semibold">Your Eligibility</h2>
 								<div className="mb-4 flex items-center gap-3">
 									{eligibility.status === "eligible" ? (
-										<CheckCircle className="h-5 w-5 text-emerald-500" />
+										<CheckCircle className="h-5 w-5 text-[#3D9970]" />
 									) : eligibility.status === "partially_eligible" ? (
-										<CheckCircle className="h-5 w-5 text-amber-500" />
+										<CheckCircle className="h-5 w-5 text-[#C49A3C]" />
 									) : (
-										<XCircle className="h-5 w-5 text-red-500" />
+										<XCircle className="h-5 w-5 text-[#C0392B]" />
 									)}
 									<div>
 										<span className={`font-medium ${
-											eligibility.status === "eligible" ? "text-emerald-600 dark:text-emerald-400" :
-											eligibility.status === "partially_eligible" ? "text-amber-600 dark:text-amber-400" :
-											"text-red-500"
+											eligibility.status === "eligible" ? "text-[#3D9970]" :
+											eligibility.status === "partially_eligible" ? "text-[#C49A3C]" :
+											"text-[#C0392B]"
 										}`}>
 											{eligibility.status === "eligible" ? "Eligible" :
 											 eligibility.status === "partially_eligible" ? "Partially Eligible" : "Not Eligible"}
@@ -163,7 +163,7 @@ export default async function ScholarshipDetailPage({
 										<ul className="space-y-1">
 											{eligibility.metCriteria.map((c, i) => (
 												<li key={i} className="flex items-start gap-2 text-sm">
-													<CheckCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
+													<CheckCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#3D9970]" />
 													{c}
 												</li>
 											))}
@@ -177,7 +177,7 @@ export default async function ScholarshipDetailPage({
 										<ul className="space-y-1">
 											{eligibility.missingCriteria.map((c, i) => (
 												<li key={i} className="flex items-start gap-2 text-sm">
-													<XCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-400" />
+													<XCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#C0392B]" />
 													{c}
 												</li>
 											))}
@@ -206,8 +206,8 @@ export default async function ScholarshipDetailPage({
 								<h2 className="mb-3 font-semibold">Funding Probability</h2>
 								<div className="mb-4 flex items-baseline gap-3">
 									<span className={`text-3xl font-bold ${
-										probability.probabilityBand === "High" ? "text-emerald-500" :
-										probability.probabilityBand === "Medium" ? "text-amber-500" : "text-red-500"
+										probability.probabilityBand === "High" ? "text-[#3D9970]" :
+										probability.probabilityBand === "Medium" ? "text-[#C49A3C]" : "text-[#C0392B]"
 									}`}>
 										{probability.probabilityPct}%
 									</span>
@@ -265,7 +265,7 @@ export default async function ScholarshipDetailPage({
 											<li key={d.id} className="flex flex-col text-sm">
 												{d.term && <span className="text-xs text-muted-foreground">{d.term}</span>}
 												<span className="font-medium">{formatDate(d.deadline)}</span>
-												<span className={`text-xs ${days > 30 ? "text-muted-foreground" : days > 7 ? "text-amber-500" : "text-red-500"}`}>
+												<span className={`text-xs ${days > 30 ? "text-muted-foreground" : days > 7 ? "text-[#C49A3C]" : "text-[#C0392B]"}`}>
 													{days > 0 ? `${days} days away` : days === 0 ? "Today!" : "Passed"}
 												</span>
 											</li>

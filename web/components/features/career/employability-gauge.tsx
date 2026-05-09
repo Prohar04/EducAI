@@ -29,7 +29,7 @@ export function EmployabilityGauge({
   const displayValue = useTransform(counterValue, (v) => Math.round(v));
 
   const scoreColor =
-    score >= 80 ? "#10b981" : score >= 60 ? "#f59e0b" : "#f43f5e";
+    score >= 80 ? "#3D9970" : score >= 60 ? "#C49A3C" : "#C0392B";
 
   useEffect(() => {
     if (!inView) return;

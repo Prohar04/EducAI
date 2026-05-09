@@ -395,7 +395,7 @@ export default function ProfileEditForm({ initialProfile }: Props) {
 				</p>
 			)}
 			{state?.success && (
-				<p className="flex items-center gap-2 rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-700 dark:text-green-400">
+				<p className="flex items-center gap-2 rounded-lg border border-[#3D9970]/30 bg-[#3D9970]/10 px-4 py-3 text-sm text-[#3D9970]">
 					<CheckCircle2 className="size-4 shrink-0" />
 					Profile saved successfully.
 				</p>

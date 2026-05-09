@@ -44,15 +44,15 @@ import {
 // ── constants ───────────────────────────────────────────────────────────────
 
 const PRIORITY_BORDER = {
-	high: "border-red-500/30 bg-red-500/5",
-	medium: "border-amber-500/30 bg-amber-500/5",
-	low: "border-emerald-500/30 bg-emerald-500/5",
+	high: "border-[#C0392B]/30 bg-[#C0392B]/5",
+	medium: "border-[#C49A3C]/30 bg-[#C49A3C]/5",
+	low: "border-[#3D9970]/30 bg-[#3D9970]/5",
 };
 
 const PRIORITY_BADGE = {
-	high: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20",
-	medium: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
-	low: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20",
+	high: "bg-[#C0392B]/10 text-[#C0392B] border-[#C0392B]/20",
+	medium: "bg-[#C49A3C]/10 text-[#C49A3C] border-[#C49A3C]/20",
+	low: "bg-[#3D9970]/10 text-[#3D9970] border-[#3D9970]/20",
 };
 
 const STATUS_CONFIG: Record<GapStatus, { label: string; color: string; icon: React.ReactNode }> = {
@@ -63,12 +63,12 @@ const STATUS_CONFIG: Record<GapStatus, { label: string; color: string; icon: Rea
 	},
 	in_progress: {
 		label: "In progress",
-		color: "text-amber-600 dark:text-amber-400 border-amber-500/30 bg-amber-500/5",
+		color: "text-[#C49A3C] border-[#C49A3C]/30 bg-[#C49A3C]/5",
 		icon: <Clock className="h-3.5 w-3.5" />,
 	},
 	completed: {
 		label: "Completed",
-		color: "text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-500/5",
+		color: "text-[#3D9970] border-[#3D9970]/30 bg-[#3D9970]/5",
 		icon: <CheckCircle className="h-3.5 w-3.5" />,
 	},
 	skipped: {
@@ -110,7 +110,7 @@ function ScoreRing({ score, size = 100 }: { score: number; size?: number }) {
 	const radius = size * 0.4;
 	const circumference = 2 * Math.PI * radius;
 	const offset = circumference - (score / 100) * circumference;
-	const color = score >= 70 ? "#22c55e" : score >= 50 ? "#f59e0b" : "#ef4444";
+	const color = score >= 70 ? "#3D9970" : score >= 50 ? "#C49A3C" : "#C0392B";
 
 	return (
 		<div className="relative inline-flex items-center justify-center">
@@ -143,7 +143,7 @@ function ProgressBar({ completed, total }: { completed: number; total: number })
 		<div className="flex items-center gap-3">
 			<div className="flex-1 h-1.5 rounded-full bg-muted/30 overflow-hidden">
 				<div
-					className="h-full rounded-full bg-emerald-500 transition-all duration-700"
+					className="h-full rounded-full bg-[#3D9970] transition-all duration-700"
 					style={{ width: `${pct}%` }}
 				/>
 			</div>
@@ -202,7 +202,7 @@ function EvidenceBadge({ ev, onDelete }: { ev: GapFixEvidenceItem; onDelete: () 
 			{isLink ? <Link2 className="h-3 w-3 text-primary shrink-0" /> : <FileText className="h-3 w-3 text-primary shrink-0" />}
 			<span className="text-muted-foreground truncate max-w-[120px]">{ev.label}</span>
 			{ev.status === "uploaded" && (
-				<span className="rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 px-1.5 py-0.5 text-[9px]">
+				<span className="rounded-full bg-[#C49A3C]/10 text-[#C49A3C] border border-[#C49A3C]/20 px-1.5 py-0.5 text-[9px]">
 					uploaded · unverified
 				</span>
 			)}
@@ -506,7 +506,7 @@ function GapCard({
 	const isSkipped = status === "skipped";
 
 	return (
-		<div className={`rounded-xl border p-4 transition-all ${isCompleted ? "border-emerald-500/30 bg-emerald-500/5 opacity-80" : isSkipped ? "opacity-50 border-border" : PRIORITY_BORDER[rec.priority]}`}>
+		<div className={`rounded-xl border p-4 transition-all ${isCompleted ? "border-[#3D9970]/30 bg-[#3D9970]/5 opacity-80" : isSkipped ? "opacity-50 border-border" : PRIORITY_BORDER[rec.priority]}`}>
 			<div className="flex items-start gap-3">
 				<div className="flex-1 min-w-0">
 					<div className="flex items-center gap-2 flex-wrap mb-1">
@@ -623,40 +623,40 @@ function BeforeAfterPanel({ session }: { session: GapFixSession }) {
 			<div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
 				<div className="text-center">
 					<p className="text-xs text-muted-foreground mb-1">Previous score</p>
-					<p className="text-2xl font-bold text-amber-500">{comparison.previousScore}</p>
+					<p className="text-2xl font-bold text-[#C49A3C]">{comparison.previousScore}</p>
 				</div>
 				<div className="text-center">
 					<p className="text-xs text-muted-foreground mb-1">Current score</p>
-					<p className={`text-2xl font-bold ${improved ? "text-emerald-500" : same ? "text-foreground" : "text-red-500"}`}>
+					<p className={`text-2xl font-bold ${improved ? "text-[#3D9970]" : same ? "text-foreground" : "text-[#C0392B]"}`}>
 						{comparison.currentScore}
 					</p>
 				</div>
 				<div className="text-center">
 					<p className="text-xs text-muted-foreground mb-1">Change</p>
 					<div className="flex items-center justify-center gap-1">
-						{improved ? <TrendingUp className="h-4 w-4 text-emerald-500" /> : same ? <Minus className="h-4 w-4 text-muted-foreground" /> : <TrendingDown className="h-4 w-4 text-red-500" />}
-						<p className={`text-xl font-bold ${improved ? "text-emerald-500" : same ? "text-foreground" : "text-red-500"}`}>
+						{improved ? <TrendingUp className="h-4 w-4 text-[#3D9970]" /> : same ? <Minus className="h-4 w-4 text-muted-foreground" /> : <TrendingDown className="h-4 w-4 text-[#C0392B]" />}
+						<p className={`text-xl font-bold ${improved ? "text-[#3D9970]" : same ? "text-foreground" : "text-[#C0392B]"}`}>
 							{improved ? "+" : ""}{comparison.scoreImprovement}
 						</p>
 					</div>
 				</div>
 				<div className="text-center">
 					<p className="text-xs text-muted-foreground mb-1">Gaps resolved</p>
-					<p className="text-2xl font-bold text-emerald-500">{comparison.resolvedGaps.length}</p>
+					<p className="text-2xl font-bold text-[#3D9970]">{comparison.resolvedGaps.length}</p>
 				</div>
 			</div>
 
 			<div className="grid gap-3 sm:grid-cols-2">
 				{comparison.resolvedGaps.length > 0 && (
-					<div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
-						<p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-2 flex items-center gap-1.5">
+					<div className="rounded-lg border border-[#3D9970]/20 bg-[#3D9970]/5 p-3">
+						<p className="text-xs font-semibold text-[#3D9970] mb-2 flex items-center gap-1.5">
 							<CheckCircle className="h-3.5 w-3.5" />
 							Resolved gaps ({comparison.resolvedGaps.length})
 						</p>
 						<ul className="space-y-1">
 							{comparison.resolvedGaps.map((g, i) => (
 								<li key={i} className="text-[11px] text-muted-foreground flex items-start gap-1.5">
-									<span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
+									<span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#3D9970] shrink-0" />
 									{g}
 								</li>
 							))}
@@ -665,15 +665,15 @@ function BeforeAfterPanel({ session }: { session: GapFixSession }) {
 				)}
 
 				{comparison.newStrengths.filter(s => !comparison.previousStrengths.includes(s)).length > 0 && (
-					<div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-3">
-						<p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-2 flex items-center gap-1.5">
+					<div className="rounded-lg border border-[#4A90D9]/20 bg-[#4A90D9]/5 p-3">
+						<p className="text-xs font-semibold text-[#4A90D9] mb-2 flex items-center gap-1.5">
 							<Sparkles className="h-3.5 w-3.5" />
 							New strengths
 						</p>
 						<ul className="space-y-1">
 							{comparison.newStrengths.filter(s => !comparison.previousStrengths.includes(s)).map((s, i) => (
 								<li key={i} className="text-[11px] text-muted-foreground flex items-start gap-1.5">
-									<span className="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500 shrink-0" />
+									<span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#4A90D9] shrink-0" />
 									{s}
 								</li>
 							))}
@@ -682,15 +682,15 @@ function BeforeAfterPanel({ session }: { session: GapFixSession }) {
 				)}
 
 				{comparison.remainingGaps.length > 0 && (
-					<div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
-						<p className="text-xs font-semibold text-amber-600 dark:text-amber-400 mb-2 flex items-center gap-1.5">
+					<div className="rounded-lg border border-[#C49A3C]/20 bg-[#C49A3C]/5 p-3">
+						<p className="text-xs font-semibold text-[#C49A3C] mb-2 flex items-center gap-1.5">
 							<AlertCircle className="h-3.5 w-3.5" />
 							Remaining gaps ({comparison.remainingGaps.length})
 						</p>
 						<ul className="space-y-1">
 							{comparison.remainingGaps.map((g, i) => (
 								<li key={i} className="text-[11px] text-muted-foreground flex items-start gap-1.5">
-									<span className="mt-1 h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" />
+									<span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#C49A3C] shrink-0" />
 									{g}
 								</li>
 							))}
@@ -699,15 +699,15 @@ function BeforeAfterPanel({ session }: { session: GapFixSession }) {
 				)}
 
 				{comparison.newGaps.length > 0 && (
-					<div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3">
-						<p className="text-xs font-semibold text-red-600 dark:text-red-400 mb-2 flex items-center gap-1.5">
+					<div className="rounded-lg border border-[#C0392B]/20 bg-[#C0392B]/5 p-3">
+						<p className="text-xs font-semibold text-[#C0392B] mb-2 flex items-center gap-1.5">
 							<AlertCircle className="h-3.5 w-3.5" />
 							New gaps found ({comparison.newGaps.length})
 						</p>
 						<ul className="space-y-1">
 							{comparison.newGaps.map((g, i) => (
 								<li key={i} className="text-[11px] text-muted-foreground flex items-start gap-1.5">
-									<span className="mt-1 h-1.5 w-1.5 rounded-full bg-red-500 shrink-0" />
+									<span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#C0392B] shrink-0" />
 									{g}
 								</li>
 							))}
@@ -910,8 +910,8 @@ export default function GapFixPage() {
 						{(session.analysisMode === "minimal" || session.analysisMode === "partial") && (
 							<div className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${
 								session.analysisMode === "minimal"
-									? "border-amber-500/30 bg-amber-500/5 text-amber-700 dark:text-amber-400"
-									: "border-blue-500/30 bg-blue-500/5 text-blue-700 dark:text-blue-400"
+									? "border-[#C49A3C]/30 bg-[#C49A3C]/5 text-[#C49A3C]"
+									: "border-[#4A90D9]/30 bg-[#4A90D9]/5 text-[#4A90D9]"
 							}`}>
 								<AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
 								<div className="flex-1">
@@ -993,15 +993,15 @@ export default function GapFixPage() {
 						{(session.result.strengths.length > 0 || session.result.weaknesses.length > 0) && (
 							<div className="grid gap-4 sm:grid-cols-2">
 								{session.result.strengths.length > 0 && (
-									<div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
-										<h3 className="mb-3 text-sm font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
+									<div className="rounded-xl border border-[#3D9970]/20 bg-[#3D9970]/5 p-4">
+										<h3 className="mb-3 text-sm font-semibold text-[#3D9970] flex items-center gap-2">
 											<CheckCircle className="h-4 w-4" />
 											Strengths ({session.result.strengths.length})
 										</h3>
 										<ul className="space-y-1.5">
 											{session.result.strengths.map((s, i) => (
 												<li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
-													<span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
+													<span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#3D9970] shrink-0" />
 													{s}
 												</li>
 											))}
@@ -1009,15 +1009,15 @@ export default function GapFixPage() {
 									</div>
 								)}
 								{session.result.weaknesses.length > 0 && (
-									<div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4">
-										<h3 className="mb-3 text-sm font-semibold text-red-700 dark:text-red-400 flex items-center gap-2">
+									<div className="rounded-xl border border-[#C0392B]/20 bg-[#C0392B]/5 p-4">
+										<h3 className="mb-3 text-sm font-semibold text-[#C0392B] flex items-center gap-2">
 											<AlertCircle className="h-4 w-4" />
 											Gaps Identified ({session.result.weaknesses.length})
 										</h3>
 										<ul className="space-y-1.5">
 											{session.result.weaknesses.map((w, i) => (
 												<li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
-													<span className="mt-1 h-1.5 w-1.5 rounded-full bg-red-500 shrink-0" />
+													<span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#C0392B] shrink-0" />
 													{w}
 												</li>
 											))}
@@ -1031,7 +1031,7 @@ export default function GapFixPage() {
 						{highPriority.length > 0 && (
 							<div>
 								<h3 className="mb-3 text-sm font-semibold flex items-center gap-2">
-									<TrendingUp className="h-4 w-4 text-red-500" />
+									<TrendingUp className="h-4 w-4 text-[#C0392B]" />
 									High Priority Actions
 								</h3>
 								<div className="space-y-3">
@@ -1082,14 +1082,14 @@ export default function GapFixPage() {
 								<div className="space-y-2">
 									{session.improvements.map(imp => (
 										<div key={imp.id} className="flex items-start gap-3 rounded-lg border border-border bg-background px-3 py-2.5">
-											<CheckCircle className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+											<CheckCircle className="h-4 w-4 text-[#3D9970] shrink-0 mt-0.5" />
 											<div className="flex-1 min-w-0">
 												<p className="text-xs font-medium">{imp.description}</p>
 												{imp.testType && imp.scoreValue !== undefined && (
 													<p className="text-[11px] text-muted-foreground mt-0.5">
 														{imp.testType}: {imp.scoreValue}
 														{imp.appliedToProfile && (
-															<span className="ml-1.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 text-[9px]">
+															<span className="ml-1.5 rounded-full bg-[#3D9970]/10 text-[#3D9970] border border-[#3D9970]/20 px-1.5 py-0.5 text-[9px]">
 																applied to profile
 															</span>
 														)}
