@@ -263,7 +263,7 @@ export function Navbar({ user }: { user: Session["user"] }) {
                             <DropdownMenuItem
                               key={href}
                               asChild
-                              className="p-0 transition-colors focus:bg-transparent"
+                              className="p-0 transition-colors"
                             >
                               <Link
                                 href={href}
@@ -271,7 +271,7 @@ export function Navbar({ user }: { user: Session["user"] }) {
                                 className={`sidebar-nav-item relative flex w-full cursor-pointer items-center gap-2.5 px-3 py-2 text-sm transition-all ${
                                   active
                                     ? "text-[#E8EEF8] font-medium"
-                                    : "text-foreground/90 hover:bg-[rgba(255,255,255,0.04)] rounded-lg"
+                                    : "text-foreground/90  rounded-lg"
                                 }`}
                                 style={{ outline: "none", WebkitTapHighlightColor: "transparent" }}
                               >
