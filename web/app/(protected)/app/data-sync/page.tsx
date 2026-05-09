@@ -70,39 +70,39 @@ const FRESHNESS_CONFIG: Record<
 > = {
   fresh: {
     label: "Fresh",
-    badge: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+    badge: "bg-[#3D9970]/10 text-[#3D9970]",
     icon: CheckCircle2,
-    dot: "bg-emerald-500",
-    cardBorder: "border-emerald-500/15",
-    iconBg: "bg-emerald-500/10",
-    iconColor: "text-emerald-600 dark:text-emerald-400",
+    dot: "bg-[#3D9970]",
+    cardBorder: "border-[#3D9970]/15",
+    iconBg: "bg-[#3D9970]/10",
+    iconColor: "text-[#3D9970]",
   },
   stale: {
     label: "Needs refresh",
-    badge: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
+    badge: "bg-[#C49A3C]/10 text-[#C49A3C]",
     icon: Clock,
-    dot: "bg-amber-500",
-    cardBorder: "border-amber-500/20",
-    iconBg: "bg-amber-500/10",
-    iconColor: "text-amber-600 dark:text-amber-400",
+    dot: "bg-[#C49A3C]",
+    cardBorder: "border-[#C49A3C]/20",
+    iconBg: "bg-[#C49A3C]/10",
+    iconColor: "text-[#C49A3C]",
   },
   updating: {
     label: "Refreshing…",
-    badge: "bg-blue-500/10 text-blue-700 dark:text-blue-400",
+    badge: "bg-[#4A90D9]/10 text-[#4A90D9]",
     icon: Loader2,
-    dot: "bg-blue-500",
-    cardBorder: "border-blue-500/20",
-    iconBg: "bg-blue-500/10",
-    iconColor: "text-blue-500",
+    dot: "bg-[#4A90D9]",
+    cardBorder: "border-[#4A90D9]/20",
+    iconBg: "bg-[#4A90D9]/10",
+    iconColor: "text-[#4A90D9]",
   },
   issue: {
     label: "Issue detected",
-    badge: "bg-red-500/10 text-red-700 dark:text-red-400",
+    badge: "bg-[#C0392B]/10 text-[#C0392B]",
     icon: AlertCircle,
-    dot: "bg-red-500",
-    cardBorder: "border-red-500/20",
-    iconBg: "bg-red-500/10",
-    iconColor: "text-red-500",
+    dot: "bg-[#C0392B]",
+    cardBorder: "border-[#C0392B]/20",
+    iconBg: "bg-[#C0392B]/10",
+    iconColor: "text-[#C0392B]",
   },
   unknown: {
     label: "Not yet refreshed",
@@ -200,12 +200,12 @@ function FreshnessCard({
       </div>
 
       {status === "stale" && (
-        <p className="text-xs text-amber-700 dark:text-amber-400 bg-amber-500/5 rounded-lg px-3 py-2 border border-amber-500/10">
+        <p className="text-xs text-[#C49A3C] bg-[#C49A3C]/5 rounded-lg px-3 py-2 border border-[#C49A3C]/10">
           Some information may be outdated. Refresh to get the latest data.
         </p>
       )}
       {status === "issue" && (
-        <p className="text-xs text-red-700 dark:text-red-400 bg-red-500/5 rounded-lg px-3 py-2 border border-red-500/10">
+        <p className="text-xs text-[#C0392B] bg-[#C0392B]/5 rounded-lg px-3 py-2 border border-[#C0392B]/10">
           The last refresh encountered an issue. Try refreshing again.
         </p>
       )}
@@ -247,10 +247,10 @@ function outcomeLabel(run: SyncRunResult): string {
 
 function outcomeBadge(run: SyncRunResult): string {
   if (run.status === "success" || run.status === "partial_success")
-    return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400";
-  if (run.status === "failed") return "bg-red-500/10 text-red-700 dark:text-red-400";
+    return "bg-[#3D9970]/10 text-[#3D9970]";
+  if (run.status === "failed") return "bg-[#C0392B]/10 text-[#C0392B]";
   if (run.status === "cancelled") return "bg-muted text-muted-foreground";
-  return "bg-blue-500/10 text-blue-700 dark:text-blue-400";
+  return "bg-[#4A90D9]/10 text-[#4A90D9]";
 }
 
 function changedSummary(run: SyncRunResult): string | null {
@@ -266,9 +266,9 @@ function UpdateHistoryRow({ run }: { run: SyncRunResult }) {
   const iconClassName = cn(
     "h-3.5 w-3.5",
     run.status === "success" || run.status === "partial_success"
-      ? "text-emerald-600 dark:text-emerald-400"
+      ? "text-[#3D9970]"
       : run.status === "failed"
-      ? "text-red-500"
+      ? "text-[#C0392B]"
       : "text-muted-foreground",
   );
 
@@ -278,9 +278,9 @@ function UpdateHistoryRow({ run }: { run: SyncRunResult }) {
         className={cn(
           "h-7 w-7 rounded-lg flex items-center justify-center shrink-0",
           run.status === "success" || run.status === "partial_success"
-            ? "bg-emerald-500/10"
+            ? "bg-[#3D9970]/10"
             : run.status === "failed"
-            ? "bg-red-500/10"
+            ? "bg-[#C0392B]/10"
             : "bg-muted",
         )}
       >
@@ -311,10 +311,10 @@ function RefreshProgressBanner({
 }) {
   if (!activeJob) return null;
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-blue-500/20 bg-blue-500/5 px-4 py-3.5">
-      <Loader2 className="h-4 w-4 text-blue-500 animate-spin shrink-0" />
+    <div className="flex items-center gap-3 rounded-xl border border-[#4A90D9]/20 bg-[#4A90D9]/5 px-4 py-3.5">
+      <Loader2 className="h-4 w-4 text-[#4A90D9] animate-spin shrink-0" />
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-blue-700 dark:text-blue-400">Refresh in progress</p>
+        <p className="text-sm font-semibold text-[#4A90D9]">Refresh in progress</p>
         <p className="text-xs text-muted-foreground mt-0.5">
           {sourceNiceLabel(activeJob.sourceKey)} data is being refreshed. This usually takes a few seconds.
         </p>
@@ -441,9 +441,9 @@ export default function DataUpdatesPage() {
 
       {/* Already running notice */}
       {conflictMsg && (
-        <div className="flex items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 mb-6">
-          <Clock className="h-5 w-5 text-amber-500 shrink-0" />
-          <p className="text-sm text-amber-700 dark:text-amber-400">{conflictMsg}</p>
+        <div className="flex items-center gap-3 rounded-xl border border-[#C49A3C]/20 bg-[#C49A3C]/5 p-4 mb-6">
+          <Clock className="h-5 w-5 text-[#C49A3C] shrink-0" />
+          <p className="text-sm text-[#C49A3C]">{conflictMsg}</p>
         </div>
       )}
 
@@ -465,11 +465,11 @@ export default function DataUpdatesPage() {
               className={cn(
                 "rounded-xl border p-4 flex items-center gap-4",
                 allFresh
-                  ? "border-emerald-500/20 bg-emerald-500/5"
+                  ? "border-[#3D9970]/20 bg-[#3D9970]/5"
                   : hasIssues
-                  ? "border-red-500/20 bg-red-500/5"
+                  ? "border-[#C0392B]/20 bg-[#C0392B]/5"
                   : hasStale
-                  ? "border-amber-500/20 bg-amber-500/5"
+                  ? "border-[#C49A3C]/20 bg-[#C49A3C]/5"
                   : "border-border bg-card",
               )}
             >
@@ -477,18 +477,18 @@ export default function DataUpdatesPage() {
                 className={cn(
                   "h-10 w-10 rounded-xl flex items-center justify-center shrink-0",
                   allFresh
-                    ? "bg-emerald-500/15"
+                    ? "bg-[#3D9970]/15"
                     : hasIssues
-                    ? "bg-red-500/15"
-                    : "bg-amber-500/15",
+                    ? "bg-[#C0392B]/15"
+                    : "bg-[#C49A3C]/15",
                 )}
               >
                 {allFresh ? (
-                  <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                  <CheckCircle2 className="h-5 w-5 text-[#3D9970]" />
                 ) : hasIssues ? (
-                  <AlertCircle className="h-5 w-5 text-red-500" />
+                  <AlertCircle className="h-5 w-5 text-[#C0392B]" />
                 ) : (
-                  <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  <Clock className="h-5 w-5 text-[#C49A3C]" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
@@ -496,10 +496,10 @@ export default function DataUpdatesPage() {
                   className={cn(
                     "text-sm font-semibold",
                     allFresh
-                      ? "text-emerald-700 dark:text-emerald-400"
+                      ? "text-[#3D9970]"
                       : hasIssues
-                      ? "text-red-700 dark:text-red-400"
-                      : "text-amber-700 dark:text-amber-400",
+                      ? "text-[#C0392B]"
+                      : "text-[#C49A3C]",
                   )}
                 >
                   {allFresh
@@ -571,12 +571,12 @@ export default function DataUpdatesPage() {
                     </div>
                   </div>
                   {status.providers.scholarshipLive ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400 shrink-0">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#3D9970]/10 px-2.5 py-1 text-xs font-semibold text-[#3D9970] shrink-0">
                       <CheckCircle2 className="h-3 w-3" />
                       Configured
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-700 dark:text-red-400 shrink-0">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#C0392B]/10 px-2.5 py-1 text-xs font-semibold text-[#C0392B] shrink-0">
                       <XCircle className="h-3 w-3" />
                       Not configured
                     </span>
@@ -596,7 +596,7 @@ export default function DataUpdatesPage() {
                     ? false
                     : false) ||
                   status.providers.scholarshipLive ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:text-blue-400 shrink-0">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#4A90D9]/10 px-2.5 py-1 text-xs font-semibold text-[#4A90D9] shrink-0">
                       <CheckCircle2 className="h-3 w-3" />
                       Active
                     </span>
@@ -618,12 +618,12 @@ export default function DataUpdatesPage() {
                     </div>
                   </div>
                   {status.providers.programsCrawler ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400 shrink-0">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#3D9970]/10 px-2.5 py-1 text-xs font-semibold text-[#3D9970] shrink-0">
                       <CheckCircle2 className="h-3 w-3" />
                       Configured
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-700 dark:text-red-400 shrink-0">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#C0392B]/10 px-2.5 py-1 text-xs font-semibold text-[#C0392B] shrink-0">
                       <XCircle className="h-3 w-3" />
                       Not configured
                     </span>
@@ -646,14 +646,14 @@ export default function DataUpdatesPage() {
               <div className="space-y-2 text-sm text-muted-foreground">
                 {recentSuccessfulRun.recordsAdded > 0 && (
                   <p className="flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#3D9970] shrink-0" />
                     {recentSuccessfulRun.recordsAdded} new{" "}
                     {recentSuccessfulRun.target === "scholarships" ? "scholarships" : "items"} added
                   </p>
                 )}
                 {recentSuccessfulRun.recordsUpdated > 0 && (
                   <p className="flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-blue-500 shrink-0" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#4A90D9] shrink-0" />
                     {recentSuccessfulRun.recordsUpdated}{" "}
                     {recentSuccessfulRun.target === "scholarships" ? "scholarships" : "items"}{" "}
                     verified and updated
@@ -670,7 +670,7 @@ export default function DataUpdatesPage() {
                   recentSuccessfulRun.recordsUpdated === 0 &&
                   recentSuccessfulRun.sources.flatMap(s => s.notes).length === 0 && (
                     <p className="flex items-center gap-2">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#3D9970] shrink-0" />
                       {sourceNiceLabel(recentSuccessfulRun.target)} data was verified and is up to
                       date
                     </p>

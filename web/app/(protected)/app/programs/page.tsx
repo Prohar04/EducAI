@@ -33,16 +33,16 @@ const FRESHNESS_CONFIG: Record<
 	FreshnessStatus,
 	{ label: string; className: string }
 > = {
-	live:               { label: "Live",     className: "bg-green-500/15 text-green-700 dark:text-green-400" },
-	recent:             { label: "Recent",   className: "bg-blue-500/15 text-blue-700 dark:text-blue-400" },
-	cached:             { label: "Cached",   className: "bg-amber-500/15 text-amber-700 dark:text-amber-400" },
-	stale:              { label: "Stale",    className: "bg-red-500/15 text-red-700 dark:text-red-400" },
+	live:               { label: "Live",     className: "bg-[#3D9970]/15 text-[#3D9970]" },
+	recent:             { label: "Recent",   className: "bg-[#4A90D9]/15 text-[#4A90D9]" },
+	cached:             { label: "Cached",   className: "bg-[#C49A3C]/15 text-[#C49A3C]" },
+	stale:              { label: "Stale",    className: "bg-[#C0392B]/15 text-[#C0392B]" },
 	source_unavailable: { label: "Offline",  className: "bg-muted text-muted-foreground" },
 };
 
 const STALE_CARD_BORDER: Partial<Record<FreshnessStatus, string>> = {
-	cached: "border-amber-500/40",
-	stale:  "border-red-500/40",
+	cached: "border-[#C49A3C]/40",
+	stale:  "border-[#C0392B]/40",
 	source_unavailable: "border-muted",
 };
 
@@ -191,7 +191,7 @@ export default async function ProgramsPage({
 					{/* Stale data banner — only when showing stale results */}
 					{showStale && result.items.length > 0 && (
 						<FadeIn>
-							<div className="mb-4 flex items-start gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-300">
+							<div className="mb-4 flex items-start gap-3 rounded-xl border border-[#C49A3C]/40 bg-[#C49A3C]/10 px-4 py-3 text-sm text-[#C49A3C]">
 								<AlertTriangle className="mt-0.5 size-4 shrink-0" />
 								<div>
 									<span className="font-semibold">Showing cached/stale programmes.</span>{" "}
@@ -224,14 +224,14 @@ export default async function ProgramsPage({
 										<div
 											className={`h-1 w-full bg-gradient-to-r ${
 												isStale
-													? "from-amber-500/30 via-amber-500/60 to-amber-500/30"
+													? "from-[#C49A3C]/30 via-[#C49A3C]/60 to-[#C49A3C]/30"
 													: "from-primary/30 via-primary/60 to-primary/30"
 											}`}
 										/>
 										<div className="flex flex-col flex-1 p-5">
 											{/* Stale overlay label */}
 											{isStale && showStale && (
-												<div className="mb-2 flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300">
+												<div className="mb-2 flex items-center gap-1.5 rounded-lg border border-[#C49A3C]/30 bg-[#C49A3C]/10 px-2.5 py-1.5 text-xs font-semibold text-[#C49A3C]">
 													<Database className="size-3" />
 													Cached data — may be outdated
 												</div>

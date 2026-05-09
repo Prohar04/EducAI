@@ -62,7 +62,7 @@ export default function QuickEditProfile({
 
       {/* Feedback */}
       {state?.success && (
-        <p className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400">
+        <p className="flex items-center gap-1.5 text-xs text-[#3D9970]">
           <CheckCircle2 className="size-3.5" /> Saved!
         </p>
       )}

@@ -421,8 +421,8 @@ export default function CVPage() {
 										{result.cv}
 									</pre>
 								</div>
-								<div className="mt-4 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2">
-									<p className="text-xs text-amber-700 dark:text-amber-400">
+								<div className="mt-4 rounded-lg border border-[#C49A3C]/20 bg-[#C49A3C]/5 px-3 py-2">
+									<p className="text-xs text-[#C49A3C]">
 										AI-generated — review, edit, and fill in any [PLACEHOLDER] markers before submitting.
 									</p>
 								</div>
@@ -440,7 +440,7 @@ export default function CVPage() {
 							<div className="mt-6 grid grid-cols-2 gap-2 text-left max-w-xs w-full">
 								{["10 professional templates", "PDF & TXT download", "Profile auto-injected", "ATS-friendly format"].map(f => (
 									<div key={f} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-										<Check className="h-3 w-3 text-emerald-500 shrink-0" />
+										<Check className="h-3 w-3 text-[#3D9970] shrink-0" />
 										{f}
 									</div>
 								))}

@@ -62,10 +62,10 @@ const FRESHNESS_CONFIG: Record<
   FreshnessStatus,
   { label: string; desc: string; className: string }
 > = {
-  live:               { label: "Live",     desc: "Verified within the last 24 hours",   className: "border-green-500/30 bg-green-500/8 text-green-700 dark:text-green-400" },
-  recent:             { label: "Recent",   desc: "Verified within the last 7 days",      className: "border-blue-500/30 bg-blue-500/8 text-blue-700 dark:text-blue-400" },
-  cached:             { label: "Cached",   desc: "Verified within the last 30 days",     className: "border-amber-500/30 bg-amber-500/8 text-amber-700 dark:text-amber-400" },
-  stale:              { label: "Stale",    desc: "Last verified more than 30 days ago",  className: "border-red-500/30 bg-red-500/8 text-red-700 dark:text-red-400" },
+  live:               { label: "Live",     desc: "Verified within the last 24 hours",   className: "border-[#3D9970]/30 bg-[#3D9970]/8 text-[#3D9970]" },
+  recent:             { label: "Recent",   desc: "Verified within the last 7 days",      className: "border-[#4A90D9]/30 bg-[#4A90D9]/8 text-[#4A90D9]" },
+  cached:             { label: "Cached",   desc: "Verified within the last 30 days",     className: "border-[#C49A3C]/30 bg-[#C49A3C]/8 text-[#C49A3C]" },
+  stale:              { label: "Stale",    desc: "Last verified more than 30 days ago",  className: "border-[#C0392B]/30 bg-[#C0392B]/8 text-[#C0392B]" },
   source_unavailable: { label: "Offline",  desc: "Source currently unavailable",         className: "border-border bg-muted/30 text-muted-foreground" },
 };
 
@@ -173,13 +173,13 @@ export default async function ProgramDetailPage({
       {/* Stale/cached data warning banner */}
       {(freshnessStatus === "stale" || freshnessStatus === "cached") && (
         <FadeIn delay={0.02}>
-          <div className="mb-5 flex items-start gap-3 rounded-xl border border-amber-500/50 bg-amber-500/12 px-4 py-3.5 text-sm text-amber-800 dark:text-amber-200">
-            <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-500" />
+          <div className="mb-5 flex items-start gap-3 rounded-xl border border-[#C49A3C]/50 bg-[#C49A3C]/12 px-4 py-3.5 text-sm text-[#C49A3C]">
+            <AlertTriangle className="mt-0.5 size-4 shrink-0 text-[#C49A3C]" />
             <div className="flex-1 min-w-0">
               <p className="font-semibold">
                 {freshnessStatus === "stale" ? "This programme data is outdated" : "This programme data may be outdated"}
               </p>
-              <p className="mt-0.5 text-xs text-amber-700 dark:text-amber-300">
+              <p className="mt-0.5 text-xs text-[#C49A3C]/80">
                 {freshnessCfg.desc}.{" "}
                 {freshnessLabel && <>Last verified: <span className="font-semibold">{freshnessLabel}</span>. </>}
                 Always verify on the official programme page before applying.
@@ -343,10 +343,10 @@ export default async function ProgramDetailPage({
                       {languageReqs.map((req) => (
                         <div
                           key={req.id}
-                          className="flex items-center justify-between rounded-xl border border-blue-500/20 bg-blue-500/5 px-4 py-3 text-sm"
+                          className="flex items-center justify-between rounded-xl border border-[#C49A3C]/20 bg-[#C49A3C]/5 px-4 py-3 text-sm"
                         >
                           <span className="font-medium text-foreground">{req.key}</span>
-                          <span className="ml-4 text-right text-blue-600 dark:text-blue-400 font-semibold">{req.value}</span>
+                          <span className="ml-4 text-right text-[#4A90D9] font-semibold">{req.value}</span>
                         </div>
                       ))}
                     </div>
@@ -360,10 +360,10 @@ export default async function ProgramDetailPage({
                       {testReqs.map((req) => (
                         <div
                           key={req.id}
-                          className="flex items-center justify-between rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm"
+                          className="flex items-center justify-between rounded-xl border border-[#C49A3C]/20 bg-[#C49A3C]/5 px-4 py-3 text-sm"
                         >
                           <span className="font-medium text-foreground">{req.key}</span>
-                          <span className="ml-4 text-right text-amber-600 dark:text-amber-400 font-semibold">{req.value}</span>
+                          <span className="ml-4 text-right text-[#C49A3C] font-semibold">{req.value}</span>
                         </div>
                       ))}
                     </div>
@@ -390,7 +390,7 @@ export default async function ProgramDetailPage({
                 <InfoRow label="Name"    value={uni.name} />
                 <InfoRow label="Country" value={uni.country.name} />
                 {uni.city          && <InfoRow label="City"    value={uni.city} />}
-                {uni.ranking       && <InfoRow label="Ranking" value={uni.ranking} icon={<Award className="size-3.5 text-amber-500" />} />}
+                {uni.ranking       && <InfoRow label="Ranking" value={uni.ranking} icon={<Award className="size-3.5 text-[#C49A3C]" />} />}
                 {uni.universityType && <InfoRow label="Type"   value={uni.universityType.charAt(0).toUpperCase() + uni.universityType.slice(1)} />}
                 {uni.description && (
                   <div className="pt-1">
@@ -432,10 +432,10 @@ export default async function ProgramDetailPage({
                       daysLeft < 0
                         ? "text-muted-foreground line-through"
                         : daysLeft <= 30
-                        ? "text-red-500"
+                        ? "text-[#C0392B]"
                         : daysLeft <= 90
-                        ? "text-amber-500"
-                        : "text-green-500";
+                        ? "text-[#C49A3C]"
+                        : "text-[#3D9970]";
                     return (
                       <div key={dl.id} className="rounded-xl border border-border/70 bg-muted/20 px-4 py-3">
                         <p className="text-xs font-semibold text-muted-foreground">{dl.term ?? "Application"}</p>

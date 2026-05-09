@@ -23,9 +23,9 @@ import {
 } from "@/lib/auth/action";
 
 const FEASIBILITY_STYLES = {
-	High: { badge: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30", dot: "bg-emerald-500" },
-	Medium: { badge: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30", dot: "bg-amber-500" },
-	Low: { badge: "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/30", dot: "bg-red-500" },
+	High: { badge: "bg-[#3D9970]/10 text-[#3D9970] border-[#3D9970]/30", dot: "bg-[#3D9970]" },
+	Medium: { badge: "bg-[#C49A3C]/10 text-[#C49A3C] border-[#C49A3C]/30", dot: "bg-[#C49A3C]" },
+	Low: { badge: "bg-[#C0392B]/10 text-[#C0392B] border-[#C0392B]/30", dot: "bg-[#C0392B]" },
 };
 
 function StepCard({ step, index }: { step: ImmigrationStep; index: number }) {
@@ -69,7 +69,7 @@ function StepCard({ step, index }: { step: ImmigrationStep; index: number }) {
 								<ul className="space-y-1">
 									{step.keyCriteria.map((c, i) => (
 										<li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
-											<CheckCircle className="h-3.5 w-3.5 mt-0.5 shrink-0 text-emerald-500" />
+											<CheckCircle className="h-3.5 w-3.5 mt-0.5 shrink-0 text-[#3D9970]" />
 											{c}
 										</li>
 									))}
@@ -82,7 +82,7 @@ function StepCard({ step, index }: { step: ImmigrationStep; index: number }) {
 								<ul className="space-y-1">
 									{step.pitfalls.map((p, i) => (
 										<li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
-											<XCircle className="h-3.5 w-3.5 mt-0.5 shrink-0 text-red-500" />
+											<XCircle className="h-3.5 w-3.5 mt-0.5 shrink-0 text-[#C0392B]" />
 											{p}
 										</li>
 									))}
@@ -168,11 +168,11 @@ function PathwayCard({ pathway, isBest }: { pathway: CountryPathway; isBest: boo
 					<div className="grid sm:grid-cols-2 gap-4">
 						{pathway.advantages.length > 0 && (
 							<div>
-								<p className="text-xs font-semibold mb-2 text-emerald-700 dark:text-emerald-400">Advantages</p>
+								<p className="text-xs font-semibold mb-2 text-[#3D9970]">Advantages</p>
 								<ul className="space-y-1">
 									{pathway.advantages.map((a, i) => (
 										<li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
-											<CheckCircle className="h-3.5 w-3.5 mt-0.5 shrink-0 text-emerald-500" />
+											<CheckCircle className="h-3.5 w-3.5 mt-0.5 shrink-0 text-[#3D9970]" />
 											{a}
 										</li>
 									))}
@@ -181,11 +181,11 @@ function PathwayCard({ pathway, isBest }: { pathway: CountryPathway; isBest: boo
 						)}
 						{pathway.challenges.length > 0 && (
 							<div>
-								<p className="text-xs font-semibold mb-2 text-amber-700 dark:text-amber-400">Challenges</p>
+								<p className="text-xs font-semibold mb-2 text-[#C49A3C]">Challenges</p>
 								<ul className="space-y-1">
 									{pathway.challenges.map((c, i) => (
 										<li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
-											<AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0 text-amber-500" />
+											<AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0 text-[#C49A3C]" />
 											{c}
 										</li>
 									))}
@@ -310,8 +310,8 @@ export default function ImmigrationPage() {
 							</div>
 						)}
 
-						<div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-							<p className="text-xs text-amber-700 dark:text-amber-400">
+						<div className="rounded-lg border border-[#C49A3C]/20 bg-[#C49A3C]/5 px-4 py-3">
+							<p className="text-xs text-[#C49A3C]">
 								<strong>Disclaimer:</strong> {result.disclaimer}
 							</p>
 						</div>

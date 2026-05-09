@@ -89,7 +89,7 @@ export default function NlpSearchPanel() {
 							{results.length} result{results.length !== 1 ? "s" : ""}
 						</span>
 						{cacheHit && (
-							<span className="rounded-full bg-green-500/15 px-2 py-0.5 text-xs text-green-500">
+							<span className="rounded-full bg-[#3D9970]/15 px-2 py-0.5 text-xs text-[#3D9970]">
 								cached
 							</span>
 						)}

@@ -66,7 +66,7 @@ function ResetPasswordContent() {
 				{state?.message && state?.success && (
 					<div
 						role="status"
-						className="mb-4 flex items-center gap-2 rounded-lg border border-green-500/50 bg-green-500/10 px-3 py-2 text-sm text-green-600 dark:text-green-400"
+						className="mb-4 flex items-center gap-2 rounded-lg border border-[#3D9970]/50 bg-[#3D9970]/10 px-3 py-2 text-sm text-[#3D9970]"
 					>
 						<CheckCircle2 className="size-4 shrink-0" />
 						{state.message}

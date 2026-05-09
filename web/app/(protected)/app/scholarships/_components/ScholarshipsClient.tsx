@@ -59,13 +59,13 @@ function formatDeadline(dateStr: string): string {
 function fundingBadgeClass(type: string | null | undefined) {
 	switch (type) {
 		case "full":
-			return "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30";
+			return "bg-[#3D9970]/15 text-[#3D9970] border-[#3D9970]/30";
 		case "partial":
-			return "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30";
+			return "bg-[#4A90D9]/15 text-[#4A90D9] border-[#4A90D9]/30";
 		case "living":
-			return "bg-violet-500/15 text-violet-600 dark:text-violet-400 border-violet-500/30";
+			return "bg-[#4A90D9]/15 text-[#4A90D9] border-[#4A90D9]/30";
 		case "research":
-			return "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30";
+			return "bg-[#C49A3C]/15 text-[#C49A3C] border-[#C49A3C]/30";
 		default:
 			return "bg-muted/50 text-muted-foreground border-border";
 	}
@@ -74,11 +74,11 @@ function fundingBadgeClass(type: string | null | undefined) {
 function eligibilityBadgeClass(status: EligibilityResult["status"]) {
 	switch (status) {
 		case "eligible":
-			return "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30";
+			return "bg-[#3D9970]/15 text-[#3D9970] border-[#3D9970]/30";
 		case "partially_eligible":
-			return "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30";
+			return "bg-[#C49A3C]/15 text-[#C49A3C] border-[#C49A3C]/30";
 		case "not_eligible":
-			return "bg-red-500/15 text-red-500 border-red-500/30";
+			return "bg-[#C0392B]/15 text-[#C0392B] border-[#C0392B]/30";
 	}
 }
 
@@ -96,11 +96,11 @@ function eligibilityLabel(status: EligibilityResult["status"]) {
 function probabilityBandClass(band: ProbabilityResult["probabilityBand"]) {
 	switch (band) {
 		case "High":
-			return "text-emerald-600 dark:text-emerald-400";
+			return "text-[#3D9970]";
 		case "Medium":
-			return "text-amber-600 dark:text-amber-400";
+			return "text-[#C49A3C]";
 		case "Low":
-			return "text-red-500";
+			return "text-[#C0392B]";
 	}
 }
 
@@ -118,7 +118,7 @@ function getFreshnessBadge(
 	if (!hasDeadline) {
 		return {
 			label: "Deadline unknown",
-			className: "bg-yellow-500/15 text-yellow-700 dark:text-yellow-400 border-yellow-500/30",
+			className: "bg-[#C49A3C]/15 text-[#C49A3C] border-[#C49A3C]/30",
 		};
 	}
 	if (!lastVerified) {
@@ -132,13 +132,13 @@ function getFreshnessBadge(
 	if (ageMs < 24 * 60 * 60 * 1000 && isLiveSourced) {
 		return {
 			label: "Live",
-			className: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
+			className: "bg-[#3D9970]/15 text-[#3D9970] border-[#3D9970]/30",
 		};
 	}
 	if (ageMs < 72 * 60 * 60 * 1000) {
 		return {
 			label: "Recent",
-			className: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30",
+			className: "bg-[#4A90D9]/15 text-[#4A90D9] border-[#4A90D9]/30",
 		};
 	}
 	return {
@@ -290,10 +290,10 @@ function EligibilityModal({
 								<div
 									className={`h-full rounded-full transition-all duration-500 ${
 										eligibility.score >= 80
-											? "bg-emerald-500"
+											? "bg-[#3D9970]"
 											: eligibility.score >= 50
-											? "bg-amber-500"
-											: "bg-red-500"
+											? "bg-[#C49A3C]"
+											: "bg-[#C0392B]"
 									}`}
 									style={{ width: `${eligibility.score}%` }}
 								/>
@@ -308,7 +308,7 @@ function EligibilityModal({
 									<ul className="space-y-1.5">
 										{eligibility.metCriteria.map((c, i) => (
 											<li key={i} className="flex items-start gap-2 text-sm">
-												<Check className="mt-0.5 size-4 shrink-0 text-emerald-500" />
+												<Check className="mt-0.5 size-4 shrink-0 text-[#3D9970]" />
 												{c}
 											</li>
 										))}
@@ -325,7 +325,7 @@ function EligibilityModal({
 									<ul className="space-y-1.5">
 										{eligibility.missingCriteria.map((c, i) => (
 											<li key={i} className="flex items-start gap-2 text-sm">
-												<X className="mt-0.5 size-4 shrink-0 text-red-500" />
+												<X className="mt-0.5 size-4 shrink-0 text-[#C0392B]" />
 												{c}
 											</li>
 										))}
@@ -376,10 +376,10 @@ function EligibilityModal({
 										<div
 											className={`h-full rounded-full transition-all duration-700 ${
 												probability.probabilityPct >= 65
-													? "bg-emerald-500"
+													? "bg-[#3D9970]"
 													: probability.probabilityPct >= 40
-													? "bg-amber-500"
-													: "bg-red-500"
+													? "bg-[#C49A3C]"
+													: "bg-[#C0392B]"
 											}`}
 											style={{ width: `${probability.probabilityPct}%` }}
 										/>
@@ -406,10 +406,10 @@ function EligibilityModal({
 													<div
 														className={`h-full rounded-full ${
 															f.score >= 0.7
-																? "bg-emerald-500"
+																? "bg-[#3D9970]"
 																: f.score >= 0.45
-																? "bg-amber-500"
-																: "bg-red-500"
+																? "bg-[#C49A3C]"
+																: "bg-[#C0392B]"
 														}`}
 														style={{ width: `${f.score * 100}%` }}
 													/>
@@ -423,14 +423,14 @@ function EligibilityModal({
 
 							{/* Weaknesses */}
 							{probability.weaknesses.length > 0 && (
-								<div className="rounded-xl border border-amber-500/25 bg-amber-500/5 p-4">
-									<h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-amber-600 dark:text-amber-400">
+								<div className="rounded-xl border border-[#C49A3C]/25 bg-[#C49A3C]/5 p-4">
+									<h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#C49A3C]">
 										Weaknesses
 									</h3>
 									<ul className="space-y-1">
 										{probability.weaknesses.map((w, i) => (
 											<li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-												<AlertCircle className="mt-0.5 size-3.5 shrink-0 text-amber-500" />
+												<AlertCircle className="mt-0.5 size-3.5 shrink-0 text-[#C49A3C]" />
 												{w}
 											</li>
 										))}
@@ -611,7 +611,7 @@ function ScholarshipCard({
 						isPast
 							? "border-border bg-muted/30 text-muted-foreground line-through"
 							: isUrgent
-							? "border-red-500/25 bg-red-500/8 text-red-600 dark:text-red-400"
+							? "border-[#C0392B]/25 bg-[#C0392B]/8 text-[#C0392B]"
 							: "border-border bg-muted/30 text-muted-foreground"
 					}`}
 				>
@@ -657,14 +657,14 @@ function ScholarshipCard({
 
 			{/* Profile match reasons */}
 			{scholarship.matchReasons && scholarship.matchReasons.length > 0 && (
-				<div className="mt-3 rounded-lg border border-emerald-500/15 bg-emerald-500/5 px-3 py-2">
-					<p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
+				<div className="mt-3 rounded-lg border border-[#3D9970]/15 bg-[#3D9970]/5 px-3 py-2">
+					<p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[#3D9970]">
 						Why it matches you
 					</p>
 					<ul className="space-y-0.5">
 						{scholarship.matchReasons.slice(0, 3).map((r, i) => (
-							<li key={i} className="flex items-center gap-1.5 text-[11px] text-emerald-700 dark:text-emerald-300">
-								<span className="h-1 w-1 shrink-0 rounded-full bg-emerald-500" />
+							<li key={i} className="flex items-center gap-1.5 text-[11px] text-[#3D9970]/80">
+								<span className="h-1 w-1 shrink-0 rounded-full bg-[#3D9970]" />
 								{r}
 							</li>
 						))}
@@ -692,8 +692,8 @@ function DeadlinesStrip({ deadlines }: { deadlines: UpcomingDeadlineItem[] }) {
 	if (!deadlines.length) return null;
 
 	return (
-		<div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
-			<h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-amber-700 dark:text-amber-400">
+		<div className="rounded-xl border border-[#C49A3C]/20 bg-[#C49A3C]/5 p-4">
+			<h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-[#C49A3C]">
 				<Bell className="size-4" /> Upcoming Deadlines (next 90 days)
 			</h2>
 			<div className="space-y-2">
@@ -702,7 +702,7 @@ function DeadlinesStrip({ deadlines }: { deadlines: UpcomingDeadlineItem[] }) {
 					return (
 						<div
 							key={d.id}
-							className="flex items-center justify-between gap-3 rounded-lg border border-amber-500/15 bg-background/60 px-3 py-2.5 text-xs"
+							className="flex items-center justify-between gap-3 rounded-lg border border-[#C49A3C]/15 bg-background/60 px-3 py-2.5 text-xs"
 						>
 							<div className="flex-1 min-w-0">
 								<p className="font-medium truncate">{d.scholarship.title}</p>
@@ -711,7 +711,7 @@ function DeadlinesStrip({ deadlines }: { deadlines: UpcomingDeadlineItem[] }) {
 								</p>
 							</div>
 							<div className="shrink-0 text-right">
-								<p className="font-semibold text-amber-700 dark:text-amber-400">
+								<p className="font-semibold text-[#C49A3C]">
 									{days <= 0 ? "Closed" : `${days}d left`}
 								</p>
 								<p className="text-muted-foreground">{formatDeadline(d.deadline)}</p>
@@ -841,7 +841,7 @@ export default function ScholarshipsClient({
 								{results.total.toLocaleString()} scholarships found
 							</p>
 							{results.personalised && (
-								<span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+								<span className="inline-flex items-center gap-1 rounded-full bg-[#3D9970]/10 px-2 py-0.5 text-[10px] font-medium text-[#3D9970]">
 									<Sparkles className="size-2.5" /> Ranked for your profile
 								</span>
 							)}
@@ -859,9 +859,9 @@ export default function ScholarshipsClient({
 				const daysAgo = Math.floor((Date.now() - latestUpdate) / (1000 * 60 * 60 * 24));
 				const label = daysAgo === 0 ? "today" : daysAgo === 1 ? "yesterday" : `${daysAgo} days ago`;
 				return (
-					<div className="mb-4 flex items-start gap-2 rounded-lg border border-blue-500/20 bg-blue-500/5 px-4 py-2.5">
-						<RefreshCw className="mt-0.5 size-3.5 shrink-0 text-blue-500" />
-						<p className="text-xs text-blue-700 dark:text-blue-400">
+					<div className="mb-4 flex items-start gap-2 rounded-lg border border-[#4A90D9]/20 bg-[#4A90D9]/5 px-4 py-2.5">
+						<RefreshCw className="mt-0.5 size-3.5 shrink-0 text-[#4A90D9]" />
+						<p className="text-xs text-[#4A90D9]">
 							Scholarship data last synced <span className="font-medium">{label}</span>.
 							Individual scholarship cards show source verification dates.
 							Always confirm deadlines on the official scholarship website before applying.
@@ -1001,7 +1001,7 @@ export default function ScholarshipsClient({
 				>
 					My Matches
 					{eligible.length > 0 && (
-						<span className="ml-2 rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-600 dark:text-emerald-400">
+						<span className="ml-2 rounded-full bg-[#3D9970]/20 px-2 py-0.5 text-xs text-[#3D9970]">
 							{eligible.length}
 						</span>
 					)}

@@ -33,13 +33,13 @@ const LEVEL_LABELS: Record<string, string> = {
 function fitBand(score: number): { label: string; scoreColor: string; bandClass: string } {
   if (score >= 80) return {
     label: "Strong Match",
-    scoreColor: "text-green-500 dark:text-green-400",
-    bandClass: "from-green-500/40 via-green-500 to-green-500/30",
+    scoreColor: "text-[#3D9970]",
+    bandClass: "from-[#3D9970]/40 via-[#3D9970] to-[#3D9970]/30",
   };
   if (score >= 50) return {
     label: "Good Match",
-    scoreColor: "text-amber-500 dark:text-amber-400",
-    bandClass: "from-amber-500/40 via-amber-500 to-amber-500/30",
+    scoreColor: "text-[#C49A3C]",
+    bandClass: "from-[#C49A3C]/40 via-[#C49A3C] to-[#C49A3C]/30",
   };
   return {
     label: "Stretch",
@@ -55,10 +55,10 @@ function freshnessLabel(updatedAt: unknown): { text: string; cls: string } | nul
   const date = new Date(updatedAt);
   if (isNaN(date.getTime())) return null;
   const ageDays = Math.floor((Date.now() - date.getTime()) / 86_400_000);
-  if (ageDays === 0) return { text: "Live", cls: "bg-green-500/10 text-green-600 dark:text-green-400" };
-  if (ageDays <= 1)  return { text: "Recent", cls: "bg-green-500/10 text-green-600 dark:text-green-400" };
-  if (ageDays <= 7)  return { text: "This week", cls: "bg-amber-500/10 text-amber-600 dark:text-amber-400" };
-  if (ageDays <= 30) return { text: `${ageDays}d ago`, cls: "bg-amber-500/10 text-amber-600 dark:text-amber-400" };
+  if (ageDays === 0) return { text: "Live", cls: "bg-[#3D9970]/10 text-[#3D9970]" };
+  if (ageDays <= 1)  return { text: "Recent", cls: "bg-[#3D9970]/10 text-[#3D9970]" };
+  if (ageDays <= 7)  return { text: "This week", cls: "bg-[#C49A3C]/10 text-[#C49A3C]" };
+  if (ageDays <= 30) return { text: `${ageDays}d ago`, cls: "bg-[#C49A3C]/10 text-[#C49A3C]" };
   return { text: `${Math.floor(ageDays / 30)}mo ago`, cls: "bg-muted text-muted-foreground" };
 }
 
@@ -192,7 +192,7 @@ function ResultCard({
 
         {/* Deadline */}
         {dlLabel && (
-          <p className="mt-1 flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-400">
+          <p className="mt-1 flex items-center gap-1 text-xs font-medium text-[#C49A3C]">
             <CalendarDays className="size-3 shrink-0" />
             {nextDeadlineTerm ? `${nextDeadlineTerm}: ` : ""}{dlLabel}
           </p>
@@ -242,7 +242,7 @@ function ResultCard({
               disabled={saved || saving}
               className={`ml-auto inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
                 saved
-                  ? "bg-green-500/10 text-green-600 dark:text-green-400 cursor-default"
+                  ? "bg-[#3D9970]/10 text-[#3D9970] cursor-default"
                   : "border border-border text-muted-foreground hover:border-primary/30 hover:text-foreground"
               }`}
             >
@@ -420,10 +420,10 @@ export default function MatchPage() {
         <div
           className={`flex items-center gap-2 rounded-lg px-4 py-3 text-sm ${
             run.status === "done"
-              ? "bg-green-500/5 border border-green-500/20 text-green-700 dark:text-green-400"
+              ? "bg-[#3D9970]/5 border border-[#3D9970]/20 text-[#3D9970]"
               : run.status === "error"
                 ? "bg-destructive/5 border border-destructive/20 text-destructive"
-                : "bg-blue-500/5 border border-blue-500/20 text-blue-700 dark:text-blue-400"
+                : "bg-[#4A90D9]/5 border border-[#4A90D9]/20 text-[#4A90D9]"
           }`}
         >
           {run.status === "done" ? (

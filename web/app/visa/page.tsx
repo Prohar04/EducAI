@@ -272,7 +272,7 @@ export default function VisaGuidePage() {
                       <span className="rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium">
                         {guide.cost}
                       </span>
-                      <span className="rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1 text-xs font-medium text-green-500">
+                      <span className="rounded-full border border-[#3D9970]/30 bg-[#3D9970]/10 px-3 py-1 text-xs font-medium text-[#3D9970]">
                         {guide.postStudyRights}
                       </span>
                     </div>
@@ -293,8 +293,8 @@ export default function VisaGuidePage() {
                       </ul>
                     </div>
                     <div className="flex flex-col justify-between gap-5">
-                      <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
-                        <p className="mb-1 text-xs font-bold text-amber-600 dark:text-amber-400">
+                      <div className="rounded-xl border border-[#C49A3C]/30 bg-[#C49A3C]/5 p-4">
+                        <p className="mb-1 text-xs font-bold text-[#C49A3C]">
                           Key tip
                         </p>
                         <p className="text-sm leading-relaxed text-muted-foreground">{guide.tip}</p>

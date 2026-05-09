@@ -146,9 +146,9 @@ interface StatsProps {
 function StatsRow({ savedCount, matchCount, deadlineCount }: StatsProps) {
   const stats = [
     { icon: Bookmark, label: "Programs Saved", value: savedCount, color: "text-primary" },
-    { icon: Sparkles, label: "Programs Matched", value: matchCount, color: "text-violet-400" },
-    { icon: Calendar, label: "Upcoming Deadlines", value: deadlineCount, color: "text-amber-400" },
-    { icon: Award, label: "Scholarships Available", value: 28, color: "text-emerald-400" },
+    { icon: Sparkles, label: "Programs Matched", value: matchCount, color: "text-[#4A90D9]" },
+    { icon: Calendar, label: "Upcoming Deadlines", value: deadlineCount, color: "text-[#C49A3C]" },
+    { icon: Award, label: "Scholarships Available", value: 28, color: "text-[#3D9970]" },
   ] as const;
 
   return (
@@ -254,7 +254,7 @@ function UpcomingDeadlines({ deadlines }: { deadlines: DeadlineItem[] }) {
     return (
       <GlassCard className="p-6">
         <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
-          <Calendar className="size-5 text-amber-400" aria-hidden="true" />
+          <Calendar className="size-5 text-[#C49A3C]" aria-hidden="true" />
           Upcoming Deadlines
         </h2>
         <div className="flex flex-col items-center justify-center py-6 text-center">
@@ -270,14 +270,14 @@ function UpcomingDeadlines({ deadlines }: { deadlines: DeadlineItem[] }) {
     <GlassCard className="p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold flex items-center gap-2">
-          <Calendar className="size-5 text-amber-400" aria-hidden="true" />
+          <Calendar className="size-5 text-[#C49A3C]" aria-hidden="true" />
           Upcoming Deadlines
         </h2>
         <Link href="/app/timeline" className="text-sm text-primary hover:underline">View Timeline</Link>
       </div>
       <ul className="space-y-2" aria-label="Upcoming deadlines">
         {deadlines.slice(0, 5).map((dl) => (
-          <li key={dl.id} className={`rounded-xl border px-3 py-2.5 ${dl.priority === "high" ? "border-rose-500/30 bg-rose-500/[0.04]" : dl.priority === "medium" ? "border-amber-500/30 bg-amber-500/[0.04]" : "border-white/[0.06] bg-white/[0.02]"}`}>
+          <li key={dl.id} className={`rounded-xl border px-3 py-2.5 ${dl.priority === "high" ? "border-[#C0392B]/30 bg-[#C0392B]/[0.04]" : dl.priority === "medium" ? "border-[#C49A3C]/30 bg-[#C49A3C]/[0.04]" : "border-white/[0.06] bg-white/[0.02]"}`}>
             <p className="text-sm font-medium line-clamp-1">{dl.title}</p>
             <div className="flex items-center gap-2 mt-0.5">
               <Clock className="size-3 text-muted-foreground/50" aria-hidden="true" />
@@ -403,7 +403,7 @@ function HeroSection({ session, profile, savedCount, deadlineCount }: HeroSectio
         <div className="relative z-10">
           <RevealAnimation variant="fadeIn">
             <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-3 py-1 text-xs font-semibold text-primary">
-              <span className="size-1.5 rounded-full bg-emerald-400" aria-hidden="true" />
+              <span className="size-1.5 rounded-full bg-[#3D9970]" aria-hidden="true" />
               Welcome back
             </div>
           </RevealAnimation>
@@ -433,7 +433,7 @@ function HeroSection({ session, profile, savedCount, deadlineCount }: HeroSectio
                   href="/app/profile"
                   className="inline-flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-5 text-sm font-medium text-foreground hover:bg-white/[0.08] transition-colors"
                 >
-                  <Zap className="size-3.5 text-amber-400" aria-hidden="true" />
+                  <Zap className="size-3.5 text-[#C49A3C]" aria-hidden="true" />
                   Profile {completeness}% complete
                 </Link>
               )}

@@ -14,10 +14,10 @@ import { EmployabilityGauge } from "@/components/features/career/employability-g
 import { predictCareerAction, type CareerResult } from "@/lib/auth/action";
 
 const OUTLOOK_STYLES = {
-  Excellent: { badge: "success" as const, bar: "bg-emerald-500" },
-  Good: { badge: "info" as const, bar: "bg-blue-500" },
-  Moderate: { badge: "warning" as const, bar: "bg-amber-500" },
-  Challenging: { badge: "danger" as const, bar: "bg-rose-500" },
+  Excellent: { badge: "success" as const, bar: "bg-[#3D9970]" },
+  Good: { badge: "info" as const, bar: "bg-[#4A90D9]" },
+  Moderate: { badge: "warning" as const, bar: "bg-[#C49A3C]" },
+  Challenging: { badge: "danger" as const, bar: "bg-[#C0392B]" },
 };
 
 const RATING_BADGE: Record<string, "success" | "info" | "warning" | "danger"> = {
@@ -84,7 +84,7 @@ export default function CareerPage() {
               {isPending ? "Analyzing career outlook…" : "Predict My Career Outcomes"}
             </Button>
             {error && (
-              <div role="alert" className="mt-4 flex items-center gap-2 rounded-xl border border-rose-500/20 bg-rose-500/8 px-4 py-2.5 text-sm text-rose-400">
+              <div role="alert" className="mt-4 flex items-center gap-2 rounded-xl border border-[#C0392B]/20 bg-[#C0392B]/8 px-4 py-2.5 text-sm text-[#C0392B]">
                 <AlertCircle className="size-4 shrink-0" aria-hidden="true" />
                 {error}
               </div>
@@ -213,8 +213,8 @@ export default function CareerPage() {
             )}
           </div>
 
-          <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.05] px-4 py-3" role="note">
-            <p className="text-xs text-amber-400/90">{result.disclaimer}</p>
+          <div className="rounded-xl border border-[#C49A3C]/20 bg-[#C49A3C]/[0.05] px-4 py-3" role="note">
+            <p className="text-xs text-[#C49A3C]/90">{result.disclaimer}</p>
           </div>
         </div>
       )}

@@ -62,10 +62,10 @@ const JOB_TYPES: { value: JobType; label: string; sub: string; icon: typeof Cloc
 ];
 
 const JOB_TYPE_COLORS: Record<JobType, string> = {
-  PART_TIME: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20",
-  FULL_TIME: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20",
-  INTERNSHIP: "bg-violet-500/10 text-violet-700 dark:text-violet-400 border-violet-500/20",
-  REMOTE: "bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20",
+  PART_TIME: "bg-[#4A90D9]/10 text-[#4A90D9] border-[#4A90D9]/20",
+  FULL_TIME: "bg-[#4A90D9]/10 text-[#4A90D9] border-[#4A90D9]/20",
+  INTERNSHIP: "bg-[#4A90D9]/10 text-[#4A90D9] border-[#4A90D9]/20",
+  REMOTE: "bg-[#4A90D9]/10 text-[#4A90D9] border-[#4A90D9]/20",
 };
 
 const LOADING_MESSAGES = [
@@ -79,8 +79,8 @@ const LOADING_MESSAGES = [
 
 function getCompanyColor(company: string): string {
   const colors = [
-    "bg-blue-500", "bg-emerald-500", "bg-violet-500", "bg-amber-500",
-    "bg-rose-500", "bg-cyan-500", "bg-indigo-500", "bg-teal-500",
+    "bg-[#4A90D9]", "bg-[#3D9970]", "bg-[#C49A3C]", "bg-[#7A8BA8]",
+    "bg-[#C0392B]", "bg-[#3D4F6B]", "bg-[#4A90D9]", "bg-[#3D9970]",
   ];
   let hash = 0;
   for (let i = 0; i < company.length; i++) hash = company.charCodeAt(i) + ((hash << 5) - hash);
@@ -90,10 +90,10 @@ function getCompanyColor(company: string): string {
 function freshnessInfo(cachedAt?: string | null): { dot: string; text: string } {
   if (!cachedAt) return { dot: "bg-gray-400", text: "Just fetched" };
   const ageMin = (Date.now() - new Date(cachedAt).getTime()) / 60_000;
-  if (ageMin < 5) return { dot: "bg-emerald-500", text: "Updated just now" };
-  if (ageMin < 30) return { dot: "bg-emerald-500", text: `Updated ${Math.floor(ageMin)} min ago` };
-  if (ageMin < 55) return { dot: "bg-yellow-500", text: `Updated ${Math.floor(ageMin)} min ago` };
-  return { dot: "bg-orange-500", text: "Refreshing data..." };
+  if (ageMin < 5) return { dot: "bg-[#3D9970]", text: "Updated just now" };
+  if (ageMin < 30) return { dot: "bg-[#3D9970]", text: `Updated ${Math.floor(ageMin)} min ago` };
+  if (ageMin < 55) return { dot: "bg-[#C49A3C]", text: `Updated ${Math.floor(ageMin)} min ago` };
+  return { dot: "bg-[#C0392B]", text: "Refreshing data..." };
 }
 
 // ── Combobox (reusable) ──────────────────────────────────────────────────────
@@ -212,7 +212,7 @@ function JobCard({
           </span>
         )}
         {listing.is_remote && (
-          <span className="inline-flex items-center gap-1 rounded-full border border-orange-500/20 bg-orange-500/10 px-2.5 py-0.5 text-xs font-medium text-orange-700 dark:text-orange-400">
+          <span className="inline-flex items-center gap-1 rounded-full border border-[#4A90D9]/20 bg-[#4A90D9]/10 px-2.5 py-0.5 text-xs font-medium text-[#4A90D9]">
             🌐 Remote
           </span>
         )}
@@ -241,7 +241,7 @@ function JobCard({
             </span>
           )}
           {listing.visa_sponsorship === "Mentioned" && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+            <span className="inline-flex items-center gap-1 rounded-full border border-[#3D9970]/20 bg-[#3D9970]/10 px-2 py-0.5 text-xs font-medium text-[#3D9970]">
               <Shield className="size-3" />
               Sponsorship mentioned
             </span>
@@ -261,7 +261,7 @@ function JobCard({
       {/* AI Live badge */}
       <div className="mt-2 flex justify-end">
         <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-          <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="size-1.5 rounded-full bg-[#3D9970] animate-pulse" />
           AI · Live
         </span>
       </div>
@@ -555,7 +555,7 @@ export default function JobsClient() {
   return (
     <div className="min-h-screen pb-16">
       {/* Hero */}
-      <div className="relative overflow-hidden border-b border-border/50 bg-gradient-to-br from-primary/5 via-background to-violet-500/5 px-4 py-10 sm:py-14">
+      <div className="relative overflow-hidden border-b border-border/50 bg-gradient-to-br from-primary/5 via-background to-[#4A90D9]/5 px-4 py-10 sm:py-14">
         <motion.div
           className="mx-auto max-w-3xl text-center"
           initial={{ opacity: 0 }}
@@ -596,8 +596,8 @@ export default function JobsClient() {
             <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/80 px-3 py-1 text-sm font-medium backdrop-blur">
               💼 Updated Hourly
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-sm font-medium text-emerald-700 dark:text-emerald-400">
-              <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#3D9970]/20 bg-[#3D9970]/10 px-3 py-1 text-sm font-medium text-[#3D9970]">
+              <span className="size-1.5 animate-pulse rounded-full bg-[#3D9970]" />
               Live Data
             </span>
           </motion.div>
@@ -905,22 +905,22 @@ export default function JobsClient() {
                   {selectedCity && selectedCountry && ` · ${selectedCity}, ${selectedCountry.flag}`}
                 </span>
                 {result.source_used === "adzuna" && (
-                  <span title="Live data from Adzuna — official job board partner" className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                  <span title="Live data from Adzuna — official job board partner" className="rounded-full border border-[#3D9970]/20 bg-[#3D9970]/10 px-2.5 py-0.5 text-xs font-medium text-[#3D9970]">
                     📋 Adzuna · Official Data
                   </span>
                 )}
                 {result.source_used === "jsearch" && (
-                  <span title="Aggregated from Indeed, LinkedIn and Glassdoor via JSearch" className="rounded-full border border-blue-500/20 bg-blue-500/10 px-2.5 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-400">
+                  <span title="Aggregated from Indeed, LinkedIn and Glassdoor via JSearch" className="rounded-full border border-[#4A90D9]/20 bg-[#4A90D9]/10 px-2.5 py-0.5 text-xs font-medium text-[#4A90D9]">
                     🔍 JSearch · Indeed/LinkedIn
                   </span>
                 )}
                 {result.source_used === "adzuna+jsearch" && (
-                  <span title="Combined results from Adzuna and JSearch" className="rounded-full border border-blue-500/20 bg-blue-500/10 px-2.5 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-400">
+                  <span title="Combined results from Adzuna and JSearch" className="rounded-full border border-[#4A90D9]/20 bg-[#4A90D9]/10 px-2.5 py-0.5 text-xs font-medium text-[#4A90D9]">
                     📋🔍 Adzuna + JSearch
                   </span>
                 )}
                 {result.source_used === "ai_generated" && (
-                  <span title="Generated by AI — job boards unavailable for this region" className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400">
+                  <span title="Generated by AI — job boards unavailable for this region" className="rounded-full border border-[#C49A3C]/20 bg-[#C49A3C]/10 px-2.5 py-0.5 text-xs font-medium text-[#C49A3C]">
                     🤖 AI Generated
                   </span>
                 )}
@@ -930,7 +930,7 @@ export default function JobsClient() {
                   </span>
                 )}
                 <div className="ml-auto flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <span className={`size-2 rounded-full ${isRefreshing ? "bg-orange-500 animate-pulse" : freshness.dot}`} />
+                  <span className={`size-2 rounded-full ${isRefreshing ? "bg-[#C49A3C] animate-pulse" : freshness.dot}`} />
                   {isRefreshing ? "Refreshing data..." : freshness.text}
                 </div>
               </div>
@@ -942,19 +942,19 @@ export default function JobsClient() {
                     initial={{ opacity: 0, y: -8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                    className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3"
+                    className="flex items-start gap-3 rounded-xl border border-[#C49A3C]/20 bg-[#C49A3C]/5 px-4 py-3"
                   >
-                    <Clock className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                    <Clock className="mt-0.5 size-4 shrink-0 text-[#C49A3C]" />
                     <div className="flex-1 text-sm">
-                      <p className="font-semibold text-amber-800 dark:text-amber-300">
+                      <p className="font-semibold text-[#C49A3C]">
                         Work Hour Limit {selectedCountry && `· ${selectedCountry.flag} ${selectedCountry.name}`}
                       </p>
-                      <p className="mt-0.5 text-amber-700 dark:text-amber-400">{result.work_hour_limit}</p>
+                      <p className="mt-0.5 text-[#C49A3C]/80">{result.work_hour_limit}</p>
                     </div>
                     <button
                       type="button"
                       onClick={() => setWorkHourDismissed(true)}
-                      className="text-amber-600 hover:text-amber-800 dark:text-amber-400"
+                      className="text-[#C49A3C] hover:text-[#C49A3C]/80"
                     >
                       <X className="size-4" />
                     </button>
@@ -964,14 +964,14 @@ export default function JobsClient() {
 
               {/* AI fallback warning banner — always visible when AI-generated results shown */}
               {result.ai_fallback_used && (
-                <div className="rounded-xl border border-amber-500/30 bg-amber-500/8 px-4 py-4">
+                <div className="rounded-xl border border-[#C49A3C]/30 bg-[#C49A3C]/8 px-4 py-4">
                   <div className="flex items-start gap-3">
-                    <AlertTriangle className="mt-0.5 size-5 shrink-0 text-amber-600 dark:text-amber-400" />
+                    <AlertTriangle className="mt-0.5 size-5 shrink-0 text-[#C49A3C]" />
                     <div className="flex-1">
-                      <p className="font-semibold text-amber-800 dark:text-amber-300">
+                      <p className="font-semibold text-[#C49A3C]">
                         ⚠️ AI-Generated Listings
                       </p>
-                      <p className="mt-1 text-sm text-amber-700 dark:text-amber-400">
+                      <p className="mt-1 text-sm text-[#C49A3C]/80">
                         Live job boards are not available for {selectedCountry?.name ?? "this country"} right now.
                         These listings were generated by AI based on real market knowledge for{" "}
                         {selectedField} professionals in {selectedCity}. Always verify on official job boards before applying.
@@ -981,7 +981,7 @@ export default function JobsClient() {
                           href={`https://linkedin.com/jobs/search?keywords=${encodeURIComponent(selectedField)}&location=${encodeURIComponent(selectedCity)}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-800 transition-colors hover:bg-amber-500/20 dark:text-amber-300"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-[#C49A3C]/30 bg-[#C49A3C]/10 px-3 py-1.5 text-xs font-semibold text-[#C49A3C] transition-colors hover:bg-[#C49A3C]/20"
                         >
                           Search on LinkedIn →
                         </a>
@@ -989,7 +989,7 @@ export default function JobsClient() {
                           href={`https://indeed.com/jobs?q=${encodeURIComponent(selectedField)}&l=${encodeURIComponent(selectedCity)}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-800 transition-colors hover:bg-amber-500/20 dark:text-amber-300"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-[#C49A3C]/30 bg-[#C49A3C]/10 px-3 py-1.5 text-xs font-semibold text-[#C49A3C] transition-colors hover:bg-[#C49A3C]/20"
                         >
                           Search on Indeed →
                         </a>
@@ -1005,19 +1005,19 @@ export default function JobsClient() {
                   <motion.div
                     initial={{ opacity: 0, y: -8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="overflow-hidden rounded-xl border border-blue-500/20 bg-blue-500/5"
+                    className="overflow-hidden rounded-xl border border-[#4A90D9]/20 bg-[#4A90D9]/5"
                   >
                     <button
                       type="button"
                       onClick={() => setPostGradOpen((v) => !v)}
                       className="flex w-full items-center gap-3 px-4 py-3 text-left"
                     >
-                      <GraduationCap className="size-4 shrink-0 text-blue-600 dark:text-blue-400" />
-                      <span className="flex-1 text-sm font-semibold text-blue-800 dark:text-blue-300">
+                      <GraduationCap className="size-4 shrink-0 text-[#4A90D9]" />
+                      <span className="flex-1 text-sm font-semibold text-[#4A90D9]">
                         🎓 Work Authorization After Your Masters/PhD{selectedCountry && ` in ${selectedCountry.name}`}
                       </span>
                       <motion.span animate={{ rotate: postGradOpen ? 180 : 0 }}>
-                        <ChevronDown className="size-4 text-blue-600 dark:text-blue-400" />
+                        <ChevronDown className="size-4 text-[#4A90D9]" />
                       </motion.span>
                     </button>
                     <AnimatePresence initial={false}>
@@ -1030,8 +1030,8 @@ export default function JobsClient() {
                         >
                           <ol className="space-y-2 px-4 pb-4">
                             {result.post_grad_permit_steps.map((step, i) => (
-                              <li key={i} className="flex items-start gap-2.5 text-sm text-blue-800 dark:text-blue-300">
-                                <CheckCircle className="mt-0.5 size-4 shrink-0 text-blue-500" />
+                              <li key={i} className="flex items-start gap-2.5 text-sm text-[#4A90D9]/80">
+                                <CheckCircle className="mt-0.5 size-4 shrink-0 text-[#4A90D9]" />
                                 <span>{step}</span>
                               </li>
                             ))}
