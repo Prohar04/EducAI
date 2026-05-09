@@ -54,7 +54,7 @@ export function OAuthButton() {
           : hovered
           ? "rgba(255,255,255,0.08)"
           : "rgba(255,255,255,0.05)",
-        border: `1px solid ${hovered ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.09)"}`,
+        border: `1px solid ${hovered ? "rgba(74,144,217,0.28)" : "rgba(74,144,217,0.18)"}`,
         borderRadius: 10,
         cursor: "pointer",
         color: "#E8EEF8",

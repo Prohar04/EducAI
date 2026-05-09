@@ -431,7 +431,7 @@ function HeroSection({ session, profile, savedCount, deadlineCount }: HeroSectio
               {completeness < 80 && (
                 <Link
                   href="/app/profile"
-                  className="inline-flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-5 text-sm font-medium text-foreground hover:bg-white/[0.08] transition-colors"
+                  className="inline-flex h-10 items-center gap-2 rounded-xl border border-[rgba(74,144,217,0.18)] bg-white/[0.04] px-5 text-sm font-medium text-foreground hover:bg-white/[0.08] transition-colors"
                 >
                   <Zap className="size-3.5 text-[#C49A3C]" aria-hidden="true" />
                   Profile {completeness}% complete
