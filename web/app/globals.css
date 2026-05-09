@@ -321,14 +321,24 @@ a:focus:not(:focus-visible) {
   box-shadow: none;
 }
 
+/* Kill ALL focus rings on nav items */
+.sidebar-nav-item,
 .sidebar-nav-item:focus,
-.sidebar-nav-item:focus-visible {
-  outline: none;
-  box-shadow: none;
+.sidebar-nav-item:hover,
+.sidebar-nav-item:active,
+.sidebar-nav-item:focus-visible,
+.sidebar-nav-item:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.sidebar-nav-item:focus:not(:focus-visible) {
-  outline: none;
+/* Kill browser default button/link focus inside nav items */
+.sidebar-nav-item *:focus,
+.sidebar-nav-item *:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* ── Auth form — scoped ring suppression for mouse interactions ───────────── */

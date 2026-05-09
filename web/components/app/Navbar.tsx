@@ -263,22 +263,41 @@ export function Navbar({ user }: { user: Session["user"] }) {
                             <DropdownMenuItem
                               key={href}
                               asChild
-                              className={`rounded-lg p-0 transition-colors ${active ? "focus:bg-transparent" : "focus:bg-muted/60"}`}
+                              className="p-0 transition-colors focus:bg-transparent"
                             >
                               <Link
                                 href={href}
                                 prefetch={["/app/programs", "/app/scholarships", "/app/jobs"].includes(href)}
-                                className={`sidebar-nav-item flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all ${
+                                className={`sidebar-nav-item relative flex w-full cursor-pointer items-center gap-2.5 px-3 py-2 text-sm transition-all ${
                                   active
-                                    ? `${ACTIVE_PILL_CLASS} bg-primary/10`
-                                    : "text-foreground/90 hover:bg-muted/60"
+                                    ? "text-[#E8EEF8] font-medium"
+                                    : "text-foreground/90 hover:bg-[rgba(255,255,255,0.04)] rounded-lg"
                                 }`}
                                 style={{ outline: "none", WebkitTapHighlightColor: "transparent" }}
                               >
-                                <Icon className={`size-3.5 shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`} />
-                                <span className="flex-1 text-[13px]">{label}</span>
+                                {active && (
+                                  <span
+                                    aria-hidden
+                                    style={{
+                                      position: "absolute",
+                                      inset: 0,
+                                      background: "rgba(74,144,217,0.10)",
+                                      backdropFilter: "blur(8px)",
+                                      WebkitBackdropFilter: "blur(8px)",
+                                      borderLeft: "2px solid rgba(74,144,217,0.70)",
+                                      borderRight: "none",
+                                      borderTop: "none",
+                                      borderBottom: "none",
+                                      borderRadius: 0,
+                                      pointerEvents: "none",
+                                      zIndex: 0,
+                                    }}
+                                  />
+                                )}
+                                <Icon className={`relative z-10 size-3.5 shrink-0 ${active ? "text-[#4A90D9]" : "text-muted-foreground"}`} />
+                                <span className="relative z-10 flex-1 text-[13px]">{label}</span>
                                 {soon && (
-                                  <span className="rounded-full border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium leading-none text-muted-foreground">
+                                  <span className="relative z-10 rounded-full border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium leading-none text-muted-foreground">
                                     Soon
                                   </span>
                                 )}
@@ -476,15 +495,32 @@ export function Navbar({ user }: { user: Session["user"] }) {
                       key={href}
                       href={href}
                       aria-current={active ? "page" : undefined}
-                      className={`sidebar-nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                      className={`sidebar-nav-item relative flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors ${
                         active
-                          ? "bg-primary/10 text-primary"
-                          : "text-foreground/80 hover:bg-muted/60 hover:text-foreground"
+                          ? "text-primary"
+                          : "text-foreground/80 hover:bg-muted/60 hover:text-foreground rounded-xl"
                       }`}
                       style={{ outline: "none", WebkitTapHighlightColor: "transparent" }}
                     >
-                      <Icon className={`size-4 shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`} />
-                      {label}
+                      {active && (
+                        <span
+                          aria-hidden
+                          style={{
+                            position: "absolute",
+                            inset: 0,
+                            background: "rgba(74,144,217,0.10)",
+                            borderLeft: "2px solid rgba(74,144,217,0.70)",
+                            borderRight: "none",
+                            borderTop: "none",
+                            borderBottom: "none",
+                            borderRadius: 0,
+                            pointerEvents: "none",
+                            zIndex: 0,
+                          }}
+                        />
+                      )}
+                      <Icon className={`relative z-10 size-4 shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`} />
+                      <span className="relative z-10">{label}</span>
                     </Link>
                   );
                 })}
@@ -522,17 +558,34 @@ export function Navbar({ user }: { user: Session["user"] }) {
                             <Link
                               key={href}
                               href={href}
-                              className={`sidebar-nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                              className={`sidebar-nav-item relative flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors ${
                                 active
-                                  ? "bg-primary/10 text-primary"
-                                  : "text-foreground/80 hover:bg-muted/60 hover:text-foreground"
+                                  ? "text-primary"
+                                  : "text-foreground/80 hover:bg-muted/60 hover:text-foreground rounded-xl"
                               }`}
                               style={{ outline: "none", WebkitTapHighlightColor: "transparent" }}
                             >
-                              <Icon className={`size-4 shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`} />
-                              <span className="flex-1">{label}</span>
+                              {active && (
+                                <span
+                                  aria-hidden
+                                  style={{
+                                    position: "absolute",
+                                    inset: 0,
+                                    background: "rgba(74,144,217,0.10)",
+                                    borderLeft: "2px solid rgba(74,144,217,0.70)",
+                                    borderRight: "none",
+                                    borderTop: "none",
+                                    borderBottom: "none",
+                                    borderRadius: 0,
+                                    pointerEvents: "none",
+                                    zIndex: 0,
+                                  }}
+                                />
+                              )}
+                              <Icon className={`relative z-10 size-4 shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`} />
+                              <span className="relative z-10 flex-1">{label}</span>
                               {soon && (
-                                <span className="rounded-full border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-primary">
+                                <span className="relative z-10 rounded-full border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-primary">
                                   Soon
                                 </span>
                               )}
