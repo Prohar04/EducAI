@@ -40,7 +40,7 @@ import type { Session } from "@/types/auth.type";
 import { getUnifiedNotifications, type AppNotification, type NotificationType } from "@/lib/auth/action";
 
 const ACTIVE_PILL_CLASS =
-  "bg-[rgba(74,144,217,0.09)] text-[#E8EEF8]";
+  "bg-[rgba(74,144,217,0.10)] text-[#E8EEF8]";
 const INACTIVE_PILL_CLASS =
   "text-[#3D4F6B] hover:text-[#7A8BA8] hover:bg-[rgba(255,255,255,0.04)]";
 
@@ -213,9 +213,10 @@ export function Navbar({ user }: { user: Session["user"] }) {
                     href={href}
                     prefetch={href === "/app/programs"}
                     aria-current={active ? "page" : undefined}
-                    className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                    className={`sidebar-nav-item inline-flex items-center rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
                       active ? ACTIVE_PILL_CLASS : INACTIVE_PILL_CLASS
                     }`}
+                    style={{ outline: "none", WebkitTapHighlightColor: "transparent" }}
                   >
                     {label}
                   </Link>
@@ -228,9 +229,10 @@ export function Navbar({ user }: { user: Session["user"] }) {
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                    className={`sidebar-nav-item inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
                       isToolsActive ? ACTIVE_PILL_CLASS : INACTIVE_PILL_CLASS
                     }`}
+                    style={{ outline: "none", WebkitTapHighlightColor: "transparent" }}
                   >
                     Tools
                     <motion.span
@@ -266,11 +268,12 @@ export function Navbar({ user }: { user: Session["user"] }) {
                               <Link
                                 href={href}
                                 prefetch={["/app/programs", "/app/scholarships", "/app/jobs"].includes(href)}
-                                className={`flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all ${
+                                className={`sidebar-nav-item flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-all ${
                                   active
                                     ? `${ACTIVE_PILL_CLASS} bg-primary/10`
                                     : "text-foreground/90 hover:bg-muted/60"
                                 }`}
+                                style={{ outline: "none", WebkitTapHighlightColor: "transparent" }}
                               >
                                 <Icon className={`size-3.5 shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`} />
                                 <span className="flex-1 text-[13px]">{label}</span>
@@ -473,11 +476,12 @@ export function Navbar({ user }: { user: Session["user"] }) {
                       key={href}
                       href={href}
                       aria-current={active ? "page" : undefined}
-                      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                      className={`sidebar-nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                         active
                           ? "bg-primary/10 text-primary"
                           : "text-foreground/80 hover:bg-muted/60 hover:text-foreground"
                       }`}
+                      style={{ outline: "none", WebkitTapHighlightColor: "transparent" }}
                     >
                       <Icon className={`size-4 shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`} />
                       {label}
@@ -518,11 +522,12 @@ export function Navbar({ user }: { user: Session["user"] }) {
                             <Link
                               key={href}
                               href={href}
-                              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                              className={`sidebar-nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                                 active
                                   ? "bg-primary/10 text-primary"
                                   : "text-foreground/80 hover:bg-muted/60 hover:text-foreground"
                               }`}
+                              style={{ outline: "none", WebkitTapHighlightColor: "transparent" }}
                             >
                               <Icon className={`size-4 shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`} />
                               <span className="flex-1">{label}</span>
