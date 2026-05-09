@@ -69,8 +69,8 @@ export default function LandingClient({ isLoggedIn }: LandingClientProps) {
           zIndex: 100,
           background: scrolled ? "rgba(8,13,24,0.92)" : "transparent",
           borderBottom: scrolled ? "1px solid rgba(255,255,255,0.05)" : "1px solid transparent",
-          backdropFilter: scrolled ? "blur(24px)" : "none",
-          WebkitBackdropFilter: scrolled ? "blur(24px)" : "none",
+          backdropFilter: scrolled ? "blur(12px)" : "none",
+          WebkitBackdropFilter: scrolled ? "blur(12px)" : "none",
           transition: "background 400ms ease, border-color 400ms ease, backdrop-filter 400ms ease",
         }}
       >

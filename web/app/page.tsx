@@ -246,7 +246,7 @@ export default async function HomePage() {
         </section>
 
         {/* ── FEATURES ────────────────────────────────────────────────── */}
-        <section id="features" aria-labelledby="features-heading" style={{ paddingTop: 140, paddingBottom: 100 }}>
+        <section id="features" aria-labelledby="features-heading" className="below-fold" style={{ paddingTop: 140, paddingBottom: 100 }}>
           <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px" }}>
             {/* Section label */}
             <div style={{ textAlign: "center", marginBottom: 60 }}>
@@ -288,7 +288,7 @@ export default async function HomePage() {
         </section>
 
         {/* ── STAY INFORMED ───────────────────────────────────────────── */}
-        <section aria-labelledby="news-heading" style={{ paddingTop: 100, paddingBottom: 100 }}>
+        <section aria-labelledby="news-heading" className="below-fold" style={{ paddingTop: 100, paddingBottom: 100 }}>
           <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px" }}>
             <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "#2A3A52", marginBottom: 16 }}>
               DAILY UPDATES
@@ -316,7 +316,7 @@ export default async function HomePage() {
         </section>
 
         {/* ── HOW IT WORKS ────────────────────────────────────────────── */}
-        <section id="how-it-works" aria-labelledby="how-heading" style={{ paddingTop: 120, paddingBottom: 80 }}>
+        <section id="how-it-works" aria-labelledby="how-heading" className="below-fold" style={{ paddingTop: 120, paddingBottom: 80 }}>
           <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 24px" }}>
             <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "#2A3A52", marginBottom: 16 }}>
               HOW IT WORKS

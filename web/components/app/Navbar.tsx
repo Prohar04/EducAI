@@ -105,15 +105,15 @@ function NotifIcon({ type }: { type: NotificationType }) {
   const classes = "mt-0.5 size-4 shrink-0";
   switch (type) {
     case "scholarship_alert":
-      return <Award className={`${classes} text-amber-500`} />;
+      return <Award className={`${classes} text-[#C49A3C]`} />;
     case "profile_incomplete":
       return <User className={`${classes} text-primary`} />;
     case "match_ready":
       return <Sparkles className={`${classes} text-primary`} />;
     case "sop_ready":
-      return <FileText className={`${classes} text-emerald-500`} />;
+      return <FileText className={`${classes} text-[#3D9970]`} />;
     case "cv_ready":
-      return <ClipboardList className={`${classes} text-emerald-500`} />;
+      return <ClipboardList className={`${classes} text-[#3D9970]`} />;
     default:
       return <Bell className={`${classes} text-muted-foreground`} />;
   }
@@ -192,7 +192,7 @@ export function Navbar({ user }: { user: Session["user"] }) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)", background: "rgba(8,13,24,0.92)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)" }}>
+      <header className="gpu-layer sticky top-0 z-50 w-full" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)", background: "rgba(8,13,24,0.92)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
         <nav
           className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8"
           aria-label="App navigation"
@@ -299,7 +299,7 @@ export function Navbar({ user }: { user: Session["user"] }) {
                 <Button variant="ghost" size="icon" className="relative size-9" aria-label="Notifications">
                   <Bell className="size-4" />
                   {unreadCount > 0 && (
-                    <span className="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                    <span className="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-[#C0392B] text-[10px] font-bold text-white">
                       {unreadCount > 9 ? "9+" : unreadCount}
                     </span>
                   )}

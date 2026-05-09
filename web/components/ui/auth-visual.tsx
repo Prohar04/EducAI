@@ -29,7 +29,7 @@ export default function AuthVisual({ className }: { className?: string }) {
 
     // --- STARS ---
     interface Star { x: number; y: number; r: number; a: number; ta: number; to: number }
-    const stars: Star[] = Array.from({ length: 25 }, () => ({
+    const stars: Star[] = Array.from({ length: 18 }, () => ({
       x: Math.random(),
       y: Math.random(),
       r: Math.random() * 0.8 + 0.2,
@@ -66,7 +66,7 @@ export default function AuthVisual({ className }: { className?: string }) {
       rotation: number
       rotSpeed: number
     }
-    const docs: DocPage[] = Array.from({ length: 5 }, () => ({
+    const docs: DocPage[] = Array.from({ length: 4 }, () => ({
       x: Math.random(),
       y: Math.random(),
       w: 22 + Math.random() * 12,
@@ -87,7 +87,7 @@ export default function AuthVisual({ className }: { className?: string }) {
       wobbleSpeed: number
       wobbleOffset: number
     }
-    const caps: GradCap[] = Array.from({ length: 7 }, () => ({
+    const caps: GradCap[] = Array.from({ length: 5 }, () => ({
       x: Math.random(),
       y: Math.random(),
       size: 8 + Math.random() * 8,
@@ -249,8 +249,18 @@ export default function AuthVisual({ className }: { className?: string }) {
     }
 
     let t = 0
+    let lastFrame = 0
+    const FRAME_INTERVAL = 1000 / 30 // 30fps
 
-    const render = () => {
+    const render = (now = 0) => {
+      rafRef.current = requestAnimationFrame(render)
+      if (now - lastFrame < FRAME_INTERVAL) return
+      lastFrame = now
+
+      // Skip draw when off-screen
+      const rect = canvas.getBoundingClientRect()
+      if (rect.bottom < 0 || rect.top > window.innerHeight) return
+
       const w = W()
       const h = H()
       ctx.clearRect(0, 0, w, h)
@@ -436,33 +446,32 @@ export default function AuthVisual({ className }: { className?: string }) {
       }
 
       t += 0.016
-      rafRef.current = requestAnimationFrame(render)
     }
 
-    render()
+    rafRef.current = requestAnimationFrame(render)
 
     let resizeTimer: ReturnType<typeof setTimeout>
-    const onResize = () => {
+    const resizeObserver = new ResizeObserver(() => {
       clearTimeout(resizeTimer)
       resizeTimer = setTimeout(() => {
         cancelAnimationFrame(rafRef.current)
         init()
-        render()
+        rafRef.current = requestAnimationFrame(render)
       }, 250)
-    }
+    })
+    resizeObserver.observe(canvas)
 
     const onVis = () => {
       if (document.hidden) cancelAnimationFrame(rafRef.current)
-      else render()
+      else rafRef.current = requestAnimationFrame(render)
     }
 
-    window.addEventListener("resize", onResize)
     document.addEventListener("visibilitychange", onVis)
 
     return () => {
       cancelAnimationFrame(rafRef.current)
       clearTimeout(resizeTimer)
-      window.removeEventListener("resize", onResize)
+      resizeObserver.disconnect()
       document.removeEventListener("visibilitychange", onVis)
     }
   }, [reduced])
