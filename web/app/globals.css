@@ -136,6 +136,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeSpeed;
@@ -145,24 +146,37 @@ body {
   background-color: #080D18;
   color: #E8EEF8;
   min-height: 100vh;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
   font-family: var(--font-inter, Inter, ui-sans-serif, system-ui, sans-serif);
+  /* Grid lines only — no fixed attachment (fixed causes scroll repaint) */
   background-image:
-    radial-gradient(
-      ellipse 90% 60% at 65% 35%,
-      rgba(27,61,107,0.28) 0%,
-      rgba(8,13,24,0) 70%
-    ),
-    linear-gradient(
-      rgba(74,144,217,0.010) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      90deg,
-      rgba(74,144,217,0.010) 1px,
-      transparent 1px
-    );
-  background-size: 100% 100%, 80px 80px, 80px 80px;
-  background-attachment: fixed;
+    linear-gradient(rgba(74,144,217,0.010) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(74,144,217,0.010) 1px, transparent 1px);
+  background-size: 80px 80px;
+  background-attachment: scroll;
+}
+
+/* BMW iX3 glow as fixed pseudo-element — does NOT repaint on scroll */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 90% 60% at 65% 35%,
+    rgba(27,61,107,0.22) 0%,
+    rgba(8,13,24,0) 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+  will-change: auto;
+}
+
+/* All page content sits above the glow pseudo-element */
+body > * {
+  position: relative;
+  z-index: 1;
 }
 
 ::selection {
@@ -262,10 +276,10 @@ a:focus:not(:focus-visible) {
   }
 
   .card-glass {
-    background: rgba(13,22,37,0.65);
+    background: rgba(13,22,37,0.85);
     border: 1px solid rgba(255,255,255,0.06);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 
   .text-gradient-primary {
@@ -327,10 +341,52 @@ a:focus:not(:focus-visible) {
   }
 }
 
+/* ── GPU compositing for fixed/sticky elements ──────────────────────────── */
+.gpu-layer {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+canvas {
+  will-change: contents;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* ── Hover animations disabled on touch devices ─────────────────────────── */
+@media (hover: none) {
+  .hover-lift:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* ── Reduce animation duration on mobile ────────────────────────────────── */
+@media (max-width: 768px) {
+  * {
+    animation-duration: 0.3s !important;
+    transition-duration: 0.2s !important;
+  }
+}
+
+/* ── Content visibility for below-fold sections ─────────────────────────── */
+.below-fold {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
+}
+
+/* ── Smooth scrollable containers ───────────────────────────────────────── */
+.scroll-smooth {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
 /* ── Responsive: mobile text + layout ───────────────────────────────────── */
 @media (max-width: 767px) {
   body {
-    background-size: 100% 100%, 40px 40px, 40px 40px;
+    background-size: 40px 40px;
   }
 }
 

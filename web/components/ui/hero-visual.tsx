@@ -45,8 +45,18 @@ export default function HeroVisual({ className }: { className?: string }) {
     ]
 
     let t = 0
+    let lastFrame = 0
+    const FRAME_INTERVAL = 1000 / 30 // 30fps
 
-    const render = () => {
+    const render = (now = 0) => {
+      rafRef.current = requestAnimationFrame(render)
+      if (now - lastFrame < FRAME_INTERVAL) return
+      lastFrame = now
+
+      // Skip draw when off-screen
+      const rect = canvas.getBoundingClientRect()
+      if (rect.bottom < 0 || rect.top > window.innerHeight) return
+
       const W = canvas.offsetWidth
       const H = canvas.offsetHeight
       ctx.clearRect(0, 0, W, H)
@@ -135,32 +145,32 @@ export default function HeroVisual({ className }: { className?: string }) {
       ctx.fill()
 
       t += 0.016
-      rafRef.current = requestAnimationFrame(render)
     }
 
-    render()
+    rafRef.current = requestAnimationFrame(render)
 
     let resizeTimer: ReturnType<typeof setTimeout>
-    const onResize = () => {
+    const resizeObserver = new ResizeObserver(() => {
       clearTimeout(resizeTimer)
       resizeTimer = setTimeout(() => {
         cancelAnimationFrame(rafRef.current)
         init()
-        render()
+        rafRef.current = requestAnimationFrame(render)
       }, 250)
-    }
+    })
+    resizeObserver.observe(canvas)
+
     const onVisibility = () => {
       if (document.hidden) cancelAnimationFrame(rafRef.current)
-      else render()
+      else rafRef.current = requestAnimationFrame(render)
     }
 
-    window.addEventListener("resize", onResize)
     document.addEventListener("visibilitychange", onVisibility)
 
     return () => {
       cancelAnimationFrame(rafRef.current)
       clearTimeout(resizeTimer)
-      window.removeEventListener("resize", onResize)
+      resizeObserver.disconnect()
       document.removeEventListener("visibilitychange", onVisibility)
     }
   }, [reduced])

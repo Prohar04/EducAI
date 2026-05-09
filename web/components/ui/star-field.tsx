@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useRef } from "react"
 import { useReducedMotion } from "framer-motion"
+import { isLowEndDevice } from "@/lib/utils/device-performance"
 
 interface Star {
   x: number
@@ -18,12 +19,13 @@ interface StarFieldProps {
   style?: React.CSSProperties
 }
 
-export default function StarField({ className, density = 8000, style }: StarFieldProps) {
+export default function StarField({ className, density = 12000, style }: StarFieldProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const rafRef = useRef<number>(0)
   const reduced = useReducedMotion()
 
   useEffect(() => {
+    if (isLowEndDevice()) return
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext("2d", { willReadFrequently: false })
@@ -89,14 +91,15 @@ export default function StarField({ className, density = 8000, style }: StarFiel
     render()
 
     let resizeTimer: ReturnType<typeof setTimeout>
-    const onResize = () => {
+    const resizeObserver = new ResizeObserver(() => {
       clearTimeout(resizeTimer)
       resizeTimer = setTimeout(() => {
         cancelAnimationFrame(rafRef.current)
         init()
         render()
       }, 250)
-    }
+    })
+    resizeObserver.observe(canvas)
 
     const onVisibility = () => {
       if (document.hidden) {
@@ -106,13 +109,12 @@ export default function StarField({ className, density = 8000, style }: StarFiel
       }
     }
 
-    window.addEventListener("resize", onResize)
     document.addEventListener("visibilitychange", onVisibility)
 
     return () => {
       cancelAnimationFrame(rafRef.current)
       clearTimeout(resizeTimer)
-      window.removeEventListener("resize", onResize)
+      resizeObserver.disconnect()
       document.removeEventListener("visibilitychange", onVisibility)
     }
   }, [density, reduced])
