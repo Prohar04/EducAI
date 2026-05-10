@@ -7,7 +7,7 @@ interface LegalLayoutProps {
 
 export default function LegalLayout({ children }: LegalLayoutProps) {
   return (
-    <div style={{ minHeight: "100vh", background: "#080D18", position: "relative", overflow: "hidden" }}>
+    <div style={{ minHeight: "100vh", background: "#080D18", position: "relative", overflowX: "hidden" }}>
       {/* Ambient glow */}
       <div
         aria-hidden="true"
