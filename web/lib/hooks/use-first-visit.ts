@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 export function useFirstVisit(key: string): boolean {
   const storageKey = `educai:visited:${key}`

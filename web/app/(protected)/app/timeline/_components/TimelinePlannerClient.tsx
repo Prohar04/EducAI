@@ -18,7 +18,6 @@ import {
 	getTimelineInputs,
 	updateTaskStatus,
 } from "@/lib/auth/action";
-import { FadeIn } from "@/components/motion/FadeIn";
 import { Reveal } from "@/components/motion/Reveal";
 import { COUNTRIES } from "@/lib/data/countries";
 

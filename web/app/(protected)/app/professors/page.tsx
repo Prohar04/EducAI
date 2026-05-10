@@ -19,7 +19,6 @@ import {
 	X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FadeIn } from "@/components/motion/FadeIn";
 import { StaggerChildren, StaggerItem } from "@/components/motion/FadeIn";
 import { SmartAutocomplete, type SuggestionItem } from "@/components/forms/SmartAutocomplete";
 import { searchProfessorsAction, getUserProfile, type ProfessorResult } from "@/lib/auth/action";

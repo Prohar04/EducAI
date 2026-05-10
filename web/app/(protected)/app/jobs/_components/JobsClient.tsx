@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageHeader } from "@/components/layout/page-header";
 import HeaderBadge from "@/components/ui/header-badge";
@@ -177,11 +178,14 @@ function JobCard({
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           {listing.company_logo ? (
-            <img
+            <Image
               src={listing.company_logo}
               alt={listing.company}
+              width={48}
+              height={48}
               className="size-12 rounded-lg object-contain border border-border bg-muted"
               onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+              unoptimized
             />
           ) : (
             <div className={`flex size-12 shrink-0 items-center justify-center rounded-lg text-white text-lg font-semibold ${colorClass}`}>
@@ -336,7 +340,7 @@ export default function JobsClient() {
 
   // Filter chips
   const [filterJobType, setFilterJobType] = useState<string>("all");
-  const [filterPosted, setFilterPosted] = useState<string>("any");
+  const [_filterPosted, setFilterPosted] = useState<string>("any");
   const [filterVisa, setFilterVisa] = useState<string>("any");
 
   const jobTitleDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -377,6 +381,7 @@ export default function JobsClient() {
       if (pollRef.current) clearInterval(pollRef.current);
       if (loadingMsgRef.current) clearInterval(loadingMsgRef.current);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function startPolling() {

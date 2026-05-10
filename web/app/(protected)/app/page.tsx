@@ -29,9 +29,7 @@ import { GlassCard } from "@/components/ui/glass-card";
 import { GradientText } from "@/components/ui/gradient-text";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { RevealAnimation } from "@/components/ui/reveal-animation";
-import { PageHeader } from "@/components/layout/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { DataSkeleton } from "@/components/shared/data-skeleton";
 import { DynamicGreeting } from "@/components/app/DynamicGreeting";
 import HeroVisual from "@/components/ui/hero-visual";
 import DashboardAnimation from "@/components/animations/dashboard-animation";
@@ -47,15 +45,6 @@ type DeadlineItem = {
 };
 
 // ─── UTILITY FUNCTIONS ────────────────────────────────────────────────────────
-
-const LEVEL_DISPLAY: Record<string, string> = {
-  BSC: "Bachelor's", MSC: "Master's", PHD: "PhD", MBA: "MBA",
-  DIPLOMA: "Diploma", BSc: "Bachelor's", MSc: "Master's", PhD: "PhD",
-};
-
-function formatCurrency(amount: number, currency = "USD"): string {
-  return `${currency} ${amount.toLocaleString()}`;
-}
 
 function getTargetCountriesDisplay(targetCountries: unknown): string | null {
   try {

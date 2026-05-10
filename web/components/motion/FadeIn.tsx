@@ -23,7 +23,7 @@ export function FadeIn({ children, delay = 0, duration = 0.4, className }: FadeI
 
 export function StaggerChildren({
 	children,
-	stagger = 0.08,
+	stagger: _stagger = 0.08,
 	className,
 }: {
 	children: React.ReactNode;

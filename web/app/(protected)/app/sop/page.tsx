@@ -12,7 +12,6 @@ import {
 	ChevronUp,
 	Copy,
 	Download,
-	FileText,
 	Loader2,
 	RefreshCw,
 	Sparkles,

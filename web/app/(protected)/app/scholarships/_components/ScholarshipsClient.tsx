@@ -20,13 +20,11 @@ import {
 	Search,
 	ShieldCheck,
 	SlidersHorizontal,
-	Sparkles,
 	TrendingUp,
 	X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FadeIn } from "@/components/motion/FadeIn";
 import { StaggerChildren, StaggerItem } from "@/components/motion/FadeIn";
 import { Reveal } from "@/components/motion/Reveal";
 import { COUNTRIES } from "@/lib/data/countries";
