@@ -1,5 +1,4 @@
 "use client"
-import { motion, useReducedMotion } from "framer-motion"
 
 interface GlowOrbProps {
   size?: number
@@ -24,22 +23,10 @@ export default function GlowOrb({
   className,
   style: styleProp,
 }: GlowOrbProps) {
-  const reduced = useReducedMotion()
-
   return (
-    <motion.div
+    <div
       aria-hidden="true"
       className={className}
-      animate={(pulse && !reduced) ? {
-        scale: [1, 1.07, 1],
-        opacity: [opacity, opacity * 0.72, opacity],
-      } : {}}
-      transition={{
-        duration: 9,
-        repeat: Infinity,
-        ease: "easeInOut",
-        repeatType: "mirror",
-      }}
       style={{
         position: "absolute",
         left: x,
@@ -52,7 +39,8 @@ export default function GlowOrb({
         filter: `blur(${blur}px)`,
         pointerEvents: "none",
         zIndex: 0,
-        willChange: "transform, opacity",
+        opacity,
+        animation: pulse ? "glowOrbPulse 9s ease-in-out infinite alternate" : "none",
         ...styleProp,
       }}
     />

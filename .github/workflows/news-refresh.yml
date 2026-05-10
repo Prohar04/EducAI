@@ -1,0 +1,20 @@
+name: News Refresh
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+    - cron: "0 18 * * *"
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Refresh news cache
+        run: |
+          curl -X POST "${{ secrets.SERVER_URL }}/api/news/refresh" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 120 \
+            --fail \
+            --silent \
+            --show-error
