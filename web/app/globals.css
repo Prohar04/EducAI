@@ -173,6 +173,16 @@ body::before {
   will-change: auto;
 }
 
+@media (max-width: 1023px) {
+  body::before {
+    background: radial-gradient(
+      ellipse 80% 55% at 65% 35%,
+      rgba(27,61,107,0.12) 0%,
+      rgba(8,13,24,0) 72%
+    );
+  }
+}
+
 /* All page content sits above the glow pseudo-element */
 body > * {
   position: relative;
@@ -495,11 +505,16 @@ header.gpu-layer {
   }
 }
 
-/* ── Reduce animation duration on mobile ────────────────────────────────── */
-@media (max-width: 768px) {
-  * {
-    animation-duration: 0.3s !important;
-    transition-duration: 0.2s !important;
+/* ── Mobile performance trims for smoother scrolling ───────────────────── */
+@media (max-width: 1023px) {
+  .card-glass {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .mobile-drawer-backdrop {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 }
 
