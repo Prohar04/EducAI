@@ -1,6 +1,12 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState, useTransition } from "react";
+
+const CareerAnimation = dynamic(
+  () => import("@/components/animations/career-animation"),
+  { ssr: false, loading: () => null },
+);
 import {
   AlertCircle, Briefcase, DollarSign, Globe, Loader2,
   Sparkles, TrendingUp, Zap,
@@ -53,11 +59,12 @@ export default function CareerPage() {
   const outlookStyle = result ? (OUTLOOK_STYLES[result.overallOutlook] ?? OUTLOOK_STYLES.Moderate) : null;
 
   return (
-    <main id="main-content" className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+    <main id="main-content" className="page-enter mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       <PageHeader
         title="Career Outlook"
         gradientWord="Outlook"
         subtitle="Job market demand, employability factors, salary ranges, and career pathways for your field and target country"
+        animation={<CareerAnimation />}
         action={
           result && (
             <Button variant="outline" size="sm" onClick={handlePredict} disabled={isPending} className="gap-1.5">
