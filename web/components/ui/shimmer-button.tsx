@@ -1,6 +1,5 @@
 "use client"
 import { forwardRef, memo } from "react"
-import { motion, useReducedMotion } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 const sizeStyles = {
@@ -38,23 +37,14 @@ interface ShimmerButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 const ShimmerButton = forwardRef<HTMLButtonElement, ShimmerButtonProps>(
   ({ className, size = "md", loading = false, variant = "primary",
-     children, disabled, ...props }, ref) => {
-    const reduced = useReducedMotion()
+     children, disabled, style, ...props }, ref) => {
     const isDisabled = disabled || loading
 
     return (
-      <motion.button
+      <button
         ref={ref}
-        whileHover={(!isDisabled && !reduced) ? {
-          scale: variant === "primary" ? 1.01 : 1,
-          background: variant === "primary"
-            ? "rgba(74,144,217,1.0)"
-            : variant === "ghost"
-            ? "rgba(255,255,255,0.07)"
-            : "rgba(74,144,217,0.08)",
-        } : {}}
-        whileTap={(!isDisabled && !reduced) ? { scale: 0.98 } : {}}
-        transition={{ duration: 0.18 }}
+        disabled={isDisabled}
+        className={cn("btn-press select-none", className)}
         style={{
           ...sizeStyles[size],
           ...variantStyles[variant],
@@ -67,28 +57,10 @@ const ShimmerButton = forwardRef<HTMLButtonElement, ShimmerButtonProps>(
           position: "relative",
           overflow: "hidden",
           outline: "none",
-          transition: "opacity 200ms",
+          ...style,
         }}
-        disabled={isDisabled}
-        className={cn("select-none", className)}
-        {...(props as React.ComponentProps<typeof motion.button>)}
+        {...props}
       >
-        {/* Shimmer sweep — only primary, only on hover */}
-        {variant === "primary" && !reduced && (
-          <motion.span
-            aria-hidden="true"
-            initial={{ x: "-110%" }}
-            whileHover={{ x: "110%" }}
-            transition={{ duration: 0.55, ease: "easeInOut" }}
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.09) 50%, transparent 100%)",
-              pointerEvents: "none",
-            }}
-          />
-        )}
-
         {loading && (
           <span style={{
             width: 14, height: 14, borderRadius: "50%",
@@ -99,9 +71,8 @@ const ShimmerButton = forwardRef<HTMLButtonElement, ShimmerButtonProps>(
             flexShrink: 0,
           }} />
         )}
-
         {children}
-      </motion.button>
+      </button>
     )
   }
 )
