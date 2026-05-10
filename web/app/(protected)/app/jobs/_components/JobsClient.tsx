@@ -1,7 +1,13 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+
+const JobsAnimation = dynamic(
+  () => import("@/components/animations/jobs-animation"),
+  { ssr: false, loading: () => null },
+);
 import {
   Briefcase,
   Clock,
@@ -553,11 +559,29 @@ export default function JobsClient() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen pb-16">
+    <div className="page-enter min-h-screen pb-16">
       {/* Hero */}
       <div className="relative overflow-hidden border-b border-border/50 bg-gradient-to-br from-primary/5 via-background to-[#4A90D9]/5 px-4 py-10 sm:py-14">
+        <div
+          aria-hidden="true"
+          className="hidden md:block"
+          style={{
+            position: "absolute",
+            right: 24,
+            top: "50%",
+            transform: "translateY(-50%)",
+            width: 340,
+            height: 180,
+            opacity: 0.65,
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        >
+          <JobsAnimation />
+        </div>
         <motion.div
           className="mx-auto max-w-3xl text-center"
+          style={{ position: "relative", zIndex: 1 }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
