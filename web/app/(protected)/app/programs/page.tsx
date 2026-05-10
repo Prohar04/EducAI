@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { searchPrograms, getSavedPrograms, getUserProfile } from "@/lib/auth/action";
-import ProgramsAnimation from "@/components/animations/programs-animation";
+import { PageHeader } from "@/components/layout/page-header";
+import HeaderBadge from "@/components/ui/header-badge";
 import ProgramFilters from "./_components/ProgramFilters";
 import SaveButton from "./_components/SaveButton";
 import NlpSearchPanel from "./_components/NlpSearchPanel";
@@ -136,39 +137,19 @@ export default async function ProgramsPage({
 
 	return (
 		<div className="page-enter mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-			<FadeIn className="mb-6">
-				<div style={{ position: "relative" }}>
-					<div
-						aria-hidden="true"
-						className="hidden md:block"
-						style={{
-							position: "absolute",
-							right: 0,
-							top: "50%",
-							transform: "translateY(-50%)",
-							width: 340,
-							height: 180,
-							opacity: 0.65,
-							pointerEvents: "none",
-							zIndex: 0,
-						}}
-					>
-						<ProgramsAnimation />
-					</div>
-					<div
-						className="flex flex-wrap items-start justify-between gap-3"
-						style={{ position: "relative", zIndex: 1 }}
-					>
-						<div>
-							<h1 className="text-3xl font-bold tracking-tight">Programs</h1>
-							<p className="mt-1 text-muted-foreground">
-								Search university programmes worldwide.
-							</p>
-						</div>
-						<RefreshProgramsButton />
-					</div>
-				</div>
-			</FadeIn>
+			<PageHeader
+				animation="programs"
+				title={<>AI <span className="gradient-text">Program Match</span></>}
+				subtitle="Find your perfect university programs ranked by fit score"
+				badges={
+					<>
+						<HeaderBadge>500+ Programs</HeaderBadge>
+						<HeaderBadge>AI-Ranked</HeaderBadge>
+						<HeaderBadge variant="outline">Live Data</HeaderBadge>
+					</>
+				}
+				rightContent={<RefreshProgramsButton />}
+			/>
 
 			<NlpSearchPanel />
 

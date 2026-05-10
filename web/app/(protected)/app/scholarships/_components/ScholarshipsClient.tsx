@@ -1,13 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
-
-const ScholarshipsAnimation = dynamic(
-	() => import("@/components/animations/scholarships-animation"),
-	{ ssr: false, loading: () => null },
-);
+import { PageHeader } from "@/components/layout/page-header";
+import HeaderBadge from "@/components/ui/header-badge";
+import { useFirstVisit } from "@/lib/hooks/use-first-visit";
 import {
 	AlertCircle,
 	Award,
@@ -756,6 +753,7 @@ export default function ScholarshipsClient({
 	initialDeadlines,
 	initialEligible,
 }: ScholarshipsClientProps) {
+	const isFirstVisit = useFirstVisit("scholarships");
 	const [results, setResults] = useState<ScholarshipListResult | null>(null);
 	const [deadlines] = useState<UpcomingDeadlineItem[]>(initialDeadlines);
 	const [eligible] = useState<EligibleScholarshipItem[]>(initialEligible);
@@ -831,53 +829,19 @@ export default function ScholarshipsClient({
 	);
 
 	return (
-		<div className="page-enter mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-			{/* Header */}
-			<FadeIn className="mb-8">
-				<div
-					className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between"
-					style={{ position: "relative" }}
-				>
-					<div
-						aria-hidden="true"
-						className="hidden md:block"
-						style={{
-							position: "absolute",
-							right: 0,
-							top: "50%",
-							transform: "translateY(-50%)",
-							width: 340,
-							height: 180,
-							opacity: 0.65,
-							pointerEvents: "none",
-							zIndex: 0,
-						}}
-					>
-						<ScholarshipsAnimation />
-					</div>
-					<div style={{ position: "relative", zIndex: 1 }}>
-						<h1 className="text-3xl font-bold tracking-tight">Scholarships</h1>
-						<p className="mt-1 text-muted-foreground">
-							Discover global funding opportunities matched to your profile.
-						</p>
-					</div>
-					{results && (
-						<div
-							className="flex flex-col items-end gap-1"
-							style={{ position: "relative", zIndex: 1 }}
-						>
-							<p className="text-xs text-muted-foreground">
-								{results.total.toLocaleString()} scholarships found
-							</p>
-							{results.personalised && (
-								<span className="inline-flex items-center gap-1 rounded-full bg-[#3D9970]/10 px-2 py-0.5 text-[10px] font-medium text-[#3D9970]">
-									<Sparkles className="size-2.5" /> Ranked for your profile
-								</span>
-							)}
-						</div>
-					)}
-				</div>
-			</FadeIn>
+		<div className={`${isFirstVisit ? "page-enter" : ""} mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8`}>
+			<PageHeader
+				animation="scholarships"
+				title={<><span className="gradient-text">Scholarships</span> &amp; Funding</>}
+				subtitle="28 real-world scholarships with deadline alerts and eligibility checks"
+				badges={
+					<>
+						<HeaderBadge>28 Scholarships</HeaderBadge>
+						<HeaderBadge>Auto-Eligibility</HeaderBadge>
+						<HeaderBadge variant="outline">Email Alerts</HeaderBadge>
+					</>
+				}
+			/>
 
 			{/* Data freshness notice */}
 			{results && results.items.length > 0 && (() => {

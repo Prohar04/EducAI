@@ -1,13 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { useState } from "react";
-
-const StrategyAnimation = dynamic(
-	() => import("@/components/animations/strategy-animation"),
-	{ ssr: false, loading: () => null },
-);
+import { PageHeader } from "@/components/layout/page-header";
+import { useFirstVisit } from "@/lib/hooks/use-first-visit";
 import {
 	Target, RefreshCw, Loader2, AlertCircle,
 	CheckSquare, Square, ShieldAlert, ListChecks,
@@ -162,6 +158,7 @@ export default function StrategyReportClient({
 	defaultCountry: string;
 	hasSavedPrograms: boolean;
 }) {
+	const isFirstVisit = useFirstVisit("strategy");
 	const [report, setReport] = useState<StrategyReport | null>(initialReport);
 	const [countryCode, setCountryCode] = useState(defaultCountry || "US");
 	const [intake, setIntake] = useState(initialReport?.intake ?? "");
@@ -204,48 +201,13 @@ export default function StrategyReportClient({
 	const countryName = COUNTRIES.find((c) => c.code === countryCode)?.name ?? countryCode;
 
 	return (
-		<div className="page-enter mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
-			{/* Header */}
-			<FadeIn className="mb-8">
-				<div
-					className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between"
-					style={{ position: "relative" }}
-				>
-					<div
-						aria-hidden="true"
-						className="hidden md:block"
-						style={{
-							position: "absolute",
-							right: 0,
-							top: "50%",
-							transform: "translateY(-50%)",
-							width: 340,
-							height: 180,
-							opacity: 0.65,
-							pointerEvents: "none",
-							zIndex: 0,
-						}}
-					>
-						<StrategyAnimation />
-					</div>
-					<div style={{ position: "relative", zIndex: 1 }}>
-						<h1 className="text-3xl font-bold tracking-tight">Application Strategy</h1>
-						<p className="mt-1 text-muted-foreground">
-							AI-generated guidance tailored to your profile and target country.
-						</p>
-					</div>
-					{report && (
-						<p
-							className="text-xs text-muted-foreground mt-1 sm:mt-2 shrink-0"
-							style={{ position: "relative", zIndex: 1 }}
-						>
-							Generated {new Date(report.createdAt).toLocaleDateString("en-US", {
-								day: "numeric", month: "short", year: "numeric",
-							})}
-						</p>
-					)}
-				</div>
-			</FadeIn>
+		<div className={`${isFirstVisit ? "page-enter" : ""} mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8`}>
+			<PageHeader
+				animation="strategy"
+				title={<>Application <span className="gradient-text">Strategy</span></>}
+				subtitle="AI-generated guidance tailored to your profile and target country"
+				metaText={report ? `Generated ${new Date(report.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}` : undefined}
+			/>
 
 			{/* Filters */}
 			<Reveal>

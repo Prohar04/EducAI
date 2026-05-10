@@ -1148,6 +1148,8 @@ export type JobListing = {
 	description?: string | null;
 	source: string;
 	is_remote?: boolean;
+	is_ai_generated?: boolean;
+	disclaimer?: string | null;
 };
 
 export type JobSearchResult = {

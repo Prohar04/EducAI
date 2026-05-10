@@ -1,12 +1,8 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useState, useTransition, useEffect, useRef } from "react";
-
-const GapFixAnimation = dynamic(
-	() => import("@/components/animations/gap-fix-animation"),
-	{ ssr: false, loading: () => null },
-);
+import { PageHeader } from "@/components/layout/page-header";
+import { useFirstVisit } from "@/lib/hooks/use-first-visit";
 import {
 	AlertCircle,
 	ArrowRight,
@@ -743,6 +739,7 @@ function BeforeAfterPanel({ session }: { session: GapFixSession }) {
 // ── main page ────────────────────────────────────────────────────────────────
 
 export default function GapFixPage() {
+	const isFirstVisit = useFirstVisit("gap-fix");
 	const [session, setSession] = useState<GapFixSession | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -857,43 +854,12 @@ export default function GapFixPage() {
 	}
 
 	return (
-		<div className="page-enter mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-			{/* Header */}
-			<FadeIn className="mb-8">
-				<div style={{ position: "relative" }}>
-					<div
-						aria-hidden="true"
-						className="hidden md:block"
-						style={{
-							position: "absolute",
-							right: 0,
-							top: "50%",
-							transform: "translateY(-50%)",
-							width: 340,
-							height: 180,
-							opacity: 0.65,
-							pointerEvents: "none",
-							zIndex: 0,
-						}}
-					>
-						<GapFixAnimation />
-					</div>
-					<div
-						className="flex items-center gap-3 mb-1"
-						style={{ position: "relative", zIndex: 1 }}
-					>
-						<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-							<Zap className="h-5 w-5 text-primary" />
-						</div>
-						<div>
-							<h1 className="text-2xl font-bold tracking-tight">Gap Fix</h1>
-							<p className="text-sm text-muted-foreground">
-								Track your improvement journey — analyze gaps, log progress, attach evidence, re-analyze.
-							</p>
-						</div>
-					</div>
-				</div>
-			</FadeIn>
+		<div className={`${isFirstVisit ? "page-enter" : ""} mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8`}>
+			<PageHeader
+				animation="gap-fix"
+				title={<>Gap <span className="gradient-text">Fix</span></>}
+				subtitle="Track your improvement journey — analyze gaps, log progress, attach evidence, re-analyze."
+			/>
 
 			{/* No session — analyze CTA */}
 			{!session ? (
