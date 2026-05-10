@@ -1,6 +1,12 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState, useTransition, useEffect } from "react";
+
+const ProfessorsAnimation = dynamic(
+	() => import("@/components/animations/professors-animation"),
+	{ ssr: false, loading: () => null },
+);
 import {
 	AlertCircle,
 	BookOpen,
@@ -256,7 +262,7 @@ export default function ProfessorsPage() {
 	}
 
 	return (
-		<div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+		<div className="page-enter mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
 			{emailModal && (
 				<EmailTemplateModal
 					professor={emailModal}
@@ -265,15 +271,37 @@ export default function ProfessorsPage() {
 			)}
 
 			<FadeIn className="mb-8">
-				<div className="flex items-center gap-3 mb-1">
-					<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-						<GraduationCap className="h-5 w-5 text-primary" />
+				<div style={{ position: "relative" }}>
+					<div
+						aria-hidden="true"
+						className="hidden md:block"
+						style={{
+							position: "absolute",
+							right: 0,
+							top: "50%",
+							transform: "translateY(-50%)",
+							width: 340,
+							height: 180,
+							opacity: 0.65,
+							pointerEvents: "none",
+							zIndex: 0,
+						}}
+					>
+						<ProfessorsAnimation />
 					</div>
-					<div>
-						<h1 className="text-2xl font-bold tracking-tight">Professor Finder</h1>
-						<p className="text-sm text-muted-foreground">
-							Source-backed professor search — only real, verified results shown
-						</p>
+					<div
+						className="flex items-center gap-3 mb-1"
+						style={{ position: "relative", zIndex: 1 }}
+					>
+						<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+							<GraduationCap className="h-5 w-5 text-primary" />
+						</div>
+						<div>
+							<h1 className="text-2xl font-bold tracking-tight">Professor Finder</h1>
+							<p className="text-sm text-muted-foreground">
+								Source-backed professor search — only real, verified results shown
+							</p>
+						</div>
 					</div>
 				</div>
 			</FadeIn>
