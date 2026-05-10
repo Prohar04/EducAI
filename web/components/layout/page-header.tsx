@@ -18,6 +18,21 @@ const animationMap = {
   dashboard:    () => import("@/components/animations/dashboard-animation"),
 } as const
 
+const DynamicAnimations = {
+  programs:     dynamic(animationMap.programs, { ssr: false, loading: () => null }),
+  scholarships: dynamic(animationMap.scholarships, { ssr: false, loading: () => null }),
+  timeline:     dynamic(animationMap.timeline, { ssr: false, loading: () => null }),
+  strategy:     dynamic(animationMap.strategy, { ssr: false, loading: () => null }),
+  sop:          dynamic(animationMap.sop, { ssr: false, loading: () => null }),
+  cv:           dynamic(animationMap.cv, { ssr: false, loading: () => null }),
+  professors:   dynamic(animationMap.professors, { ssr: false, loading: () => null }),
+  "gap-fix":    dynamic(animationMap["gap-fix"], { ssr: false, loading: () => null }),
+  career:       dynamic(animationMap.career, { ssr: false, loading: () => null }),
+  jobs:         dynamic(animationMap.jobs, { ssr: false, loading: () => null }),
+  immigration:  dynamic(animationMap.immigration, { ssr: false, loading: () => null }),
+  dashboard:    dynamic(animationMap.dashboard, { ssr: false, loading: () => null }),
+} as const
+
 type AnimationKey = keyof typeof animationMap
 
 interface PageHeaderProps {
@@ -43,10 +58,7 @@ const PageHeader = memo(function PageHeader({
   centered = false,
   className,
 }: PageHeaderProps) {
-  const Animation = dynamic(animationMap[animation], {
-    ssr: false,
-    loading: () => null,
-  })
+  const Animation = DynamicAnimations[animation]
 
   const combined = rightContent ?? action
 

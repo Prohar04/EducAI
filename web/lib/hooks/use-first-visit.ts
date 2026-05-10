@@ -2,16 +2,21 @@
 import { useEffect, useState } from "react"
 
 export function useFirstVisit(key: string): boolean {
-  const [isFirst, setIsFirst] = useState(false)
+  const storageKey = `educai:visited:${key}`
 
-  useEffect(() => {
-    const storageKey = `educai:visited:${key}`
-    const visited = sessionStorage.getItem(storageKey)
-    if (!visited) {
-      setIsFirst(true)
-      sessionStorage.setItem(storageKey, "1")
+  const [isFirst] = useState(() => {
+    try {
+      if (typeof window === "undefined") return false
+      const visited = sessionStorage.getItem(storageKey)
+      if (!visited) {
+        sessionStorage.setItem(storageKey, "1")
+        return true
+      }
+      return false
+    } catch {
+      return false
     }
-  }, [key])
+  })
 
   return isFirst
 }
