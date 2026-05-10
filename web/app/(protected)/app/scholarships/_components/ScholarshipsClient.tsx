@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+
+const ScholarshipsAnimation = dynamic(
+	() => import("@/components/animations/scholarships-animation"),
+	{ ssr: false, loading: () => null },
+);
 import {
 	AlertCircle,
 	Award,
@@ -825,18 +831,41 @@ export default function ScholarshipsClient({
 	);
 
 	return (
-		<div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+		<div className="page-enter mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
 			{/* Header */}
 			<FadeIn className="mb-8">
-				<div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-					<div>
+				<div
+					className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between"
+					style={{ position: "relative" }}
+				>
+					<div
+						aria-hidden="true"
+						className="hidden md:block"
+						style={{
+							position: "absolute",
+							right: 0,
+							top: "50%",
+							transform: "translateY(-50%)",
+							width: 340,
+							height: 180,
+							opacity: 0.65,
+							pointerEvents: "none",
+							zIndex: 0,
+						}}
+					>
+						<ScholarshipsAnimation />
+					</div>
+					<div style={{ position: "relative", zIndex: 1 }}>
 						<h1 className="text-3xl font-bold tracking-tight">Scholarships</h1>
 						<p className="mt-1 text-muted-foreground">
 							Discover global funding opportunities matched to your profile.
 						</p>
 					</div>
 					{results && (
-						<div className="flex flex-col items-end gap-1">
+						<div
+							className="flex flex-col items-end gap-1"
+							style={{ position: "relative", zIndex: 1 }}
+						>
 							<p className="text-xs text-muted-foreground">
 								{results.total.toLocaleString()} scholarships found
 							</p>
