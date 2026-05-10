@@ -34,6 +34,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { DataSkeleton } from "@/components/shared/data-skeleton";
 import { DynamicGreeting } from "@/components/app/DynamicGreeting";
 import HeroVisual from "@/components/ui/hero-visual";
+import DashboardAnimation from "@/components/animations/dashboard-animation";
 
 // ─── TYPE DEFINITIONS ─────────────────────────────────────────────────────────
 
@@ -397,6 +398,23 @@ function HeroSection({ session, profile, savedCount, deadlineCount }: HeroSectio
     <section className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-[#0D1117] to-[#080C14] p-6 sm:p-8" aria-label="Welcome section">
       {/* Background glow */}
       <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/10 blur-[80px]" aria-hidden="true" />
+      <div
+        aria-hidden="true"
+        className="hidden md:block lg:hidden"
+        style={{
+          position: "absolute",
+          right: 16,
+          top: "50%",
+          transform: "translateY(-50%)",
+          width: 340,
+          height: 180,
+          opacity: 0.65,
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      >
+        <DashboardAnimation />
+      </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_280px] items-center">
         {/* Left: welcome */}
@@ -540,7 +558,7 @@ export default async function StudyPlanPage() {
   const matchCount = matchData?.run?.status === "done" ? (matchData.run.results?.length ?? 0) : 0;
 
   return (
-    <main id="main-content" className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+    <main id="main-content" className="page-enter mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
       {/* Hero */}
       <HeroSection
         session={sessionData}
