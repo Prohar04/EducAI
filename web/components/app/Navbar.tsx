@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
   BookOpen,
@@ -235,13 +234,15 @@ export function Navbar({ user }: { user: Session["user"] }) {
                     style={{ outline: "none", WebkitTapHighlightColor: "transparent" }}
                   >
                     Tools
-                    <motion.span
-                      animate={{ rotate: modulesOpen ? 180 : 0 }}
-                      transition={{ duration: 0.2, ease: "easeInOut" }}
-                      style={{ display: "flex" }}
+                    <span
+                      style={{
+                        display: "flex",
+                        transform: modulesOpen ? "rotate(180deg)" : "rotate(0deg)",
+                        transition: "transform 200ms ease",
+                      }}
                     >
                       <ChevronDown className="size-3.5" />
-                    </motion.span>
+                    </span>
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -271,7 +272,7 @@ export function Navbar({ user }: { user: Session["user"] }) {
                                 className={`sidebar-nav-item relative flex w-full cursor-pointer items-center gap-2.5 px-3 py-2 text-sm transition-all ${
                                   active
                                     ? "text-[#E8EEF8] font-medium"
-                                    : "text-foreground/90  rounded-lg"
+                                    : "text-foreground/90 rounded-lg"
                                 }`}
                                 style={{ outline: "none", WebkitTapHighlightColor: "transparent" }}
                               >
@@ -445,28 +446,17 @@ export function Navbar({ user }: { user: Session["user"] }) {
       </header>
 
       {/* Mobile menu overlay */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              key="mobile-backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
-              onClick={() => setMobileOpen(false)}
-            />
-            {/* Drawer */}
-            <motion.div
-              key="mobile-drawer"
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
-              className="fixed right-0 top-0 z-50 h-full w-72 max-w-[85vw] overflow-y-auto border-l border-border bg-background shadow-2xl lg:hidden"
-            >
+      <>
+        {/* Backdrop */}
+        <div
+          className={`mobile-drawer-backdrop lg:hidden ${mobileOpen ? "open" : ""}`}
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
+        {/* Drawer */}
+        <div
+          className={`mobile-drawer border-l border-border bg-background shadow-2xl lg:hidden ${mobileOpen ? "open" : ""}`}
+        >
               {/* Drawer header */}
               <div className="flex h-16 items-center justify-between border-b border-border px-4">
                 <div className="flex flex-col">
@@ -534,23 +524,17 @@ export function Navbar({ user }: { user: Session["user"] }) {
                   className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hover:bg-muted/60 transition-colors"
                 >
                   Tools
-                  <motion.span
-                    animate={{ rotate: mobileToolsOpen ? 180 : 0 }}
-                    transition={{ duration: 0.2 }}
-                    style={{ display: "flex" }}
+                  <span
+                    style={{
+                      display: "flex",
+                      transform: mobileToolsOpen ? "rotate(180deg)" : "rotate(0deg)",
+                      transition: "transform 200ms ease",
+                    }}
                   >
                     <ChevronDown className="size-3.5" />
-                  </motion.span>
+                  </span>
                 </button>
-                <AnimatePresence initial={false}>
-                  {mobileToolsOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden"
-                    >
+                <div className={`mobile-tools-body ${mobileToolsOpen ? "open" : ""}`}>
                       <div className="space-y-1 pt-1">
                         {TOOLS.map(({ href, label, icon: Icon, soon }) => {
                           const active = isActive(href);
@@ -593,9 +577,7 @@ export function Navbar({ user }: { user: Session["user"] }) {
                           );
                         })}
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                </div>
               </div>
 
               {/* Divider */}
@@ -622,10 +604,8 @@ export function Navbar({ user }: { user: Session["user"] }) {
                   Sign out
                 </button>
               </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+        </div>
+      </>
     </>
   );
 }
