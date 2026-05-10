@@ -1,18 +1,13 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useState, useTransition } from "react";
-
-const CareerAnimation = dynamic(
-  () => import("@/components/animations/career-animation"),
-  { ssr: false, loading: () => null },
-);
 import {
   AlertCircle, Briefcase, DollarSign, Globe, Loader2,
   Sparkles, TrendingUp, Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
+import { useFirstVisit } from "@/lib/hooks/use-first-visit";
 import { GlassCard } from "@/components/ui/glass-card";
 import { RevealAnimation } from "@/components/ui/reveal-animation";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -40,6 +35,7 @@ const DEMAND_BADGE: Record<string, "success" | "warning" | "danger"> = {
 };
 
 export default function CareerPage() {
+  const isFirstVisit = useFirstVisit("career");
   const [result, setResult] = useState<CareerResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -59,12 +55,11 @@ export default function CareerPage() {
   const outlookStyle = result ? (OUTLOOK_STYLES[result.overallOutlook] ?? OUTLOOK_STYLES.Moderate) : null;
 
   return (
-    <main id="main-content" className="page-enter mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+    <main id="main-content" className={`${isFirstVisit ? "page-enter" : ""} mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8`}>
       <PageHeader
-        title="Career Outlook"
-        gradientWord="Outlook"
+        animation="career"
+        title={<>Career <span className="gradient-text">Outlook</span></>}
         subtitle="Job market demand, employability factors, salary ranges, and career pathways for your field and target country"
-        animation={<CareerAnimation />}
         action={
           result && (
             <Button variant="outline" size="sm" onClick={handlePredict} disabled={isPending} className="gap-1.5">

@@ -1,90 +1,188 @@
 "use client"
-import { GradientText } from "@/components/ui/gradient-text"
-import { cn } from "@/lib/utils"
+
+import dynamic from "next/dynamic"
+import { ReactNode, memo } from "react"
+
+const animationMap = {
+  programs:     () => import("@/components/animations/programs-animation"),
+  scholarships: () => import("@/components/animations/scholarships-animation"),
+  timeline:     () => import("@/components/animations/timeline-animation"),
+  strategy:     () => import("@/components/animations/strategy-animation"),
+  sop:          () => import("@/components/animations/sop-animation"),
+  cv:           () => import("@/components/animations/cv-animation"),
+  professors:   () => import("@/components/animations/professors-animation"),
+  "gap-fix":    () => import("@/components/animations/gap-fix-animation"),
+  career:       () => import("@/components/animations/career-animation"),
+  jobs:         () => import("@/components/animations/jobs-animation"),
+  immigration:  () => import("@/components/animations/immigration-animation"),
+  dashboard:    () => import("@/components/animations/dashboard-animation"),
+} as const
+
+type AnimationKey = keyof typeof animationMap
 
 interface PageHeaderProps {
-  title: string
-  gradientWord?: string
+  animation: AnimationKey
+  title: ReactNode
   subtitle?: string
-  action?: React.ReactNode
-  animation?: React.ReactNode
+  badges?: ReactNode
+  action?: ReactNode
+  rightContent?: ReactNode
+  metaText?: string
+  centered?: boolean
   className?: string
 }
 
-export function PageHeader({ title, gradientWord, subtitle, action, animation, className }: PageHeaderProps) {
-  const titleParts = gradientWord
-    ? title.split(new RegExp(`(${gradientWord})`, "i"))
-    : [title]
+const PageHeader = memo(function PageHeader({
+  animation,
+  title,
+  subtitle,
+  badges,
+  action,
+  rightContent,
+  metaText,
+  centered = false,
+  className,
+}: PageHeaderProps) {
+  const Animation = dynamic(animationMap[animation], {
+    ssr: false,
+    loading: () => null,
+  })
+
+  const combined = rightContent ?? action
 
   return (
     <div
-      className={cn("mb-8 animate-fade-up", className)}
-      style={{ position: "relative" }}
+      className={className}
+      style={{
+        position: "relative",
+        padding: "28px 0 20px",
+        marginBottom: 24,
+        overflow: "hidden",
+        minHeight: 140,
+      }}
     >
-      {animation && (
-        <div
-          aria-hidden="true"
-          className="hidden md:block"
+      {/* Animation — positioned right, never overlaps text */}
+      <div
+        aria-hidden="true"
+        className="hidden md:block"
+        style={{
+          position: "absolute",
+          right: -40,
+          top: 0,
+          bottom: 0,
+          width: "42%",
+          maxWidth: 520,
+          opacity: 0.80,
+          pointerEvents: "none",
+          zIndex: 0,
+          maskImage: "linear-gradient(to right, transparent 0%, black 35%, black 100%)",
+          WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 35%, black 100%)",
+        }}
+      >
+        <Animation />
+      </div>
+
+      {/* Content layer — sits on top of animation */}
+      <div
+        className="page-header-content"
+        style={{
+          position: "relative",
+          zIndex: 1,
+          maxWidth: "55%",
+          textAlign: centered ? "center" : "left",
+          marginLeft: centered ? "auto" : 0,
+          marginRight: centered ? "auto" : 0,
+        }}
+      >
+        <h1
           style={{
-            position: "absolute",
-            right: 0,
-            top: "50%",
-            transform: "translateY(-50%)",
-            width: 340,
-            height: 180,
-            opacity: 0.65,
-            pointerEvents: "none",
-            zIndex: 0,
+            fontSize: "clamp(22px, 3.2vw, 36px)",
+            fontWeight: 700,
+            color: "#E8EEF8",
+            letterSpacing: "-0.025em",
+            lineHeight: 1.15,
+            margin: 0,
+            marginBottom: subtitle ? 10 : 0,
           }}
         >
-          {animation}
-        </div>
-      )}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap", position: "relative", zIndex: 1 }}>
-        <div style={{ minWidth: 0 }}>
-          <h1 style={{
-            fontSize: "clamp(22px, 3vw, 30px)",
-            fontWeight: 600,
-            letterSpacing: "-0.02em",
-            color: "#E8EEF8",
-            lineHeight: 1.2,
-          }}>
-            {gradientWord ? (
-              titleParts.map((part, i) =>
-                part.toLowerCase() === gradientWord.toLowerCase() ? (
-                  <GradientText key={i} variant="hero">{part}</GradientText>
-                ) : (
-                  <span key={i}>{part}</span>
-                )
-              )
-            ) : title}
-          </h1>
-          {subtitle && (
-            <p style={{
-              marginTop: 6,
-              fontSize: 14,
+          {title}
+        </h1>
+
+        {subtitle && (
+          <p
+            style={{
+              fontSize: "clamp(13px, 1.3vw, 15px)",
               color: "#7A8BA8",
               fontWeight: 300,
               lineHeight: 1.6,
-            }}>
-              {subtitle}
-            </p>
-          )}
-        </div>
-        {action && <div style={{ flexShrink: 0 }}>{action}</div>}
+              margin: 0,
+              marginBottom: badges ? 14 : 0,
+            }}
+          >
+            {subtitle}
+          </p>
+        )}
+
+        {badges && (
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 8,
+              alignItems: "center",
+              justifyContent: centered ? "center" : "flex-start",
+            }}
+          >
+            {badges}
+          </div>
+        )}
       </div>
+
       {/* Gradient underline */}
       <div
-        className="animate-fade-in delay-100"
         style={{
-          marginTop: 20,
+          position: "relative",
+          zIndex: 1,
+          marginTop: 16,
           height: 1,
-          background: "linear-gradient(90deg, rgba(74,144,217,0.25) 0%, rgba(74,144,217,0) 100%)",
-          transformOrigin: "left",
+          background: "linear-gradient(90deg, rgba(74,144,217,0.25) 0%, rgba(74,144,217,0) 60%)",
         }}
       />
+
+      {/* Top-right meta text */}
+      {metaText && !combined && (
+        <div
+          style={{
+            position: "absolute",
+            top: 32,
+            right: 0,
+            zIndex: 2,
+            fontSize: 12,
+            color: "#3D4F6B",
+            fontWeight: 300,
+          }}
+        >
+          {metaText}
+        </div>
+      )}
+
+      {/* Right-side action/content */}
+      {combined && (
+        <div
+          style={{
+            position: "absolute",
+            top: 28,
+            right: 0,
+            zIndex: 2,
+          }}
+        >
+          {combined}
+        </div>
+      )}
     </div>
   )
-}
+})
 
+PageHeader.displayName = "PageHeader"
+export { PageHeader }
 export default PageHeader

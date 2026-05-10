@@ -1,0 +1,87 @@
+name: Data Freshness Sync
+
+on:
+  schedule:
+    # Twice daily — 06:00 and 18:00 UTC (in addition to data-sync.yml)
+    - cron: "0 6 * * *"
+    - cron: "0 18 * * *"
+  workflow_dispatch:
+
+jobs:
+  refresh-all:
+    name: Refresh All Data Sources
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Validate required secrets
+        id: validate
+        run: |
+          MISSING=false
+          BACKEND_URL_CLEAN=$(printf '%s' "$BACKEND_URL" | tr -d '[:space:]')
+          CRON_SECRET_CLEAN=$(printf '%s' "$CRON_SECRET" | tr -d '[:space:]')
+
+          if [ -z "$BACKEND_URL_CLEAN" ]; then
+            echo "::warning::BACKEND_URL secret is not configured. Skipping freshness sync."
+            MISSING=true
+          else
+            case "$BACKEND_URL_CLEAN" in
+              http://*|https://*)
+                echo "Backend URL scheme: OK"
+                ;;
+              *)
+                echo "::warning::BACKEND_URL does not start with http:// or https://"
+                MISSING=true
+                ;;
+            esac
+          fi
+
+          if [ -z "$CRON_SECRET_CLEAN" ]; then
+            echo "::warning::CRON_SECRET secret is not configured. Skipping freshness sync."
+            MISSING=true
+          fi
+
+          if [ "$MISSING" = "true" ]; then
+            echo "secrets_ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "secrets_ready=true" >> "$GITHUB_OUTPUT"
+            echo "backend_url=${BACKEND_URL_CLEAN}" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          BACKEND_URL: ${{ secrets.BACKEND_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
+      - name: Refresh programs data
+        if: steps.validate.outputs.secrets_ready == 'true'
+        run: |
+          curl -X POST "${{ steps.validate.outputs.backend_url }}/api/cron/refresh-programs" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 300 || echo "::warning::Programs refresh failed"
+
+      - name: Refresh scholarships data
+        if: steps.validate.outputs.secrets_ready == 'true'
+        run: |
+          curl -X POST "${{ steps.validate.outputs.backend_url }}/api/cron/refresh-scholarships" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 300 || echo "::warning::Scholarships refresh failed"
+
+      - name: Refresh news cache
+        if: steps.validate.outputs.secrets_ready == 'true'
+        run: |
+          curl -X POST "${{ steps.validate.outputs.backend_url }}/api/cron/refresh-news" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 180 || echo "::warning::News refresh failed"
+
+      - name: Refresh visa data
+        if: steps.validate.outputs.secrets_ready == 'true'
+        run: |
+          curl -X POST "${{ steps.validate.outputs.backend_url }}/api/cron/refresh-visa" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --max-time 180 || echo "::warning::Visa data refresh failed"
+
+      - name: Skipped (secrets not configured)
+        if: steps.validate.outputs.secrets_ready == 'false'
+        run: |
+          echo "Freshness sync skipped — required secrets not configured."
+          echo "Configure BACKEND_URL and CRON_SECRET in repo secrets to enable sync."
+          exit 0

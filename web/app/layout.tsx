@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { NoiseTexture } from "@/components/ui/noise-texture";
 import { NavProgress } from "@/components/ui/nav-progress";
+import { ServiceWorkerRegistrar } from "@/components/app/ServiceWorkerRegistrar";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -147,6 +148,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <a href="#main-content" className="skip-to-content">Skip to content</a>
+          <ServiceWorkerRegistrar />
           <NoiseTexture />
           <NavProgress />
           {children}

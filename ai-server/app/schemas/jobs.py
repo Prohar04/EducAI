@@ -36,6 +36,8 @@ class JobListing(BaseModel):
     description: Optional[str] = None
     source: str
     is_remote: bool = False
+    is_ai_generated: bool = False
+    disclaimer: Optional[str] = None
 
 
 class JobSearchResponse(BaseModel):

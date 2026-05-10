@@ -1,13 +1,10 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
-const JobsAnimation = dynamic(
-  () => import("@/components/animations/jobs-animation"),
-  { ssr: false, loading: () => null },
-);
+import { PageHeader } from "@/components/layout/page-header";
+import HeaderBadge from "@/components/ui/header-badge";
+import { useFirstVisit } from "@/lib/hooks/use-first-visit";
 import {
   Briefcase,
   Clock,
@@ -253,23 +250,35 @@ function JobCard({
             </span>
           )}
         </div>
-        <a
-          href={listing.apply_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-90"
-        >
-          Apply Now
-          <ExternalLink className="size-3" />
-        </a>
+        {listing.apply_url ? (
+          <a
+            href={listing.apply_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+          >
+            Apply Now
+            <ExternalLink className="size-3" />
+          </a>
+        ) : (
+          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[#C49A3C]/20 bg-[#C49A3C]/10 px-3 py-1.5 text-xs font-medium text-[#C49A3C]">
+            Search on job boards
+          </span>
+        )}
       </div>
 
-      {/* AI Live badge */}
-      <div className="mt-2 flex justify-end">
-        <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-          <span className="size-1.5 rounded-full bg-[#3D9970] animate-pulse" />
-          AI · Live
-        </span>
+      {/* Source / AI badge */}
+      <div className="mt-2 flex justify-end gap-2">
+        {listing.is_ai_generated ? (
+          <span className="inline-flex items-center gap-1 rounded-full border border-[#C49A3C]/20 bg-[#C49A3C]/10 px-2 py-0.5 text-[10px] font-medium text-[#C49A3C]">
+            ✨ AI-generated example
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+            <span className="size-1.5 rounded-full bg-[#3D9970] animate-pulse" />
+            AI · Live
+          </span>
+        )}
       </div>
     </motion.div>
   );
@@ -281,6 +290,7 @@ const SAVED_JOBS_KEY = "educai_saved_jobs";
 const LAST_SEARCH_KEY = "educai_last_job_search";
 
 export default function JobsClient() {
+  const isFirstVisit = useFirstVisit("jobs");
   // Form state
   const [selectedCountry, setSelectedCountry] = useState<StudyCountry | null>(null);
   const [selectedCity, setSelectedCity] = useState("");
@@ -559,73 +569,26 @@ export default function JobsClient() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="page-enter min-h-screen pb-16">
-      {/* Hero */}
-      <div className="relative overflow-hidden border-b border-border/50 bg-gradient-to-br from-primary/5 via-background to-[#4A90D9]/5 px-4 py-10 sm:py-14">
-        <div
-          aria-hidden="true"
-          className="hidden md:block"
-          style={{
-            position: "absolute",
-            right: 24,
-            top: "50%",
-            transform: "translateY(-50%)",
-            width: 340,
-            height: 180,
-            opacity: 0.65,
-            pointerEvents: "none",
-            zIndex: 0,
-          }}
-        >
-          <JobsAnimation />
+    <div className={`${isFirstVisit ? "page-enter" : ""} min-h-screen pb-16`}>
+      {/* Header */}
+      <div className="border-b border-border/50 bg-gradient-to-br from-primary/5 via-background to-[#4A90D9]/5 px-4 sm:px-6">
+        <div className="mx-auto max-w-3xl">
+          <PageHeader
+            animation="jobs"
+            title={<>Find Your Perfect <span className="gradient-text">Job</span> Abroad</>}
+            subtitle="Live listings from Indeed, LinkedIn & more — refreshed every hour"
+            badges={
+              <>
+                <HeaderBadge>🌍 30 Countries</HeaderBadge>
+                <HeaderBadge>💼 Updated Hourly</HeaderBadge>
+                <HeaderBadge variant="outline">
+                  <span className="size-1.5 animate-pulse rounded-full bg-[#3D9970] inline-block" />
+                  Live Data
+                </HeaderBadge>
+              </>
+            }
+          />
         </div>
-        <motion.div
-          className="mx-auto max-w-3xl text-center"
-          style={{ position: "relative", zIndex: 1 }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <motion.div className="flex flex-wrap justify-center gap-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
-            {["Find", "Your", "Perfect", "Job", "Abroad"].map((word, i) => (
-              <motion.span
-                key={word + i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.07, duration: 0.4 }}
-              >
-                {word === "Job" ? <span className="text-primary">{word}</span> : word}
-              </motion.span>
-            ))}
-          </motion.div>
-
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45 }}
-            className="mt-3 text-muted-foreground"
-          >
-            Live listings from Indeed, LinkedIn & more — refreshed every hour
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            className="mt-4 flex flex-wrap justify-center gap-2"
-          >
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/80 px-3 py-1 text-sm font-medium backdrop-blur">
-              🌍 30 Countries
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/80 px-3 py-1 text-sm font-medium backdrop-blur">
-              💼 Updated Hourly
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#3D9970]/20 bg-[#3D9970]/10 px-3 py-1 text-sm font-medium text-[#3D9970]">
-              <span className="size-1.5 animate-pulse rounded-full bg-[#3D9970]" />
-              Live Data
-            </span>
-          </motion.div>
-        </motion.div>
       </div>
 
       <div className="mx-auto max-w-3xl space-y-6 px-4 py-8">
