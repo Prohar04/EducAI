@@ -260,6 +260,11 @@ a:focus:not(:focus-visible) {
   50% { opacity: 0.5; }
 }
 
+@keyframes glowOrbPulse {
+  from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  to   { opacity: 0.72; transform: translate(-50%, -50%) scale(1.07); }
+}
+
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }

@@ -444,7 +444,13 @@ export default async function HomePage() {
                 { label: "Terms", href: "/terms" },
                 { label: "GitHub", href: "https://github.com/Prohar04/EducAI" },
               ].map((item) => (
-                <a key={item.label} href={item.href} className="footer-link" style={{ fontSize: 12, color: "#2A3A52", textDecoration: "none", transition: "color 200ms" }}>
+                <a
+                  key={item.label}
+                  href={item.href}
+                  className="footer-link"
+                  style={{ fontSize: 12, color: "#2A3A52", textDecoration: "none", transition: "color 200ms" }}
+                  {...(item.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                >
                   {item.label}
                 </a>
               ))}
