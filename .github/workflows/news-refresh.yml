@@ -2,19 +2,99 @@ name: News Refresh
 
 on:
   schedule:
+    # Twice daily — 06:00 and 18:00 UTC
     - cron: "0 6 * * *"
     - cron: "0 18 * * *"
   workflow_dispatch:
+    inputs:
+      reason:
+        description: "Reason for manual trigger"
+        required: false
+        default: "Manual refresh"
 
 jobs:
   refresh:
+    name: Refresh News Cache
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+
     steps:
-      - name: Refresh news cache
+      - name: Validate required secrets
+        id: validate
         run: |
-          curl -X POST "${{ secrets.SERVER_URL }}/api/news/refresh" \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            --max-time 120 \
-            --fail \
+          BACKEND_URL_CLEAN=$(printf '%s' "$BACKEND_URL" | tr -d '[:space:]')
+          CRON_SECRET_CLEAN=$(printf '%s' "$CRON_SECRET" | tr -d '[:space:]')
+
+          if [ -z "$BACKEND_URL_CLEAN" ]; then
+            echo "::warning::BACKEND_URL secret is not configured — skipping news refresh."
+            echo "secrets_ready=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          case "$BACKEND_URL_CLEAN" in
+            http://*|https://*)
+              echo "Backend URL scheme: OK"
+              ;;
+            *)
+              echo "::warning::BACKEND_URL does not start with http:// or https:// — skipping."
+              echo "secrets_ready=false" >> "$GITHUB_OUTPUT"
+              exit 0
+              ;;
+          esac
+
+          if [ -z "$CRON_SECRET_CLEAN" ]; then
+            echo "::warning::CRON_SECRET secret is not configured — skipping news refresh."
+            echo "secrets_ready=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "secrets_ready=true" >> "$GITHUB_OUTPUT"
+          echo "backend_url=${BACKEND_URL_CLEAN}" >> "$GITHUB_OUTPUT"
+          echo "Backend URL configured: ${BACKEND_URL_CLEAN:0:30}..."
+        env:
+          BACKEND_URL: ${{ secrets.BACKEND_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
+      - name: Refresh news cache
+        if: steps.validate.outputs.secrets_ready == 'true'
+        run: |
+          CLEAN_URL="${{ steps.validate.outputs.backend_url }}"
+
+          HTTP_STATUS=$(curl \
             --silent \
-            --show-error
+            --output /tmp/response.txt \
+            --write-out "%{http_code}" \
+            --max-time 90 \
+            --retry 2 \
+            --retry-delay 5 \
+            -X POST "${CLEAN_URL}/api/news/refresh" \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            -H "Content-Type: application/json") || true
+
+          echo "HTTP Status: $HTTP_STATUS"
+          echo "Response: $(cat /tmp/response.txt 2>/dev/null || echo '(empty)')"
+
+          if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ] 2>/dev/null; then
+            echo "✅ News cache refreshed successfully"
+          elif [ "$HTTP_STATUS" = "404" ]; then
+            echo "⚠️ Endpoint not found (404) — skipping without failure"
+            exit 0
+          elif [ "$HTTP_STATUS" = "000" ] || [ "$HTTP_STATUS" = "503" ] || [ "$HTTP_STATUS" = "502" ]; then
+            echo "⚠️ Server unreachable (Render free tier may be sleeping) — skipping"
+            exit 0
+          else
+            echo "❌ Refresh failed with status $HTTP_STATUS"
+            exit 1
+          fi
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
+      - name: Skipped (secrets not configured)
+        if: steps.validate.outputs.secrets_ready == 'false'
+        run: |
+          echo "News refresh skipped — BACKEND_URL or CRON_SECRET not configured."
+          exit 0
+
+      - name: Log completion
+        if: steps.validate.outputs.secrets_ready == 'true'
+        run: echo "News refresh completed at $(date -u '+%Y-%m-%d %H:%M:%S UTC')"

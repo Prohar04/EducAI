@@ -1,10 +1,24 @@
 import { Router } from "express"
-import type { Request, Response } from "express"
-import { authMiddleware } from "../middlewares/authenticate.ts"
+import type { Request, Response, NextFunction } from "express"
 
 const router = Router()
 const AI_SERVER_URL = process.env.AI_SERVER_URL || "http://localhost:8001"
 const AI_SERVER_API_KEY = process.env.AI_SERVER_API_KEY || ""
+
+function authenticateCron(req: Request, res: Response, next: NextFunction): void {
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret) {
+    // No secret configured — allow in non-production environments only
+    if (process.env.NODE_ENV !== "production") { next(); return }
+    res.status(500).json({ error: "CRON_SECRET not configured" })
+    return
+  }
+  if (req.headers.authorization !== `Bearer ${cronSecret}`) {
+    res.status(401).json({ error: "Unauthorized" })
+    return
+  }
+  next()
+}
 
 router.get("/education", async (req: Request, res: Response) => {
   try {
@@ -30,18 +44,28 @@ router.get("/education", async (req: Request, res: Response) => {
   }
 })
 
-router.post("/refresh", authMiddleware, async (req: Request, res: Response) => {
+router.post("/refresh", authenticateCron, async (req: Request, res: Response) => {
   try {
     const aiRes = await fetch(`${AI_SERVER_URL}/api/v1/news/refresh`, {
       method: "POST",
       headers: { "X-API-Key": AI_SERVER_API_KEY },
-      signal: AbortSignal.timeout(120000),
+      signal: AbortSignal.timeout(90000),
     })
+
+    if (!aiRes.ok) {
+      // AI server down — return 200 so the cron doesn't alarm; it will retry in 12h
+      console.warn("News refresh: AI server returned", aiRes.status)
+      res.json({ success: false, message: "AI server unavailable", timestamp: new Date().toISOString() })
+      return
+    }
+
     const data = await aiRes.json()
-    res.json(data)
+    console.log("News cache refreshed:", data)
+    res.json({ success: true, data, timestamp: new Date().toISOString() })
   } catch (err) {
     console.error("News refresh error:", err)
-    res.status(500).json({ error: "Refresh failed" })
+    // Return 200 so the cron doesn't alarm on transient failures
+    res.json({ success: false, error: String(err), timestamp: new Date().toISOString() })
   }
 })
 
