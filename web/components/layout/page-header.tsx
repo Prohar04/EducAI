@@ -1,5 +1,4 @@
 "use client"
-import { motion, useReducedMotion } from "framer-motion"
 import { GradientText } from "@/components/ui/gradient-text"
 import { cn } from "@/lib/utils"
 
@@ -8,24 +7,40 @@ interface PageHeaderProps {
   gradientWord?: string
   subtitle?: string
   action?: React.ReactNode
+  animation?: React.ReactNode
   className?: string
 }
 
-export function PageHeader({ title, gradientWord, subtitle, action, className }: PageHeaderProps) {
-  const reduced = useReducedMotion()
-
+export function PageHeader({ title, gradientWord, subtitle, action, animation, className }: PageHeaderProps) {
   const titleParts = gradientWord
     ? title.split(new RegExp(`(${gradientWord})`, "i"))
     : [title]
 
   return (
-    <motion.div
-      className={cn("mb-8", className)}
-      initial={reduced ? false : { opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+    <div
+      className={cn("mb-8 animate-fade-up", className)}
+      style={{ position: "relative" }}
     >
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+      {animation && (
+        <div
+          aria-hidden="true"
+          className="hidden md:block"
+          style={{
+            position: "absolute",
+            right: 0,
+            top: "50%",
+            transform: "translateY(-50%)",
+            width: 340,
+            height: 180,
+            opacity: 0.65,
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        >
+          {animation}
+        </div>
+      )}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap", position: "relative", zIndex: 1 }}>
         <div style={{ minWidth: 0 }}>
           <h1 style={{
             fontSize: "clamp(22px, 3vw, 30px)",
@@ -59,17 +74,16 @@ export function PageHeader({ title, gradientWord, subtitle, action, className }:
         {action && <div style={{ flexShrink: 0 }}>{action}</div>}
       </div>
       {/* Gradient underline */}
-      <motion.div
+      <div
+        className="animate-fade-in delay-100"
         style={{
           marginTop: 20,
           height: 1,
           background: "linear-gradient(90deg, rgba(74,144,217,0.25) 0%, rgba(74,144,217,0) 100%)",
+          transformOrigin: "left",
         }}
-        initial={reduced ? false : { scaleX: 0, originX: 0 }}
-        animate={{ scaleX: 1 }}
-        transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
       />
-    </motion.div>
+    </div>
   )
 }
 
