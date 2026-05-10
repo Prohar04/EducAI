@@ -105,7 +105,7 @@ export default async function HomePage() {
   const feedItems = await fetchEducationPulse().catch(() => []);
 
   return (
-    <div style={{ minHeight: "100vh", position: "relative", overflow: "hidden" }}>
+    <div style={{ minHeight: "100vh", position: "relative", overflowX: "hidden" }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION_SCHEMA) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_SCHEMA) }} />
 
