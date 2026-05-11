@@ -10,13 +10,61 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Refresh news
+      - name: Validate required secrets
+        id: validate
         run: |
+          MISSING=false
+
+          BACKEND_URL_CLEAN=$(printf '%s' "$BACKEND_URL" | tr -d '[:space:]')
+          CRON_SECRET_CLEAN=$(printf '%s' "$CRON_SECRET" | tr -d '[:space:]')
+
+          if [ -z "$BACKEND_URL_CLEAN" ]; then
+            echo "::warning::BACKEND_URL secret is not configured. Skipping news refresh."
+            MISSING=true
+          else
+            case "$BACKEND_URL_CLEAN" in
+              http://*|https://*)
+                echo "Backend URL scheme: OK"
+                ;;
+              *)
+                echo "::warning::BACKEND_URL does not start with http:// or https://"
+                MISSING=true
+                ;;
+            esac
+          fi
+
+          if [ -z "$CRON_SECRET_CLEAN" ]; then
+            echo "::warning::CRON_SECRET secret is not configured. Skipping news refresh."
+            MISSING=true
+          fi
+
+          if [ "$MISSING" = "true" ]; then
+            echo "secrets_ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "secrets_ready=true" >> "$GITHUB_OUTPUT"
+            echo "backend_url=${BACKEND_URL_CLEAN}" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          BACKEND_URL: ${{ secrets.BACKEND_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
+      - name: Refresh news
+        if: steps.validate.outputs.secrets_ready == 'true'
+        run: |
+          CLEAN_URL="${{ steps.validate.outputs.backend_url }}"
+
           STATUS=$(curl -s -o /tmp/r.txt -w "%{http_code}" \
             --max-time 60 --retry 2 \
-            -X POST "${{ secrets.SERVER_URL }}/api/news/refresh" \
+            -X POST "${CLEAN_URL}/api/news/refresh" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
           echo "Status: $STATUS — $(cat /tmp/r.txt)"
           [ "$STATUS" = "000" ] && exit 0
           [ "$STATUS" = "404" ] && exit 0
+          exit 0
+
+      - name: Sync skipped (secrets not configured)
+        if: steps.validate.outputs.secrets_ready == 'false'
+        run: |
+          echo "News refresh skipped — required secrets not configured or BACKEND_URL is malformed."
+          echo "Configure BACKEND_URL and CRON_SECRET in repo secrets to enable scheduled refresh."
           exit 0
