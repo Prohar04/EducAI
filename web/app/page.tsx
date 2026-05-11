@@ -5,15 +5,15 @@ import { getSession } from "@/lib/auth/session";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { fetchEducationPulse } from "@/lib/data/fetchEducationPulse";
 import { GradientText } from "@/components/ui/gradient-text";
-import LandingClient from "@/components/home/LandingClient";
+import LandingClientWrapper from "@/components/home/LandingClientWrapper";
 
 const DailyQuote = dynamic(
   () => import("@/components/home/DailyQuote"),
-  { loading: () => <div style={{ height: 120 }} /> }
+  { loading: () => <div style={{ height: 120 }} />, ssr: true }
 );
 const EducationNews = dynamic(
   () => import("@/components/home/EducationNews"),
-  { loading: () => <div style={{ height: 400 }} /> }
+  { loading: () => <div style={{ height: 400 }} />, ssr: true }
 );
 
 export const metadata: Metadata = {
@@ -72,10 +72,6 @@ const REAL_STATS = [
   { value: "4",    label: "AI providers integrated" },
 ] as const;
 
-const TRUST_TECH = ["Next.js", "FastAPI", "PostgreSQL", "OpenAI"] as const;
-const TRUST_INFRA = ["Vercel", "Render", "Neon"] as const;
-const TRUST_DATA = ["Adzuna", "JSearch", "Serper", "Firecrawl"] as const;
-
 const ORGANIZATION_SCHEMA = {
   "@context": "https://schema.org", "@type": "Organization",
   name: "EducAI", url: "https://educai-web.vercel.app",
@@ -99,7 +95,7 @@ export default async function HomePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_SCHEMA) }} />
 
       {/* Client component handles canvas + interactive navbar */}
-      <LandingClient isLoggedIn={isLoggedIn} />
+      <LandingClientWrapper isLoggedIn={isLoggedIn} />
 
       <main id="main-content">
         {/* ── HERO ─────────────────────────────────────────────────────── */}

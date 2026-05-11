@@ -1,5 +1,5 @@
 import { unstable_cache } from "next/cache";
-import Parser from "rss-parser";
+import { XMLParser } from "fast-xml-parser";
 import staticFeed from "./educationFeed.json";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -72,32 +72,113 @@ function guessReadTime(text: string): number {
   return Math.max(1, Math.round(text.split(" ").length / 200));
 }
 
+function toText(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (typeof value === "number") return String(value);
+  if (Array.isArray(value)) return toText(value[0]);
+  if (value && typeof value === "object") {
+    const node = value as Record<string, unknown>;
+    if (typeof node["#text"] === "string") return node["#text"];
+    if (typeof node.href === "string") return node.href;
+  }
+  return "";
+}
+
+function toArray<T>(value: T | T[] | undefined): T[] {
+  if (!value) return [];
+  return Array.isArray(value) ? value : [value];
+}
+
+function extractItems(xml: string): Array<Record<string, unknown>> {
+  const parser = new XMLParser({
+    ignoreAttributes: false,
+    attributeNamePrefix: "",
+    removeNSPrefix: true,
+    parseTagValue: true,
+    parseAttributeValue: true,
+    trimValues: true,
+  });
+
+  const parsed = parser.parse(xml) as {
+    rss?: { channel?: { item?: Record<string, unknown> | Record<string, unknown>[] } };
+    feed?: { entry?: Record<string, unknown> | Record<string, unknown>[] };
+  };
+
+  return [
+    ...toArray(parsed.rss?.channel?.item),
+    ...toArray(parsed.feed?.entry),
+  ];
+}
+
+async function fetchFeedItems(url: string): Promise<Array<Record<string, unknown>>> {
+  const response = await fetch(url, {
+    headers: {
+      accept: "application/rss+xml, application/xml;q=0.9, text/xml;q=0.8, */*;q=0.5",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to load feed: ${response.status}`);
+  }
+
+  const xml = await response.text();
+  return extractItems(xml);
+}
+
+function getEntryUrl(entry: Record<string, unknown>): string {
+  const link = entry.link;
+
+  if (typeof link === "string") return link;
+  if (Array.isArray(link)) return getEntryUrl({ link: link[0] as unknown as Record<string, unknown> });
+  if (link && typeof link === "object") {
+    const linkObject = link as Record<string, unknown>;
+    if (typeof linkObject.href === "string") return linkObject.href;
+    if (typeof linkObject.url === "string") return linkObject.url;
+  }
+
+  return "";
+}
+
+function getEntryDate(entry: Record<string, unknown>): string {
+  return (
+    toText(entry.isoDate) ||
+    toText(entry.pubDate) ||
+    toText(entry.published) ||
+    toText(entry.updated) ||
+    new Date().toISOString()
+  );
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Fetcher (wrapped with unstable_cache for 24 h server-side caching)
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function _fetchEducationPulse(): Promise<FeedItem[]> {
-  const parser = new Parser({ timeout: 8_000 });
   const allItems: FeedItem[] = [];
 
   await Promise.allSettled(
     RSS_SOURCES.map(async (source) => {
       try {
-        const feed = await parser.parseURL(source.url);
-        feed.items.slice(0, 5).forEach((entry, i) => {
+        const entries = await fetchFeedItems(source.url);
+
+        entries.slice(0, 5).forEach((entry, i) => {
           const raw =
-            entry.contentSnippet ?? entry.content ?? entry.summary ?? "";
+            toText(entry.contentSnippet) ||
+            toText(entry.description) ||
+            toText(entry.summary) ||
+            toText(entry.content) ||
+            "";
           const snippet = stripHtml(raw).slice(0, 220);
           allItems.push({
-            id: `${source.name}-${i}-${entry.isoDate ?? Date.now()}`,
-            title: entry.title ?? "Untitled",
+            id: `${source.name}-${i}-${getEntryDate(entry)}`,
+            title: toText(entry.title) || "Untitled",
             snippet: snippet || "Click to read the full article.",
             region: source.region,
             topic: source.topic,
-            publishedAt: entry.isoDate ?? new Date().toISOString(),
+            publishedAt: getEntryDate(entry),
             readTime: guessReadTime(snippet),
             sourceName: source.name,
-            url: entry.link ?? source.url,
+            url: getEntryUrl(entry) || source.url,
           });
         });
       } catch {
