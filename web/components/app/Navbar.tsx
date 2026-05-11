@@ -158,29 +158,41 @@ export function Navbar({ user }: { user: Session["user"] }) {
     setMobileOpen(false);
   }, [pathname]);
 
-  // Prevent body scroll when mobile menu is open
+  // Prevent body scroll when mobile menu is open.
+  // Effect 1 (root) + Effect 2 (body) must save independently
+  // to avoid restoring stale values. Here we handle root only.
   useEffect(() => {
     const root = document.documentElement;
-    const body = document.body;
     const previousRootOverflow = root.style.overflow;
     const previousRootTouchAction = root.style.touchAction;
-    const previousBodyOverflow = body.style.overflow;
-    const previousBodyTouchAction = body.style.touchAction;
 
     if (mobileOpen) {
       root.style.overflow = "hidden";
       root.style.touchAction = "none";
-      body.style.overflow = "hidden";
-      body.style.touchAction = "none";
     } else {
       root.style.overflow = previousRootOverflow;
       root.style.touchAction = previousRootTouchAction;
-      body.style.overflow = previousBodyOverflow;
-      body.style.touchAction = previousBodyTouchAction;
     }
     return () => {
       root.style.overflow = previousRootOverflow;
       root.style.touchAction = previousRootTouchAction;
+    };
+  }, [mobileOpen]);
+
+  // Effect 2: only body, only when mobileNav is open.
+  useEffect(() => {
+    const body = document.body;
+    const previousBodyOverflow = body.style.overflow;
+    const previousBodyTouchAction = body.style.touchAction;
+
+    if (mobileOpen) {
+      body.style.overflow = "hidden";
+      body.style.touchAction = "none";
+    } else {
+      body.style.overflow = previousBodyOverflow;
+      body.style.touchAction = previousBodyTouchAction;
+    }
+    return () => {
       body.style.overflow = previousBodyOverflow;
       body.style.touchAction = previousBodyTouchAction;
     };

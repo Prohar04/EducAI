@@ -110,7 +110,6 @@ export default async function HomePage() {
             position: "relative",
             paddingTop: "clamp(72px, 10vh, 120px)",
             paddingBottom: "clamp(24px, 4vw, 48px)",
-            overflowX: "hidden",
           }}
         >
           <div className="landing-hero-copy" style={{
