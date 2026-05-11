@@ -56,8 +56,14 @@ export async function signUp(
 			message: "Something went wrong. Please try again later.",
 		};
 	} catch (err) {
-		// redirect() throws a special error — rethrow it
-		throw err;
+		if (typeof err === "object" && err !== null && "digest" in err) {
+			throw err;
+		}
+
+		return {
+			message:
+				"Unable to reach the authentication server. Please try again later.",
+		};
 	}
 }
 
@@ -128,7 +134,14 @@ export async function signUpFull(
 		const data = await response.json().catch(() => null);
 		return { message: data?.message ?? "Something went wrong. Please try again later." };
 	} catch (err) {
-		throw err;
+		if (typeof err === "object" && err !== null && "digest" in err) {
+			throw err;
+		}
+
+		return {
+			message:
+				"Unable to reach the authentication server. Please try again later.",
+		};
 	}
 }
 
@@ -203,7 +216,14 @@ export async function signIn(
 			message: data?.message || "Invalid credentials.",
 		};
 	} catch (err) {
-		throw err;
+		if (typeof err === "object" && err !== null && "digest" in err) {
+			throw err;
+		}
+
+		return {
+			message:
+				"Unable to reach the authentication server. Please try again later.",
+		};
 	}
 }
 
