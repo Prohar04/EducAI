@@ -38,10 +38,34 @@ export const STAGES: StageOption[] = [
 	},
 ];
 
-export const TARGET_INTAKES = [
-	"Fall 2025", "Spring 2026", "Fall 2026", "Spring 2027",
-	"Fall 2027", "Spring 2028", "Fall 2028",
-];
+export function getAvailableIntakes(): Array<{ value: string; label: string }> {
+	const now = new Date();
+	const currentYear = now.getFullYear();
+
+	const intakeMonths = [
+		{ month: 1, label: "January" },
+		{ month: 5, label: "May" },
+		{ month: 9, label: "September" },
+	];
+
+	const result: Array<{ value: string; label: string }> = [];
+
+	for (let yearOffset = 0; yearOffset <= 2; yearOffset++) {
+		const year = currentYear + yearOffset;
+		for (const { month, label } of intakeMonths) {
+			const intakeDate = new Date(year, month - 1, 1);
+			const diffMs = intakeDate.getTime() - now.getTime();
+			const diffMonths = diffMs / (1000 * 60 * 60 * 24 * 30);
+			if (diffMonths > 1) {
+				result.push({ value: `${label} ${year}`, label: `${label} ${year}` });
+			}
+		}
+	}
+
+	return result.slice(0, 8);
+}
+
+export const TARGET_INTAKES = getAvailableIntakes().map((i) => i.value);
 
 export const LEVELS = ["BSc", "MSc", "PhD", "MBA", "Diploma"] as const;
 export type Level = typeof LEVELS[number];

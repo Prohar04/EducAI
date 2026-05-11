@@ -8,7 +8,6 @@ from ...middleware.secure_keys import checkApiKey
 from ...domains.searching.webSearch import WebSearch
 from ...domains.jobs.adzuna import fetch_adzuna_jobs, supports_country, ADZUNA_APP_ID, ADZUNA_APP_KEY
 from ...domains.jobs.jsearch import fetch_jsearch_jobs, RAPIDAPI_KEY
-from ...domains.jobs.openai_fallback import fetch_openai_fallback_jobs
 from ...schemas.jobs import (
     JobListing,
     JobSearchRequest,
@@ -218,7 +217,6 @@ logger.info(
 async def search_jobs(payload: JobSearchRequest) -> JobSearchResponse:
     listings: list[JobListing] = []
     source_used = "none"
-    ai_fallback_used = False
 
     # SOURCE 1: Adzuna (official, 16 countries)
     if supports_country(payload.country_code) and ADZUNA_APP_ID and ADZUNA_APP_KEY:
@@ -248,18 +246,8 @@ async def search_jobs(payload: JobSearchRequest) -> JobSearchResponse:
         except Exception as e:
             logger.warning("JSearch failed: %s", e)
 
-    # SOURCE 3: OpenAI fallback (last resort)
-    if len(listings) < 3:
-        try:
-            logger.info("Using OpenAI fallback for %s in %s", payload.field, payload.city)
-            listings = await fetch_openai_fallback_jobs(
-                payload.country, payload.city, payload.field, payload.job_type, payload.visa_type
-            )
-            source_used = "ai_generated"
-            ai_fallback_used = True
-        except Exception as e:
-            logger.error("OpenAI fallback failed: %s", e)
-            listings = []
+    # SOURCE 3: NEVER use AI-generated jobs for user-facing search.
+    # Return empty with fallback links instead.
 
     country_upper = payload.country_code.upper()
     work_hour_limit = WORK_HOUR_LIMITS.get(country_upper)
@@ -268,6 +256,13 @@ async def search_jobs(payload: JobSearchRequest) -> JobSearchResponse:
     if payload.job_type == JobType.FULL_TIME:
         post_grad_steps = POST_GRAD_PERMIT_STEPS.get(country_upper)
 
+    if not listings:
+        logger.info(
+            "No live jobs from Adzuna or JSearch for %s in %s — returning empty (no AI fallback)",
+            payload.field,
+            payload.city,
+        )
+
     return JobSearchResponse(
         listings=listings,
         work_hour_limit=work_hour_limit,
@@ -275,7 +270,7 @@ async def search_jobs(payload: JobSearchRequest) -> JobSearchResponse:
         total=len(listings),
         query_used=f"{payload.field} {payload.job_type} in {payload.city}",
         source_used=source_used,
-        ai_fallback_used=ai_fallback_used,
+        ai_fallback_used=False,
         cached_at=None,
     )
 

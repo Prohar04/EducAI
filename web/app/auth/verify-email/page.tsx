@@ -62,7 +62,7 @@ export default async function VerifyEmailPage({
 			<AuthCard>
 				<AuthHeader
 					title="Email verified!"
-					description="Your account is confirmed. Sign in to complete your profile setup."
+					description="Your account is confirmed. Sign in to set up your profile."
 				/>
 				<div className="mt-8 space-y-4">
 					<div className="flex items-center gap-2 rounded-lg border border-[#3D9970]/50 bg-[#3D9970]/10 px-3 py-2 text-sm text-[#3D9970]">
@@ -73,15 +73,15 @@ export default async function VerifyEmailPage({
 						<p className="font-medium text-foreground mb-1">What happens next?</p>
 						<ol className="list-decimal list-inside space-y-1 text-xs">
 							<li>Sign in with your email and password</li>
-							<li>Complete your profile setup (takes ~2 minutes)</li>
-							<li>Access your personalized study plan</li>
+							<li>Complete your study abroad profile (~3 minutes)</li>
+							<li>Get AI-matched programs, scholarships, and a timeline</li>
 						</ol>
 					</div>
 					<Link
 						href="/auth/signin"
 						className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
 					>
-						Sign In and Continue
+						Sign In → Complete Profile
 					</Link>
 				</div>
 			</AuthCard>

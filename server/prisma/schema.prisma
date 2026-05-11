@@ -46,6 +46,7 @@ model User {
   scholarshipAlertLogs     ScholarshipAlertLog[]
   gapFixSessions           GapFixSession[]
   jobSearches              JobSearch[]
+  strategyActions          StrategyAction[]
 
   @@index([email])
   @@index([oauthProvider, oauthId])
@@ -643,6 +644,27 @@ model JobResult {
 
   @@index([jobSearchId])
   @@map("job_results")
+}
+
+// ── STRATEGY ACTION TRACKING ───────────────────────────────────────
+model StrategyAction {
+  id          String    @id @default(cuid())
+  userId      String    @map("user_id") @db.Uuid
+  strategyId  String    @map("strategy_id") @db.VarChar(100)
+  actionText  String    @map("action_text") @db.Text
+  status      String    @default("not_started") @db.VarChar(30)
+  // Status: not_started | in_progress | pending_verification | completed | skipped
+  evidence    String?   @db.Text
+  verifiedAt  DateTime? @map("verified_at") @db.Timestamp
+  aiVerified  Boolean   @default(false) @map("ai_verified")
+  aiFeedback  String?   @map("ai_feedback") @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamp
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamp
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, strategyId])
+  @@map("strategy_actions")
 }
 
 // ── GOOGLE OAUTH ONE-TIME CODES ────────────────────────────────────

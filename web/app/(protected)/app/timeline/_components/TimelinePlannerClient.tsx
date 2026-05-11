@@ -171,6 +171,7 @@ function TaskItem({
 	const isUpdating = updatingId === item.id;
 	const isDone = item.status === "completed";
 	const isOverdue = item.status === "overdue";
+	const nowMs = new Date().getTime();
 
 	const nextStatus: TaskStatus = isDone ? "pending" : "completed";
 
@@ -234,6 +235,17 @@ function TaskItem({
 							})}
 						</p>
 					)}
+					{item.date && !isDone && (() => {
+						const diffMs = new Date(item.date).getTime() - nowMs;
+						const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+						if (diffDays > 0) return (
+							<span className="text-xs text-[#4A90D9]/80">In {diffDays}d</span>
+						);
+						if (diffDays < 0) return (
+							<span className="text-xs text-[#C0392B]">Overdue by {Math.abs(diffDays)}d</span>
+						);
+						return <span className="text-xs text-[#C49A3C]">Due today</span>;
+					})()}
 					{item.estimatedDuration && (
 						<p className="text-xs text-muted-foreground/50">~ {item.estimatedDuration}</p>
 					)}

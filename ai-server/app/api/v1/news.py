@@ -9,6 +9,7 @@ from ...domains.searching.webSearch import WebSearch
 
 router = APIRouter()
 
+
 class NewsItem(BaseModel):
     title: str
     url: str
@@ -17,30 +18,32 @@ class NewsItem(BaseModel):
     date: Optional[str] = None
     category: str
 
-# In-memory cache — refreshed twice daily by cron
+# In-memory cache — refreshed hourly by cron
+
+
 _cache: dict[str, dict] = {}
-CACHE_TTL_HOURS = 12
+CACHE_TTL_HOURS = 1
 
 CATEGORY_QUERIES: dict[str, list[str]] = {
     "university": [
-        "international university admissions news 2025",
-        "top universities international students update",
-        "university ranking changes",
+        "international university admissions 2025 2026",
+        "top university news international students this week",
+        "university scholarship deadline 2025",
     ],
     "visa": [
-        "student visa policy changes 2025",
-        "international student visa news",
-        "study abroad visa requirements update",
+        "student visa policy update 2025",
+        "international student visa news today",
+        "study abroad visa requirements change",
     ],
     "scholarship": [
-        "international scholarship announcements 2025",
-        "study abroad scholarships open applications",
-        "fully funded scholarships international students",
+        "new scholarship international students open apply 2025",
+        "fully funded scholarship deadline 2025",
+        "Chevening Fulbright DAAD Erasmus news",
     ],
     "general": [
-        "study abroad news",
-        "international education trends 2025",
-        "international student tips guidance",
+        "study abroad news today",
+        "international education update",
+        "IELTS TOEFL GRE update 2025",
     ],
 }
 

@@ -12,11 +12,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { upsertUserProfile } from "@/lib/auth/action";
-import { STAGES, TARGET_INTAKES, LEVELS } from "@/lib/data/stages";
+import { STAGES, getAvailableIntakes, LEVELS } from "@/lib/data/stages";
 import { COUNTRIES, COUNTRY_TESTS } from "@/lib/data/countries";
 import { MAJORS } from "@/lib/data/majors";
 import { TUITION_RANGES, PRIORITIES, CURRENCIES } from "@/lib/data/tuitionRanges";
 import { SmartAutocomplete } from "@/components/forms/SmartAutocomplete";
+import InstitutionAutocomplete from "@/components/ui/institution-autocomplete";
 import type { SuggestionItem } from "@/components/forms/SmartAutocomplete";
 import { convert, toUSD, RATES_ARE_LIVE } from "@/lib/utils/exchangeRates";
 import type { UserProfile, Session } from "@/types/auth.type";
@@ -117,7 +118,7 @@ function Step1({ values, set }: StepProps) {
 						className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
 					>
 						<option value="">Select intake…</option>
-						{TARGET_INTAKES.map((t) => <option key={t} value={t}>{t}</option>)}
+						{getAvailableIntakes().map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
 					</select>
 				</div>
 				<div>
@@ -216,12 +217,11 @@ function Step2({ values, set }: StepProps) {
 	return (
 		<div className="space-y-5">
 			<div>
-				<Label htmlFor="institution" className="mb-1.5 block text-sm font-medium">Current / Last Institution <span className="text-xs text-muted-foreground">(optional)</span></Label>
-				<Input
-					id="institution"
-					placeholder="e.g. University of Dhaka"
+				<Label className="mb-1.5 block text-sm font-medium">Current / Last Institution <span className="text-xs text-muted-foreground">(optional)</span></Label>
+				<InstitutionAutocomplete
 					value={values.currentInstitution}
-					onChange={(e) => set("currentInstitution", e.target.value)}
+					onChange={(v) => set("currentInstitution", v)}
+					placeholder="e.g. University of Dhaka"
 				/>
 			</div>
 

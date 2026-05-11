@@ -32,60 +32,49 @@ export const metadata: Metadata = {
 export const revalidate = 86_400;
 
 const FEATURES = [
-  {
-    title: "Global program database",
-    description: "Real-time data from universities across Germany, UK, USA, Canada, Australia, and more.",
-    icon: "🌍",
-  },
-  {
-    title: "Profile-matched recommendations",
-    description: "Programs scored against your GPA, language scores, budget, and career goals — with reasoning.",
-    icon: "✦",
-  },
-  {
-    title: "Scholarship intelligence",
-    description: "28+ verified scholarships with deadline tracking, eligibility pre-screening, and probability scoring.",
-    icon: "◈",
-  },
-  {
-    title: "Application strategy",
-    description: "AI-generated admission chance band, risk assessment, and concrete action plan.",
-    icon: "◎",
-  },
-  {
-    title: "Timeline planner",
-    description: "Month-by-month roadmap from saved program deadlines and country-specific visa milestones.",
-    icon: "◷",
-  },
-  {
-    title: "AI advisor chatbot",
-    description: "Context-aware assistant that knows your saved programs, scholarships, and deadlines.",
-    icon: "◬",
-  },
+  { icon: "🎓", title: "Program Match",     description: "AI-ranked universities by fit score across GPA, language, budget, and career goals." },
+  { icon: "💰", title: "Scholarships",      description: "28+ real scholarships with deadline alerts, eligibility pre-screening, and probability scoring." },
+  { icon: "📅", title: "Timeline",          description: "Month-by-month application roadmap from your saved programs and visa milestones." },
+  { icon: "♟️", title: "Strategy",          description: "AI admission strategy with chance bands, risk assessment, and concrete action plan." },
+  { icon: "📝", title: "SOP Builder",       description: "Statement of purpose generated in your voice from your real academic profile." },
+  { icon: "📄", title: "CV Builder",        description: "ATS-friendly resume in 3 styles: US Standard, European, and Academic." },
+  { icon: "👨‍🏫", title: "Professor Finder", description: "Research supervisor discovery matched to your intended thesis area." },
+  { icon: "⚡", title: "Gap Fix",           description: "Profile weakness analysis with verified evidence tracking and AI verification." },
+  { icon: "📈", title: "Career Outlook",    description: "Salary ranges, top employers, and career pathways per country." },
+  { icon: "💼", title: "Job Finder",        description: "Real jobs from Adzuna and JSearch — zero AI-generated listings." },
+  { icon: "🛂", title: "Immigration",       description: "Visa, post-study work permit, and PR guide per target country." },
+  { icon: "🤖", title: "AI Advisor",        description: "Context-aware study abroad chatbot that knows your profile and deadlines." },
+  { icon: "📊", title: "Data Freshness",    description: "Real-time data health monitor showing when each source was last synced." },
 ] as const;
 
 const STEPS = [
   {
     number: "01",
-    title: "Build your profile",
-    description: "Tell us your academic background, target countries, budget, and goals. Takes under three minutes.",
+    title: "Complete your profile (5 minutes)",
+    description: "Tell us your academic background, target countries, budget, and goals. Our wizard guides you step by step.",
   },
   {
     number: "02",
-    title: "Get matched programs",
-    description: "AI analyzes thousands of programs and scores each one against your specific profile.",
+    title: "Let AI analyze your fit",
+    description: "AI analyzes programs, scholarships, and career pathways across all your target countries simultaneously.",
   },
   {
     number: "03",
-    title: "Discover funding",
-    description: "We surface scholarships you actually qualify for — with deadlines, amounts, and next steps.",
-  },
-  {
-    number: "04",
-    title: "Execute your plan",
-    description: "Use SOP builder, CV tools, professor finder, and visa guidance — all in one place.",
+    title: "Apply with AI-generated documents",
+    description: "Use SOP builder, CV tools, job listings, and visa guides — all tailored to your profile and target country.",
   },
 ] as const;
+
+const REAL_STATS = [
+  { value: "30+",  label: "Countries supported" },
+  { value: "28",   label: "Real scholarships in database" },
+  { value: "13",   label: "Features built" },
+  { value: "4",    label: "AI providers integrated" },
+] as const;
+
+const TRUST_TECH = ["Next.js", "FastAPI", "PostgreSQL", "OpenAI"] as const;
+const TRUST_INFRA = ["Vercel", "Render", "Neon"] as const;
+const TRUST_DATA = ["Adzuna", "JSearch", "Serper", "Firecrawl"] as const;
 
 const ORGANIZATION_SCHEMA = {
   "@context": "https://schema.org", "@type": "Organization",
@@ -315,20 +304,39 @@ export default async function HomePage() {
           </div>
         </section>
 
+        {/* ── REAL STATS ──────────────────────────────────────────────── */}
+        <section aria-label="Platform stats" className="below-fold" style={{ paddingTop: 80, paddingBottom: 80 }}>
+          <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 24 }}>
+              {REAL_STATS.map((s) => (
+                <div key={s.label} style={{
+                  textAlign: "center",
+                  padding: "28px 20px",
+                  background: "rgba(255,255,255,0.02)",
+                  border: "1px solid rgba(255,255,255,0.04)",
+                  borderRadius: 14,
+                }}>
+                  <div style={{ fontSize: "clamp(28px, 5vw, 42px)", fontWeight: 700, color: "#4A90D9", letterSpacing: "-0.02em" }}>{s.value}</div>
+                  <div style={{ fontSize: 13, fontWeight: 300, color: "#7A8BA8", marginTop: 6 }}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* ── HOW IT WORKS ────────────────────────────────────────────── */}
-        <section id="how-it-works" aria-labelledby="how-heading" className="below-fold" style={{ paddingTop: 120, paddingBottom: 80 }}>
+        <section id="how-it-works" aria-labelledby="how-heading" className="below-fold" style={{ paddingTop: 80, paddingBottom: 80 }}>
           <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 24px" }}>
             <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "#2A3A52", marginBottom: 16 }}>
               HOW IT WORKS
             </p>
             <h2 id="how-heading" style={{ fontSize: "clamp(24px, 3.5vw, 36px)", fontWeight: 300, letterSpacing: "-0.02em", color: "#E8EEF8", marginBottom: 60 }}>
-              Four steps to your dream university
+              Three steps to your dream university
             </h2>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
               {STEPS.map((step, i) => (
                 <div key={step.number} style={{ display: "flex", gap: 24, paddingBottom: 40, position: "relative" }}>
-                  {/* Vertical connecting line */}
                   {i < STEPS.length - 1 && (
                     <div style={{
                       position: "absolute",
@@ -339,7 +347,6 @@ export default async function HomePage() {
                       background: "rgba(255,255,255,0.05)",
                     }} />
                   )}
-                  {/* Step number background decoration */}
                   <div style={{
                     fontSize: "clamp(80px, 12vw, 120px)",
                     fontWeight: 900,
@@ -361,6 +368,32 @@ export default async function HomePage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── TRUST INDICATORS ────────────────────────────────────────── */}
+        <section aria-label="Technology stack" className="below-fold" style={{ paddingTop: 40, paddingBottom: 80 }}>
+          <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 20, alignItems: "center", textAlign: "center" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
+                <span style={{ fontSize: 11, color: "#3D4F6B", fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase" }}>Built with</span>
+                {TRUST_TECH.map((t) => (
+                  <span key={t} style={{ fontSize: 12, color: "#7A8BA8", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 6, padding: "3px 10px" }}>{t}</span>
+                ))}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
+                <span style={{ fontSize: 11, color: "#3D4F6B", fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase" }}>Deployed on</span>
+                {TRUST_INFRA.map((t) => (
+                  <span key={t} style={{ fontSize: 12, color: "#7A8BA8", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 6, padding: "3px 10px" }}>{t}</span>
+                ))}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
+                <span style={{ fontSize: 11, color: "#3D4F6B", fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase" }}>Data sources</span>
+                {TRUST_DATA.map((t) => (
+                  <span key={t} style={{ fontSize: 12, color: "#7A8BA8", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 6, padding: "3px 10px" }}>{t}</span>
+                ))}
+              </div>
             </div>
           </div>
         </section>

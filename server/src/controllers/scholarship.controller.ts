@@ -65,7 +65,7 @@ export async function listScholarships(req: Request & { userId?: string }, res: 
         }
         : null,
     });
-    res.status(200).json(result);
+    res.status(200).json({ ...result, fetchedAt: new Date().toISOString() });
   } catch (err) {
     console.error('[scholarship:list]', err);
     res.status(500).json({ message: 'Failed to fetch scholarships' });
