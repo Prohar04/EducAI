@@ -76,7 +76,7 @@ const PageHeader = memo(function PageHeader({
       {/* Animation — positioned right, never overlaps text */}
       <div
         aria-hidden="true"
-        className="hidden md:block"
+        className="hidden xl:block"
         style={{
           position: "absolute",
           right: -40,
@@ -100,7 +100,7 @@ const PageHeader = memo(function PageHeader({
         style={{
           position: "relative",
           zIndex: 1,
-          maxWidth: "55%",
+          maxWidth: "min(58%, 760px)",
           textAlign: centered ? "center" : "left",
           marginLeft: centered ? "auto" : 0,
           marginRight: centered ? "auto" : 0,
@@ -164,10 +164,8 @@ const PageHeader = memo(function PageHeader({
       {/* Top-right meta text */}
       {metaText && !combined && (
         <div
+          className="mt-4 xl:mt-0 xl:absolute xl:top-8 xl:right-0"
           style={{
-            position: "absolute",
-            top: 32,
-            right: 0,
             zIndex: 2,
             fontSize: 12,
             color: "#3D4F6B",
@@ -181,10 +179,8 @@ const PageHeader = memo(function PageHeader({
       {/* Right-side action/content */}
       {combined && (
         <div
+          className="mt-4 xl:mt-0 xl:absolute xl:top-7 xl:right-0"
           style={{
-            position: "absolute",
-            top: 28,
-            right: 0,
             zIndex: 2,
           }}
         >

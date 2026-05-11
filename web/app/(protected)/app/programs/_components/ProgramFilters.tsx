@@ -54,12 +54,12 @@ export default function ProgramFilters({ current }: { current: Record<string, st
 					</Button>
 				)}
 			</div>
-			{/* Filter row */}
-			<div className="flex flex-wrap gap-2">
+			{/* Filter row — stack on mobile, inline on sm+ */}
+			<div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
 				<select
 					name="level"
 					defaultValue={current.level ?? ""}
-					className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+					className="h-9 rounded-md border border-input bg-background px-3 text-sm sm:w-auto"
 				>
 					{LEVELS.map((l) => (
 						<option key={l.value} value={l.value}>
@@ -69,13 +69,13 @@ export default function ProgramFilters({ current }: { current: Record<string, st
 				</select>
 				<Input
 					name="field"
-					className="h-9 w-36 sm:w-40"
+					className="h-9 sm:w-40"
 					placeholder="Field (e.g. CS)"
 					defaultValue={current.field ?? ""}
 				/>
 				<Input
 					name="country"
-					className="h-9 w-32 sm:w-36"
+					className="h-9 sm:w-36"
 					placeholder="Country (US, GB…)"
 					defaultValue={current.country ?? ""}
 				/>

@@ -871,7 +871,7 @@ export default function ScholarshipsClient({
 			{/* Search + filters */}
 			<Reveal>
 				<div className="mb-6 space-y-3">
-					<form onSubmit={handleSearch} className="flex gap-2">
+					<form onSubmit={handleSearch} className="flex flex-col gap-2 sm:flex-row sm:items-center">
 						<div className="relative flex-1">
 							<Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
 							<Input
@@ -882,20 +882,22 @@ export default function ScholarshipsClient({
 								className="pl-9"
 							/>
 						</div>
-						<Button type="submit" disabled={loading} className="gap-2 shrink-0">
-							{loading ? <Loader2 className="size-4 animate-spin" /> : <Search className="size-4" />}
-							Search
-						</Button>
-						<Button
-							type="button"
-							variant="outline"
-							size="icon"
-							onClick={() => setShowFilters((v) => !v)}
-							className={showFilters ? "border-primary text-primary" : ""}
-							aria-label="Toggle filters"
-						>
-							<SlidersHorizontal className="size-4" />
-						</Button>
+						<div className="flex gap-2 sm:items-center">
+							<Button type="submit" disabled={loading} className="gap-2 shrink-0 w-full sm:w-auto">
+								{loading ? <Loader2 className="size-4 animate-spin" /> : <Search className="size-4" />}
+								Search
+							</Button>
+							<Button
+								type="button"
+								variant="outline"
+								size="icon"
+								onClick={() => setShowFilters((v) => !v)}
+								className={`${showFilters ? "border-primary text-primary" : ""} w-full sm:w-auto`}
+								aria-label="Toggle filters"
+							>
+								<SlidersHorizontal className="size-4" />
+							</Button>
+						</div>
 					</form>
 
 					{showFilters && (

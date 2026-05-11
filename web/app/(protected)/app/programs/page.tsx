@@ -255,14 +255,14 @@ export default async function ProgramsPage({
 													initialSaved={savedIds.has(program.id)}
 												/>
 											</div>
-											<Link href={`/app/programs/${program.id}`} className="flex-1">
-												<h2 className="font-semibold leading-snug transition-colors group-hover:text-primary">
+											<Link href={`/app/programs/${program.id}`} className="flex-1 min-w-0">
+												<h2 className="break-words font-semibold leading-snug transition-colors group-hover:text-primary">
 													{program.title}
 												</h2>
-												<p className="mt-0.5 text-sm text-muted-foreground">
+												<p className="mt-0.5 break-words text-sm text-muted-foreground">
 													{program.university.name}
 												</p>
-												<p className="text-xs text-muted-foreground">
+												<p className="break-words text-xs text-muted-foreground">
 													{program.university.country.name}
 													{program.university.city ? `, ${program.university.city}` : ""}
 												</p>

@@ -29,7 +29,7 @@ const SignInPage = async ({ searchParams }: SignInPageProps) => {
 				description="Sign in to your EducAI account to continue learning."
 			/>
 
-			<div className="mt-8 auth-form">
+			<div className="mt-8 auth-form space-y-4">
 				{sessionExpired && (
 					<div
 						role="alert"

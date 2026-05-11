@@ -2,13 +2,10 @@
 import { useEffect, useState } from "react"
 import dynamic from "next/dynamic"
 import Link from "next/link"
+import { useMediaQuery } from "../../lib/hooks/use-media-query"
 
 const StarField = dynamic(
   () => import("@/components/ui/star-field"),
-  { loading: () => null, ssr: false }
-)
-const HeroVisual = dynamic(
-  () => import("@/components/ui/hero-visual"),
   { loading: () => null, ssr: false }
 )
 const GlowOrb = dynamic(
@@ -22,6 +19,8 @@ interface LandingClientProps {
 
 export default function LandingClient({ isLoggedIn }: LandingClientProps) {
   const [scrolled, setScrolled] = useState(false)
+  const isMobile = useMediaQuery("(max-width: 767px)")
+  const isTablet = useMediaQuery("(min-width: 768px) and (max-width: 1279px)")
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -32,27 +31,32 @@ export default function LandingClient({ isLoggedIn }: LandingClientProps) {
   return (
     <>
       {/* Background canvas */}
-      <StarField
-        style={{
-          position: "fixed",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          pointerEvents: "none",
-          zIndex: 0,
-        }}
-      />
+      {!isMobile && (
+        <StarField
+          density={isTablet ? 18000 : 12000}
+          style={{
+            position: "fixed",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
+      )}
 
       {/* BMW center glow */}
-      <GlowOrb
-        size={700}
-        x="65%"
-        y="35%"
-        color="rgba(27,61,107,0.28)"
-        blur={150}
-        pulse
-        style={{ position: "fixed" }}
-      />
+      {!isMobile && (
+        <GlowOrb
+          size={isTablet ? 560 : 700}
+          x="65%"
+          y="35%"
+          color="rgba(27,61,107,0.28)"
+          blur={isTablet ? 120 : 150}
+          pulse
+          style={{ position: "fixed" }}
+        />
+      )}
 
       {/* Fixed navbar */}
       <nav
@@ -61,11 +65,11 @@ export default function LandingClient({ isLoggedIn }: LandingClientProps) {
           top: 0,
           left: 0,
           right: 0,
-          height: 60,
+          height: "clamp(56px, 6vh, 60px)",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0 32px",
+          padding: "0 clamp(16px, 3vw, 32px)",
           zIndex: 100,
           background: scrolled ? "rgba(8,13,24,0.92)" : "transparent",
           borderBottom: scrolled ? "1px solid rgba(255,255,255,0.05)" : "1px solid transparent",
@@ -167,23 +171,6 @@ export default function LandingClient({ isLoggedIn }: LandingClientProps) {
         </div>
       </nav>
 
-      {/* HeroVisual canvas — positioned right of hero, desktop only */}
-      <div
-        className="hidden lg:block"
-        style={{
-          position: "absolute",
-          right: "-5%",
-          top: "50%",
-          transform: "translateY(-50%)",
-          width: 480,
-          height: 480,
-          opacity: 0.55,
-          zIndex: 1,
-          pointerEvents: "none",
-        }}
-      >
-        <HeroVisual />
-      </div>
     </>
   )
 }

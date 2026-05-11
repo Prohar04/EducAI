@@ -42,15 +42,15 @@ export default function CountriesPage() {
                 <Link
                   key={country.slug}
                   href={`/countries/${country.slug}`}
-                  className="group flex flex-col rounded-2xl border border-border bg-card p-6 transition-all duration-200 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
+                  className="group flex flex-col rounded-2xl border border-border bg-card p-5 transition-all duration-200 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 sm:p-6"
                 >
                   <div className="mb-4 flex items-center gap-3">
-                    <span className="text-3xl">{country.flag}</span>
-                    <div>
-                      <h2 className="font-bold text-foreground group-hover:text-primary transition-colors">
+                    <span className="shrink-0 text-3xl">{country.flag}</span>
+                    <div className="min-w-0">
+                      <h2 className="break-words font-bold text-foreground transition-colors group-hover:text-primary">
                         {country.name}
                       </h2>
-                      <p className="text-xs text-muted-foreground">{country.visaType.split("(")[0].trim()}</p>
+                      <p className="truncate text-xs text-muted-foreground">{country.visaType.split("(")[0].trim()}</p>
                     </div>
                   </div>
                   <p className="mb-4 flex-1 text-sm leading-relaxed text-muted-foreground line-clamp-3">

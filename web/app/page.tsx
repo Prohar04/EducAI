@@ -6,6 +6,7 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { fetchEducationPulse } from "@/lib/data/fetchEducationPulse";
 import { GradientText } from "@/components/ui/gradient-text";
 import LandingClientWrapper from "@/components/home/LandingClientWrapper";
+import { HeroVisualWrapper } from "@/components/ui/hero-visual-wrapper";
 
 const DailyQuote = dynamic(
   () => import("@/components/home/DailyQuote"),
@@ -90,7 +91,7 @@ export default async function HomePage() {
   const feedItems = await fetchEducationPulse().catch(() => []);
 
   return (
-    <div style={{ minHeight: "100vh", position: "relative", overflowX: "hidden" }}>
+    <div style={{ minHeight: "100svh", position: "relative" }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION_SCHEMA) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_SCHEMA) }} />
 
@@ -101,18 +102,21 @@ export default async function HomePage() {
         {/* ── HERO ─────────────────────────────────────────────────────── */}
         <section
           aria-label="Hero"
+          className="landing-hero"
           style={{
-            minHeight: "100vh",
+            minHeight: "100svh",
             display: "flex",
             alignItems: "center",
             position: "relative",
-            paddingTop: 80,
+            paddingTop: "clamp(72px, 10vh, 120px)",
+            paddingBottom: "clamp(24px, 4vw, 48px)",
+            overflowX: "hidden",
           }}
         >
-          <div style={{
-            maxWidth: 680,
+          <div className="landing-hero-copy" style={{
+            maxWidth: 720,
             margin: "0 auto",
-            padding: "80px 24px 60px",
+            padding: "clamp(48px, 8vw, 80px) clamp(16px, 4vw, 24px) clamp(40px, 6vw, 60px)",
             textAlign: "center",
             position: "relative",
             zIndex: 1,
@@ -137,7 +141,7 @@ export default async function HomePage() {
             </div>
 
             {/* H1 */}
-            <h1 style={{
+            <h1 className="landing-hero-title" style={{
               fontSize: "clamp(44px, 7vw, 82px)",
               lineHeight: 1.05,
               letterSpacing: "-0.03em",
@@ -213,6 +217,22 @@ export default async function HomePage() {
             </div>
           </div>
 
+          {/* HeroVisual orbital rings — positioned within hero section, desktop xl only */}
+          <HeroVisualWrapper
+            className="hidden xl:block"
+            style={{
+              position: "absolute",
+              right: "-5%",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: 480,
+              height: 480,
+              opacity: 0.55,
+              zIndex: 0,
+              pointerEvents: "none",
+            }}
+          />
+
           {/* Scroll indicator */}
           <div style={{
             position: "absolute",
@@ -246,7 +266,7 @@ export default async function HomePage() {
             {/* Feature grid — borderless cells */}
             <div style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))",
               gap: 1,
               background: "rgba(255,255,255,0.03)",
               border: "1px solid rgba(255,255,255,0.03)",
@@ -279,7 +299,7 @@ export default async function HomePage() {
               DAILY UPDATES
             </p>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 48 }} className="news-grid">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "clamp(24px, 4vw, 48px)" }} className="news-grid">
               {/* Left column: heading + quote */}
               <div>
                 <h2 id="news-heading" style={{ fontSize: "clamp(24px, 3.5vw, 40px)", fontWeight: 300, letterSpacing: "-0.02em", color: "#E8EEF8", lineHeight: 1.15, marginBottom: 8 }}>
@@ -303,7 +323,7 @@ export default async function HomePage() {
         {/* ── REAL STATS ──────────────────────────────────────────────── */}
         <section aria-label="Platform stats" className="below-fold" style={{ paddingTop: 80, paddingBottom: 80 }}>
           <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 24 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 170px), 1fr))", gap: 24 }}>
               {REAL_STATS.map((s) => (
                 <div key={s.label} style={{
                   textAlign: "center",
@@ -370,7 +390,7 @@ export default async function HomePage() {
 
         {/* ── CTA SECTION ─────────────────────────────────────────────── */}
         <section style={{
-          padding: "80px 40px",
+          padding: "clamp(64px, 8vw, 96px) clamp(16px, 4vw, 40px)",
           background: "rgba(13,22,37,0.55)",
           borderTop: "1px solid rgba(255,255,255,0.04)",
           borderBottom: "1px solid rgba(255,255,255,0.04)",
@@ -425,7 +445,7 @@ export default async function HomePage() {
 
         {/* ── FOOTER ──────────────────────────────────────────────────── */}
         <footer style={{ borderTop: "1px solid rgba(255,255,255,0.04)", padding: "32px 40px" }}>
-          <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr auto auto", gap: 40, alignItems: "center", flexWrap: "wrap" }}>
+          <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))", gap: 24, alignItems: "center" }}>
             {/* Logo */}
             <div>
               <div style={{ marginBottom: 8 }}>

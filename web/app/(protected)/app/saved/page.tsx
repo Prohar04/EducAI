@@ -19,22 +19,22 @@ export default async function SavedProgramsPage() {
 	return (
 		<div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 			<FadeIn className="mb-8">
-				<h1 className="text-3xl font-bold tracking-tight">Saved Programs</h1>
+				<h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Saved Programs</h1>
 				<p className="mt-1 text-muted-foreground">
 					Your bookmarked programmes.
 				</p>
 			</FadeIn>
 
 			{saved.length === 0 ? (
-				<div className="flex flex-col items-center justify-center py-20 text-center">
-				<SavedIllustration className="mb-3 h-32 w-auto text-primary opacity-75" />
+				<div className="flex flex-col items-center justify-center py-16 text-center sm:py-20">
+				<SavedIllustration className="mb-3 h-28 w-auto text-primary opacity-75 sm:h-32" />
 					<h2 className="text-lg font-semibold">Nothing saved yet</h2>
-					<p className="mt-1 text-sm text-muted-foreground">
+					<p className="mt-1 max-w-xs text-sm text-muted-foreground">
 						Browse programmes and click &quot;Save&quot; to bookmark them here.
 					</p>
 					<Link
 						href="/app/programs"
-						className="mt-5 inline-flex h-9 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+						className="mt-5 inline-flex h-10 w-full max-w-xs items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 sm:h-9 sm:w-auto"
 					>
 						Browse Programs
 					</Link>
@@ -71,13 +71,13 @@ export default async function SavedProgramsPage() {
 											href={`/app/programs/${program.id}`}
 											className="flex-1"
 										>
-											<h2 className="font-semibold leading-snug transition-colors group-hover:text-primary">
+											<h2 className="break-words font-semibold leading-snug transition-colors group-hover:text-primary">
 												{program.title}
 											</h2>
-											<p className="mt-0.5 text-sm text-muted-foreground">
+											<p className="mt-0.5 break-words text-sm text-muted-foreground">
 												{program.university.name}
 											</p>
-											<p className="text-xs text-muted-foreground">
+											<p className="break-words text-xs text-muted-foreground">
 												{program.university.country.name}
 												{program.university.city ? `, ${program.university.city}` : ""}
 											</p>

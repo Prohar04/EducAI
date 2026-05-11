@@ -100,9 +100,12 @@ export function ChatPanel({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduced ? { opacity: 0 } : { opacity: 0, y: 20, scale: 0.96 }}
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed bottom-24 right-6 z-50 w-[380px] max-w-[calc(100vw-2rem)]"
+            className="fixed bottom-24 right-6 z-50 w-[min(380px,calc(100vw-2rem))] max-w-[calc(100vw-2rem)]"
           >
-            <GlassCard className="flex flex-col overflow-hidden shadow-xl shadow-black/40" style={{ height: 520 }}>
+            <GlassCard
+              className="flex flex-col overflow-hidden shadow-xl shadow-black/40"
+              style={{ height: "min(520px, calc(100svh - 7rem))", maxHeight: "calc(100svh - 7rem)" }}
+            >
               {/* Header */}
               <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3">
                 <div className="flex items-center gap-2.5">

@@ -228,7 +228,7 @@ export default function VisaGuidePage() {
             <h2 className="mb-10 text-xl font-extrabold tracking-tight sm:text-2xl">
               5 things every student visa applicant should know
             </h2>
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 xl:[&>*]:min-w-0">
               {GENERAL_TIPS.map((tip) => {
                 const Icon = tip.icon;
                 return (
@@ -255,14 +255,14 @@ export default function VisaGuidePage() {
               {VISA_GUIDES.map((guide) => (
                 <article
                   key={guide.country}
-                  className="rounded-2xl border border-border bg-card p-6 sm:p-8"
+                  className="rounded-2xl border border-border bg-card p-4 sm:p-8"
                 >
                   <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex items-center gap-3">
                       <span className="text-3xl">{guide.flag}</span>
-                      <div>
-                        <h3 className="text-xl font-extrabold">{guide.country}</h3>
-                        <p className="text-sm text-muted-foreground">{guide.visaName}</p>
+                      <div className="min-w-0">
+                        <h3 className="break-words text-xl font-extrabold">{guide.country}</h3>
+                        <p className="break-words text-sm text-muted-foreground">{guide.visaName}</p>
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-2">

@@ -829,8 +829,8 @@ export default function OnboardingWizard({
 						<AnimatePresence mode="wait">
 							<motion.div
 								key={`header-${step}`}
-								initial={reduced ? false : { opacity: 0, y: 10 }}
-								animate={{ opacity: 1, y: 0 }}
+								initial={false}
+								animate={reduced ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
 								exit={reduced ? undefined : { opacity: 0, y: -6 }}
 								transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
 								className="mb-8"
@@ -849,13 +849,8 @@ export default function OnboardingWizard({
 							<motion.div
 								key={step}
 								custom={direction}
-								variants={reduced ? undefined : {
-									hidden: (dir: number) => ({ opacity: 0, x: dir * 28 }),
-									visible: { opacity: 1, x: 0, transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } },
-									exit: (dir: number) => ({ opacity: 0, x: dir * -20, transition: { duration: 0.18, ease: [0.4, 0, 0.2, 1] } }),
-								}}
-								initial="hidden"
-								animate="visible"
+								initial={false}
+								animate={reduced ? { opacity: 1, x: 0 } : { opacity: 1, x: 0 }}
 								exit="exit"
 								className="rounded-2xl border border-border bg-card p-6 shadow-sm"
 							>

@@ -686,14 +686,13 @@ export default function GapFixPage() {
 
   return (
     <div
-      className={isFirst ? "page-enter" : ""}
-      style={{ padding: "0 24px 60px" }}
+      className={`${isFirst ? "page-enter" : ""} mx-auto max-w-6xl px-4 pb-16 sm:px-6 lg:px-8`}
     >
       {/* Header */}
       <div
         style={{
           position: "relative",
-          padding: "32px 0 24px",
+          padding: "28px 0 20px",
           marginBottom: 24,
           overflow: "hidden",
           minHeight: 140,
@@ -701,7 +700,7 @@ export default function GapFixPage() {
       >
         <div
           aria-hidden="true"
-          className="hidden md:block"
+          className="hidden xl:block"
           style={{
             position: "absolute",
             right: -40,
@@ -719,7 +718,7 @@ export default function GapFixPage() {
           <GapFixAnimation />
         </div>
 
-        <div style={{ position: "relative", zIndex: 1, maxWidth: "55%" }}>
+        <div className="page-header-content" style={{ position: "relative", zIndex: 1, maxWidth: "min(58%, 760px)" }}>
           <h1
             style={{
               fontSize: "clamp(28px, 4vw, 42px)",

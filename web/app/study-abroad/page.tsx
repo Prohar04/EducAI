@@ -195,13 +195,13 @@ export default function StudyAbroadGuidePage() {
                 From choosing a destination to getting your visa — a step-by-step guide for international students
                 planning to study in Germany, Canada, the UK, Australia, the USA, or anywhere in between.
               </p>
-              <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                <Button size="lg" asChild className="h-12 px-8 font-semibold">
+              <div className="mt-8 flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row">
+                <Button size="lg" asChild className="h-12 w-full px-8 font-semibold sm:w-auto">
                   <Link href="/auth/signup">
                     Start your plan — free <ArrowRight className="ml-2 size-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="h-12 px-8">
+                <Button size="lg" variant="outline" asChild className="h-12 w-full px-8 sm:w-auto">
                   <a href="#steps">Read the guide</a>
                 </Button>
               </div>

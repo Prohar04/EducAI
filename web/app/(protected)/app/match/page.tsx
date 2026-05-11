@@ -164,8 +164,8 @@ function ResultCard({
         </div>
 
         {/* Title + university */}
-        <h3 className="font-semibold leading-snug">{title}</h3>
-        <p className="mt-0.5 text-sm text-muted-foreground">{university}</p>
+        <h3 className="break-words font-semibold leading-snug">{title}</h3>
+        <p className="mt-0.5 break-words text-sm text-muted-foreground">{university}</p>
 
         {/* Location + duration */}
         <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
@@ -375,13 +375,13 @@ export default function MatchPage() {
   const isRunning = run?.status === "running" || run?.status === "pending" || isPending;
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8 space-y-8">
+    <div className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:space-y-8 sm:px-6 sm:py-10 lg:px-8">
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <Sparkles className="size-7 text-primary" />
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight sm:text-3xl">
+            <Sparkles className="size-6 shrink-0 text-primary sm:size-7" />
             AI Match
           </h1>
           <p className="mt-1 text-muted-foreground">
@@ -391,7 +391,7 @@ export default function MatchPage() {
         <Button
           onClick={handleRunMatch}
           disabled={isRunning}
-          className="shrink-0"
+          className="w-full shrink-0 sm:w-auto"
         >
           {isRunning ? (
             <>
@@ -484,7 +484,7 @@ export default function MatchPage() {
 
       {/* No run yet */}
       {!loading && !run && (
-        <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center flex flex-col items-center">
+        <div className="flex flex-col items-center rounded-xl border border-dashed border-border bg-card p-6 text-center sm:p-12">
           <MatchIllustration className="mb-4 h-32 w-auto text-primary opacity-75" />
           <p className="text-muted-foreground">
             No match results yet. Click <strong>Run Match</strong> to scrape live programmes tailored to your profile.
@@ -522,7 +522,7 @@ export default function MatchPage() {
 
       {/* Done but empty */}
       {!loading && run?.status === "done" && results.length === 0 && (
-        <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border bg-card p-6 text-center sm:p-10">
           <MatchIllustration className="h-24 w-auto text-primary opacity-60" />
           <div className="space-y-1">
             <p className="font-semibold text-foreground">No programmes found for your profile</p>

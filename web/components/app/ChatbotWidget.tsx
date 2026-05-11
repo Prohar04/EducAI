@@ -215,7 +215,7 @@ export function ChatbotWidget() {
 					animate="visible"
 					exit="exit"
 					className="flex w-[min(388px,calc(100vw-2.5rem))] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-xl"
-					style={{ height: "min(580px, calc(100vh - 7rem))" }}
+					style={{ height: "min(580px, calc(100svh - 7rem))", maxHeight: "calc(100svh - 7rem)" }}
 				>
 					{/* Header */}
 					<div className="flex items-center justify-between gap-3 border-b border-border bg-card px-4 py-3.5">

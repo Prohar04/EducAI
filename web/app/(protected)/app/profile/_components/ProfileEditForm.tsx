@@ -170,7 +170,7 @@ export default function ProfileEditForm({ initialProfile }: Props) {
 			<input type="hidden" name="researchInterest" value={researchInterest} />
 
 			{/* ── Section 1: Academic Stage ── */}
-			<section className="rounded-xl border border-border bg-card p-6 space-y-5">
+			<section className="rounded-xl border border-border bg-card p-4 space-y-5 sm:p-6">
 				<h2 className="font-semibold text-base">Academic Stage</h2>
 				<div className="grid gap-5 sm:grid-cols-2">
 					<Field label="Current stage">
@@ -219,7 +219,7 @@ export default function ProfileEditForm({ initialProfile }: Props) {
 			</section>
 
 			{/* ── Section 2: Academic record ── */}
-			<section className="rounded-xl border border-border bg-card p-6 space-y-5">
+			<section className="rounded-xl border border-border bg-card p-4 space-y-5 sm:p-6">
 				<h2 className="font-semibold text-base">Academic Record</h2>
 				<div className="grid gap-5 sm:grid-cols-2">
 					<Field label="Current institution">
@@ -289,7 +289,7 @@ export default function ProfileEditForm({ initialProfile }: Props) {
 			</section>
 
 			{/* ── Section 3: Test Scores ── */}
-			<section className="rounded-xl border border-border bg-card p-6 space-y-5">
+			<section className="rounded-xl border border-border bg-card p-4 space-y-5 sm:p-6">
 				<h2 className="font-semibold text-base">Test Scores</h2>
 				<div className="grid gap-5 sm:grid-cols-2">
 					<Field label="English test">
@@ -334,7 +334,7 @@ export default function ProfileEditForm({ initialProfile }: Props) {
 			</section>
 
 			{/* ── Section 4: Budget & Preferences ── */}
-			<section className="rounded-xl border border-border bg-card p-6 space-y-5">
+			<section className="rounded-xl border border-border bg-card p-4 space-y-5 sm:p-6">
 				<h2 className="font-semibold text-base">Budget &amp; Preferences</h2>
 				<p className="text-xs text-muted-foreground -mt-2">Used for tuition-based matching and affordability ranking.</p>
 				<div className="grid gap-5 sm:grid-cols-2">
@@ -402,7 +402,7 @@ export default function ProfileEditForm({ initialProfile }: Props) {
 			)}
 
 			<div className="flex items-center justify-end gap-3">
-				<Button type="submit" disabled={isPending}>
+				<Button type="submit" disabled={isPending} className="w-full sm:w-auto">
 					{isPending ? (
 						<>
 							<Loader2 className="mr-2 size-4 animate-spin" />

@@ -176,14 +176,14 @@ function JobCard({
     >
       {/* Top row */}
       <div className="flex items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
+        <div className="flex min-w-0 items-start gap-3">
           {listing.company_logo ? (
             <Image
               src={listing.company_logo}
               alt={listing.company}
               width={48}
               height={48}
-              className="size-12 rounded-lg object-contain border border-border bg-muted"
+              className="size-12 shrink-0 rounded-lg object-contain border border-border bg-muted"
               onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
               unoptimized
             />
@@ -192,9 +192,9 @@ function JobCard({
               {companyInitial}
             </div>
           )}
-          <div>
-            <p className="text-xs text-muted-foreground font-medium">{listing.company}</p>
-            <h3 className="mt-0.5 text-[15px] font-semibold leading-snug line-clamp-2">{listing.title}</h3>
+          <div className="min-w-0">
+            <p className="truncate text-xs text-muted-foreground font-medium">{listing.company}</p>
+            <h3 className="mt-0.5 text-[15px] font-semibold leading-snug line-clamp-2 break-words">{listing.title}</h3>
           </div>
         </div>
         <button
@@ -921,8 +921,8 @@ export default function JobsClient() {
                     🔍 Live from Search
                   </span>
                 )}
-                <div className="ml-auto flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <span className={`size-2 rounded-full ${isRefreshing ? "bg-[#C49A3C] animate-pulse" : freshness.dot}`} />
+                <div className="ml-auto flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
+                  <span className={`size-2 shrink-0 rounded-full ${isRefreshing ? "bg-[#C49A3C] animate-pulse" : freshness.dot}`} />
                   {isRefreshing ? "Refreshing data..." : freshness.text}
                 </div>
               </div>

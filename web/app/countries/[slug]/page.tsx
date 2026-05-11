@@ -131,9 +131,9 @@ export default async function CountryPage({
                 {country.description}
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Button size="lg" asChild className="h-12 px-8 font-semibold">
+                <Button size="lg" asChild className="h-12 px-6 font-semibold sm:px-8">
                   <Link href="/auth/signup">
-                    Find programs in {country.name} <ArrowRight className="ml-2 size-4" />
+                    <span className="truncate">Find programs in {country.name}</span> <ArrowRight className="ml-2 size-4 shrink-0" />
                   </Link>
                 </Button>
                 <Button size="lg" variant="outline" asChild className="h-12 px-8">
@@ -202,8 +202,8 @@ export default async function CountryPage({
                         key={u}
                         className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-3 text-sm font-medium"
                       >
-                        <GraduationCap className="size-4 text-primary/70 shrink-0" />
-                        {u}
+                        <GraduationCap className="size-4 shrink-0 text-primary/70" />
+                        <span className="break-words min-w-0">{u}</span>
                       </li>
                     ))}
                   </ul>

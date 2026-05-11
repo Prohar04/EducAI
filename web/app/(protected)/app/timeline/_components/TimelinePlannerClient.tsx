@@ -177,7 +177,7 @@ function TaskItem({
 
 	return (
 		<div
-			className={`flex items-start gap-3 px-5 py-3.5 transition-colors ${isDone ? "opacity-60" : ""}`}
+			className={`flex items-start gap-2 px-3 py-3 transition-colors sm:gap-3 sm:px-5 sm:py-3.5 ${isDone ? "opacity-60" : ""}`}
 		>
 			{/* Completion toggle */}
 			<button
@@ -263,7 +263,7 @@ function TaskItem({
 			</div>
 
 			{/* Type badge */}
-			<span className={`mt-0.5 shrink-0 self-start rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide pointer-events-none select-none ${badgeClass}`}>
+			<span className={`mt-0.5 hidden shrink-0 self-start rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide pointer-events-none select-none sm:inline-flex ${badgeClass}`}>
 				{item.type}
 			</span>
 		</div>
@@ -299,9 +299,9 @@ function MonthCard({
 			<button
 				type="button"
 				onClick={() => setOpen((o) => !o)}
-				className="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-muted/30 transition-colors"
+				className="flex w-full items-center justify-between gap-2 px-4 py-4 text-left hover:bg-muted/30 transition-colors sm:px-5"
 			>
-				<div className="flex items-center gap-3 flex-wrap">
+				<div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 sm:gap-3">
 					<Calendar className={`size-4 shrink-0 ${isCurrentMonth ? "text-primary" : "text-muted-foreground"}`} />
 					<span className="font-semibold">
 						{month.label}
@@ -534,8 +534,8 @@ export default function TimelinePlannerClient({
 
 			{/* Controls */}
 			<Reveal>
-				<div className="mb-6 flex flex-wrap gap-3 rounded-2xl border border-border bg-card px-5 py-4">
-					<div className="flex flex-col gap-1 flex-1 min-w-[160px]">
+				<div className="mb-6 flex flex-wrap gap-3 rounded-2xl border border-border bg-card px-4 py-4 sm:px-5">
+					<div className="flex min-w-[140px] flex-1 flex-col gap-1">
 						<label className="text-xs font-medium text-muted-foreground">Target Country</label>
 						<select
 							value={countryCode}
@@ -549,7 +549,7 @@ export default function TimelinePlannerClient({
 							))}
 						</select>
 					</div>
-					<div className="flex flex-col gap-1 flex-1 min-w-[160px]">
+					<div className="flex min-w-[140px] flex-1 flex-col gap-1">
 						<label className="text-xs font-medium text-muted-foreground">Target Intake</label>
 						<select
 							value={intake}
@@ -562,11 +562,11 @@ export default function TimelinePlannerClient({
 							))}
 						</select>
 					</div>
-					<div className="flex items-end">
+					<div className="flex w-full items-end sm:w-auto">
 						<Button
 							onClick={handleGenerate}
 							disabled={isPending || hasNoProfile}
-							className="gap-2 whitespace-nowrap"
+							className="w-full gap-2 whitespace-nowrap sm:w-auto"
 						>
 							{isPending ? (
 								<><Loader2 className="size-4 animate-spin" /> Generating…</>

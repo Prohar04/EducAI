@@ -13,7 +13,7 @@ const SignUpPage = () => {
 				description="Start your AI-powered learning journey today."
 			/>
 
-			<div className="mt-8 auth-form">
+			<div className="mt-8 auth-form space-y-4">
 				<OAuthButton />
 				<AuthDivider />
 				<SignUpForm />

@@ -160,15 +160,44 @@ export function Navbar({ user }: { user: Session["user"] }) {
 
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
+    const root = document.documentElement;
+    const body = document.body;
+    const previousRootOverflow = root.style.overflow;
+    const previousRootTouchAction = root.style.touchAction;
+    const previousBodyOverflow = body.style.overflow;
+    const previousBodyTouchAction = body.style.touchAction;
+
     if (mobileOpen) {
-      document.body.style.overflow = "hidden";
+      root.style.overflow = "hidden";
+      root.style.touchAction = "none";
+      body.style.overflow = "hidden";
+      body.style.touchAction = "none";
     } else {
-      document.body.style.overflow = "";
+      root.style.overflow = previousRootOverflow;
+      root.style.touchAction = previousRootTouchAction;
+      body.style.overflow = previousBodyOverflow;
+      body.style.touchAction = previousBodyTouchAction;
     }
     return () => {
-      document.body.style.overflow = "";
+      root.style.overflow = previousRootOverflow;
+      root.style.touchAction = previousRootTouchAction;
+      body.style.overflow = previousBodyOverflow;
+      body.style.touchAction = previousBodyTouchAction;
     };
   }, [mobileOpen]);
+
+  // Ensure scroll is restored when leaving mobile breakpoint
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 1024px)");
+    const onChange = () => {
+      if (media.matches) {
+        setMobileOpen(false);
+      }
+    };
+    onChange();
+    media.addEventListener("change", onChange);
+    return () => media.removeEventListener("change", onChange);
+  }, []);
 
   const handleSignOut = async () => {
     await fetch("/api/signout", { method: "POST" });
@@ -193,7 +222,7 @@ export function Navbar({ user }: { user: Session["user"] }) {
     <>
       <header className="gpu-layer sticky top-0 z-50 w-full" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)", background: "rgba(8,13,24,0.92)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
         <nav
-          className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8"
+          className="mx-auto flex h-14 max-w-7xl items-center justify-between px-3 sm:h-16 sm:px-4 lg:px-8"
           aria-label="App navigation"
         >
           {/* Logo */}
@@ -328,7 +357,10 @@ export function Navbar({ user }: { user: Session["user"] }) {
                   )}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80 rounded-2xl p-2">
+              <DropdownMenuContent
+                align="end"
+                className="w-[min(20rem,calc(100vw-1rem))] max-h-[calc(100svh-6rem)] overflow-y-auto rounded-2xl p-2"
+              >
                 <div className="flex items-center justify-between px-2 py-1.5">
                   <div>
                     <p className="text-sm font-semibold">Notifications</p>
