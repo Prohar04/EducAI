@@ -13,7 +13,7 @@ The AI Server is responsible for:
 
 ## Architecture
 
-```
+```text
 FastAPI Server (Python 3.13)
 ├── Health Endpoints (liveness/readiness probes)
 ├── Chat API (GPT-4o-mini + fallbacks)
@@ -82,7 +82,7 @@ Server runs on `http://localhost:8001`
 ### Health Checks (No Auth Required)
 
 | Method | Endpoint | Purpose |
-|--------|----------|---------|
+| -------- | ---------- | --------- |
 | `GET` | `/health` | General liveness probe |
 | `HEAD` | `/health` | Lightweight liveness (load balancers) |
 | `GET` | `/health/llm` | LLM provider status |
@@ -90,7 +90,7 @@ Server runs on `http://localhost:8001`
 ### Protected Endpoints (Require API Key)
 
 | Method | Endpoint | Purpose |
-|--------|----------|---------|
+| -------- | ---------- | --------- |
 | `POST` | `/api/v1/chat` | Conversational chat |
 | `GET` | `/api/v1/edu/...` | Recommendations |
 | `POST` | `/api/v1/module1/...` | Program matching & sync |
@@ -99,7 +99,7 @@ Server runs on `http://localhost:8001`
 ## Environment Variables
 
 | Variable | Required | Description |
-|----------|----------|-------------|
+| ---------- | ---------- | ------------- |
 | `MASTER_APIKEY` | ✅ | Shared secret with Express server |
 | `OPENAI_API_KEY` | ✅ | GPT-4o-mini or fallback LLM |
 | `GROQ_API_KEY` | Optional | Free-tier LLM fallback |
@@ -113,7 +113,7 @@ Server runs on `http://localhost:8001`
 
 ## Project Structure
 
-```
+```text
 ai-server/
 ├── app/
 │   ├── main.py                    # FastAPI app initialization

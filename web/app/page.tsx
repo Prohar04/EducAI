@@ -372,32 +372,6 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ── TRUST INDICATORS ────────────────────────────────────────── */}
-        <section aria-label="Technology stack" className="below-fold" style={{ paddingTop: 40, paddingBottom: 80 }}>
-          <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 20, alignItems: "center", textAlign: "center" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
-                <span style={{ fontSize: 11, color: "#3D4F6B", fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase" }}>Built with</span>
-                {TRUST_TECH.map((t) => (
-                  <span key={t} style={{ fontSize: 12, color: "#7A8BA8", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 6, padding: "3px 10px" }}>{t}</span>
-                ))}
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
-                <span style={{ fontSize: 11, color: "#3D4F6B", fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase" }}>Deployed on</span>
-                {TRUST_INFRA.map((t) => (
-                  <span key={t} style={{ fontSize: 12, color: "#7A8BA8", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 6, padding: "3px 10px" }}>{t}</span>
-                ))}
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
-                <span style={{ fontSize: 11, color: "#3D4F6B", fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase" }}>Data sources</span>
-                {TRUST_DATA.map((t) => (
-                  <span key={t} style={{ fontSize: 12, color: "#7A8BA8", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 6, padding: "3px 10px" }}>{t}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* ── CTA SECTION ─────────────────────────────────────────────── */}
         <section style={{
           padding: "80px 40px",
