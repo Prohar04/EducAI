@@ -45,6 +45,7 @@ model User {
   strategyReports          StrategyReport[]
   scholarshipAlertLogs     ScholarshipAlertLog[]
   gapFixSessions           GapFixSession[]
+  gapFixItems              GapFixItem[]
   jobSearches              JobSearch[]
   strategyActions          StrategyAction[]
 
@@ -591,6 +592,39 @@ model GapFixEvidence {
   @@index([sessionId])
   @@index([userId])
   @@map("gap_fix_evidences")
+}
+
+// ── GAP FIX ITEMS (V2 — AI-verified, per-item scoring) ───────────
+model GapFixItem {
+  id          String   @id @default(cuid())
+  userId      String   @db.Uuid
+  gapType     String   @db.VarChar(100)
+  title       String   @db.VarChar(300)
+  description String   @db.Text
+  priority    String   @default("medium") @db.VarChar(20)
+
+  status      String   @default("not_started") @db.VarChar(40)
+  // Allowed: not_started | in_progress | pending_verification | completed | skipped
+
+  evidenceText   String?  @db.Text
+  evidenceUrl    String?  @db.Text
+  pdfUrl         String?  @db.Text
+
+  aiVerified     Boolean  @default(false)
+  aiConfidence   Float?
+  aiFeedback     String?  @db.Text
+  aiVerifiedAt   DateTime?
+
+  resourceLinks  String?  @db.Text  // JSON array: [{title, url, description}]
+
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp
+  updatedAt   DateTime @updatedAt     @map("updated_at") @db.Timestamp
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, status])
+  @@map("gap_fix_items")
 }
 
 // ── JOB FINDER ────────────────────────────────────────────────────

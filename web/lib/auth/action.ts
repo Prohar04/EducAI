@@ -896,6 +896,105 @@ export const reanalyzeGapFixAction = async (sessionId: string): Promise<GapFixSe
 /** @deprecated use analyzeGapFixAction */
 export const generateGapFixAction = analyzeGapFixAction;
 
+// ── Gap Fix V2 (AI-verified items with per-item scoring) ────────────────────
+
+export interface GapFixItemResource {
+	title: string;
+	url: string;
+	description?: string;
+}
+
+export interface GapFixItemV2 {
+	id: string;
+	gapType: string;
+	title: string;
+	description: string;
+	priority: "high" | "medium" | "low";
+	status: "not_started" | "in_progress" | "pending_verification" | "completed" | "skipped";
+	evidenceText?: string | null;
+	evidenceUrl?: string | null;
+	pdfUrl?: string | null;
+	aiVerified: boolean;
+	aiConfidence?: number | null;
+	aiFeedback?: string | null;
+	aiVerifiedAt?: string | null;
+	resourceLinks: GapFixItemResource[];
+}
+
+export interface GapFixDataV2 {
+	items: GapFixItemV2[];
+	score: number;
+	totalItems: number;
+	completedItems: number;
+}
+
+export const getGapFixItemsAction = async (): Promise<GapFixDataV2 | null> => {
+	const response = await authFetch(`${BACKEND_URL}/api/gap-fix`);
+	if (!response.ok) return null;
+	return response.json();
+};
+
+export const analyzeGapFixItemsAction = async (
+	profile: Record<string, unknown>,
+	targetCountries: string[],
+	targetField: string,
+): Promise<GapFixDataV2 | null> => {
+	const response = await authFetch(`${BACKEND_URL}/api/gap-fix/analyze`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ profile, targetCountries, targetField }),
+	});
+	if (!response.ok) return null;
+	return response.json();
+};
+
+export const uploadGapFixPDFAction = async (
+	itemId: string,
+	formData: FormData,
+): Promise<{ success: boolean; pdfUrl?: string; message?: string; error?: string }> => {
+	const response = await authFetch(`${BACKEND_URL}/api/gap-fix/${itemId}/upload-pdf`, {
+		method: "POST",
+		body: formData,
+	});
+	return response.json();
+};
+
+export const verifyGapFixEvidenceAction = async (
+	itemId: string,
+	evidenceText: string | null,
+	evidenceUrl: string | null,
+): Promise<{
+	success: boolean;
+	verified: boolean;
+	confidence: number;
+	feedback: string;
+	new_status: string;
+	score_impact: string;
+	new_score: number;
+	item: GapFixItemV2;
+	error?: string;
+	message?: string;
+} | null> => {
+	const response = await authFetch(`${BACKEND_URL}/api/gap-fix/${itemId}/verify`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ evidenceText, evidenceUrl }),
+	});
+	if (!response.ok) {
+		const data = await response.json() as { error?: string; message?: string };
+		return { success: false, verified: false, confidence: 0, feedback: data.message ?? data.error ?? "Verification failed", new_status: "not_started", score_impact: "none", new_score: 0, item: null as unknown as GapFixItemV2, error: data.error };
+	}
+	return response.json();
+};
+
+export const skipGapFixItemAction = async (itemId: string): Promise<{ success: boolean; new_score: number } | null> => {
+	const response = await authFetch(`${BACKEND_URL}/api/gap-fix/${itemId}/skip`, {
+		method: "PATCH",
+	});
+	if (!response.ok) return null;
+	return response.json();
+};
+
 // ── Module 4: Career Outcome Predictor ──────────────────────────────────────
 
 export interface CareerOutlookFactor {

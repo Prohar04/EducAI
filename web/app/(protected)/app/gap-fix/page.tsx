@@ -1,1127 +1,990 @@
 "use client";
 
-import { useState, useTransition, useEffect, useRef } from "react";
-import { PageHeader } from "@/components/layout/page-header";
+import { useEffect, useRef, useState, useCallback, useTransition } from "react";
+import dynamic from "next/dynamic";
 import { useFirstVisit } from "@/lib/hooks/use-first-visit";
 import {
-	AlertCircle,
-	ArrowRight,
-	CheckCircle,
-	ChevronDown,
-	ChevronRight,
-	CircleDashed,
-	Clock,
-	ExternalLink,
-	FileText,
-	Link2,
-	Loader2,
-	Minus,
-	Paperclip,
-	Plus,
-	RefreshCw,
-	Sparkles,
-	TrendingDown,
-	TrendingUp,
-	Trash2,
-	Upload,
-	Zap,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { FadeIn } from "@/components/motion/FadeIn";
-import {
-	analyzeGapFixAction,
-	getGapFixSessionAction,
-	updateGapStatusAction,
-	addImprovementAction,
-	addEvidenceLinkAction,
-	uploadEvidenceAction,
-	deleteEvidenceAction,
-	reanalyzeGapFixAction,
-	type GapFixSession,
-	type GapFixRecommendation,
-	type GapStatus,
-	type GapFixEvidenceItem,
+  getGapFixItemsAction,
+  analyzeGapFixItemsAction,
+  uploadGapFixPDFAction,
+  verifyGapFixEvidenceAction,
+  skipGapFixItemAction,
+  getUserProfile,
+  type GapFixItemV2,
+  type GapFixDataV2,
 } from "@/lib/auth/action";
 
-// ── constants ───────────────────────────────────────────────────────────────
+const GapFixAnimation = dynamic(
+  () => import("@/components/animations/gap-fix-animation"),
+  { ssr: false, loading: () => null },
+);
 
-const PRIORITY_BORDER = {
-	high: "border-[#C0392B]/30 bg-[#C0392B]/5",
-	medium: "border-[#C49A3C]/30 bg-[#C49A3C]/5",
-	low: "border-[#3D9970]/30 bg-[#3D9970]/5",
+// ─── Status / priority config ────────────────────────────────────
+
+const STATUS_CONFIG: Record<
+  string,
+  { label: string; color: string; bg: string; border: string; icon: string }
+> = {
+  not_started: {
+    label: "Not Started",
+    color: "#3D4F6B",
+    bg: "rgba(61,79,107,0.12)",
+    border: "rgba(61,79,107,0.30)",
+    icon: "○",
+  },
+  in_progress: {
+    label: "In Progress",
+    color: "#4A90D9",
+    bg: "rgba(74,144,217,0.12)",
+    border: "rgba(74,144,217,0.30)",
+    icon: "◉",
+  },
+  pending_verification: {
+    label: "Pending Verification",
+    color: "#C49A3C",
+    bg: "rgba(196,154,60,0.12)",
+    border: "rgba(196,154,60,0.30)",
+    icon: "◎",
+  },
+  completed: {
+    label: "Completed",
+    color: "#3D9970",
+    bg: "rgba(61,153,112,0.12)",
+    border: "rgba(61,153,112,0.30)",
+    icon: "✓",
+  },
+  skipped: {
+    label: "Skipped",
+    color: "#C0392B",
+    bg: "rgba(192,57,43,0.12)",
+    border: "rgba(192,57,43,0.30)",
+    icon: "–",
+  },
 };
 
-const PRIORITY_BADGE = {
-	high: "bg-[#C0392B]/10 text-[#C0392B] border-[#C0392B]/20",
-	medium: "bg-[#C49A3C]/10 text-[#C49A3C] border-[#C49A3C]/20",
-	low: "bg-[#3D9970]/10 text-[#3D9970] border-[#3D9970]/20",
+const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
+  high: { label: "High Priority", color: "#C0392B" },
+  medium: { label: "Medium Priority", color: "#C49A3C" },
+  low: { label: "Low Priority", color: "#3D4F6B" },
 };
 
-const STATUS_CONFIG: Record<GapStatus, { label: string; color: string; icon: React.ReactNode }> = {
-	not_started: {
-		label: "Not started",
-		color: "text-muted-foreground border-border",
-		icon: <CircleDashed className="h-3.5 w-3.5" />,
-	},
-	in_progress: {
-		label: "In progress",
-		color: "text-[#C49A3C] border-[#C49A3C]/30 bg-[#C49A3C]/5",
-		icon: <Clock className="h-3.5 w-3.5" />,
-	},
-	completed: {
-		label: "Completed",
-		color: "text-[#3D9970] border-[#3D9970]/30 bg-[#3D9970]/5",
-		icon: <CheckCircle className="h-3.5 w-3.5" />,
-	},
-	skipped: {
-		label: "Skipped",
-		color: "text-muted-foreground/60 border-border/50",
-		icon: <Minus className="h-3.5 w-3.5" />,
-	},
-};
+// ─── Score Ring ───────────────────────────────────────────────────
 
-const IMPROVEMENT_TYPES = [
-	{ value: "test_score", label: "Improved test score" },
-	{ value: "certification", label: "Added certification" },
-	{ value: "internship", label: "Added internship / work experience" },
-	{ value: "project", label: "Added new project" },
-	{ value: "github_portfolio", label: "Added GitHub / portfolio" },
-	{ value: "publication", label: "Added publication / research" },
-	{ value: "volunteering", label: "Added volunteering / leadership" },
-	{ value: "cv_sop", label: "Improved CV / SOP" },
-	{ value: "scholarship_achievement", label: "Added scholarship achievement" },
-	{ value: "other", label: "Other improvement" },
-];
+function ScoreRing({ score }: { score: number }) {
+  const r = 52;
+  const circ = 2 * Math.PI * r;
+  const filled = (score / 100) * circ;
+  const color = score >= 70 ? "#3D9970" : score >= 40 ? "#C49A3C" : "#C0392B";
 
-const EVIDENCE_TYPES = [
-	{ value: "certificate", label: "Certificate (PDF / image)" },
-	{ value: "cv", label: "CV / Resume" },
-	{ value: "sop", label: "Statement of Purpose" },
-	{ value: "transcript", label: "Transcript" },
-	{ value: "internship_letter", label: "Internship / employment letter" },
-	{ value: "link", label: "Portfolio / GitHub / LinkedIn link" },
-	{ value: "publication", label: "Publication link" },
-	{ value: "other", label: "Other" },
-];
-
-const TEST_TYPES = ["IELTS", "TOEFL", "PTE", "Duolingo", "GRE", "GMAT"];
-
-// ── sub-components ───────────────────────────────────────────────────────────
-
-function ScoreRing({ score, size = 100 }: { score: number; size?: number }) {
-	const radius = size * 0.4;
-	const circumference = 2 * Math.PI * radius;
-	const offset = circumference - (score / 100) * circumference;
-	const color = score >= 70 ? "#3D9970" : score >= 50 ? "#C49A3C" : "#C0392B";
-
-	return (
-		<div className="relative inline-flex items-center justify-center">
-			<svg width={size} height={size} className="-rotate-90">
-				<circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="currentColor" strokeWidth={8} className="text-muted/30" />
-				<circle
-					cx={size / 2}
-					cy={size / 2}
-					r={radius}
-					fill="none"
-					stroke={color}
-					strokeWidth={8}
-					strokeDasharray={circumference}
-					strokeDashoffset={offset}
-					strokeLinecap="round"
-					style={{ transition: "stroke-dashoffset 1s ease" }}
-				/>
-			</svg>
-			<div className="absolute flex flex-col items-center">
-				<span className="text-xl font-bold" style={{ color }}>{score}</span>
-				<span className="text-[10px] text-muted-foreground">/100</span>
-			</div>
-		</div>
-	);
+  return (
+    <svg width={128} height={128} viewBox="0 0 128 128">
+      <circle
+        cx={64}
+        cy={64}
+        r={r}
+        fill="none"
+        stroke="rgba(255,255,255,0.06)"
+        strokeWidth={10}
+      />
+      <circle
+        cx={64}
+        cy={64}
+        r={r}
+        fill="none"
+        stroke={color}
+        strokeWidth={10}
+        strokeDasharray={`${filled} ${circ}`}
+        strokeLinecap="round"
+        transform="rotate(-90 64 64)"
+        style={{ transition: "stroke-dasharray 800ms ease" }}
+      />
+      <text
+        x={64}
+        y={60}
+        textAnchor="middle"
+        fill="#E8EEF8"
+        fontSize={26}
+        fontWeight={700}
+      >
+        {score}
+      </text>
+      <text x={64} y={78} textAnchor="middle" fill="#7A8BA8" fontSize={11}>
+        / 100
+      </text>
+    </svg>
+  );
 }
 
-function ProgressBar({ completed, total }: { completed: number; total: number }) {
-	const pct = total === 0 ? 0 : Math.round((completed / total) * 100);
-	return (
-		<div className="flex items-center gap-3">
-			<div className="flex-1 h-1.5 rounded-full bg-muted/30 overflow-hidden">
-				<div
-					className="h-full rounded-full bg-[#3D9970] transition-all duration-700"
-					style={{ width: `${pct}%` }}
-				/>
-			</div>
-			<span className="text-xs text-muted-foreground shrink-0">{completed}/{total} done</span>
-		</div>
-	);
-}
+// ─── Evidence Panel ───────────────────────────────────────────────
 
-function StatusPill({ status, onChange }: { status: GapStatus; onChange: (s: GapStatus) => void }) {
-	const [open, setOpen] = useState(false);
-	const cfg = STATUS_CONFIG[status];
-	const ref = useRef<HTMLDivElement>(null);
-
-	useEffect(() => {
-		function handleClick(e: MouseEvent) {
-			if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-		}
-		document.addEventListener("mousedown", handleClick);
-		return () => document.removeEventListener("mousedown", handleClick);
-	}, []);
-
-	return (
-		<div className="relative" ref={ref}>
-			<button
-				type="button"
-				onClick={() => setOpen(v => !v)}
-				className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors ${cfg.color}`}
-			>
-				{cfg.icon}
-				{cfg.label}
-				<ChevronDown className="h-3 w-3 opacity-60" />
-			</button>
-			{open && (
-				<div className="absolute right-0 top-full z-50 mt-1 min-w-[150px] rounded-xl border border-border bg-card shadow-lg p-1">
-					{(Object.keys(STATUS_CONFIG) as GapStatus[]).map(s => (
-						<button
-							key={s}
-							type="button"
-							className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs hover:bg-muted/50 transition-colors"
-							onClick={() => { onChange(s); setOpen(false); }}
-						>
-							<span className={STATUS_CONFIG[s].color}>{STATUS_CONFIG[s].icon}</span>
-							{STATUS_CONFIG[s].label}
-						</button>
-					))}
-				</div>
-			)}
-		</div>
-	);
-}
-
-function EvidenceBadge({ ev, onDelete }: { ev: GapFixEvidenceItem; onDelete: () => void }) {
-	const isLink = ev.status === "linked";
-	return (
-		<div className="flex items-center gap-2 rounded-lg border border-border bg-background px-2.5 py-1.5 text-[11px] group">
-			{isLink ? <Link2 className="h-3 w-3 text-primary shrink-0" /> : <FileText className="h-3 w-3 text-primary shrink-0" />}
-			<span className="text-muted-foreground truncate max-w-[120px]">{ev.label}</span>
-			{ev.status === "uploaded" && (
-				<span className="rounded-full bg-[#C49A3C]/10 text-[#C49A3C] border border-[#C49A3C]/20 px-1.5 py-0.5 text-[9px]">
-					uploaded · unverified
-				</span>
-			)}
-			{isLink && ev.url && (
-				<a href={ev.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-					<ExternalLink className="h-3 w-3" />
-				</a>
-			)}
-			<button
-				type="button"
-				onClick={onDelete}
-				className="ml-auto opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
-			>
-				<Trash2 className="h-3 w-3" />
-			</button>
-		</div>
-	);
-}
-
-// ── ImprovementModal ─────────────────────────────────────────────────────────
-
-function ImprovementModal({
-	onClose,
-	onSubmit,
+function EvidencePanel({
+  item,
+  onVerified,
 }: {
-	onClose: () => void;
-	onSubmit: (data: {
-		type: string;
-		description: string;
-		testType?: string;
-		scoreValue?: number;
-		applyToProfile?: boolean;
-	}) => Promise<void>;
+  item: GapFixItemV2;
+  onVerified: (result: {
+    verified: boolean;
+    feedback: string;
+    new_status: string;
+    new_score: number;
+    item: GapFixItemV2;
+  }) => void;
 }) {
-	const [type, setType] = useState("test_score");
-	const [description, setDescription] = useState("");
-	const [testType, setTestType] = useState("IELTS");
-	const [scoreValue, setScoreValue] = useState("");
-	const [applyToProfile, setApplyToProfile] = useState(true);
-	const [submitting, setSubmitting] = useState(false);
+  const [text, setText] = useState(item.evidenceText ?? "");
+  const [url, setUrl] = useState(item.evidenceUrl ?? "");
+  const [verifying, startVerify] = useTransition();
+  const [uploading, startUpload] = useTransition();
+  const [uploadedPdf, setUploadedPdf] = useState<string | null>(item.pdfUrl ?? null);
+  const [localError, setLocalError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
-	const isTestScore = type === "test_score";
+  const handleUploadPDF = (file: File) => {
+    setLocalError(null);
+    startUpload(async () => {
+      const fd = new FormData();
+      fd.append("pdf", file);
+      const result = await uploadGapFixPDFAction(item.id, fd);
+      if (result?.error) {
+        setLocalError(result.error);
+      } else if (result?.pdfUrl) {
+        setUploadedPdf(result.pdfUrl);
+      }
+    });
+  };
 
-	async function handleSubmit(e: React.FormEvent) {
-		e.preventDefault();
-		if (!description.trim()) return;
-		setSubmitting(true);
-		await onSubmit({
-			type,
-			description: description.trim(),
-			testType: isTestScore ? testType : undefined,
-			scoreValue: isTestScore && scoreValue ? Number(scoreValue) : undefined,
-			applyToProfile: isTestScore ? applyToProfile : false,
-		});
-		setSubmitting(false);
-	}
+  const handleVerify = () => {
+    if (!text.trim() && !url.trim() && !uploadedPdf) {
+      setLocalError(
+        "Please provide evidence first: write what you did, add a URL, or upload a PDF.",
+      );
+      return;
+    }
+    setLocalError(null);
+    startVerify(async () => {
+      const result = await verifyGapFixEvidenceAction(
+        item.id,
+        text.trim() || null,
+        url.trim() || null,
+      );
+      if (!result || result.error) {
+        setLocalError(result?.feedback ?? result?.error ?? "Verification failed");
+        return;
+      }
+      onVerified(result);
+    });
+  };
 
-	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-			<div className="w-full max-w-md rounded-2xl border border-border bg-card shadow-xl p-6">
-				<h3 className="text-base font-semibold mb-1">Log an improvement</h3>
-				<p className="text-xs text-muted-foreground mb-4">Record what you&apos;ve improved. Test score updates will be applied to your profile.</p>
-				<form onSubmit={handleSubmit} className="space-y-4">
-					<div>
-						<label className="text-xs font-medium text-muted-foreground mb-1.5 block">Improvement type</label>
-						<select
-							value={type}
-							onChange={e => setType(e.target.value)}
-							className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-						>
-							{IMPROVEMENT_TYPES.map(t => (
-								<option key={t.value} value={t.value}>{t.label}</option>
-							))}
-						</select>
-					</div>
+  const alreadyVerified = item.aiVerified && item.status === "completed";
 
-					{isTestScore && (
-						<div className="grid grid-cols-2 gap-3">
-							<div>
-								<label className="text-xs font-medium text-muted-foreground mb-1.5 block">Test</label>
-								<select
-									value={testType}
-									onChange={e => setTestType(e.target.value)}
-									className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-								>
-									{TEST_TYPES.map(t => <option key={t}>{t}</option>)}
-								</select>
-							</div>
-							<div>
-								<label className="text-xs font-medium text-muted-foreground mb-1.5 block">New score</label>
-								<input
-									type="number"
-									step="0.1"
-									value={scoreValue}
-									onChange={e => setScoreValue(e.target.value)}
-									placeholder="e.g. 7.5"
-									className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-								/>
-							</div>
-						</div>
-					)}
+  return (
+    <div
+      style={{
+        marginTop: 16,
+        padding: 16,
+        background: "rgba(255,255,255,0.02)",
+        borderRadius: 10,
+        border: "1px solid rgba(255,255,255,0.06)",
+      }}
+    >
+      <p
+        style={{
+          fontSize: 12,
+          color: "#7A8BA8",
+          marginBottom: 12,
+          textTransform: "uppercase",
+          letterSpacing: "0.05em",
+          fontWeight: 500,
+        }}
+      >
+        Submit Evidence
+      </p>
 
-					<div>
-						<label className="text-xs font-medium text-muted-foreground mb-1.5 block">Description</label>
-						<textarea
-							value={description}
-							onChange={e => setDescription(e.target.value)}
-							placeholder="Briefly describe what you improved..."
-							rows={2}
-							className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary resize-none"
-						/>
-					</div>
+      {alreadyVerified ? (
+        <div
+          style={{
+            padding: "10px 14px",
+            background: "rgba(61,153,112,0.10)",
+            border: "1px solid rgba(61,153,112,0.25)",
+            borderRadius: 8,
+            fontSize: 13,
+            color: "#3D9970",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          <span>✓</span>
+          <span>
+            AI Verified — {item.aiFeedback ?? "Evidence accepted."}
+            {item.aiConfidence && (
+              <span style={{ color: "#7A8BA8", marginLeft: 8 }}>
+                ({Math.round(item.aiConfidence * 100)}% confidence)
+              </span>
+            )}
+          </span>
+        </div>
+      ) : (
+        <>
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Describe what you have done to address this gap. Be specific — e.g. 'I completed the IELTS Academic exam on March 5th and scored 7.0'"
+            rows={3}
+            style={{
+              width: "100%",
+              resize: "vertical",
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(74,144,217,0.20)",
+              borderRadius: 8,
+              padding: "10px 12px",
+              color: "#E8EEF8",
+              fontSize: 13,
+              outline: "none",
+              marginBottom: 10,
+              lineHeight: 1.5,
+              fontFamily: "inherit",
+              boxSizing: "border-box",
+            }}
+          />
 
-					{isTestScore && (
-						<label className="flex items-center gap-2 text-xs cursor-pointer select-none">
-							<input
-								type="checkbox"
-								checked={applyToProfile}
-								onChange={e => setApplyToProfile(e.target.checked)}
-								className="rounded"
-							/>
-							<span className="text-muted-foreground">Apply score to my profile (used in re-analysis)</span>
-						</label>
-					)}
+          <input
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="Evidence URL — e.g. https://coursera.org/verify/your-certificate"
+            style={{
+              width: "100%",
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(74,144,217,0.20)",
+              borderRadius: 8,
+              padding: "10px 12px",
+              color: "#E8EEF8",
+              fontSize: 13,
+              outline: "none",
+              marginBottom: 10,
+              boxSizing: "border-box",
+            }}
+          />
 
-					<div className="flex gap-2 pt-1">
-						<Button type="button" variant="outline" size="sm" onClick={onClose} className="flex-1">Cancel</Button>
-						<Button type="submit" size="sm" disabled={!description.trim() || submitting} className="flex-1 gap-1.5">
-							{submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
-							Save improvement
-						</Button>
-					</div>
-				</form>
-			</div>
-		</div>
-	);
+          <div
+            style={{
+              display: "flex",
+              gap: 10,
+              alignItems: "center",
+              marginBottom: 12,
+              flexWrap: "wrap",
+            }}
+          >
+            <button
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              style={{
+                padding: "8px 16px",
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                borderRadius: 8,
+                color: "#7A8BA8",
+                fontSize: 12,
+                cursor: uploading ? "not-allowed" : "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              {uploading ? "Uploading..." : "📎 Upload PDF"}
+            </button>
+
+            {uploadedPdf && (
+              <span
+                style={{
+                  fontSize: 11,
+                  color: "#3D9970",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 4,
+                }}
+              >
+                ✓ PDF uploaded
+              </span>
+            )}
+
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".pdf"
+              style={{ display: "none" }}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleUploadPDF(file);
+                e.target.value = "";
+              }}
+            />
+          </div>
+
+          {localError && (
+            <div
+              style={{
+                padding: "8px 12px",
+                background: "rgba(192,57,43,0.10)",
+                border: "1px solid rgba(192,57,43,0.25)",
+                borderRadius: 8,
+                fontSize: 12,
+                color: "#C0392B",
+                marginBottom: 10,
+              }}
+            >
+              {localError}
+            </div>
+          )}
+
+          {item.aiFeedback && !alreadyVerified && (
+            <div
+              style={{
+                padding: "8px 12px",
+                background: "rgba(196,154,60,0.08)",
+                border: "1px solid rgba(196,154,60,0.20)",
+                borderRadius: 8,
+                fontSize: 12,
+                color: "#C49A3C",
+                marginBottom: 10,
+              }}
+            >
+              Previous feedback: {item.aiFeedback}
+            </div>
+          )}
+
+          <button
+            onClick={handleVerify}
+            disabled={verifying}
+            style={{
+              padding: "10px 22px",
+              background: verifying
+                ? "rgba(74,144,217,0.40)"
+                : "rgba(74,144,217,0.88)",
+              color: "#080D18",
+              border: "none",
+              borderRadius: 8,
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: verifying ? "not-allowed" : "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              width: "100%",
+              justifyContent: "center",
+            }}
+          >
+            {verifying ? "ChatGPT is verifying..." : "✓ Verify with ChatGPT"}
+          </button>
+
+          <p
+            style={{
+              fontSize: 11,
+              color: "#3D4F6B",
+              marginTop: 8,
+              textAlign: "center",
+            }}
+          >
+            Score only updates after AI verification passes
+          </p>
+        </>
+      )}
+    </div>
+  );
 }
 
-// ── EvidenceModal ────────────────────────────────────────────────────────────
-
-function EvidenceModal({
-	recTitle,
-	onClose,
-	onSubmitLink,
-	onUploadFile,
-}: {
-	recTitle: string;
-	onClose: () => void;
-	onSubmitLink: (label: string, type: string, url: string) => Promise<void>;
-	onUploadFile: (label: string, type: string, file: File) => Promise<void>;
-}) {
-	const [mode, setMode] = useState<"link" | "file">("link");
-	const [evidenceType, setEvidenceType] = useState("link");
-	const [label, setLabel] = useState("");
-	const [url, setUrl] = useState("");
-	const [file, setFile] = useState<File | null>(null);
-	const [submitting, setSubmitting] = useState(false);
-	const fileRef = useRef<HTMLInputElement>(null);
-
-	async function handleSubmit(e: React.FormEvent) {
-		e.preventDefault();
-		if (!label.trim()) return;
-		setSubmitting(true);
-		if (mode === "link" && url.trim()) {
-			await onSubmitLink(label.trim(), evidenceType, url.trim());
-		} else if (mode === "file" && file) {
-			await onUploadFile(label.trim(), evidenceType, file);
-		}
-		setSubmitting(false);
-	}
-
-	const canSubmit = label.trim() && (mode === "link" ? url.trim() : !!file);
-
-	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-			<div className="w-full max-w-md rounded-2xl border border-border bg-card shadow-xl p-6">
-				<h3 className="text-base font-semibold mb-1">Attach evidence</h3>
-				<p className="text-xs text-muted-foreground mb-4 truncate">For: {recTitle}</p>
-
-				<div className="flex gap-2 mb-4">
-					{(["link", "file"] as const).map(m => (
-						<button
-							key={m}
-							type="button"
-							onClick={() => setMode(m)}
-							className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
-								mode === m ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-muted/30"
-							}`}
-						>
-							{m === "link" ? <Link2 className="h-3.5 w-3.5" /> : <Upload className="h-3.5 w-3.5" />}
-							{m === "link" ? "Link" : "Upload file"}
-						</button>
-					))}
-				</div>
-
-				<form onSubmit={handleSubmit} className="space-y-3">
-					<div>
-						<label className="text-xs font-medium text-muted-foreground mb-1.5 block">Evidence type</label>
-						<select
-							value={evidenceType}
-							onChange={e => setEvidenceType(e.target.value)}
-							className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-						>
-							{EVIDENCE_TYPES.map(t => (
-								<option key={t.value} value={t.value}>{t.label}</option>
-							))}
-						</select>
-					</div>
-
-					<div>
-						<label className="text-xs font-medium text-muted-foreground mb-1.5 block">Label</label>
-						<input
-							type="text"
-							value={label}
-							onChange={e => setLabel(e.target.value)}
-							placeholder="e.g. IELTS certificate, GitHub profile"
-							className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-						/>
-					</div>
-
-					{mode === "link" ? (
-						<div>
-							<label className="text-xs font-medium text-muted-foreground mb-1.5 block">URL</label>
-							<input
-								type="url"
-								value={url}
-								onChange={e => setUrl(e.target.value)}
-								placeholder="https://..."
-								className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-							/>
-						</div>
-					) : (
-						<div>
-							<label className="text-xs font-medium text-muted-foreground mb-1.5 block">File (PDF, image, Word — max 10 MB)</label>
-							<div
-								onClick={() => fileRef.current?.click()}
-								className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/20 px-4 py-6 cursor-pointer hover:bg-muted/30 transition-colors"
-							>
-								{file ? (
-									<>
-										<FileText className="h-6 w-6 text-primary mb-1" />
-										<span className="text-xs font-medium">{file.name}</span>
-										<span className="text-[11px] text-muted-foreground">{(file.size / 1024).toFixed(0)} KB</span>
-									</>
-								) : (
-									<>
-										<Upload className="h-6 w-6 text-muted-foreground mb-1" />
-										<span className="text-xs text-muted-foreground">Click to choose a file</span>
-									</>
-								)}
-							</div>
-							<input
-								ref={fileRef}
-								type="file"
-								accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx"
-								className="hidden"
-								onChange={e => setFile(e.target.files?.[0] ?? null)}
-							/>
-							{mode === "file" && (
-								<p className="mt-1.5 text-[11px] text-muted-foreground">
-									Files are stored as-is and not parsed or verified.
-								</p>
-							)}
-						</div>
-					)}
-
-					<div className="flex gap-2 pt-1">
-						<Button type="button" variant="outline" size="sm" onClick={onClose} className="flex-1">Cancel</Button>
-						<Button type="submit" size="sm" disabled={!canSubmit || submitting} className="flex-1 gap-1.5">
-							{submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Paperclip className="h-3.5 w-3.5" />}
-							Attach
-						</Button>
-					</div>
-				</form>
-			</div>
-		</div>
-	);
-}
-
-// ── GapCard ──────────────────────────────────────────────────────────────────
+// ─── Gap Card ─────────────────────────────────────────────────────
 
 function GapCard({
-	rec,
-	status,
-	evidences,
-	onStatusChange,
-	onAddImprovement,
-	onAddEvidence,
-	onDeleteEvidence,
+  item,
+  onUpdate,
 }: {
-	rec: GapFixRecommendation;
-	status: GapStatus;
-	evidences: GapFixEvidenceItem[];
-	onStatusChange: (s: GapStatus) => void;
-	onAddImprovement: () => void;
-	onAddEvidence: () => void;
-	onDeleteEvidence: (id: string) => void;
+  item: GapFixItemV2;
+  onUpdate: (updated: { item: GapFixItemV2; new_score: number }) => void;
 }) {
-	const [expanded, setExpanded] = useState(false);
-	const isCompleted = status === "completed";
-	const isSkipped = status === "skipped";
+  const [expanded, setExpanded] = useState(false);
+  const [skipping, startSkip] = useTransition();
+  const status = STATUS_CONFIG[item.status] ?? STATUS_CONFIG.not_started;
+  const priority = PRIORITY_CONFIG[item.priority] ?? PRIORITY_CONFIG.medium;
 
-	return (
-		<div className={`rounded-xl border p-4 transition-all ${isCompleted ? "border-[#3D9970]/30 bg-[#3D9970]/5 opacity-80" : isSkipped ? "opacity-50 border-border" : PRIORITY_BORDER[rec.priority]}`}>
-			<div className="flex items-start gap-3">
-				<div className="flex-1 min-w-0">
-					<div className="flex items-center gap-2 flex-wrap mb-1">
-						<span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${PRIORITY_BADGE[rec.priority]}`}>
-							{rec.priority}
-						</span>
-						<span className="text-[11px] text-muted-foreground">{rec.category}</span>
-						<span className="ml-auto text-[11px] text-muted-foreground flex items-center gap-1">
-							<Clock className="h-3 w-3" />~{rec.timelineWeeks}w
-						</span>
-					</div>
-					<p className="text-sm font-semibold">{rec.title}</p>
-					<p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{rec.description}</p>
-				</div>
-			</div>
+  const handleVerified = (result: {
+    verified: boolean;
+    feedback: string;
+    new_status: string;
+    new_score: number;
+    item: GapFixItemV2;
+  }) => {
+    onUpdate({ item: result.item, new_score: result.new_score });
+    if (result.verified) setExpanded(false);
+  };
 
-			<div className="flex items-center gap-2 mt-3">
-				<StatusPill status={status} onChange={onStatusChange} />
-				<button
-					type="button"
-					onClick={() => setExpanded(v => !v)}
-					className="ml-auto flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-				>
-					{expanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-					{expanded ? "Less" : "Details"}
-				</button>
-			</div>
+  const handleSkip = () => {
+    startSkip(async () => {
+      const result = await skipGapFixItemAction(item.id);
+      if (result) {
+        onUpdate({
+          item: { ...item, status: "skipped", aiVerified: false },
+          new_score: result.new_score,
+        });
+      }
+    });
+  };
 
-			{expanded && (
-				<div className="mt-4 space-y-4 border-t border-border/50 pt-3">
-					{rec.actions.length > 0 && (
-						<div>
-							<p className="mb-2 text-xs font-semibold">Action steps</p>
-							<ul className="space-y-1.5">
-								{rec.actions.map((action, i) => (
-									<li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
-										<ArrowRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-										{action}
-									</li>
-								))}
-							</ul>
-						</div>
-					)}
+  return (
+    <div
+      style={{
+        background: "rgba(13,22,37,0.65)",
+        border: `1px solid ${item.aiVerified && item.status === "completed" ? "rgba(61,153,112,0.35)" : "rgba(74,144,217,0.18)"}`,
+        borderRadius: 14,
+        padding: 20,
+        transition: "border-color 300ms ease",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: 12,
+          cursor: "pointer",
+        }}
+        onClick={() => setExpanded(!expanded)}
+      >
+        <div style={{ flex: 1 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: 6,
+              flexWrap: "wrap",
+            }}
+          >
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                color: status.color,
+                background: status.bg,
+                border: `1px solid ${status.border}`,
+                padding: "2px 10px",
+                borderRadius: 999,
+              }}
+            >
+              {status.icon} {status.label}
+            </span>
+            <span style={{ fontSize: 10, color: priority.color, fontWeight: 500 }}>
+              {priority.label}
+            </span>
+            {item.aiVerified && (
+              <span
+                style={{
+                  fontSize: 10,
+                  color: "#3D9970",
+                  background: "rgba(61,153,112,0.10)",
+                  border: "1px solid rgba(61,153,112,0.25)",
+                  padding: "2px 8px",
+                  borderRadius: 999,
+                  fontWeight: 600,
+                }}
+              >
+                ✓ AI Verified
+              </span>
+            )}
+          </div>
 
-					{rec.resources.length > 0 && (
-						<div>
-							<p className="mb-2 text-xs font-semibold">Resources</p>
-							<div className="flex flex-wrap gap-1.5">
-								{rec.resources.map((r, i) => (
-									<span key={i} className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-2.5 py-1 text-[11px] text-muted-foreground">
-										<ExternalLink className="h-3 w-3" />
-										{r}
-									</span>
-								))}
-							</div>
-						</div>
-					)}
+          <h3
+            style={{
+              fontSize: 15,
+              fontWeight: 600,
+              color: "#E8EEF8",
+              margin: 0,
+              marginBottom: 6,
+            }}
+          >
+            {item.title}
+          </h3>
 
-					<div>
-						<div className="flex items-center justify-between mb-2">
-							<p className="text-xs font-semibold">Evidence & proof</p>
-							<button
-								type="button"
-								onClick={onAddEvidence}
-								className="flex items-center gap-1 text-[11px] text-primary hover:underline"
-							>
-								<Plus className="h-3 w-3" />
-								Add
-							</button>
-						</div>
-						{evidences.length === 0 ? (
-							<p className="text-[11px] text-muted-foreground">No evidence attached yet.</p>
-						) : (
-							<div className="flex flex-wrap gap-2">
-								{evidences.map(ev => (
-									<EvidenceBadge key={ev.id} ev={ev} onDelete={() => onDeleteEvidence(ev.id)} />
-								))}
-							</div>
-						)}
-					</div>
+          <p
+            style={{
+              fontSize: 13,
+              color: "#7A8BA8",
+              margin: 0,
+              lineHeight: 1.5,
+              display: expanded ? "block" : "-webkit-box",
+              WebkitLineClamp: expanded ? undefined : 2,
+              WebkitBoxOrient: "vertical",
+              overflow: expanded ? "visible" : "hidden",
+            }}
+          >
+            {item.description}
+          </p>
+        </div>
 
-					<div className="pt-1">
-						<button
-							type="button"
-							onClick={onAddImprovement}
-							className="flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-xs font-medium text-primary hover:bg-primary/10 transition-colors w-full justify-center"
-						>
-							<TrendingUp className="h-3.5 w-3.5" />
-							Log an improvement for this gap
-						</button>
-					</div>
-				</div>
-			)}
-		</div>
-	);
+        <span
+          style={{
+            fontSize: 14,
+            color: "#3D4F6B",
+            transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 200ms ease",
+            flexShrink: 0,
+            marginTop: 4,
+          }}
+        >
+          ▼
+        </span>
+      </div>
+
+      {expanded && (
+        <>
+          {item.resourceLinks?.length > 0 && (
+            <div style={{ marginTop: 16 }}>
+              <p
+                style={{
+                  fontSize: 11,
+                  color: "#3D4F6B",
+                  marginBottom: 8,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  fontWeight: 500,
+                }}
+              >
+                Resources
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {item.resourceLinks.map((link, i) => (
+                  <a
+                    key={i}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      fontSize: 12,
+                      color: "#4A90D9",
+                      textDecoration: "none",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                      padding: "6px 10px",
+                      background: "rgba(74,144,217,0.06)",
+                      borderRadius: 6,
+                      border: "1px solid rgba(74,144,217,0.12)",
+                    }}
+                  >
+                    <span>↗</span>
+                    <span>{link.title}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {item.status !== "skipped" && (
+            <EvidencePanel item={item} onVerified={handleVerified} />
+          )}
+
+          {(item.status === "not_started" || item.status === "in_progress") && (
+            <button
+              onClick={handleSkip}
+              disabled={skipping}
+              style={{
+                marginTop: 10,
+                padding: "6px 14px",
+                background: "transparent",
+                border: "1px solid rgba(192,57,43,0.25)",
+                borderRadius: 6,
+                color: "#C0392B",
+                fontSize: 11,
+                cursor: skipping ? "not-allowed" : "pointer",
+              }}
+            >
+              {skipping ? "Skipping..." : "Skip this gap"}
+            </button>
+          )}
+        </>
+      )}
+    </div>
+  );
 }
 
-// ── BeforeAfterPanel ─────────────────────────────────────────────────────────
-
-function BeforeAfterPanel({ session }: { session: GapFixSession }) {
-	const { comparison, previousResult, result } = session;
-	if (!comparison || !previousResult) return null;
-
-	const improved = comparison.scoreImprovement > 0;
-	const same = comparison.scoreImprovement === 0;
-
-	return (
-		<div className="rounded-xl border border-border bg-card p-5">
-			<h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-				<RefreshCw className="h-4 w-4 text-primary" />
-				Before vs After Re-analysis
-			</h3>
-
-			<div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
-				<div className="text-center">
-					<p className="text-xs text-muted-foreground mb-1">Previous score</p>
-					<p className="text-2xl font-bold text-[#C49A3C]">{comparison.previousScore}</p>
-				</div>
-				<div className="text-center">
-					<p className="text-xs text-muted-foreground mb-1">Current score</p>
-					<p className={`text-2xl font-bold ${improved ? "text-[#3D9970]" : same ? "text-foreground" : "text-[#C0392B]"}`}>
-						{comparison.currentScore}
-					</p>
-				</div>
-				<div className="text-center">
-					<p className="text-xs text-muted-foreground mb-1">Change</p>
-					<div className="flex items-center justify-center gap-1">
-						{improved ? <TrendingUp className="h-4 w-4 text-[#3D9970]" /> : same ? <Minus className="h-4 w-4 text-muted-foreground" /> : <TrendingDown className="h-4 w-4 text-[#C0392B]" />}
-						<p className={`text-xl font-bold ${improved ? "text-[#3D9970]" : same ? "text-foreground" : "text-[#C0392B]"}`}>
-							{improved ? "+" : ""}{comparison.scoreImprovement}
-						</p>
-					</div>
-				</div>
-				<div className="text-center">
-					<p className="text-xs text-muted-foreground mb-1">Gaps resolved</p>
-					<p className="text-2xl font-bold text-[#3D9970]">{comparison.resolvedGaps.length}</p>
-				</div>
-			</div>
-
-			<div className="grid gap-3 sm:grid-cols-2">
-				{comparison.resolvedGaps.length > 0 && (
-					<div className="rounded-lg border border-[#3D9970]/20 bg-[#3D9970]/5 p-3">
-						<p className="text-xs font-semibold text-[#3D9970] mb-2 flex items-center gap-1.5">
-							<CheckCircle className="h-3.5 w-3.5" />
-							Resolved gaps ({comparison.resolvedGaps.length})
-						</p>
-						<ul className="space-y-1">
-							{comparison.resolvedGaps.map((g, i) => (
-								<li key={i} className="text-[11px] text-muted-foreground flex items-start gap-1.5">
-									<span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#3D9970] shrink-0" />
-									{g}
-								</li>
-							))}
-						</ul>
-					</div>
-				)}
-
-				{comparison.newStrengths.filter(s => !comparison.previousStrengths.includes(s)).length > 0 && (
-					<div className="rounded-lg border border-[#4A90D9]/20 bg-[#4A90D9]/5 p-3">
-						<p className="text-xs font-semibold text-[#4A90D9] mb-2 flex items-center gap-1.5">
-							<Sparkles className="h-3.5 w-3.5" />
-							New strengths
-						</p>
-						<ul className="space-y-1">
-							{comparison.newStrengths.filter(s => !comparison.previousStrengths.includes(s)).map((s, i) => (
-								<li key={i} className="text-[11px] text-muted-foreground flex items-start gap-1.5">
-									<span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#4A90D9] shrink-0" />
-									{s}
-								</li>
-							))}
-						</ul>
-					</div>
-				)}
-
-				{comparison.remainingGaps.length > 0 && (
-					<div className="rounded-lg border border-[#C49A3C]/20 bg-[#C49A3C]/5 p-3">
-						<p className="text-xs font-semibold text-[#C49A3C] mb-2 flex items-center gap-1.5">
-							<AlertCircle className="h-3.5 w-3.5" />
-							Remaining gaps ({comparison.remainingGaps.length})
-						</p>
-						<ul className="space-y-1">
-							{comparison.remainingGaps.map((g, i) => (
-								<li key={i} className="text-[11px] text-muted-foreground flex items-start gap-1.5">
-									<span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#C49A3C] shrink-0" />
-									{g}
-								</li>
-							))}
-						</ul>
-					</div>
-				)}
-
-				{comparison.newGaps.length > 0 && (
-					<div className="rounded-lg border border-[#C0392B]/20 bg-[#C0392B]/5 p-3">
-						<p className="text-xs font-semibold text-[#C0392B] mb-2 flex items-center gap-1.5">
-							<AlertCircle className="h-3.5 w-3.5" />
-							New gaps found ({comparison.newGaps.length})
-						</p>
-						<ul className="space-y-1">
-							{comparison.newGaps.map((g, i) => (
-								<li key={i} className="text-[11px] text-muted-foreground flex items-start gap-1.5">
-									<span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#C0392B] shrink-0" />
-									{g}
-								</li>
-							))}
-						</ul>
-					</div>
-				)}
-			</div>
-
-			{/* Next best actions */}
-			{result.recommendations.filter(r => r.priority === "high").length > 0 && (
-				<div className="mt-4 rounded-lg border border-border bg-muted/20 p-3">
-					<p className="text-xs font-semibold mb-2">Next best actions</p>
-					<ul className="space-y-1">
-						{result.recommendations.filter(r => r.priority === "high").slice(0, 3).map(r => (
-							<li key={r.id} className="text-[11px] text-muted-foreground flex items-start gap-1.5">
-								<ArrowRight className="mt-0.5 h-3 w-3 shrink-0 text-primary" />
-								{r.title}
-							</li>
-						))}
-					</ul>
-				</div>
-			)}
-		</div>
-	);
-}
-
-// ── main page ────────────────────────────────────────────────────────────────
+// ─── Main Page ────────────────────────────────────────────────────
 
 export default function GapFixPage() {
-	const isFirstVisit = useFirstVisit("gap-fix");
-	const [session, setSession] = useState<GapFixSession | null>(null);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-	const [analyzing, startAnalyze] = useTransition();
-	const [reanalyzing, startReanalyze] = useTransition();
+  const isFirst = useFirstVisit("gap-fix");
+  const [data, setData] = useState<GapFixDataV2 | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [analyzing, startAnalyze] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<string>("all");
 
-	// Modals
-	const [improvementModal, setImprovementModal] = useState<{ recId: string; recTitle: string } | null>(null);
-	const [evidenceModal, setEvidenceModal] = useState<{ recId: string; recTitle: string } | null>(null);
+  const load = useCallback(() => {
+    getGapFixItemsAction().then(result => {
+      setData(result);
+      setLoading(false);
+    });
+  }, []);
 
-	useEffect(() => {
-		getGapFixSessionAction().then(s => {
-			setSession(s);
-			setLoading(false);
-		});
-	}, []);
+  useEffect(() => {
+    load();
+  }, [load]);
 
-	function handleAnalyze() {
-		setError(null);
-		startAnalyze(async () => {
-			const result = await analyzeGapFixAction();
-			if (result.error) {
-				setError(result.error);
-				return;
-			}
-			setSession(result.session);
-		});
-	}
+  const handleAnalyze = () => {
+    setError(null);
+    startAnalyze(async () => {
+      const profileData = await getUserProfile();
+      const profile = (profileData as unknown as Record<string, unknown>) ?? {};
+      const result = await analyzeGapFixItemsAction(
+        profile,
+        (profile.targetCountries as string[]) ?? [],
+        (profile.fieldOfStudy as string) ?? (profile.intendedMajor as string) ?? "General",
+      );
+      if (!result) {
+        setError("Analysis failed. Please try again.");
+        return;
+      }
+      setData(result);
+    });
+  };
 
-	function handleReanalyze() {
-		if (!session) return;
-		startReanalyze(async () => {
-			const s = await reanalyzeGapFixAction(session.id);
-			if (!s) {
-				setError("Re-analysis failed. Please try again.");
-				return;
-			}
-			setSession(s);
-		});
-	}
+  const handleItemUpdate = ({
+    item,
+    new_score,
+  }: {
+    item: GapFixItemV2;
+    new_score: number;
+  }) => {
+    setData((prev) => {
+      if (!prev) return prev;
+      const items = prev.items.map((i) => (i.id === item.id ? item : i));
+      const completedItems = items.filter(
+        (i) => i.aiVerified && i.status === "completed",
+      ).length;
+      return { ...prev, items, score: new_score, completedItems };
+    });
+  };
 
-	async function handleStatusChange(recId: string, status: GapStatus) {
-		if (!session) return;
-		const ok = await updateGapStatusAction(session.id, recId, status);
-		if (ok) {
-			setSession(prev => prev ? {
-				...prev,
-				gapStatuses: { ...prev.gapStatuses, [recId]: status },
-			} : prev);
-		}
-	}
+  const filteredItems =
+    data?.items.filter((item) => {
+      if (filter === "all") return true;
+      if (filter === "pending")
+        return item.status !== "completed" && item.status !== "skipped";
+      if (filter === "completed") return item.status === "completed";
+      return true;
+    }) ?? [];
 
-	async function handleAddImprovement(data: {
-		type: string;
-		description: string;
-		testType?: string;
-		scoreValue?: number;
-		applyToProfile?: boolean;
-	}) {
-		if (!session) return;
-		const updated = await addImprovementAction(session.id, data);
-		if (updated) setSession(updated);
-		setImprovementModal(null);
-	}
+  const FILTERS = [
+    { key: "all", label: "All", count: data?.items.length ?? 0 },
+    {
+      key: "pending",
+      label: "Pending",
+      count:
+        data?.items.filter(
+          (i) => i.status !== "completed" && i.status !== "skipped",
+        ).length ?? 0,
+    },
+    { key: "completed", label: "Completed", count: data?.completedItems ?? 0 },
+  ];
 
-	async function handleAddEvidenceLink(label: string, type: string, url: string) {
-		if (!session || !evidenceModal) return;
-		const ev = await addEvidenceLinkAction(session.id, evidenceModal.recId, label, type, url);
-		if (ev) {
-			setSession(prev => prev ? { ...prev, evidences: [...prev.evidences, ev] } : prev);
-		}
-		setEvidenceModal(null);
-	}
+  return (
+    <div
+      className={isFirst ? "page-enter" : ""}
+      style={{ padding: "0 24px 60px" }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          position: "relative",
+          padding: "32px 0 24px",
+          marginBottom: 24,
+          overflow: "hidden",
+          minHeight: 140,
+        }}
+      >
+        <div
+          aria-hidden="true"
+          className="hidden md:block"
+          style={{
+            position: "absolute",
+            right: -40,
+            top: 0,
+            bottom: 0,
+            width: "42%",
+            opacity: 0.8,
+            pointerEvents: "none",
+            maskImage:
+              "linear-gradient(to right, transparent 0%, black 35%)",
+            WebkitMaskImage:
+              "linear-gradient(to right, transparent 0%, black 35%)",
+          }}
+        >
+          <GapFixAnimation />
+        </div>
 
-	async function handleUploadFile(label: string, type: string, file: File) {
-		if (!session || !evidenceModal) return;
-		const fd = new FormData();
-		fd.set("label", label);
-		fd.set("type", type);
-		fd.set("file", file, file.name);
-		const ev = await uploadEvidenceAction(session.id, evidenceModal.recId, fd);
-		if (ev) {
-			setSession(prev => prev ? { ...prev, evidences: [...prev.evidences, ev] } : prev);
-		}
-		setEvidenceModal(null);
-	}
+        <div style={{ position: "relative", zIndex: 1, maxWidth: "55%" }}>
+          <h1
+            style={{
+              fontSize: "clamp(28px, 4vw, 42px)",
+              fontWeight: 700,
+              color: "#E8EEF8",
+              letterSpacing: "-0.025em",
+              margin: 0,
+              marginBottom: 10,
+            }}
+          >
+            Gap <span className="gradient-text">Fix</span>
+          </h1>
+          <p
+            style={{
+              fontSize: 15,
+              color: "#7A8BA8",
+              fontWeight: 300,
+              lineHeight: 1.6,
+              margin: 0,
+            }}
+          >
+            AI analyzes your profile gaps and verifies your evidence before
+            updating your score.
+          </p>
+        </div>
+      </div>
 
-	async function handleDeleteEvidence(evidenceId: string) {
-		const ok = await deleteEvidenceAction(evidenceId);
-		if (ok) {
-			setSession(prev => prev ? { ...prev, evidences: prev.evidences.filter(e => e.id !== evidenceId) } : prev);
-		}
-	}
+      {loading ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div
+            style={{
+              display: "flex",
+              gap: 16,
+              marginBottom: 8,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <div
+              className="skeleton"
+              style={{ width: 128, height: 128, borderRadius: "50%" }}
+            />
+          </div>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="skeleton"
+              style={{
+                height: 100,
+                borderRadius: 14,
+                animationDelay: `${i * 80}ms`,
+              }}
+            />
+          ))}
+        </div>
+      ) : error ? (
+        <div
+          style={{
+            textAlign: "center",
+            padding: "60px 24px",
+            color: "#C0392B",
+            fontSize: 14,
+          }}
+        >
+          {error}
+          <button
+            onClick={() => void load()}
+            style={{
+              display: "block",
+              margin: "16px auto 0",
+              padding: "8px 20px",
+              background: "rgba(74,144,217,0.15)",
+              border: "1px solid rgba(74,144,217,0.25)",
+              borderRadius: 8,
+              color: "#4A90D9",
+              fontSize: 13,
+              cursor: "pointer",
+            }}
+          >
+            Try again
+          </button>
+        </div>
+      ) : !data || data.items.length === 0 ? (
+        /* Empty state */
+        <div style={{ textAlign: "center", padding: "60px 24px" }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>⚡</div>
+          <h2
+            style={{
+              fontSize: 22,
+              fontWeight: 600,
+              color: "#E8EEF8",
+              marginBottom: 12,
+            }}
+          >
+            Analyze Your Profile Gaps
+          </h2>
+          <p
+            style={{
+              fontSize: 14,
+              color: "#7A8BA8",
+              maxWidth: 400,
+              margin: "0 auto 28px",
+              lineHeight: 1.6,
+            }}
+          >
+            AI will analyze your profile and identify specific weaknesses that
+            could hurt your university applications.
+          </p>
+          <button
+            onClick={handleAnalyze}
+            disabled={analyzing}
+            style={{
+              padding: "13px 32px",
+              background: analyzing
+                ? "rgba(74,144,217,0.40)"
+                : "rgba(74,144,217,0.88)",
+              color: "#080D18",
+              border: "none",
+              borderRadius: 10,
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: analyzing ? "not-allowed" : "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 10,
+            }}
+          >
+            {analyzing ? "Analyzing your profile..." : "Run AI Gap Analysis"}
+          </button>
+        </div>
+      ) : (
+        <>
+          {/* Score + stats */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "auto 1fr",
+              gap: 32,
+              alignItems: "center",
+              padding: 24,
+              background: "rgba(13,22,37,0.65)",
+              border: "1px solid rgba(74,144,217,0.18)",
+              borderRadius: 16,
+              marginBottom: 28,
+            }}
+          >
+            <ScoreRing score={data.score} />
+            <div>
+              <h2
+                style={{
+                  fontSize: 18,
+                  fontWeight: 700,
+                  color: "#E8EEF8",
+                  marginBottom: 6,
+                }}
+              >
+                Profile Gap Score
+              </h2>
+              <p
+                style={{
+                  fontSize: 13,
+                  color: "#7A8BA8",
+                  lineHeight: 1.5,
+                  marginBottom: 16,
+                }}
+              >
+                {data.completedItems} of {data.totalItems} gaps verified and
+                completed. Score only increases when AI verifies your evidence.
+              </p>
+              <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+                {[
+                  { label: "Total Gaps", value: data.totalItems, color: "#4A90D9" },
+                  { label: "Completed", value: data.completedItems, color: "#3D9970" },
+                  {
+                    label: "Remaining",
+                    value: data.totalItems - data.completedItems,
+                    color: "#C49A3C",
+                  },
+                ].map((stat) => (
+                  <div key={stat.label}>
+                    <div
+                      style={{ fontSize: 24, fontWeight: 700, color: stat.color }}
+                    >
+                      {stat.value}
+                    </div>
+                    <div style={{ fontSize: 11, color: "#7A8BA8" }}>
+                      {stat.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
 
-	// ── computed ───────────────────────────────────────────────────────────────
+          {/* Filter tabs */}
+          <div
+            style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap" }}
+          >
+            {FILTERS.map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setFilter(f.key)}
+                style={{
+                  padding: "7px 16px",
+                  background:
+                    filter === f.key
+                      ? "rgba(74,144,217,0.15)"
+                      : "rgba(255,255,255,0.04)",
+                  border:
+                    filter === f.key
+                      ? "1px solid rgba(74,144,217,0.35)"
+                      : "1px solid rgba(255,255,255,0.08)",
+                  borderRadius: 999,
+                  color: filter === f.key ? "#E8EEF8" : "#7A8BA8",
+                  fontSize: 12,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  outline: "none",
+                }}
+              >
+                {f.label} ({f.count})
+              </button>
+            ))}
 
-	const recs = session?.result.recommendations ?? [];
-	const total = recs.length;
-	const completedCount = recs.filter(r => (session?.gapStatuses[r.id] ?? "not_started") === "completed").length;
-	const highPriority = recs.filter(r => r.priority === "high");
-	const otherPriority = recs.filter(r => r.priority !== "high");
-	const improvementsCount = session?.improvements.length ?? 0;
+            <button
+              onClick={handleAnalyze}
+              disabled={analyzing}
+              style={{
+                marginLeft: "auto",
+                padding: "7px 16px",
+                background: "transparent",
+                border: "1px solid rgba(74,144,217,0.25)",
+                borderRadius: 999,
+                color: "#4A90D9",
+                fontSize: 12,
+                fontWeight: 500,
+                cursor: analyzing ? "not-allowed" : "pointer",
+                outline: "none",
+              }}
+            >
+              {analyzing ? "Analyzing..." : "↺ Re-analyze"}
+            </button>
+          </div>
 
-	// ── render states ──────────────────────────────────────────────────────────
-
-	if (loading) {
-		return (
-			<div className="flex min-h-[60vh] items-center justify-center">
-				<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-			</div>
-		);
-	}
-
-	return (
-		<div className={`${isFirstVisit ? "page-enter" : ""} mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8`}>
-			<PageHeader
-				animation="gap-fix"
-				title={<>Gap <span className="gradient-text">Fix</span></>}
-				subtitle="Track your improvement journey — analyze gaps, log progress, attach evidence, re-analyze."
-			/>
-
-			{/* No session — analyze CTA */}
-			{!session ? (
-				<div className="flex flex-col items-center justify-center min-h-[400px] rounded-xl border border-dashed border-border bg-card/50 p-10 text-center">
-					<div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-						<Sparkles className="h-8 w-8 text-primary" />
-					</div>
-					<h3 className="mb-2 font-semibold">Profile Gap Analysis</h3>
-					<p className="max-w-sm text-sm text-muted-foreground mb-6">
-						We&apos;ll analyze your academic profile, test scores, experience, and goals to identify weaknesses and give you a concrete improvement roadmap.
-					</p>
-					<Button onClick={handleAnalyze} disabled={analyzing} size="lg" className="gap-2">
-						{analyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
-						{analyzing ? "Analyzing your profile…" : "Analyze My Profile"}
-					</Button>
-					{error && (
-						<div className="mt-4 flex items-start gap-2 rounded-lg border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive max-w-sm text-left">
-							<AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-							<div>
-								{error}
-								{(error.toLowerCase().includes("profile") || error.toLowerCase().includes("complete")) && (
-									<div className="mt-1.5">
-										<a href="/app/profile" className="underline underline-offset-2 font-medium">
-											Go to profile settings
-										</a>
-									</div>
-								)}
-							</div>
-						</div>
-					)}
-					<p className="mt-4 text-xs text-muted-foreground">
-						<a href="/app/profile" className="underline underline-offset-2 hover:text-foreground transition-colors">
-							Set up your profile
-						</a>{" "}for the most accurate recommendations
-					</p>
-				</div>
-			) : (
-				<FadeIn>
-					<div className="space-y-6">
-
-						{/* Partial / minimal analysis notice */}
-						{(session.analysisMode === "minimal" || session.analysisMode === "partial") && (
-							<div className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${
-								session.analysisMode === "minimal"
-									? "border-[#C49A3C]/30 bg-[#C49A3C]/5 text-[#C49A3C]"
-									: "border-[#4A90D9]/30 bg-[#4A90D9]/5 text-[#4A90D9]"
-							}`}>
-								<AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
-								<div className="flex-1">
-									{session.analysisMode === "minimal" ? (
-										<>
-											<span className="font-medium">Analysis based on limited data.</span>
-											{" "}Your profile is not set up yet — these are general recommendations.{" "}
-											<a href="/app/profile" className="underline underline-offset-2 font-medium hover:opacity-80 transition-opacity">
-												Complete your profile
-											</a>{" "}and re-analyze for personalized results.
-										</>
-									) : (
-										<>
-											<span className="font-medium">Partial analysis.</span>
-											{" "}Some profile fields are missing — adding your degree level, GPA, and test scores will improve recommendation accuracy.{" "}
-											<a href="/app/profile" className="underline underline-offset-2 font-medium hover:opacity-80 transition-opacity">
-												Update your profile
-											</a>{" "}then re-analyze.
-										</>
-									)}
-								</div>
-							</div>
-						)}
-
-						{/* Score overview + progress */}
-						<div className="rounded-xl border border-border bg-card p-6">
-							<div className="flex flex-col sm:flex-row items-center gap-6">
-								<ScoreRing score={session.result.profileScore} />
-								<div className="flex-1 text-center sm:text-left">
-									<h2 className="text-lg font-semibold mb-1">Profile Competitiveness Score</h2>
-									<p className="text-sm text-muted-foreground mb-3">{session.result.prioritySummary}</p>
-									<div className="space-y-2">
-										<ProgressBar completed={completedCount} total={total} />
-										<div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-											<span>{session.result.weaknesses.length} gap{session.result.weaknesses.length !== 1 ? "s" : ""} found</span>
-											<span>·</span>
-											<span>{improvementsCount} improvement{improvementsCount !== 1 ? "s" : ""} logged</span>
-											<span>·</span>
-											<span>{session.evidences.length} evidence attached</span>
-										</div>
-									</div>
-								</div>
-								<div className="flex flex-col gap-2 shrink-0">
-									<Button
-										variant="outline"
-										size="sm"
-										onClick={handleReanalyze}
-										disabled={reanalyzing}
-										className="gap-1.5"
-									>
-										{reanalyzing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-										Re-analyze
-									</Button>
-									<Button
-										variant="ghost"
-										size="sm"
-										onClick={handleAnalyze}
-										disabled={analyzing}
-										className="gap-1.5 text-muted-foreground"
-									>
-										{analyzing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-										Fresh analysis
-									</Button>
-								</div>
-							</div>
-						</div>
-
-						{error && (
-							<div className="flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/5 px-4 py-2.5 text-sm text-destructive">
-								<AlertCircle className="h-4 w-4 shrink-0" />
-								{error}
-							</div>
-						)}
-
-						{/* Before/After comparison (shown after re-analysis) */}
-						{session.comparison && <BeforeAfterPanel session={session} />}
-
-						{/* Strengths & Weaknesses */}
-						{(session.result.strengths.length > 0 || session.result.weaknesses.length > 0) && (
-							<div className="grid gap-4 sm:grid-cols-2">
-								{session.result.strengths.length > 0 && (
-									<div className="rounded-xl border border-[#3D9970]/20 bg-[#3D9970]/5 p-4">
-										<h3 className="mb-3 text-sm font-semibold text-[#3D9970] flex items-center gap-2">
-											<CheckCircle className="h-4 w-4" />
-											Strengths ({session.result.strengths.length})
-										</h3>
-										<ul className="space-y-1.5">
-											{session.result.strengths.map((s, i) => (
-												<li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
-													<span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#3D9970] shrink-0" />
-													{s}
-												</li>
-											))}
-										</ul>
-									</div>
-								)}
-								{session.result.weaknesses.length > 0 && (
-									<div className="rounded-xl border border-[#C0392B]/20 bg-[#C0392B]/5 p-4">
-										<h3 className="mb-3 text-sm font-semibold text-[#C0392B] flex items-center gap-2">
-											<AlertCircle className="h-4 w-4" />
-											Gaps Identified ({session.result.weaknesses.length})
-										</h3>
-										<ul className="space-y-1.5">
-											{session.result.weaknesses.map((w, i) => (
-												<li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
-													<span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#C0392B] shrink-0" />
-													{w}
-												</li>
-											))}
-										</ul>
-									</div>
-								)}
-							</div>
-						)}
-
-						{/* High priority gap cards */}
-						{highPriority.length > 0 && (
-							<div>
-								<h3 className="mb-3 text-sm font-semibold flex items-center gap-2">
-									<TrendingUp className="h-4 w-4 text-[#C0392B]" />
-									High Priority Actions
-								</h3>
-								<div className="space-y-3">
-									{highPriority.map(rec => (
-										<GapCard
-											key={rec.id}
-											rec={rec}
-											status={session.gapStatuses[rec.id] ?? "not_started"}
-											evidences={session.evidences.filter(e => e.recId === rec.id)}
-											onStatusChange={s => handleStatusChange(rec.id, s)}
-											onAddImprovement={() => setImprovementModal({ recId: rec.id, recTitle: rec.title })}
-											onAddEvidence={() => setEvidenceModal({ recId: rec.id, recTitle: rec.title })}
-											onDeleteEvidence={handleDeleteEvidence}
-										/>
-									))}
-								</div>
-							</div>
-						)}
-
-						{/* Other priority gap cards */}
-						{otherPriority.length > 0 && (
-							<div>
-								<h3 className="mb-3 text-sm font-semibold">Additional Recommendations</h3>
-								<div className="space-y-3">
-									{otherPriority.map(rec => (
-										<GapCard
-											key={rec.id}
-											rec={rec}
-											status={session.gapStatuses[rec.id] ?? "not_started"}
-											evidences={session.evidences.filter(e => e.recId === rec.id)}
-											onStatusChange={s => handleStatusChange(rec.id, s)}
-											onAddImprovement={() => setImprovementModal({ recId: rec.id, recTitle: rec.title })}
-											onAddEvidence={() => setEvidenceModal({ recId: rec.id, recTitle: rec.title })}
-											onDeleteEvidence={handleDeleteEvidence}
-										/>
-									))}
-								</div>
-							</div>
-						)}
-
-						{/* Improvements log */}
-						{session.improvements.length > 0 && (
-							<div className="rounded-xl border border-border bg-card p-5">
-								<h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-									<TrendingUp className="h-4 w-4 text-primary" />
-									Improvements Logged ({session.improvements.length})
-								</h3>
-								<div className="space-y-2">
-									{session.improvements.map(imp => (
-										<div key={imp.id} className="flex items-start gap-3 rounded-lg border border-border bg-background px-3 py-2.5">
-											<CheckCircle className="h-4 w-4 text-[#3D9970] shrink-0 mt-0.5" />
-											<div className="flex-1 min-w-0">
-												<p className="text-xs font-medium">{imp.description}</p>
-												{imp.testType && imp.scoreValue !== undefined && (
-													<p className="text-[11px] text-muted-foreground mt-0.5">
-														{imp.testType}: {imp.scoreValue}
-														{imp.appliedToProfile && (
-															<span className="ml-1.5 rounded-full bg-[#3D9970]/10 text-[#3D9970] border border-[#3D9970]/20 px-1.5 py-0.5 text-[9px]">
-																applied to profile
-															</span>
-														)}
-													</p>
-												)}
-											</div>
-											<span className="text-[10px] text-muted-foreground shrink-0">
-												{new Date(imp.addedAt).toLocaleDateString()}
-											</span>
-										</div>
-									))}
-								</div>
-							</div>
-						)}
-
-						<p className="text-xs text-muted-foreground text-center">
-							AI-generated analysis based on your profile — update your profile and re-analyze for fresh recommendations
-						</p>
-					</div>
-				</FadeIn>
-			)}
-
-			{/* Modals */}
-			{improvementModal && (
-				<ImprovementModal
-					onClose={() => setImprovementModal(null)}
-					onSubmit={handleAddImprovement}
-				/>
-			)}
-
-			{evidenceModal && (
-				<EvidenceModal
-					recTitle={evidenceModal.recTitle}
-					onClose={() => setEvidenceModal(null)}
-					onSubmitLink={handleAddEvidenceLink}
-					onUploadFile={handleUploadFile}
-				/>
-			)}
-		</div>
-	);
+          {/* Gap items */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {filteredItems.length === 0 ? (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "40px 24px",
+                  color: "#7A8BA8",
+                  fontSize: 14,
+                }}
+              >
+                No gaps in this category.
+              </div>
+            ) : (
+              filteredItems.map((item) => (
+                <GapCard key={item.id} item={item} onUpdate={handleItemUpdate} />
+              ))
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
