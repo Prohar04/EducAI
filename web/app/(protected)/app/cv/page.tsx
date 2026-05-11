@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { StaggerChildren, StaggerItem } from "@/components/motion/FadeIn";
 import { generateCvAction, type CvTemplate, type CvResult } from "@/lib/auth/action";
+import DocumentTemplateSelector, { type CVTemplate } from "@/components/features/document-template-selector";
 
 const TEMPLATES: { value: CvTemplate; label: string; desc: string; badge?: string }[] = [
 	{ value: "minimal-academic", label: "Minimal Academic", desc: "Clean STEM grad CV — education & research first" },
@@ -85,39 +86,47 @@ function TextArea({ value, onChange, placeholder, rows = 3 }: {
 	);
 }
 
-function downloadAsPdf(content: string, filename: string) {
-	const win = window.open("", "_blank");
-	if (!win) return;
-	const escaped = content
-		.replace(/&/g, "&amp;")
-		.replace(/</g, "&lt;")
-		.replace(/>/g, "&gt;");
-	win.document.write(`<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>${filename}</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Times New Roman', Georgia, serif; font-size: 11pt; line-height: 1.5; color: #000; background: #fff; }
-  pre { white-space: pre-wrap; word-break: break-word; font-family: inherit; font-size: inherit; line-height: inherit; }
-  @page { margin: 0.85in 1in; }
-  @media print { body { margin: 0; } }
-</style>
-</head>
-<body><pre>${escaped}</pre>
-<script>window.onload = function() { window.print(); }<\/script>
-</body>
-</html>`);
-	win.document.close();
+async function downloadAsPdf(
+	content: string,
+	template: string,
+	setDownloading: (v: boolean) => void,
+) {
+	setDownloading(true);
+	try {
+		const API = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+		const res = await fetch(`${API}/cv/download-pdf`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify({ content, template }),
+		});
+		if (!res.ok) throw new Error("Download failed");
+		const blob = await res.blob();
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = `CV-${new Date().toISOString().slice(0, 10)}.pdf`;
+		a.click();
+		URL.revokeObjectURL(url);
+	} catch {
+		const win = window.open("", "_blank");
+		if (!win) return;
+		const escaped = content.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+		win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:'Times New Roman',serif;font-size:11pt;line-height:1.5;color:#000;padding:0.85in 1in}pre{white-space:pre-wrap;font-family:inherit}</style></head><body><pre>${escaped}</pre><script>window.onload=function(){window.print()}<\/script></body></html>`);
+		win.document.close();
+	} finally {
+		setDownloading(false);
+	}
 }
 
 export default function CVPage() {
 	const isFirstVisit = useFirstVisit("cv");
 	const [cvTemplate, setCvTemplate] = useState<CvTemplate>("minimal-academic");
+	const [docTemplate, setDocTemplate] = useState<CVTemplate>("us_standard");
 	const [result, setResult] = useState<CvResult | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [copied, setCopied] = useState(false);
+	const [downloading, setDownloading] = useState(false);
 	const [isPending, startTransition] = useTransition();
 
 	// Rich form state
@@ -199,7 +208,7 @@ export default function CVPage() {
 
 	function handleDownloadPdf() {
 		if (!result) return;
-		downloadAsPdf(result.cv, `CV-${cvTemplate}`);
+		downloadAsPdf(result.cv, docTemplate, setDownloading);
 	}
 
 	return (
@@ -213,6 +222,12 @@ export default function CVPage() {
 			<div className="grid gap-6 lg:grid-cols-5">
 				{/* Config panel */}
 				<div className="space-y-4 lg:col-span-2">
+
+					{/* Document style selector */}
+					<div className="rounded-xl border border-border bg-card p-5">
+						<h2 className="mb-3 text-sm font-semibold">Document Style</h2>
+						<DocumentTemplateSelector mode="cv" selected={docTemplate} onSelect={(id) => setDocTemplate(id as CVTemplate)} />
+					</div>
 
 					{/* Template selector */}
 					<div className="rounded-xl border border-border bg-card p-5">
@@ -401,8 +416,8 @@ export default function CVPage() {
 											<Download className="h-3.5 w-3.5" />
 											.txt
 										</Button>
-										<Button variant="default" size="sm" onClick={handleDownloadPdf} className="gap-1.5">
-											<Download className="h-3.5 w-3.5" />
+										<Button variant="default" size="sm" onClick={handleDownloadPdf} disabled={downloading} className="gap-1.5">
+											{downloading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
 											PDF
 										</Button>
 										<Button variant="ghost" size="sm" onClick={handleGenerate} disabled={isPending} className="gap-1.5">

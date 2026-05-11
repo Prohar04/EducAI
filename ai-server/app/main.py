@@ -24,6 +24,7 @@ from .api.v1.scrape_match import router as scrape_match_router
 from .api.v1.strategy import router as strategy_router
 from .api.v1.jobs import router as jobs_router
 from .api.v1.news import router as news_router
+from .api.v1.gap_fix import router as gap_fix_router
 from .middleware.audit_log import AuditLogMiddleware
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -72,6 +73,8 @@ app.include_router(strategy_router, prefix="/api/v1/module1")
 app.include_router(jobs_router, prefix="/api/v1")
 # Education News: categorized news with in-memory caching
 app.include_router(news_router, prefix="/api/v1/news")
+# Gap Fix: AI evidence verification
+app.include_router(gap_fix_router, prefix="/api/v1/gap-fix")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Root & Health Endpoints

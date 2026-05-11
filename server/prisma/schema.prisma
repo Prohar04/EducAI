@@ -667,6 +667,23 @@ model StrategyAction {
   @@map("strategy_actions")
 }
 
+// ── DATA FRESHNESS TRACKING ────────────────────────────────────────
+// Tracks when each data source was last synced and its current status.
+model DataFreshness {
+  id           String    @id @default(cuid())
+  source       String    @unique @db.VarChar(100)
+  lastSyncAt   DateTime  @default(now()) @map("last_sync_at") @db.Timestamp
+  status       String    @default("success") @db.VarChar(50)
+  recordCount  Int       @default(0) @map("record_count")
+  details      String?   @db.Text
+  errorMessage String?   @map("error_message") @db.Text
+  nextSyncAt   DateTime? @map("next_sync_at") @db.Timestamp
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamp
+
+  @@index([source])
+  @@map("data_freshness")
+}
+
 // ── GOOGLE OAUTH ONE-TIME CODES ────────────────────────────────────
 model OAuthCode {
   id           String   @id @default(cuid())

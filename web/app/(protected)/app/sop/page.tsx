@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { StaggerChildren, StaggerItem } from "@/components/motion/FadeIn";
 import { generateSopAction, type SopTemplate, type SopResult } from "@/lib/auth/action";
+import DocumentTemplateSelector, { type SOPTemplate } from "@/components/features/document-template-selector";
 
 const TEMPLATES: { value: SopTemplate; label: string; desc: string; badge?: string }[] = [
 	{ value: "formal-academic", label: "Formal Academic", desc: "Professional, structured academic prose" },
@@ -85,40 +86,49 @@ function TextArea({ value, onChange, placeholder, rows = 3 }: {
 	);
 }
 
-function downloadAsPdf(content: string, filename: string) {
-	const win = window.open("", "_blank");
-	if (!win) return;
-	const escaped = content
-		.replace(/&/g, "&amp;")
-		.replace(/</g, "&lt;")
-		.replace(/>/g, "&gt;");
-	win.document.write(`<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>${filename}</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: Georgia, 'Times New Roman', serif; font-size: 12pt; line-height: 1.7; color: #000; background: #fff; }
-  p { margin-bottom: 1em; text-align: justify; }
-  pre { white-space: pre-wrap; word-break: break-word; font-family: inherit; font-size: inherit; line-height: inherit; }
-  @page { margin: 1in 1.1in; }
-  @media print { body { margin: 0; } }
-</style>
-</head>
-<body><pre>${escaped}</pre>
-<script>window.onload = function() { window.print(); }<\/script>
-</body>
-</html>`);
-	win.document.close();
+async function downloadAsPdf(
+	content: string,
+	template: string,
+	targetUniversity: string,
+	setDownloading: (v: boolean) => void,
+) {
+	setDownloading(true);
+	try {
+		const API = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+		const res = await fetch(`${API}/sop/download-pdf`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+			body: JSON.stringify({ content, template, targetUniversity }),
+		});
+		if (!res.ok) throw new Error("Download failed");
+		const blob = await res.blob();
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = `SOP-${new Date().toISOString().slice(0, 10)}.pdf`;
+		a.click();
+		URL.revokeObjectURL(url);
+	} catch {
+		// Fallback to browser print
+		const win = window.open("", "_blank");
+		if (!win) return;
+		const escaped = content.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+		win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:Georgia,serif;font-size:12pt;line-height:1.7;color:#000;padding:1in 1.1in}pre{white-space:pre-wrap;font-family:inherit}</style></head><body><pre>${escaped}</pre><script>window.onload=function(){window.print()}<\/script></body></html>`);
+		win.document.close();
+	} finally {
+		setDownloading(false);
+	}
 }
 
 export default function SOPPage() {
 	const isFirstVisit = useFirstVisit("sop");
 	const [sopTemplate, setSopTemplate] = useState<SopTemplate>("formal-academic");
+	const [docTemplate, setDocTemplate] = useState<SOPTemplate>("standard_academic");
 	const [result, setResult] = useState<SopResult | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [copied, setCopied] = useState(false);
+	const [downloading, setDownloading] = useState(false);
 	const [isPending, startTransition] = useTransition();
 
 	// Target fields
@@ -198,7 +208,7 @@ export default function SOPPage() {
 
 	function handleDownloadPdf() {
 		if (!result) return;
-		downloadAsPdf(result.sop, `SOP-${sopTemplate}`);
+		downloadAsPdf(result.sop, docTemplate, targetUniversity, setDownloading);
 	}
 
 	return (
@@ -212,6 +222,12 @@ export default function SOPPage() {
 			<div className="grid gap-6 lg:grid-cols-5">
 				{/* Config panel */}
 				<div className="space-y-4 lg:col-span-2">
+
+					{/* Document style selector */}
+					<div className="rounded-xl border border-border bg-card p-5">
+						<h2 className="mb-3 text-sm font-semibold">Document Style</h2>
+						<DocumentTemplateSelector mode="sop" selected={docTemplate} onSelect={(id) => setDocTemplate(id as SOPTemplate)} />
+					</div>
 
 					{/* Template selector */}
 					<div className="rounded-xl border border-border bg-card p-5">
@@ -396,8 +412,8 @@ export default function SOPPage() {
 											<Download className="h-3.5 w-3.5" />
 											.txt
 										</Button>
-										<Button variant="default" size="sm" onClick={handleDownloadPdf} className="gap-1.5">
-											<Download className="h-3.5 w-3.5" />
+										<Button variant="default" size="sm" onClick={handleDownloadPdf} disabled={downloading} className="gap-1.5">
+											{downloading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
 											PDF
 										</Button>
 										<Button variant="ghost" size="sm" onClick={handleGenerate} disabled={isPending} className="gap-1.5">

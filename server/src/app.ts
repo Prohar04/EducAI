@@ -33,6 +33,7 @@ import dataSyncRoutes from './routes/dataSync.router.ts';
 import jobRoutes from './routes/jobRoutes.ts';
 import newsRoutes from './routes/newsRoutes.ts';
 import currencyRoutes from './routes/currency.router.ts';
+import freshnessRoutes from './routes/freshness.router.ts';
 // import { PrismaSessionStore } from './services/session.service.ts';
 
 const app = express();
@@ -218,6 +219,7 @@ app.use('/data-sync', dataSyncRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/currency', currencyRoutes);
+app.use('/freshness', freshnessRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
