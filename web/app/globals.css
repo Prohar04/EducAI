@@ -525,8 +525,23 @@ header.gpu-layer {
 
 /* ── Content visibility for below-fold sections ─────────────────────────── */
 .below-fold {
-  content-visibility: auto;
   contain-intrinsic-size: 0 500px;
+}
+
+@media (max-width: 1023px), (max-height: 800px) {
+  section[aria-label="Hero"] {
+    min-height: auto;
+    padding-top: 96px;
+    padding-bottom: 72px;
+  }
+
+  section[id="features"],
+  section[aria-labelledby="news-heading"],
+  section[aria-label="Platform stats"],
+  section[id="how-it-works"] {
+    padding-top: 88px !important;
+    padding-bottom: 72px !important;
+  }
 }
 
 /* ── Smooth scrollable containers ───────────────────────────────────────── */
