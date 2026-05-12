@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import { Router } from 'express';
 import multer from 'multer';
 import { authMiddleware } from '#src/middlewares/authenticate.ts';
+import { getGapFixUploadDir } from '#src/config/paths.ts';
 import {
   gapFixGenerateHandler,
   gapFixGetSessionHandler,
@@ -13,7 +14,7 @@ import {
   gapFixReanalyzeHandler,
 } from '#src/controllers/gapfix.controller.ts';
 
-const UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'gap-fix');
+const UPLOAD_DIR = getGapFixUploadDir();
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 const storage = multer.diskStorage({

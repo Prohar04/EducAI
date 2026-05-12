@@ -6,6 +6,7 @@ import type { GapFixResult } from '#src/services/gapfix.service.ts';
 import { Prisma } from '../generated/client.ts';
 import prisma from '#src/config/database.ts';
 import logger from '#src/config/logger.ts';
+import { getGapFixUploadDir } from '#src/config/paths.ts';
 
 type GapStatus = 'not_started' | 'in_progress' | 'completed' | 'skipped';
 
@@ -333,7 +334,7 @@ export async function gapFixDeleteEvidenceHandler(req: Request, res: Response): 
     if (!ev) { res.status(404).json({ error: 'Evidence not found' }); return; }
 
     if (ev.fileName && !ev.url) {
-      const UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'gap-fix');
+      const UPLOAD_DIR = getGapFixUploadDir();
       const files = fs.existsSync(UPLOAD_DIR) ? fs.readdirSync(UPLOAD_DIR) : [];
       const match = files.find(f => f.endsWith(`-${ev.fileName}`));
       if (match) fs.unlinkSync(path.join(UPLOAD_DIR, match));

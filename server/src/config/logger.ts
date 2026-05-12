@@ -1,4 +1,7 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import winston from 'winston';
+import { getLogDir } from './paths.ts';
 
 // ── Winston Logger Configuration ───────────────────────────────────────────────
 // Production/container-safe logging.
@@ -28,16 +31,19 @@ const logger = winston.createLogger({
 // Only enable local file logs if explicitly requested.
 // Do NOT enable this on Render unless you also create/chown the logs directory.
 if (enableFileLogging) {
+  const logDir = getLogDir();
+  fs.mkdirSync(logDir, { recursive: true });
+
   logger.add(
     new winston.transports.File({
-      filename: 'logs/error.log',
+      filename: path.join(logDir, 'error.log'),
       level: 'error',
     })
   );
 
   logger.add(
     new winston.transports.File({
-      filename: 'logs/combined.log',
+      filename: path.join(logDir, 'combined.log'),
     })
   );
 }
