@@ -443,7 +443,7 @@ export default async function HomePage() {
         </section>
 
         {/* ── FOOTER ──────────────────────────────────────────────────── */}
-        <footer style={{ borderTop: "1px solid rgba(255,255,255,0.04)", padding: "32px 40px" }}>
+        <footer style={{ borderTop: "1px solid rgba(255,255,255,0.04)", padding: "32px clamp(16px, 4vw, 40px)" }}>
           <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))", gap: 24, alignItems: "center" }}>
             {/* Logo */}
             <div>

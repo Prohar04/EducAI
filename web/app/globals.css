@@ -206,12 +206,22 @@ a,
   touch-action: manipulation;
 }
 
-input,
+input:not([type="checkbox"]):not([type="radio"]),
 select,
 textarea {
   width: 100%;
   min-height: 44px;
   font-size: 16px;
+}
+
+/* Checkboxes and radio buttons must keep their native compact size */
+input[type="checkbox"],
+input[type="radio"] {
+  width: 1rem;
+  height: 1rem;
+  min-height: 1rem;
+  flex-shrink: 0;
+  cursor: pointer;
 }
 
 @media (hover: none) and (pointer: coarse) {
