@@ -256,7 +256,7 @@ async function runMatchBackground(runId: string, userId: string, profile: Profil
         english_score:     profile.englishScore    ?? null,
       };
 
-      let aiData: AiScrapeResponse;
+      let aiData: AiScrapeResponse | null = null;
       try {
         const aiRes = await fetchAiWithRetry(`${AI_SERVER_URL}/api/v1/module1/scrape-match`, {
           method:  'POST',
@@ -273,33 +273,39 @@ async function runMatchBackground(runId: string, userId: string, profile: Profil
         aiData = (await aiRes.json()) as AiScrapeResponse;
       } catch (err) {
         log(`AI server failed: ${err}`);
-        await markError(`AI server unavailable — ${err}`);
-        return;
+        aiData = null;
       }
 
-      await setProgress(60);
-      log(`AI returned ${aiData.ranked?.length ?? 0} ranked items`);
+      if (aiData) {
+        await setProgress(60);
+        log(`AI returned ${aiData.ranked?.length ?? 0} ranked items`);
 
-      // ── Ingest normalised programs into Neon ───────────────────────────
-      const normalizedCountries = aiData.normalized?.countries ?? [];
-      if (normalizedCountries.length > 0) {
-        try {
-          const counts = await performIngest(normalizedCountries, runId);
-          log(`ingest done: ${JSON.stringify(counts)}`);
-        } catch (err) {
-          log(`ingest non-fatal: ${err}`);
+        // ── Ingest normalised programs into Neon ───────────────────────────
+        const normalizedCountries = aiData.normalized?.countries ?? [];
+        if (normalizedCountries.length > 0) {
+          try {
+            const counts = await performIngest(normalizedCountries, runId);
+            log(`ingest done: ${JSON.stringify(counts)}`);
+          } catch (err) {
+            log(`ingest non-fatal: ${err}`);
+          }
+          await prisma.dataSourceMeta.upsert({
+            where:  { cacheKey },
+            create: { cacheKey, lastScrapedAt: new Date(), parserVersion: '1' },
+            update: { lastScrapedAt: new Date() },
+          }).catch(() => {});
         }
-        await prisma.dataSourceMeta.upsert({
-          where:  { cacheKey },
-          create: { cacheKey, lastScrapedAt: new Date(), parserVersion: '1' },
-          update: { lastScrapedAt: new Date() },
-        }).catch(() => {});
+
+        await setProgress(80);
+
+        // ── Resolve programKey → DB programId ────────────────────────────
+        ranked = await mapAiRankedToIds(aiData.ranked ?? []);
+      } else {
+        log('AI unavailable — falling back to cached DB ranking');
+        await setProgress(60);
+        ranked = await rankFromDB(profile, targetCountries, intendedLevel, intendedMajor);
+        await setProgress(80);
       }
-
-      await setProgress(80);
-
-      // ── Resolve programKey → DB programId ────────────────────────────
-      ranked = await mapAiRankedToIds(aiData.ranked ?? []);
     }
 
     await setProgress(95);
