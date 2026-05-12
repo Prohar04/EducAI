@@ -9,23 +9,25 @@
 # ═══════════════════════════════════════════════════════════════════════════════
 
 # BASE
-from fastapi import FastAPI, Depends, APIRouter
+from fastapi import APIRouter, Depends, FastAPI
+from fastapi.responses import Response
+
+from .api.v1.chat import router as chat_router
+from .api.v1.gap_fix import router as gap_fix_router
+from .api.v1.health import router as health_router
+from .api.v1.jobs import router as jobs_router
+from .api.v1.module1_sync import router as module1_sync_router
+from .api.v1.news import router as news_router
+from .api.v1.recommendations import router as recommendations_router
+from .api.v1.scrape_match import router as scrape_match_router
+from .api.v1.strategy import router as strategy_router
 
 # Prisma DB
 from .db.prisma_connect import lifespan
+from .middleware.audit_log import AuditLogMiddleware
 
 # CONFIG
 from .middleware.secure_keys import checkApiKey
-from .api.v1.health import router as health_router
-from .api.v1.chat import router as chat_router
-from .api.v1.recommendations import router as recommendations_router
-from .api.v1.module1_sync import router as module1_sync_router
-from .api.v1.scrape_match import router as scrape_match_router
-from .api.v1.strategy import router as strategy_router
-from .api.v1.jobs import router as jobs_router
-from .api.v1.news import router as news_router
-from .api.v1.gap_fix import router as gap_fix_router
-from .middleware.audit_log import AuditLogMiddleware
 
 # ─────────────────────────────────────────────────────────────────────────────
 # FastAPI Application Initialization
@@ -52,6 +54,7 @@ app.include_router(health_router, prefix="/api/v1")
 # ─────────────────────────────────────────────────────────────────────────────
 # AI Chatbot: Conversational interface with full user profile context
 app.include_router(chat_router, prefix="/api/v1")
+
 
 # Data utility endpoint
 @app.get("/data")
@@ -80,10 +83,27 @@ app.include_router(gap_fix_router, prefix="/api/v1/gap-fix")
 # Root & Health Endpoints
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @app.get("/")
 async def get():
     """Root endpoint - basic connectivity check."""
     return {"message": "EducAI AI Server is running", "version": "1.0.0"}
+
+
+@app.head("/")
+async def root_head():
+    return Response(status_code=200)
+
+
+# Compatibility health endpoint for external monitors (no /api/v1 prefix).
+@app.get("/health")
+async def health_root():
+    return {"status": "ok", "service": "educai-ai", "version": "1.0.0"}
+
+
+@app.head("/health")
+async def health_root_head():
+    return Response(status_code=200)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
