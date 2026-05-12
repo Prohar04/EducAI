@@ -23,6 +23,9 @@ COPY . .
 # Generate Prisma client (needs schema + node_modules)
 RUN npx prisma generate
 
+# Ensure uploads directory is writable for the non-root user
+RUN mkdir -p /app/uploads/gap-fix && chown -R appuser:nodejs /app/uploads
+
 USER appuser
 
 EXPOSE 8000
