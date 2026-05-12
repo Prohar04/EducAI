@@ -30,4 +30,4 @@ USER appuser
 
 EXPOSE 8000
 
-CMD ["npx", "tsx", "src/index.ts"]
+ENTRYPOINT ["npx", "tsx", "src/index.ts"]
