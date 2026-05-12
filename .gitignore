@@ -66,3 +66,5 @@ docs/*.pdf
 
 # Claude Code internal artifacts
 skills-lock.json
+.claude/settings.local.json
+.claude/settings.local.json.broken
