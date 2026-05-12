@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/providers/theme-provider";
 import { NoiseTexture } from "@/components/ui/noise-texture";
 import { NavProgress } from "@/components/ui/nav-progress";
 import { ServiceWorkerRegistrar } from "@/components/app/ServiceWorkerRegistrar";
+import { GlobalScrollRestore } from "@/components/app/ScrollRestoration";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -124,7 +125,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
+    <html lang="en" suppressHydrationWarning >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -151,6 +152,7 @@ export default function RootLayout({
           <ServiceWorkerRegistrar />
           <NoiseTexture />
           <NavProgress />
+          <GlobalScrollRestore />
           {children}
         </ThemeProvider>
       </body>

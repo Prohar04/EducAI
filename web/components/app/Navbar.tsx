@@ -153,57 +153,45 @@ export function Navbar({ user }: { user: Session["user"] }) {
     }
   }, [alertsOpen, notifsLoaded, loadNotifications]);
 
-  // Close mobile menu on route change
+  // CRITICAL: Ensure scroll is always restored on route change - this effect runs first on pathname change
+  // It unconditionally clears any stale scroll locks from previous page/navigation
   useEffect(() => {
     setMobileOpen(false);
+    const root = document.documentElement;
+    const body = document.body;
+    root.style.overflow = "";
+    root.style.touchAction = "";
+    body.style.overflow = "";
+    body.style.touchAction = "";
+    root.classList.remove("scroll-locked");
+    body.classList.remove("scroll-locked");
   }, [pathname]);
 
-  // Prevent body scroll when mobile menu is open.
-  // Effect 1 (root) + Effect 2 (body) must save independently
-  // to avoid restoring stale values. Here we handle root only.
+  // Keep document scrolling enabled even when the mobile menu is open.
   useEffect(() => {
     const root = document.documentElement;
-    const previousRootOverflow = root.style.overflow;
-    const previousRootTouchAction = root.style.touchAction;
-
-    if (mobileOpen) {
-      root.style.overflow = "hidden";
-      root.style.touchAction = "none";
-    } else {
-      root.style.overflow = previousRootOverflow;
-      root.style.touchAction = previousRootTouchAction;
-    }
-    return () => {
-      root.style.overflow = previousRootOverflow;
-      root.style.touchAction = previousRootTouchAction;
-    };
-  }, [mobileOpen]);
-
-  // Effect 2: only body, only when mobileNav is open.
-  useEffect(() => {
     const body = document.body;
-    const previousBodyOverflow = body.style.overflow;
-    const previousBodyTouchAction = body.style.touchAction;
-
-    if (mobileOpen) {
-      body.style.overflow = "hidden";
-      body.style.touchAction = "none";
-    } else {
-      body.style.overflow = previousBodyOverflow;
-      body.style.touchAction = previousBodyTouchAction;
-    }
-    return () => {
-      body.style.overflow = previousBodyOverflow;
-      body.style.touchAction = previousBodyTouchAction;
-    };
+    root.style.overflow = "";
+    root.style.touchAction = "";
+    body.style.overflow = "";
+    body.style.touchAction = "";
+    root.classList.remove("scroll-locked");
+    body.classList.remove("scroll-locked");
   }, [mobileOpen]);
 
-  // Ensure scroll is restored when leaving mobile breakpoint
+  // Ensure scroll is restored when resizing from mobile to desktop
   useEffect(() => {
     const media = window.matchMedia("(min-width: 1024px)");
     const onChange = () => {
       if (media.matches) {
         setMobileOpen(false);
+        // Clear any scroll locks on breakpoint change
+        const root = document.documentElement;
+        const body = document.body;
+        root.style.overflow = "";
+        root.style.touchAction = "";
+        body.style.overflow = "";
+        body.style.touchAction = "";
       }
     };
     onChange();
