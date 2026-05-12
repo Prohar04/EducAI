@@ -16,6 +16,9 @@ import { toUSD } from '#src/utils/exchangeRates.ts';
 const AI_SERVER_URL     = process.env.AI_SERVER_URL     ?? 'http://localhost:8001';
 const AI_SERVER_API_KEY = process.env.AI_SERVER_API_KEY ?? '';
 const CACHE_TTL_MS      = 24 * 60 * 60 * 1000; // 24 hours
+const AI_TIMEOUT_MS     = 120_000;
+const AI_MAX_RETRIES    = 3;
+const AI_RETRY_BASE_MS  = 1_000;
 
 // ── Major synonym map (mirrors Python taxonomy for DB cache-hit ranking) ── //
 
@@ -116,6 +119,39 @@ interface AiScrapeResponse {
   run_id:     string;
   normalized: { countries: CountryInput[] };
   ranked:     AiRankedItem[];
+}
+
+async function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function fetchAiWithRetry(url: string, init: RequestInit, log: (msg: string) => void) {
+  let lastErr: unknown;
+  for (let attempt = 1; attempt <= AI_MAX_RETRIES; attempt += 1) {
+    try {
+      const res = await fetch(url, { ...init, signal: AbortSignal.timeout(AI_TIMEOUT_MS) });
+      if (res.ok) return res;
+
+      // Retry on transient server errors
+      if (res.status >= 500 && res.status < 600) {
+        const body = await res.text().catch(() => '');
+        lastErr = new Error(`AI server ${res.status}: ${body.slice(0, 200)}`);
+      } else {
+        return res;
+      }
+    } catch (err) {
+      lastErr = err;
+    }
+
+    if (attempt < AI_MAX_RETRIES) {
+      const backoff = AI_RETRY_BASE_MS * Math.pow(2, attempt - 1);
+      const jitter = Math.floor(Math.random() * 250);
+      log(`AI server retry ${attempt}/${AI_MAX_RETRIES} in ${backoff + jitter}ms`);
+      await sleep(backoff + jitter);
+    }
+  }
+
+  throw lastErr;
 }
 
 type RankedRow = {
@@ -222,15 +258,14 @@ async function runMatchBackground(runId: string, userId: string, profile: Profil
 
       let aiData: AiScrapeResponse;
       try {
-        const aiRes = await fetch(`${AI_SERVER_URL}/api/v1/module1/scrape-match`, {
+        const aiRes = await fetchAiWithRetry(`${AI_SERVER_URL}/api/v1/module1/scrape-match`, {
           method:  'POST',
           headers: {
             'Content-Type': 'application/json',
             ...(AI_SERVER_API_KEY ? { 'X-API-KEY': AI_SERVER_API_KEY } : {}),
           },
           body:   JSON.stringify(aiPayload),
-          signal: AbortSignal.timeout(240_000),
-        });
+        }, log);
         if (!aiRes.ok) {
           const txt = await aiRes.text().catch(() => '');
           throw new Error(`AI server ${aiRes.status}: ${txt.slice(0, 200)}`);
