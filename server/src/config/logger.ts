@@ -1,56 +1,33 @@
 import winston from 'winston';
 
 // ── Winston Logger Configuration ───────────────────────────────────────────────
-// Centralized logging for Express API services.
-// In production/container environments, logs go to stdout/stderr.
-// In development, logs are also written to local files.
+// Production/container-safe logging.
+// Logs go to stdout/stderr by default so Render can capture them.
+// File logs are disabled unless ENABLE_FILE_LOGGING=true.
 
-const isProduction = process.env.NODE_ENV === 'production';
+const enableFileLogging = process.env.ENABLE_FILE_LOGGING === 'true';
 
 const logger = winston.createLogger({
-  /**
-   * Log Level
-   */
   level: process.env.LOG_LEVEL || 'info',
 
-  /**
-   * Format Configuration
-   */
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.errors({ stack: true }),
     winston.format.json()
   ),
 
-  /**
-   * Default Metadata
-   */
   defaultMeta: { service: 'acquisition-api' },
 
-  /**
-   * Transports
-   * Production: console only, so Render can capture logs.
-   * Development: console + local files.
-   */
   transports: [
     new winston.transports.Console({
       stderrLevels: ['error'],
-      format: isProduction
-        ? winston.format.combine(
-            winston.format.timestamp(),
-            winston.format.errors({ stack: true }),
-            winston.format.json()
-          )
-        : winston.format.combine(
-            winston.format.colorize(),
-            winston.format.simple()
-          ),
     }),
   ],
 });
 
-// File logs only in development/local environments
-if (!isProduction) {
+// Only enable local file logs if explicitly requested.
+// Do NOT enable this on Render unless you also create/chown the logs directory.
+if (enableFileLogging) {
   logger.add(
     new winston.transports.File({
       filename: 'logs/error.log',
