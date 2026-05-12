@@ -7,7 +7,6 @@
   // Use ruff (already in ai-server/.venv) for linting + formatting.
   // Disable legacy linters that enforce the 79-char default.
   "[python]": {
-    "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.fixAll.ruff": "explicit",
@@ -23,8 +22,34 @@
   "ruff.lineLength": 120,
   "ruff.enable": true,
 
-  // Exclude temp folder from Python analysis
-  "python.analysis.exclude": ["/tmp/**"],
+  // Default excludes for Python analysis
+  "python.analysis.exclude": [
+    "**/node_modules",
+    "**/__pycache__",
+    "**/.git",
+    "**/.hg",
+    "**/.svn",
+    "**/.tox",
+    "**/.nox",
+    "**/.mypy_cache",
+    "**/.pytest_cache",
+    "**/.ruff_cache",
+    "**/.pytype",
+    "**/.ipynb_checkpoints",
+    "**/.venv",
+    ".venv",
+    ".venv/**",
+    "venv",
+    "venv/**",
+    "**/venv",
+    "**/site-packages",
+    "**/dist",
+    "**/build",
+    "**/coverage",
+    "**/.next",
+    "**/.*",
+    "/tmp/**"
+  ],
   "files.exclude": {
     "**/__pycache__": true,
     "**/*.pyc": true
