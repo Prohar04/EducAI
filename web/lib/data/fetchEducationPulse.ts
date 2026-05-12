@@ -216,5 +216,5 @@ async function _fetchEducationPulse(): Promise<FeedItem[]> {
 export const fetchEducationPulse = unstable_cache(
   _fetchEducationPulse,
   ["education-pulse"],
-  { revalidate: 86_400 }, // 24 h
+  { revalidate: 3600 }, // 1 hour - refreshed hourly
 );
