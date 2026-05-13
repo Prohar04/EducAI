@@ -13,37 +13,37 @@ jobs:
       - name: Validate required secrets
         id: validate
         run: |
-          MISSING=false
+          ERRORS=""
 
           BACKEND_URL_CLEAN=$(printf '%s' "$BACKEND_URL" | tr -d '[:space:]')
           CRON_SECRET_CLEAN=$(printf '%s' "$CRON_SECRET" | tr -d '[:space:]')
 
           if [ -z "$BACKEND_URL_CLEAN" ]; then
-            echo "::warning::BACKEND_URL secret is not configured. Skipping news refresh."
-            MISSING=true
+            ERRORS="${ERRORS}\nERROR: BACKEND_URL secret is not configured."
           else
             case "$BACKEND_URL_CLEAN" in
               http://*|https://*)
-                echo "Backend URL scheme: OK"
+                echo "Backend URL scheme: valid"
                 ;;
               *)
-                echo "::warning::BACKEND_URL does not start with http:// or https://"
-                MISSING=true
+                ERRORS="${ERRORS}\nERROR: BACKEND_URL does not start with http:// or https://"
                 ;;
             esac
           fi
 
           if [ -z "$CRON_SECRET_CLEAN" ]; then
-            echo "::warning::CRON_SECRET secret is not configured. Skipping news refresh."
-            MISSING=true
+            ERRORS="${ERRORS}\nERROR: CRON_SECRET secret is not configured."
           fi
 
-          if [ "$MISSING" = "true" ]; then
+          if [ -n "$ERRORS" ]; then
+            echo "${ERRORS}"
+            echo "Cannot run news refresh without BACKEND_URL and CRON_SECRET secrets."
             echo "secrets_ready=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "secrets_ready=true" >> "$GITHUB_OUTPUT"
-            echo "backend_url=${BACKEND_URL_CLEAN}" >> "$GITHUB_OUTPUT"
+            exit 1
           fi
+
+          echo "secrets_ready=true" >> "$GITHUB_OUTPUT"
+          echo "backend_url=${BACKEND_URL_CLEAN}" >> "$GITHUB_OUTPUT"
         env:
           BACKEND_URL: ${{ secrets.BACKEND_URL }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
@@ -51,20 +51,23 @@ jobs:
       - name: Refresh news
         if: steps.validate.outputs.secrets_ready == 'true'
         run: |
-          CLEAN_URL="${{ steps.validate.outputs.backend_url }}"
+          BACKEND_URL_CLEAN=$(printf '%s' "${{ secrets.BACKEND_URL }}" | tr -d '[:space:]')
+          CRON_SECRET_CLEAN=$(printf '%s' "${{ secrets.CRON_SECRET }}" | tr -d '[:space:]')
 
-          STATUS=$(curl -s -o /tmp/r.txt -w "%{http_code}" \
-            --max-time 60 --retry 2 \
-            -X POST "${CLEAN_URL}/api/news/refresh" \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
-          echo "Status: $STATUS — $(cat /tmp/r.txt)"
-          [ "$STATUS" = "000" ] && exit 0
-          [ "$STATUS" = "404" ] && exit 0
-          exit 0
+          HTTP_CODE=$(curl -s -o /tmp/r.txt -w "%{http_code}" \
+            --max-time 60 \
+            -X POST "${BACKEND_URL_CLEAN}/api/news/refresh" \
+            -H "Authorization: Bearer ${CRON_SECRET_CLEAN}")
 
-      - name: Sync skipped (secrets not configured)
-        if: steps.validate.outputs.secrets_ready == 'false'
-        run: |
-          echo "News refresh skipped — required secrets not configured or BACKEND_URL is malformed."
-          echo "Configure BACKEND_URL and CRON_SECRET in repo secrets to enable scheduled refresh."
-          exit 0
+          RESPONSE=$(cat /tmp/r.txt)
+          echo "Backend returned HTTP status: ${HTTP_CODE}"
+          echo "Response: ${RESPONSE}"
+
+          # Fail on non-2xx responses
+          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+            echo "News refresh completed successfully."
+            exit 0
+          else
+            echo "ERROR: News refresh failed with HTTP ${HTTP_CODE}"
+            exit 1
+          fi
