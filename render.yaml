@@ -71,6 +71,16 @@ services:
         sync: false
       - key: RAPIDAPI_KEY
         sync: false
+      # ── Cron/Sync Authentication ────────────────────────────────────────────────
+      - key: CRON_SECRET
+        sync: false   # must match CRON_SECRET in GitHub Actions secrets
+      # ── Supabase Storage (Gap Fix evidence) ─────────────────────────────────────
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: SUPABASE_EVIDENCE_BUCKET
+        sync: false   # default: "evidence" — create this bucket in Supabase dashboard
 
   # ─────────────────────────────────────────────────────────────────────────────
   # FastAPI AI Server
