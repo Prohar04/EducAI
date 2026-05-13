@@ -34,7 +34,7 @@ export async function uploadEvidencePDF(
   const supabase = getClient();
 
   if (!supabase) {
-    throw new Error('Supabase storage is not configured. Please set SUPABASE_URL and SUPABASE_SERVICE_KEY environment variables.');
+    throw new Error('Evidence storage is currently unavailable. Please try again later or contact support if the problem persists.');
   }
 
   const safeName = fileName.replace(/[^a-zA-Z0-9.\-_]/g, '_');

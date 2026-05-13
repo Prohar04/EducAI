@@ -162,7 +162,8 @@ router.post('/:id/upload-pdf', upload.single('pdf'), async (req: Request, res: R
     });
   } catch (err) {
     console.error('PDF upload error:', err);
-    res.status(500).json({ error: 'PDF upload failed' });
+    const errorMessage = err instanceof Error ? err.message : 'PDF upload failed';
+    res.status(500).json({ error: errorMessage });
   }
 });
 
