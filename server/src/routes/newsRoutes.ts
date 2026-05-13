@@ -1,24 +1,10 @@
 import { Router } from "express"
-import type { Request, Response, NextFunction } from "express"
+import type { Request, Response } from "express"
+import { authenticateCron } from "#src/middlewares/authenticateCron.ts"
 
 const router = Router()
 const AI_SERVER_URL = process.env.AI_SERVER_URL || "http://localhost:8001"
 const AI_SERVER_API_KEY = process.env.AI_SERVER_API_KEY || ""
-
-function authenticateCron(req: Request, res: Response, next: NextFunction): void {
-  const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret) {
-    // No secret configured — allow in non-production environments only
-    if (process.env.NODE_ENV !== "production") { next(); return }
-    res.status(500).json({ error: "CRON_SECRET not configured" })
-    return
-  }
-  if (req.headers.authorization !== `Bearer ${cronSecret}`) {
-    res.status(401).json({ error: "Unauthorized" })
-    return
-  }
-  next()
-}
 
 router.get("/education", async (req: Request, res: Response) => {
   try {

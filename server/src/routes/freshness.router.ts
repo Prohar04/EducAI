@@ -1,9 +1,12 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { authMiddleware } from '#src/middlewares/authenticate.ts';
+import { authenticateCron } from '#src/middlewares/authenticateCron.ts';
 import prisma from '#src/config/database.ts';
 
 const router = Router();
+
+// GET /freshness — requires user authentication
 router.use(authMiddleware);
 
 const THRESHOLDS_HOURS: Record<string, number> = {
@@ -54,8 +57,8 @@ router.get('/', async (_req: Request, res: Response): Promise<void> => {
   }
 })
 
-// POST /freshness/update — upsert freshness record (called by cron jobs)
-router.post('/update', async (req: Request, res: Response): Promise<void> => {
+// POST /freshness/update — upsert freshness record (called by cron jobs) — requires cron auth
+router.post('/update', authenticateCron, async (req: Request, res: Response): Promise<void> => {
   try {
     const { source, recordCount, status, details } = req.body as {
       source: string
