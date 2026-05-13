@@ -1,5 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js"
 
+const BUCKET_NAME = process.env.SUPABASE_EVIDENCE_BUCKET || 'evidence';
+
 let _client: SupabaseClient | null = null;
 let _configured = false;
 
@@ -41,12 +43,12 @@ export async function uploadEvidencePDF(
   const path = `gap-evidence/${userId}/${evidenceId}/${Date.now()}-${safeName}`;
 
   const { error } = await supabase.storage
-    .from('evidence')
+    .from(BUCKET_NAME)
     .upload(path, fileBuffer, { contentType: 'application/pdf', upsert: true });
 
   if (error) throw new Error(`Supabase upload failed: ${error.message}`);
 
-  const { data } = supabase.storage.from('evidence').getPublicUrl(path);
+  const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(path);
   return data.publicUrl;
 }
 
@@ -58,9 +60,9 @@ export async function deleteEvidencePDF(publicUrl: string): Promise<void> {
   }
   try {
     const url = new URL(publicUrl);
-    const path = url.pathname.split('/object/public/evidence/')[1];
+    const path = url.pathname.split(`/object/public/${BUCKET_NAME}/`)[1];
     if (!path) return;
-    await supabase.storage.from('evidence').remove([path]);
+    await supabase.storage.from(BUCKET_NAME).remove([path]);
   } catch {
     // Non-fatal: file may not be in Supabase
   }
