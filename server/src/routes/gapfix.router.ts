@@ -1,4 +1,3 @@
-import path from 'node:path';
 import fs from 'node:fs';
 import { Router } from 'express';
 import multer from 'multer';
@@ -12,6 +11,8 @@ import {
   gapFixAddEvidenceHandler,
   gapFixDeleteEvidenceHandler,
   gapFixReanalyzeHandler,
+  gapFixVerifyEvidenceHandler,
+  gapFixGetEvidenceStatusHandler,
 } from '#src/controllers/gapfix.controller.ts';
 
 const UPLOAD_DIR = getGapFixUploadDir();
@@ -50,5 +51,7 @@ router.post('/session/:id/reanalyze', gapFixReanalyzeHandler);
 // Evidence
 router.post('/session/:id/evidence', upload.single('file'), gapFixAddEvidenceHandler);
 router.delete('/evidence/:evidenceId', gapFixDeleteEvidenceHandler);
+router.patch('/evidence/:evidenceId/verify', gapFixVerifyEvidenceHandler);
+router.get('/session/:id/evidence-status', gapFixGetEvidenceStatusHandler);
 
 export default router;

@@ -10,6 +10,9 @@ import { getGapFixUploadDir } from '#src/config/paths.ts';
 
 type GapStatus = 'not_started' | 'in_progress' | 'completed' | 'skipped';
 
+// Evidence verification status - system controlled
+type EvidenceStatus = 'pending' | 'verified' | 'rejected';
+
 interface ImprovementEntry {
   id: string;
   type: string;
@@ -345,6 +348,96 @@ export async function gapFixDeleteEvidenceHandler(req: Request, res: Response): 
   } catch (err) {
     logger.error(`[gapfix] deleteEvidence failed evidenceId=${evidenceId}: ${err}`);
     res.status(500).json({ error: 'Failed to delete evidence' });
+  }
+}
+
+// PATCH /gap-fix/evidence/:evidenceId/verify — verify or reject evidence (system-controlled)
+// Uses new verification fields: status, verificationNotes, verifiedAt
+export async function gapFixVerifyEvidenceHandler(req: Request, res: Response): Promise<void> {
+  const userId = (req as AuthRequest).userId;
+  const evidenceId = param(req.params.evidenceId);
+  const { status, notes } = req.body as { status: EvidenceStatus; notes?: string };
+
+  const allowedStatuses: EvidenceStatus[] = ['pending', 'verified', 'rejected'];
+  if (!allowedStatuses.includes(status)) {
+    res.status(400).json({ error: 'Invalid status. Must be pending, verified, or rejected' });
+    return;
+  }
+
+  try {
+    const ev = await prisma.gapFixEvidence.findFirst({ where: { id: evidenceId, userId } });
+    if (!ev) { res.status(404).json({ error: 'Evidence not found' }); return; }
+
+    // Only allow verification if evidence exists (url or file)
+    if (!ev.url && !ev.fileName) {
+      res.status(400).json({ error: 'Cannot verify evidence without URL or file' });
+      return;
+    }
+
+    const updateData: Record<string, unknown> = { status };
+    if (status === 'verified') {
+      updateData.verifiedAt = new Date();
+    }
+    if (notes) {
+      updateData.verificationNotes = notes;
+    }
+
+    const updated = await prisma.gapFixEvidence.update({
+      where: { id: evidenceId },
+      data: updateData,
+    });
+
+    logger.info(`[gapfix] evidence=${evidenceId} status=${status} by userId=${userId}`);
+    res.status(200).json(updated);
+  } catch (err) {
+    logger.error(`[gapfix] verifyEvidence failed evidenceId=${evidenceId}: ${err}`);
+    res.status(500).json({ error: 'Failed to verify evidence' });
+  }
+}
+
+// GET /gap-fix/session/:id/evidence-status — get summary of evidence verification status for a session
+export async function gapFixGetEvidenceStatusHandler(req: Request, res: Response): Promise<void> {
+  const userId = (req as AuthRequest).userId;
+  const sessionId = param(req.params.id);
+
+  try {
+    const session = await prisma.gapFixSession.findFirst({ where: { id: sessionId, userId } });
+    if (!session) { res.status(404).json({ error: 'Session not found' }); return; }
+
+    const evidences = await prisma.gapFixEvidence.findMany({
+      where: { sessionId },
+      select: { id: true, recId: true, status: true, type: true, label: true },
+    });
+
+    // Group by recId and count verification status
+    const statusByRecId: Record<string, { pending: number; verified: number; rejected: number }> = {};
+    for (const ev of evidences) {
+      if (!statusByRecId[ev.recId]) {
+        statusByRecId[ev.recId] = { pending: 0, verified: 0, rejected: 0 };
+      }
+      // Map existing status values to verification status
+      // pending: newly added evidence (default from schema)
+      // verified: explicitly verified
+      // rejected: explicitly rejected
+      // uploaded/linked: legacy - treat as pending for verification purposes
+      if (ev.status === 'verified') statusByRecId[ev.recId].verified++;
+      else if (ev.status === 'rejected') statusByRecId[ev.recId].rejected++;
+      else statusByRecId[ev.recId].pending++;
+    }
+
+    // Determine if gap score can be recalculated (all evidence verified for each gap)
+    const allVerified = Object.values(statusByRecId).every(
+      (counts) => counts.verified > 0 && counts.pending === 0 && counts.rejected === 0
+    );
+
+    res.status(200).json({
+      evidences,
+      statusByRecId,
+      canRecalculateScore: allVerified,
+    });
+  } catch (err) {
+    logger.error(`[gapfix] getEvidenceStatus failed sessionId=${sessionId}: ${err}`);
+    res.status(500).json({ error: 'Failed to get evidence status' });
   }
 }
 

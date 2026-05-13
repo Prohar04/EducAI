@@ -575,17 +575,21 @@ model GapFixSession {
 
 // Evidence attached to a specific recommendation inside a session.
 model GapFixEvidence {
-  id         String   @id @default(cuid())
-  sessionId  String   @map("session_id")
-  userId     String   @map("user_id") @db.Uuid
-  recId      String   @map("rec_id") @db.VarChar(100) // matches GapFixRecommendation.id
-  type       String   @db.VarChar(50)  // certificate | cv | sop | transcript | internship_letter | link | publication | other
-  label      String   @db.VarChar(200)
-  url        String?  @db.Text         // for links / portfolio / GitHub
-  fileName   String?  @map("file_name") @db.VarChar(255)
-  fileSize   Int?     @map("file_size")
-  status     String   @default("pending") @db.VarChar(20) // uploaded | linked
-  uploadedAt DateTime @default(now()) @map("uploaded_at") @db.Timestamp
+  id              String    @id @default(cuid())
+  sessionId       String    @map("session_id")
+  userId          String    @map("user_id") @db.Uuid
+  recId           String    @map("rec_id") @db.VarChar(100) // matches GapFixRecommendation.id
+  type            String    @db.VarChar(50)  // certificate | cv | sop | transcript | internship_letter | link | publication | other
+  label           String    @db.VarChar(200)
+  url             String?   @db.Text         // for links / portfolio / GitHub
+  fileName        String?   @map("file_name") @db.VarChar(255)
+  fileSize        Int?      @map("file_size")
+  // Status: pending (default) | verified | rejected (system-controlled verification states)
+  status           String    @default("pending") @db.VarChar(20)
+  uploadedAt       DateTime  @default(now()) @map("uploaded_at") @db.Timestamp
+  // Verification fields
+  verificationNotes String?  @map("verification_notes") @db.Text
+  verifiedAt        DateTime? @map("verified_at") @db.Timestamp
 
   session GapFixSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
