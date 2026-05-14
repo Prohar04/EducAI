@@ -1229,6 +1229,7 @@ export type JobSearchPayload = {
 	jobType: "PART_TIME" | "FULL_TIME" | "INTERNSHIP" | "REMOTE";
 	visaType?: string;
 	keyword?: string;
+	datePosted?: "today" | "3days" | "week" | "month";
 	page?: number;
 };
 
@@ -1335,6 +1336,42 @@ export const getJobSuggestionsAction = async (
 
 export const getJobRefreshStatusAction = async (): Promise<{ ok: boolean; data: JobRefreshStatus } | null> => {
 	const response = await authFetch(`${BACKEND_URL}/api/jobs/refresh-status`);
+	if (!response.ok) return null;
+	return response.json();
+};
+
+// ── Multi-Country Job Search ───────────────────────────────────────────────────
+
+export type CountryJobGroup = {
+	countryCode: string;
+	country: string;
+	city: string;
+	listings: JobListing[];
+	sourceUsed: string;
+	total: number;
+	workHourLimit?: string;
+	postGradPermitSteps?: string[];
+	error?: string;
+	cachedAt?: string;
+};
+
+export type MultiCountryJobSearchPayload = {
+	countries: { country: string; countryCode: string; city: string }[];
+	field: string;
+	jobType: "PART_TIME" | "FULL_TIME" | "INTERNSHIP" | "REMOTE";
+	keyword?: string;
+	datePosted?: "today" | "3days" | "week" | "month";
+	page?: number;
+};
+
+export const searchMultiCountryJobsAction = async (
+	payload: MultiCountryJobSearchPayload,
+): Promise<{ ok: boolean; data: { groups: CountryJobGroup[]; cachedAt: string } } | null> => {
+	const response = await authFetch(`${BACKEND_URL}/api/jobs/multi-search`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(payload),
+	});
 	if (!response.ok) return null;
 	return response.json();
 };

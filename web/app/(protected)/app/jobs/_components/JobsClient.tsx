@@ -27,6 +27,9 @@ import {
   Loader2,
   DollarSign,
   Lock,
+  SlidersHorizontal,
+  Tag,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,12 +49,14 @@ import {
 } from "@/lib/jobConstants";
 import {
   searchJobsAction,
+  searchMultiCountryJobsAction,
   getJobHistoryAction,
   getJobSuggestionsAction,
   getJobRefreshStatusAction,
   type JobListing,
   type JobSearchResult,
   type JobHistoryItem,
+  type CountryJobGroup,
 } from "@/lib/auth/action";
 
 // ── Types ───────────────────────────────────────────────────────────────────
@@ -303,6 +308,18 @@ export default function JobsClient() {
   const [jobTitle, setJobTitle] = useState("");
   const [visaType, setVisaType] = useState("");
 
+  // Multi-country state
+  const [multiMode, setMultiMode] = useState(false);
+  const [selectedCountries, setSelectedCountries] = useState<StudyCountry[]>([]);
+
+  // Advanced filter state
+  const [datePosted, setDatePosted] = useState<"today" | "3days" | "week" | "month" | "">("");
+  const [filterSalaryOnly, setFilterSalaryOnly] = useState(false);
+  const [filterSource, setFilterSource] = useState<"all" | "adzuna" | "jsearch">("all");
+
+  // Multi-country results
+  const [multiResult, setMultiResult] = useState<CountryJobGroup[] | null>(null);
+
   // Combobox open state
   const [countryOpen, setCountryOpen] = useState(false);
   const [cityOpen, setCityOpen] = useState(false);
@@ -456,17 +473,19 @@ export default function JobsClient() {
 
   // ── Search ────────────────────────────────────────────────────────────────
 
-  const canSearch = !!(selectedCountry && selectedCity && selectedField && jobType && !isLoading);
+  const canSearch = multiMode
+    ? !!(selectedCountries.length >= 1 && selectedField && jobType && !isLoading)
+    : !!(selectedCountry && selectedCity && selectedField && jobType && !isLoading);
 
   async function handleSearch(page = 1) {
     if (!canSearch && page === 1) return;
-    if (!selectedCountry || !selectedField || !selectedCity || !jobType) return;
 
     setIsLoading(true);
     setError(null);
     setLoadingMsg(0);
     if (page === 1) {
       setResult(null);
+      setMultiResult(null);
       setAllListings([]);
       setWorkHourDismissed(false);
       setPostGradOpen(false);
@@ -475,45 +494,73 @@ export default function JobsClient() {
       setFilterVisa("any");
     }
 
-    // Cycle loading messages
     loadingMsgRef.current = setInterval(() => {
       setLoadingMsg((m) => (m + 1) % LOADING_MESSAGES.length);
     }, 1500);
 
     try {
-      const payload = {
-        country: selectedCountry.name,
-        countryCode: selectedCountry.code,
-        city: selectedCity,
-        field: selectedField,
-        jobType: jobType as "PART_TIME" | "FULL_TIME" | "INTERNSHIP" | "REMOTE",
-        visaType: visaType || undefined,
-        keyword: jobTitle.trim() || undefined,
-        page,
-      };
-
-      const res = await searchJobsAction(payload);
-
-      if (!res?.ok) {
-        setError("Job search failed. Please try again in a moment.");
-        return;
-      }
-
-      if (page === 1) {
-        setResult(res.data);
-        setAllListings(res.data.listings);
-        setCurrentPage(1);
-      } else {
-        setAllListings((prev) => [...prev, ...res.data.listings]);
-        setCurrentPage(page);
-      }
-
-      // Save last search
-      try {
-        localStorage.setItem(LAST_SEARCH_KEY, JSON.stringify({
-          country: selectedCountry, city: selectedCity, field: selectedField, jobType,
+      if (multiMode && selectedCountries.length > 0) {
+        // ── Multi-country path ───────────────────────────────────────────────
+        const countriesPayload = selectedCountries.map((c) => ({
+          country: c.name,
+          countryCode: c.code,
+          city: (CITIES_BY_COUNTRY[c.code] ?? [])[0] ?? c.name,
         }));
-      } catch {}
+
+        const res = await searchMultiCountryJobsAction({
+          countries: countriesPayload,
+          field: selectedField,
+          jobType: jobType as "PART_TIME" | "FULL_TIME" | "INTERNSHIP" | "REMOTE",
+          keyword: jobTitle.trim() || undefined,
+          datePosted: datePosted || undefined,
+          page,
+        });
+
+        if (!res?.ok) {
+          setError("Multi-country search failed. Please try again.");
+          return;
+        }
+        setMultiResult(res.data.groups);
+        // Flatten for saved-jobs tab
+        setAllListings(res.data.groups.flatMap((g) => g.listings));
+      } else {
+        // ── Single-country path ──────────────────────────────────────────────
+        if (!selectedCountry || !selectedField || !selectedCity || !jobType) return;
+
+        const payload = {
+          country: selectedCountry.name,
+          countryCode: selectedCountry.code,
+          city: selectedCity,
+          field: selectedField,
+          jobType: jobType as "PART_TIME" | "FULL_TIME" | "INTERNSHIP" | "REMOTE",
+          visaType: visaType || undefined,
+          keyword: jobTitle.trim() || undefined,
+          datePosted: datePosted || undefined,
+          page,
+        };
+
+        const res = await searchJobsAction(payload);
+
+        if (!res?.ok) {
+          setError("Job search failed. Please try again in a moment.");
+          return;
+        }
+
+        if (page === 1) {
+          setResult(res.data);
+          setAllListings(res.data.listings);
+          setCurrentPage(1);
+        } else {
+          setAllListings((prev) => [...prev, ...res.data.listings]);
+          setCurrentPage(page);
+        }
+
+        try {
+          localStorage.setItem(LAST_SEARCH_KEY, JSON.stringify({
+            country: selectedCountry, city: selectedCity, field: selectedField, jobType,
+          }));
+        } catch {}
+      }
     } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
@@ -541,6 +588,9 @@ export default function JobsClient() {
   const filteredListings = allListings.filter((l) => {
     if (filterJobType !== "all" && l.job_type !== filterJobType) return false;
     if (filterVisa === "mentioned" && l.visa_sponsorship !== "Mentioned") return false;
+    if (filterSalaryOnly && !l.salary) return false;
+    if (filterSource === "adzuna" && !l.source.toLowerCase().includes("adzuna")) return false;
+    if (filterSource === "jsearch" && !l.source.toLowerCase().includes("jsearch")) return false;
     return true;
   });
 
@@ -606,12 +656,67 @@ export default function JobsClient() {
           className="rounded-2xl border border-border bg-card shadow-lg"
         >
           <div className="p-5 sm:p-6">
-            <h2 className="mb-5 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-              Search Parameters
-            </h2>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+                Search Parameters
+              </h2>
+              <button
+                type="button"
+                onClick={() => { setMultiMode(!multiMode); setSelectedCountries([]); setSelectedCountry(null); setSelectedCity(""); }}
+                className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                  multiMode ? "border-primary bg-primary text-primary-foreground" : "border-border bg-muted/40 text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <SlidersHorizontal className="size-3" />
+                {multiMode ? "Multi-country mode" : "Single country"}
+              </button>
+            </div>
 
-            {/* Row 1: Country + City */}
-            <div className="grid gap-4 sm:grid-cols-2">
+            {/* Multi-country selector */}
+            {multiMode && (
+              <div className="mb-4 rounded-xl border border-[#4A90D9]/20 bg-[#4A90D9]/5 p-3">
+                <p className="mb-2 text-xs font-medium text-[#4A90D9]">
+                  Select up to 4 countries — auto-selects major city per country
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {STUDY_COUNTRIES.slice(0, 20).map((c) => {
+                    const active = selectedCountries.some((x) => x.code === c.code);
+                    return (
+                      <button
+                        key={c.code}
+                        type="button"
+                        onClick={() => {
+                          if (active) {
+                            setSelectedCountries(selectedCountries.filter((x) => x.code !== c.code));
+                          } else if (selectedCountries.length < 4) {
+                            setSelectedCountries([...selectedCountries, c]);
+                          }
+                        }}
+                        className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+                          active
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : selectedCountries.length >= 4
+                            ? "cursor-not-allowed border-border bg-muted/30 text-muted-foreground/40"
+                            : "border-border bg-background hover:bg-muted/60"
+                        }`}
+                      >
+                        <span>{c.flag}</span>
+                        <span>{c.name}</span>
+                        {active && <X className="size-2.5" />}
+                      </button>
+                    );
+                  })}
+                </div>
+                {selectedCountries.length > 0 && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Searching: {selectedCountries.map(c => `${c.flag} ${c.name} (${(CITIES_BY_COUNTRY[c.code] ?? [])[0] ?? c.name})`).join(" · ")}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Row 1: Country + City (single-country mode only) */}
+            <div className={`grid gap-4 sm:grid-cols-2 ${multiMode ? "hidden" : ""}`}>
               {/* Country */}
               <Combobox
                 id="country"
@@ -834,8 +939,59 @@ export default function JobsClient() {
               </AnimatePresence>
             </div>
 
+            {/* Advanced filters row */}
+            <div className="mt-4 flex flex-wrap gap-2">
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <SlidersHorizontal className="size-3" />
+                <span>Filters:</span>
+              </div>
+              {/* Date posted */}
+              {(["", "today", "3days", "week", "month"] as const).map((dp) => (
+                dp === "" ? null : (
+                  <button
+                    key={dp}
+                    type="button"
+                    onClick={() => setDatePosted(datePosted === dp ? "" : dp)}
+                    className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+                      datePosted === dp ? "border-primary bg-primary text-primary-foreground" : "border-border bg-muted/40 text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <Calendar className="size-3" />
+                    {dp === "today" ? "Today" : dp === "3days" ? "Last 3 days" : dp === "week" ? "This week" : "This month"}
+                  </button>
+                )
+              ))}
+              {/* Salary only */}
+              <button
+                type="button"
+                onClick={() => setFilterSalaryOnly(!filterSalaryOnly)}
+                className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+                  filterSalaryOnly ? "border-primary bg-primary text-primary-foreground" : "border-border bg-muted/40 text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <DollarSign className="size-3" />
+                Salary shown
+              </button>
+              {/* Source filter */}
+              {(["all", "adzuna", "jsearch"] as const).map((src) => (
+                src === "all" ? null : (
+                  <button
+                    key={src}
+                    type="button"
+                    onClick={() => setFilterSource(filterSource === src ? "all" : src)}
+                    className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+                      filterSource === src ? "border-primary bg-primary text-primary-foreground" : "border-border bg-muted/40 text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <Tag className="size-3" />
+                    {src === "adzuna" ? "Adzuna" : "JSearch"}
+                  </button>
+                )
+              ))}
+            </div>
+
             {/* Search button */}
-            <div className="mt-5">
+            <div className="mt-4">
               <Button
                 onClick={() => handleSearch(1)}
                 disabled={!canSearch}
@@ -882,7 +1038,75 @@ export default function JobsClient() {
           )}
         </AnimatePresence>
 
-        {/* Results section */}
+        {/* Multi-country grouped results */}
+        <AnimatePresence>
+          {multiResult && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+              <div className="flex items-center gap-2 rounded-xl border border-border bg-card/80 px-4 py-3">
+                <Globe className="size-4 text-[#4A90D9]" />
+                <span className="text-sm font-medium">
+                  Multi-country results · {selectedField} · {multiResult.reduce((s, g) => s + g.total, 0)} total jobs
+                </span>
+              </div>
+              {multiResult.map((group) => (
+                <div key={group.countryCode} className="space-y-3">
+                  <div className="flex items-center gap-2 border-b border-border pb-2">
+                    <span className="text-lg">{STUDY_COUNTRIES.find(c => c.code === group.countryCode)?.flag ?? "🌍"}</span>
+                    <h3 className="font-semibold">{group.country} · {group.city}</h3>
+                    <span className="ml-auto text-sm text-muted-foreground">{group.total} jobs</span>
+                    {group.error ? (
+                      <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs text-destructive">Unavailable</span>
+                    ) : group.sourceUsed === "adzuna" ? (
+                      <span className="rounded-full border border-[#3D9970]/20 bg-[#3D9970]/10 px-2 py-0.5 text-xs text-[#3D9970]">Adzuna</span>
+                    ) : (
+                      <span className="rounded-full border border-[#4A90D9]/20 bg-[#4A90D9]/10 px-2 py-0.5 text-xs text-[#4A90D9]">JSearch</span>
+                    )}
+                  </div>
+                  {group.error ? (
+                    <div className="rounded-xl border border-destructive/10 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                      {group.error}
+                    </div>
+                  ) : group.listings.length === 0 ? (
+                    <div className="rounded-xl border border-border bg-card px-4 py-6 text-center text-sm text-muted-foreground">
+                      No jobs found in {group.city}. Try a different job type or field.
+                    </div>
+                  ) : (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {group.listings
+                        .filter(l => {
+                          if (filterJobType !== "all" && l.job_type !== filterJobType) return false;
+                          if (filterVisa === "mentioned" && l.visa_sponsorship !== "Mentioned") return false;
+                          if (filterSalaryOnly && !l.salary) return false;
+                          if (filterSource === "adzuna" && !l.source.toLowerCase().includes("adzuna")) return false;
+                          if (filterSource === "jsearch" && !l.source.toLowerCase().includes("jsearch")) return false;
+                          return true;
+                        })
+                        .slice(0, 6)
+                        .map((listing, i) => (
+                          <JobCard
+                            key={`${group.countryCode}-${listing.apply_url}-${i}`}
+                            listing={listing}
+                            index={i}
+                            saved={savedJobUrls.has(listing.apply_url)}
+                            onToggleSave={() => toggleSaveJob(listing.apply_url)}
+                          />
+                        ))
+                      }
+                    </div>
+                  )}
+                  {group.workHourLimit && (
+                    <div className="flex items-start gap-2 rounded-lg border border-[#C49A3C]/20 bg-[#C49A3C]/5 px-3 py-2 text-xs text-[#C49A3C]">
+                      <Clock className="mt-0.5 size-3 shrink-0" />
+                      {group.workHourLimit}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Single-country results section */}
         <AnimatePresence>
           {result && (
             <motion.div

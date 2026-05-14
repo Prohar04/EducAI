@@ -1,5 +1,5 @@
 import prisma from "#src/config/database.ts";
-import type { JobSearchBody, JobSearchAIResponse } from "#src/schemas/jobSchemas.ts";
+import type { JobSearchBody, JobSearchAIResponse, MultiCountryJobSearchBody, CountryJobGroup } from "#src/schemas/jobSchemas.ts";
 import { jobCache, suggestCache } from "#src/lib/jobCache.ts";
 import logger from "#src/config/logger.ts";
 
@@ -36,6 +36,7 @@ async function callAIServer(payload: JobSearchBody): Promise<JobSearchAIResponse
       job_type: payload.jobType,
       visa_type: payload.visaType,
       keyword: payload.keyword ?? null,
+      date_posted: payload.datePosted ?? null,
       page: payload.page ?? 1,
     }),
     signal: AbortSignal.timeout(35_000),
@@ -204,6 +205,55 @@ export async function getRefreshStatus(userId: string) {
       jobType: lastSearch.jobType,
     },
   };
+}
+
+export async function searchMultiCountryFromAI(
+  userId: string,
+  body: MultiCountryJobSearchBody,
+): Promise<{ groups: CountryJobGroup[]; cachedAt: string }> {
+  const now = new Date().toISOString();
+
+  const groups = await Promise.all(
+    body.countries.map(async ({ country, countryCode, city }): Promise<CountryJobGroup> => {
+      const payload: JobSearchBody = {
+        country,
+        countryCode,
+        city,
+        field: body.field,
+        jobType: body.jobType,
+        keyword: body.keyword,
+        datePosted: body.datePosted,
+        page: body.page ?? 1,
+      };
+      try {
+        const data = await searchJobsFromAI(userId, payload);
+        return {
+          countryCode,
+          country,
+          city,
+          listings: data.listings,
+          sourceUsed: data.source_used,
+          total: data.total,
+          workHourLimit: data.work_hour_limit,
+          postGradPermitSteps: data.post_grad_permit_steps,
+          cachedAt: data.cachedAt,
+        };
+      } catch (err) {
+        logger.warn(`[jobs] multi-country search failed for ${countryCode}: ${err}`);
+        return {
+          countryCode,
+          country,
+          city,
+          listings: [],
+          sourceUsed: "error",
+          total: 0,
+          error: `Search unavailable for ${country}`,
+        };
+      }
+    }),
+  );
+
+  return { groups, cachedAt: now };
 }
 
 export async function backgroundRefreshAll() {

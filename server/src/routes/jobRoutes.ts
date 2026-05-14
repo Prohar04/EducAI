@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authMiddleware } from "#src/middlewares/authenticate.ts";
 import {
   searchJobs,
+  searchMultiCountryJobs,
   getJobSuggestions,
   getJobHistory,
   getJobRefreshStatus,
@@ -16,6 +17,7 @@ router.get("/suggest", getJobSuggestions);
 // Protected — all job search endpoints require authentication
 router.use(authMiddleware);
 router.post("/search", searchJobs);
+router.post("/multi-search", searchMultiCountryJobs);
 router.get("/history", getJobHistory);
 router.get("/refresh-status", getJobRefreshStatus);
 router.post("/background-refresh", triggerBackgroundRefresh);

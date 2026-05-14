@@ -2,12 +2,13 @@ import type { Response, NextFunction } from "express";
 import type { AuthRequest } from "#src/types/authRequest.type.ts";
 import {
   searchJobsFromAI,
+  searchMultiCountryFromAI,
   getSuggestions,
   getJobSearchHistory,
   getRefreshStatus,
   backgroundRefreshAll,
 } from "#src/services/jobService.ts";
-import { jobSearchSchema, suggestQuerySchema } from "#src/schemas/jobSchemas.ts";
+import { jobSearchSchema, multiCountryJobSearchSchema, suggestQuerySchema } from "#src/schemas/jobSchemas.ts";
 import logger from "#src/config/logger.ts";
 
 export async function searchJobs(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
@@ -62,6 +63,24 @@ export async function getJobRefreshStatus(req: AuthRequest, res: Response, next:
     const status = await getRefreshStatus(userId);
     res.status(200).json({ ok: true, data: status });
   } catch (err) {
+    next(err);
+  }
+}
+
+export async function searchMultiCountryJobs(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  const userId = req.userId!;
+  const parsed = multiCountryJobSearchSchema.safeParse({ body: req.body });
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid request", details: parsed.error.flatten() });
+    return;
+  }
+
+  try {
+    logger.info(`[jobs] multi-country search userId=${userId} countries=${parsed.data.body.countries.map(c => c.countryCode).join(',')}`);
+    const result = await searchMultiCountryFromAI(userId, parsed.data.body);
+    res.status(200).json({ ok: true, data: result });
+  } catch (err) {
+    logger.error(`[jobs] multi-country search failed userId=${userId}: ${err}`);
     next(err);
   }
 }
