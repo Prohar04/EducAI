@@ -42,12 +42,22 @@ def _visa_signal(description: str | None) -> str | None:
     return None
 
 
+_JSEARCH_DATE_MAP = {
+    "today": "today",
+    "3days": "3days",
+    "week": "week",
+    "month": "month",
+}
+
+
 async def fetch_jsearch_jobs(
     country: str,
     city: str,
     field: str,
     job_type: JobType,
     page: int = 1,
+    keyword: str | None = None,
+    date_posted: str | None = None,
 ) -> List[JobListing]:
     if not RAPIDAPI_KEY:
         raise ValueError("RAPIDAPI_KEY not configured")
@@ -59,7 +69,9 @@ async def fetch_jsearch_jobs(
         JobType.FULL_TIME: "",
     }.get(job_type, "")
 
-    query = f"{field} {job_type_label} jobs in {city} {country}".strip()
+    # Use explicit keyword if provided, otherwise fall back to field of study
+    search_term = keyword.strip() if keyword else field
+    query = f"{search_term} {job_type_label} jobs in {city} {country}".strip()
 
     headers = {
         "X-RapidAPI-Key": RAPIDAPI_KEY,
@@ -69,7 +81,7 @@ async def fetch_jsearch_jobs(
         "query": query,
         "page": str(page),
         "num_pages": "1",
-        "date_posted": "today",
+        "date_posted": _JSEARCH_DATE_MAP.get(date_posted or "", "month"),
     }
 
     async with httpx.AsyncClient(timeout=12.0) as client:

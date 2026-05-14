@@ -222,7 +222,12 @@ async def search_jobs(payload: JobSearchRequest) -> JobSearchResponse:
     if supports_country(payload.country_code) and ADZUNA_APP_ID and ADZUNA_APP_KEY:
         try:
             listings = await fetch_adzuna_jobs(
-                payload.country_code, payload.city, payload.field, payload.job_type, payload.page
+                payload.country_code,
+                payload.city,
+                payload.field,
+                payload.job_type,
+                payload.page,
+                keyword=payload.keyword,
             )
             if len(listings) >= 3:
                 source_used = "adzuna"
@@ -234,7 +239,13 @@ async def search_jobs(payload: JobSearchRequest) -> JobSearchResponse:
     if len(listings) < 3 and RAPIDAPI_KEY:
         try:
             jsearch_results = await fetch_jsearch_jobs(
-                payload.country, payload.city, payload.field, payload.job_type, payload.page
+                payload.country,
+                payload.city,
+                payload.field,
+                payload.job_type,
+                payload.page,
+                keyword=payload.keyword,
+                date_posted=payload.date_posted,
             )
             if len(jsearch_results) >= 3:
                 listings = jsearch_results
@@ -268,7 +279,9 @@ async def search_jobs(payload: JobSearchRequest) -> JobSearchResponse:
         work_hour_limit=work_hour_limit,
         post_grad_permit_steps=post_grad_steps,
         total=len(listings),
-        query_used=f"{payload.field} {payload.job_type} in {payload.city}",
+        query_used=(
+            f"{payload.keyword or payload.field} {payload.job_type} in {payload.city}"
+        ),
         source_used=source_used,
         ai_fallback_used=False,
         cached_at=None,

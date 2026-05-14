@@ -39,6 +39,7 @@ async def fetch_adzuna_jobs(
     field: str,
     job_type: JobType,
     page: int = 1,
+    keyword: str | None = None,
 ) -> List[JobListing]:
     if not ADZUNA_APP_ID or not ADZUNA_APP_KEY:
         raise ValueError("Adzuna credentials not configured")
@@ -52,7 +53,10 @@ async def fetch_adzuna_jobs(
         JobType.FULL_TIME: "",
     }.get(job_type, "")
 
-    what = f"{field} {job_type_label}".strip()
+    # If keyword is given (e.g. "Software Engineer"), use it as the primary search term;
+    # otherwise fall back to the field of study.
+    search_term = keyword.strip() if keyword else field
+    what = f"{search_term} {job_type_label}".strip()
 
     params: dict[str, str | int] = {
         "app_id": ADZUNA_APP_ID,

@@ -17,6 +17,8 @@ class JobSearchRequest(BaseModel):
     field: str = Field(..., description="Field of study or industry")
     job_type: JobType = Field(..., description="Type of employment")
     visa_type: Optional[str] = Field(None, description="Visa type the student holds")
+    keyword: Optional[str] = Field(None, max_length=120, description="Optional job title or keyword to narrow results")
+    date_posted: Optional[str] = Field(None, description="Filter by date posted: today | 3days | week | month")
     page: int = Field(1, ge=1, description="Result page")
 
 
