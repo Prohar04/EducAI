@@ -7,6 +7,7 @@ import { fetchEducationPulse } from "@/lib/data/fetchEducationPulse";
 import { GradientText } from "@/components/ui/gradient-text";
 import LandingClientWrapper from "@/components/home/LandingClientWrapper";
 import { HeroVisualWrapper } from "@/components/ui/hero-visual-wrapper";
+import Footer from "@/components/layout/Footer";
 
 const DailyQuote = dynamic(
   () => import("@/components/home/DailyQuote"),
@@ -442,44 +443,9 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ── FOOTER ──────────────────────────────────────────────────── */}
-        <footer style={{ borderTop: "1px solid rgba(255,255,255,0.04)", padding: "32px clamp(16px, 4vw, 40px)" }}>
-          <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))", gap: 24, alignItems: "center" }}>
-            {/* Logo */}
-            <div>
-              <div style={{ marginBottom: 8 }}>
-                <span style={{ fontSize: 15, fontWeight: 300, color: "#E8EEF8" }}>Educ</span>
-                <span style={{ fontSize: 15, fontWeight: 700, color: "#4A90D9" }}>AI</span>
-              </div>
-              <p style={{ fontSize: 12, color: "#2A3A52", maxWidth: 220 }}>
-                AI-powered study abroad platform. Real data, honest AI.
-              </p>
-            </div>
-            {/* Copyright */}
-            <p style={{ fontSize: 12, color: "#2A3A52" }}>
-              © {new Date().getFullYear()} EducAI
-            </p>
-            {/* Links */}
-            <div style={{ display: "flex", gap: 20 }}>
-              {[
-                { label: "Privacy", href: "/privacy" },
-                { label: "Terms", href: "/terms" },
-                { label: "GitHub", href: "https://github.com/Prohar04/EducAI" },
-              ].map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  className="footer-link"
-                  style={{ fontSize: 12, color: "#2A3A52", textDecoration: "none", transition: "color 200ms" }}
-                  {...(item.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                >
-                  {item.label}
-                </a>
-              ))}
-            </div>
-          </div>
-        </footer>
       </main>
+
+      <Footer />
     </div>
   );
 }

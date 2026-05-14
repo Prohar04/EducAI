@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 import Link from "next/link"
+import Footer from "@/components/layout/Footer"
 
 interface LegalLayoutProps {
   children: ReactNode
@@ -68,35 +69,7 @@ export default function LegalLayout({ children }: LegalLayoutProps) {
         {children}
       </div>
 
-      {/* Footer */}
-      <footer style={{
-        borderTop: "1px solid rgba(255,255,255,0.05)",
-        padding: "24px clamp(16px, 4vw, 40px)",
-        position: "relative",
-        zIndex: 1,
-      }}>
-        <div style={{
-          maxWidth: 960,
-          margin: "0 auto",
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))",
-          gap: 12,
-          alignItems: "center",
-        }}>
-          <p style={{ fontSize: 12, color: "#3D4F6B" }}>
-            © 2025 EducAI. All rights reserved.
-          </p>
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <Link href="/terms" style={{ fontSize: 12, color: "#3D4F6B", textDecoration: "none" }}>
-              Terms of Service
-            </Link>
-            <span style={{ color: "#2A3A52", fontSize: 12 }}>·</span>
-            <Link href="/privacy" style={{ fontSize: 12, color: "#3D4F6B", textDecoration: "none" }}>
-              Privacy Policy
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }
