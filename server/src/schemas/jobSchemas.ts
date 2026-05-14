@@ -8,6 +8,7 @@ export const jobSearchSchema = z.object({
     field: z.string().min(2).max(100),
     jobType: z.enum(["PART_TIME", "FULL_TIME", "INTERNSHIP", "REMOTE"]),
     visaType: z.string().max(100).optional(),
+    keyword: z.string().max(120).optional(),
     page: z.number().int().min(1).default(1),
   }),
 });

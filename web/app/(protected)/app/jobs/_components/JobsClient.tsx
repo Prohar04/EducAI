@@ -488,6 +488,7 @@ export default function JobsClient() {
         field: selectedField,
         jobType: jobType as "PART_TIME" | "FULL_TIME" | "INTERNSHIP" | "REMOTE",
         visaType: visaType || undefined,
+        keyword: jobTitle.trim() || undefined,
         page,
       };
 

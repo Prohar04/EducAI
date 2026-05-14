@@ -1228,6 +1228,7 @@ export type JobSearchPayload = {
 	field: string;
 	jobType: "PART_TIME" | "FULL_TIME" | "INTERNSHIP" | "REMOTE";
 	visaType?: string;
+	keyword?: string;
 	page?: number;
 };
 

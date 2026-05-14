@@ -16,6 +16,7 @@ function buildCacheKey(p: JobSearchBody): string {
     p.city.trim().toLowerCase(),
     p.field.trim().toLowerCase(),
     p.jobType.toLowerCase(),
+    (p.keyword ?? "").trim().toLowerCase(),
     String(p.page ?? 1),
   ].join(":");
 }
@@ -34,6 +35,7 @@ async function callAIServer(payload: JobSearchBody): Promise<JobSearchAIResponse
       field: payload.field,
       job_type: payload.jobType,
       visa_type: payload.visaType,
+      keyword: payload.keyword ?? null,
       page: payload.page ?? 1,
     }),
     signal: AbortSignal.timeout(35_000),
