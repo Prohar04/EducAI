@@ -6,9 +6,6 @@ import prisma from '#src/config/database.ts';
 
 const router = Router();
 
-// GET /freshness — requires user authentication
-router.use(authMiddleware);
-
 const THRESHOLDS_HOURS: Record<string, number> = {
   jobs: 3, news: 3, currency: 12,
   scholarships: 48, programs: 48, visa: 48, professors: 48,
@@ -19,8 +16,8 @@ const SOURCE_NEXT_HOURS: Record<string, number> = {
   scholarships: 24, programs: 24, visa: 24, professors: 24,
 }
 
-// GET /freshness — list all data sources with staleness info
-router.get('/', async (_req: Request, res: Response): Promise<void> => {
+// GET /freshness — list all data sources with staleness info (user auth required)
+router.get('/', authMiddleware, async (_req: Request, res: Response): Promise<void> => {
   try {
     const records = await prisma.dataFreshness.findMany({
       orderBy: { source: 'asc' },
