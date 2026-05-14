@@ -122,8 +122,8 @@ jobs:
           elif [ "$HTTP_STATUS" -eq 409 ]; then
             echo "::warning::Sync already running (409). Another sync job is in progress — this run is a no-op."
             exit 0
-          elif [ "$HTTP_STATUS" -eq 403 ]; then
-            echo "::error::Authorization failed (403). Verify CRON_SECRET matches server configuration."
+          elif [ "$HTTP_STATUS" -eq 401 ] || [ "$HTTP_STATUS" -eq 403 ]; then
+            echo "::error::Authorization failed ($HTTP_STATUS). Verify CRON_SECRET matches server CRON_SECRET env var."
             exit 1
           elif [ "$HTTP_STATUS" -eq 000 ]; then
             echo "::error::Could not connect to backend. Verify BACKEND_URL is correct and the server is running."

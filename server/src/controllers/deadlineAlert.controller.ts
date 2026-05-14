@@ -16,17 +16,9 @@ import {
   getRecentAlertCount,
 } from '#src/services/deadlineAlert.service.ts';
 
-const CRON_SECRET = process.env.CRON_SECRET ?? '';
-
 // POST /deadline-alerts/run
-// Protected by CRON_SECRET header (X-Cron-Secret) for external scheduler use.
+// Auth handled by authenticateCron middleware in the router.
 export const triggerAlertRun = async (req: Request, res: Response) => {
-  const secret = req.headers['x-cron-secret'];
-  if (CRON_SECRET && secret !== CRON_SECRET) {
-    res.status(403).json({ message: 'Forbidden — invalid cron secret' });
-    return;
-  }
-
   try {
     const result = await runDeadlineAlertJob();
     console.info('[deadline-alerts:run] completed', result);

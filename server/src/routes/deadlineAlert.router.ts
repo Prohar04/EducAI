@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { authMiddleware } from '#src/middlewares/authenticate.ts';
+import { authenticateCron } from '#src/middlewares/authenticateCron.ts';
 import {
   triggerAlertRun,
   listPendingAlerts,
@@ -9,9 +10,8 @@ import {
 
 const router = Router();
 
-// Public-ish endpoint: protected by CRON_SECRET header, not user auth
-// Safe to call from a scheduler (GitHub Actions, cron, Vercel cron, etc.)
-router.post('/run', triggerAlertRun);
+// Cron-only: protected by CRON_SECRET (Authorization: Bearer <token>)
+router.post('/run', authenticateCron, triggerAlertRun);
 
 // User-authenticated endpoints
 router.get('/pending', authMiddleware, listPendingAlerts);

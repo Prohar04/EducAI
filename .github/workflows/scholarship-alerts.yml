@@ -2,10 +2,10 @@ name: Scholarship Deadline Alerts
 
 # Runs daily at 08:00 UTC to trigger the deadline alert job.
 # The job calls POST /deadline-alerts/run on the production server
-# and is protected by the CRON_SECRET header.
+# and is protected by CRON_SECRET (Authorization: Bearer <token>).
 #
-# Required secrets:
-#   API_BASE_URL  — e.g. https://api.educai.app
+# Required GitHub Actions secrets (Settings → Secrets → Actions):
+#   BACKEND_URL   — e.g. https://educai-jva1.onrender.com  (no trailing slash)
 #   CRON_SECRET   — must match CRON_SECRET env var on the server
 
 on:
@@ -17,38 +17,88 @@ jobs:
   trigger-alerts:
     name: Trigger Deadline Alert Job
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
-      - name: Check required secrets
-        id: check
+      - name: Validate required secrets
+        id: validate
         run: |
-          if [ -z "${{ secrets.API_BASE_URL }}" ]; then
-            echo "configured=false" >> "$GITHUB_OUTPUT"
-            echo "⚠️ API_BASE_URL secret not configured — skipping alert trigger."
-            echo "   Add it at: Settings → Secrets → Actions → API_BASE_URL"
+          ERRORS=""
+
+          BACKEND_URL_CLEAN=$(printf '%s' "$BACKEND_URL" | tr -d '[:space:]')
+          CRON_SECRET_CLEAN=$(printf '%s' "$CRON_SECRET" | tr -d '[:space:]')
+
+          if [ -z "$BACKEND_URL_CLEAN" ]; then
+            ERRORS="${ERRORS}\nERROR: BACKEND_URL secret is not configured."
           else
-            echo "configured=true" >> "$GITHUB_OUTPUT"
+            case "$BACKEND_URL_CLEAN" in
+              http://*|https://*)
+                echo "Backend URL scheme: valid"
+                ;;
+              *)
+                ERRORS="${ERRORS}\nERROR: BACKEND_URL does not start with http:// or https://"
+                ;;
+            esac
           fi
 
-      - name: Trigger alert job
-        if: steps.check.outputs.configured == 'true'
-        run: |
-          RESPONSE=$(curl -s -w "\n%{http_code}" \
-            -X POST \
-            -H "Content-Type: application/json" \
-            -H "X-Cron-Secret: ${{ secrets.CRON_SECRET }}" \
-            "${{ secrets.API_BASE_URL }}/deadline-alerts/run")
+          if [ -z "$CRON_SECRET_CLEAN" ]; then
+            ERRORS="${ERRORS}\nERROR: CRON_SECRET secret is not configured."
+          fi
 
-          HTTP_STATUS=$(echo "$RESPONSE" | tail -n1)
-          BODY=$(echo "$RESPONSE" | head -n-1)
-
-          echo "HTTP Status: $HTTP_STATUS"
-          echo "Response: $BODY"
-
-          if [ "$HTTP_STATUS" != "200" ]; then
-            echo "::error::Alert job failed with status $HTTP_STATUS"
+          if [ -n "$ERRORS" ]; then
+            printf '%b\n' "${ERRORS}"
+            echo "Cannot run scholarship alerts without BACKEND_URL and CRON_SECRET secrets."
+            echo "secrets_ready=false" >> "$GITHUB_OUTPUT"
             exit 1
           fi
 
-          echo "✅ Alert job completed successfully"
-          echo "$BODY" | python3 -c "import sys, json; d = json.load(sys.stdin); print(f'Alerts sent: {d.get(\"alertsSent\", 0)}, Users processed: {d.get(\"usersProcessed\", 0)}')" 2>/dev/null || true
+          echo "secrets_ready=true" >> "$GITHUB_OUTPUT"
+          echo "backend_url=${BACKEND_URL_CLEAN}" >> "$GITHUB_OUTPUT"
+        env:
+          BACKEND_URL: ${{ secrets.BACKEND_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
+      - name: Trigger alert job
+        if: steps.validate.outputs.secrets_ready == 'true'
+        run: |
+          BACKEND_URL_CLEAN=$(printf '%s' "${{ secrets.BACKEND_URL }}" | tr -d '[:space:]')
+          CRON_SECRET_CLEAN=$(printf '%s' "${{ secrets.CRON_SECRET }}" | tr -d '[:space:]')
+
+          echo "Triggering scholarship deadline alerts at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+          HTTP_STATUS=$(curl -s -o /tmp/alerts_response.json -w "%{http_code}" \
+            -X POST "${BACKEND_URL_CLEAN}/deadline-alerts/run" \
+            -H "Authorization: Bearer ${CRON_SECRET_CLEAN}" \
+            -H "Content-Type: application/json" \
+            --max-time 60 \
+            --retry 2 \
+            --retry-delay 5)
+
+          echo "HTTP Status: $HTTP_STATUS"
+          echo "=== Response body ==="
+          python3 -m json.tool /tmp/alerts_response.json 2>/dev/null || cat /tmp/alerts_response.json 2>/dev/null || echo "(empty)"
+          echo "=== End response ==="
+
+          if [ "$HTTP_STATUS" -eq 200 ]; then
+            echo "Scholarship alert job completed successfully (200)."
+            python3 -c "
+import sys, json
+try:
+  d = json.load(open('/tmp/alerts_response.json'))
+  print(f'Alerts sent: {d.get(\"alertsSent\", 0)}, Users processed: {d.get(\"usersProcessed\", 0)}')
+except Exception:
+  pass
+" 2>/dev/null || true
+            exit 0
+          elif [ "$HTTP_STATUS" -eq 401 ] || [ "$HTTP_STATUS" -eq 403 ]; then
+            echo "::error::Authorization failed ($HTTP_STATUS). Verify CRON_SECRET matches server CRON_SECRET env var."
+            exit 1
+          elif [ "$HTTP_STATUS" -eq 000 ]; then
+            echo "::error::Could not connect to backend. Verify BACKEND_URL is correct and the server is running."
+            exit 1
+          else
+            echo "::error::Alert job failed with HTTP $HTTP_STATUS."
+            exit 1
+          fi
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
