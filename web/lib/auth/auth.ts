@@ -52,6 +52,12 @@ export async function signUp(
 			return { message: "Email already in use." };
 		}
 
+		if (response.status === 503) {
+			return {
+				message: "We could not send the verification email. Please try again later.",
+			};
+		}
+
 		return {
 			message: "Something went wrong. Please try again later.",
 		};
@@ -129,6 +135,12 @@ export async function signUpFull(
 
 		if (response.status === 409) {
 			return { message: "Email already in use." };
+		}
+
+		if (response.status === 503) {
+			return {
+				message: "We could not send the verification email. Please try again later.",
+			};
 		}
 
 		const data = await response.json().catch(() => null);

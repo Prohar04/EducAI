@@ -1,4 +1,4 @@
-import transporter, { EMAIL_FROM } from '#src/config/nodemailer.config.ts';
+import transporter, { EMAIL_FROM, EMAIL_CONFIGURED } from '#src/config/nodemailer.config.ts';
 
 // EMAIL_PROVIDER=console  → print link to stdout (dev default when no creds configured)
 // EMAIL_PROVIDER=smtp|gmail → send via nodemailer
@@ -13,9 +13,26 @@ interface SendMailResult {
 }
 
 async function sendMail(opts: { to: string; subject: string; html: string; text: string }): Promise<SendMailResult> {
+  // Always-console mode (explicit opt-in via EMAIL_PROVIDER=console)
   if (EMAIL_PROVIDER === 'console') {
     console.log(`\n[EMAIL → ${opts.to}] ${opts.subject}\n${opts.text}\n`);
     return { success: true, provider: 'console', messageId: 'console-log' };
+  }
+
+  // Guard: if no real SMTP credentials are configured, fail fast in production
+  // rather than silently "succeeding" with jsonTransport (which discards the email).
+  if (!EMAIL_CONFIGURED) {
+    const msg = 'SMTP not configured — set SMTP_HOST, SMTP_USER, SMTP_PASS in environment';
+    console.error(`[email] ${msg}`);
+
+    if (IS_DEV) {
+      // Dev convenience: print link to console so local testing still works
+      console.log(`\n[EMAIL (no-creds dev fallback) → ${opts.to}] ${opts.subject}\n${opts.text}\n`);
+      return { success: true, provider: 'console-fallback', messageId: 'no-creds-dev', error: msg };
+    }
+
+    // Production: return failure so callers can surface the error to the user
+    return { success: false, provider: 'none', error: msg };
   }
 
   try {
@@ -28,7 +45,7 @@ async function sendMail(opts: { to: string; subject: string; html: string; text:
 
     if (IS_DEV) {
       // In development, fall back to console so signup/reset never fail locally
-      console.log(`\n[EMAIL (fallback) → ${opts.to}] ${opts.subject}\n${opts.text}\n`);
+      console.log(`\n[EMAIL (SMTP error fallback) → ${opts.to}] ${opts.subject}\n${opts.text}\n`);
       return { success: true, provider: 'console-fallback', error: errorMessage };
     }
 

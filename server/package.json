@@ -31,7 +31,8 @@
     "prisma:seed": "tsx prisma/seed.ts",
     "dev:docker": "sh ./scripts/dev.sh",
     "prod:docker": "sh ./scripts/prod.sh",
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
+    "email:test": "tsx scripts/send-test-verification-email.ts"
   },
   "dependencies": {
     "@arcjet/inspect": "^1.0.0-beta.12",

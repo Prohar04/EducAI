@@ -121,6 +121,7 @@ export const refresh = async (req: Request, res: Response) => {
 // ── SIGNUP ─────────────────────────────────────────────────────────
 
 export const signup = async (req: Request, res: Response) => {
+  const t0 = Date.now();
   try {
     const { email, password, name, avatarUrl, profile } = req.body;
 
@@ -144,6 +145,9 @@ export const signup = async (req: Request, res: Response) => {
       return res.status(422).json({ message: 'Password must contain at least one special character' });
     }
 
+    const tValidation = Date.now();
+    console.log(`[signup] validation done in ${tValidation - t0}ms`);
+
     const existingUser = await findUserByEmail(email);
     if (existingUser) {
       if (existingUser.emailVerified) {
@@ -158,7 +162,12 @@ export const signup = async (req: Request, res: Response) => {
         .json({ message: 'Account created. Please check your email to verify.' });
     }
 
+    const tDbLookup = Date.now();
+    console.log(`[signup] db lookup done in ${tDbLookup - tValidation}ms`);
+
     const hashedPassword = await hashing(password);
+    const tHash = Date.now();
+    console.log(`[signup] password hashing done in ${tHash - tDbLookup}ms`);
 
     const newUser: ReturnUserDto = await createUser({
       email: email.toLowerCase(),
@@ -212,9 +221,14 @@ export const signup = async (req: Request, res: Response) => {
       }).catch((e) => console.error('Profile creation at signup failed (non-fatal):', e));
     }
 
+    const tUserCreate = Date.now();
+    console.log(`[signup] user created in ${tUserCreate - tHash}ms | userId=${newUser.id}`);
+
     // Fire-and-forget: email failures must roll back account creation
     try {
       await sendVerification(newUser.id, newUser.email);
+      const tEmail = Date.now();
+      console.log(`[signup] email sent in ${tEmail - tUserCreate}ms | total=${tEmail - t0}ms`);
     } catch (emailError) {
       // Roll back the user creation since email verification is required
       await prisma.user.delete({ where: { id: newUser.id } });
