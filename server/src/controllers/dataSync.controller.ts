@@ -9,22 +9,7 @@ import {
 } from '#src/services/dataSync.service.ts';
 import logger from '#src/config/logger.ts';
 
-function getAuthContext(req: Request): { isAuthorized: boolean; isCron: boolean; userId: string | undefined } {
-  const cronSecret = process.env.CRON_SECRET;
-  const authHeader = req.headers.authorization ?? '';
-  const isCron = !!(cronSecret && authHeader === `Bearer ${cronSecret}`);
-  const userId = (req as unknown as { userId?: string }).userId;
-  return { isAuthorized: !!userId || isCron, isCron, userId };
-}
-
 export async function dataSyncRunHandler(req: Request, res: Response): Promise<void> {
-  const { isAuthorized, isCron, userId } = getAuthContext(req);
-
-  if (!isAuthorized) {
-    res.status(403).json({ error: 'Forbidden' });
-    return;
-  }
-
   const { target = 'all' } = req.body as { target?: SyncTarget };
   const validTargets: SyncTarget[] = ['scholarships', 'programs', 'all'];
   if (!validTargets.includes(target)) {
@@ -32,13 +17,10 @@ export async function dataSyncRunHandler(req: Request, res: Response): Promise<v
     return;
   }
 
-  const triggerType = isCron ? 'cron' : 'manual';
-  const triggeredBy = userId ?? 'cron';
-
-  logger.info(`[dataSync] trigger type=${triggerType} target=${target} by=${triggeredBy}`);
+  logger.info(`[dataSync] trigger type=cron target=${target} by=cron`);
 
   try {
-    const result = await runDataSync(target, triggerType, triggeredBy);
+    const result = await runDataSync(target, 'cron', 'cron');
 
     if (result.status === 'running' && !result.finishedAt) {
       res.status(409).json(result);
@@ -88,8 +70,6 @@ export async function dataSyncJobDetailsHandler(req: Request, res: Response): Pr
 }
 
 export async function dataSyncCancelHandler(req: Request, res: Response): Promise<void> {
-  const { isAuthorized } = getAuthContext(req);
-  if (!isAuthorized) { res.status(403).json({ error: 'Forbidden' }); return; }
 
   try {
     const id = String(req.params.id ?? '');
@@ -103,9 +83,6 @@ export async function dataSyncCancelHandler(req: Request, res: Response): Promis
 }
 
 export async function dataSyncRetryHandler(req: Request, res: Response): Promise<void> {
-  const { isAuthorized, isCron, userId } = getAuthContext(req);
-  if (!isAuthorized) { res.status(403).json({ error: 'Forbidden' }); return; }
-
   const { target = 'all' } = req.body as { target?: SyncTarget };
   const validTargets: SyncTarget[] = ['scholarships', 'programs', 'all'];
   if (!validTargets.includes(target)) {
@@ -113,10 +90,10 @@ export async function dataSyncRetryHandler(req: Request, res: Response): Promise
     return;
   }
 
-  logger.info(`[dataSync] retry target=${target} by=${userId ?? 'cron'}`);
+  logger.info(`[dataSync] retry target=${target} by=cron`);
 
   try {
-    const result = await runDataSync(target, isCron ? 'cron' : 'manual', userId ?? 'cron');
+    const result = await runDataSync(target, 'cron', 'cron');
 
     if (result.status === 'running' && !result.finishedAt) {
       res.status(409).json(result);

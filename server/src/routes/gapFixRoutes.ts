@@ -3,7 +3,7 @@ import multer from 'multer';
 import { authMiddleware } from '#src/middlewares/authenticate.ts';
 import { AuthRequest } from '#src/types/authRequest.type.ts';
 import prisma from '#src/config/database.ts';
-import { uploadEvidencePDF } from '#src/services/supabaseStorageService.ts';
+import { uploadEvidencePDF, deleteEvidencePDF } from '#src/services/supabaseStorageService.ts';
 
 const router = Router();
 router.use(authMiddleware);
@@ -149,14 +149,14 @@ router.post('/:id/upload-pdf', upload.single('pdf'), async (req: Request, res: R
   if (!item) { res.status(404).json({ error: 'Gap item not found' }); return; }
 
   try {
-    const pdfUrl = await uploadEvidencePDF(userId, id, req.file.buffer, req.file.originalname);
+    const { signedUrl, storagePath } = await uploadEvidencePDF(userId, id, req.file.buffer, req.file.originalname);
     const updated = await prisma.gapFixItem.update({
       where: { id },
-      data: { pdfUrl, status: 'pending_verification', aiVerified: false },
+      data: { pdfUrl: signedUrl, pdfStoragePath: storagePath, status: 'pending_verification', aiVerified: false },
     });
     res.json({
       success: true,
-      pdfUrl,
+      pdfUrl: signedUrl,
       status: updated.status,
       message: "PDF uploaded. Click 'Verify with AI' to verify your evidence.",
     });
@@ -252,6 +252,13 @@ router.delete('/:id', async (req: Request, res: Response): Promise<void> => {
 
   const item = await prisma.gapFixItem.findFirst({ where: { id, userId } });
   if (!item) { res.status(404).json({ error: 'Not found' }); return; }
+
+  // Delete associated Supabase file if present (non-fatal)
+  if (item.pdfStoragePath) {
+    deleteEvidencePDF(item.pdfStoragePath).catch((err) =>
+      console.warn('[gap-fix] Failed to delete Supabase file:', err)
+    );
+  }
 
   await prisma.gapFixItem.delete({ where: { id } });
   const allItems = await prisma.gapFixItem.findMany({ where: { userId } });

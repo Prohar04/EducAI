@@ -117,7 +117,7 @@ export async function sendScholarshipDeadlineAlert(
 ): Promise<void> {
   if (alerts.length === 0) return;
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+  const appUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000';
   const scholarshipsUrl = `${appUrl}/app/scholarships`;
 
   const itemRows = alerts

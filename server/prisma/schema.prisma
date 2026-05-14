@@ -610,9 +610,10 @@ model GapFixItem {
   status      String   @default("not_started") @db.VarChar(40)
   // Allowed: not_started | in_progress | pending_verification | completed | skipped
 
-  evidenceText   String?  @db.Text
-  evidenceUrl    String?  @db.Text
-  pdfUrl         String?  @db.Text
+  evidenceText      String?  @db.Text
+  evidenceUrl       String?  @db.Text
+  pdfUrl            String?  @db.Text
+  pdfStoragePath    String?  @map("pdf_storage_path") @db.Text
 
   aiVerified     Boolean  @default(false)
   aiConfidence   Float?
