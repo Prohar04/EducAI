@@ -103,6 +103,27 @@ router.post('/refresh-programs', authenticateCron, async (_req: Request, res: Re
     console.log('[cron] Starting programs data refresh');
     const result = await runDataSync('programs', 'cron', 'cron');
     console.log('[cron] Programs refresh completed:', result.status);
+
+    // Keep DataFreshness in sync so the /freshness endpoint reflects the latest state
+    const prisma = (await import('#src/config/database.ts')).default;
+    await prisma.dataFreshness.upsert({
+      where: { source: 'programs' },
+      update: {
+        lastSyncAt: new Date(),
+        status: result.status === 'success' || result.status === 'partial_success' ? 'success' : 'error',
+        recordCount: result.recordsProcessed,
+        nextSyncAt: new Date(Date.now() + 24 * 3600000),
+        errorMessage: result.errorSummary ?? null,
+      },
+      create: {
+        source: 'programs',
+        lastSyncAt: new Date(),
+        status: result.status === 'success' || result.status === 'partial_success' ? 'success' : 'error',
+        recordCount: result.recordsProcessed,
+        nextSyncAt: new Date(Date.now() + 24 * 3600000),
+      },
+    });
+
     res.json({ success: true, target: 'programs', status: result.status, finishedAt: result.finishedAt });
   } catch (err) {
     console.error('[cron] programs refresh error:', err);
@@ -116,6 +137,27 @@ router.post('/refresh-scholarships', authenticateCron, async (_req: Request, res
     console.log('[cron] Starting scholarships data refresh');
     const result = await runDataSync('scholarships', 'cron', 'cron');
     console.log('[cron] Scholarships refresh completed:', result.status);
+
+    // Keep DataFreshness in sync so the /freshness endpoint reflects the latest state
+    const prisma = (await import('#src/config/database.ts')).default;
+    await prisma.dataFreshness.upsert({
+      where: { source: 'scholarships' },
+      update: {
+        lastSyncAt: new Date(),
+        status: result.status === 'success' || result.status === 'partial_success' ? 'success' : 'error',
+        recordCount: result.recordsProcessed,
+        nextSyncAt: new Date(Date.now() + 24 * 3600000),
+        errorMessage: result.errorSummary ?? null,
+      },
+      create: {
+        source: 'scholarships',
+        lastSyncAt: new Date(),
+        status: result.status === 'success' || result.status === 'partial_success' ? 'success' : 'error',
+        recordCount: result.recordsProcessed,
+        nextSyncAt: new Date(Date.now() + 24 * 3600000),
+      },
+    });
+
     res.json({ success: true, target: 'scholarships', status: result.status, finishedAt: result.finishedAt });
   } catch (err) {
     console.error('[cron] scholarships refresh error:', err);
