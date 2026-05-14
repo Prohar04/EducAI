@@ -71,10 +71,75 @@ function buildSOPHtml(opts: PDFOptions): string {
 </html>`
 }
 
+function _isSectionHeader(line: string): boolean {
+  const t = line.trim()
+  if (!t) return false
+  if (t.length >= 3 && t === t.toUpperCase() && /^[A-Z\s\/&()\-─]+$/.test(t)) return true
+  if (/^[A-Z][A-Za-z\s&\/\-()]{2,39}:$/.test(t)) return true
+  return false
+}
+
+function _isContactLine(line: string): boolean {
+  const t = line.trim()
+  return t.includes("@") || t.includes("|") || /\+?[\d\s()\-]{8,}/.test(t) || t.startsWith("http")
+}
+
+function _isUnderlineSep(line: string): boolean {
+  return /^[=\-─]{3,}$/.test(line.trim())
+}
+
 function buildCVHtml(opts: PDFOptions): string {
-  const isUS = opts.template === "us_standard" || opts.template === "google_faang"
-  const fontFamily = isUS ? "'Arial', 'Helvetica', sans-serif" : "Georgia, 'Times New Roman', serif"
-  const fontSize = isUS ? "10.5pt" : "11pt"
+  const templateStyles: Record<string, { font: string; accentColor: string; nameSize: string; bodySize: string; lineHeight: string }> = {
+    "minimal-academic": { font: "Georgia, 'Times New Roman', serif", accentColor: "#4A90D9", nameSize: "18pt", bodySize: "10.5pt", lineHeight: "1.55" },
+    "research-focused": { font: "Georgia, serif", accentColor: "#3D6B9F", nameSize: "17pt", bodySize: "10.5pt", lineHeight: "1.6" },
+    "modern-professional": { font: "Arial, Helvetica, sans-serif", accentColor: "#4A90D9", nameSize: "20pt", bodySize: "10.5pt", lineHeight: "1.5" },
+    "scholarship-focused": { font: "Georgia, serif", accentColor: "#2563EB", nameSize: "18pt", bodySize: "10.5pt", lineHeight: "1.6" },
+    "technical-engineering": { font: "Arial, Helvetica, sans-serif", accentColor: "#475569", nameSize: "18pt", bodySize: "10pt", lineHeight: "1.45" },
+    "business-management": { font: "Arial, Helvetica, sans-serif", accentColor: "#2563EB", nameSize: "20pt", bodySize: "10.5pt", lineHeight: "1.5" },
+    "clean-classic": { font: "'Times New Roman', Georgia, serif", accentColor: "#374151", nameSize: "18pt", bodySize: "11pt", lineHeight: "1.55" },
+    "compact-one-page": { font: "Arial, Helvetica, sans-serif", accentColor: "#4A90D9", nameSize: "16pt", bodySize: "9.5pt", lineHeight: "1.4" },
+    "phd-research": { font: "Georgia, serif", accentColor: "#3D6B9F", nameSize: "18pt", bodySize: "10.5pt", lineHeight: "1.6" },
+    "international-student": { font: "Arial, Helvetica, sans-serif", accentColor: "#4A90D9", nameSize: "18pt", bodySize: "10.5pt", lineHeight: "1.5" },
+  }
+
+  const s = templateStyles[opts.template] ?? templateStyles["modern-professional"]!
+
+  const lines = opts.content.split("\n")
+  const htmlLines: string[] = []
+  let nameAdded = false
+
+  for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i]
+    const trimmed = raw.trim()
+
+    if (!trimmed) { htmlLines.push("<div style='height:6pt'></div>"); continue }
+    if (_isUnderlineSep(trimmed)) continue
+
+    if (!nameAdded && !_isSectionHeader(trimmed) && !_isContactLine(trimmed)) {
+      nameAdded = true
+      htmlLines.push(`<div style="text-align:center;font-size:${s.nameSize};font-weight:700;color:#0f172a;margin-bottom:4pt">${trimmed}</div>`)
+      continue
+    }
+    if (!nameAdded) nameAdded = true
+
+    if (_isContactLine(trimmed) && i < 5) {
+      htmlLines.push(`<div style="text-align:center;font-size:9.5pt;color:#475569;margin-bottom:2pt">${trimmed}</div>`)
+      continue
+    }
+    if (_isSectionHeader(trimmed)) {
+      htmlLines.push(`<div style="margin-top:12pt;margin-bottom:4pt;font-size:9pt;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#0f172a;border-bottom:1.5pt solid ${s.accentColor};padding-bottom:2pt">${trimmed.replace(/:$/, "")}</div>`)
+      continue
+    }
+    if (/^\s{2,}[-•*]/.test(raw) || /^\s{4,}/.test(raw)) {
+      htmlLines.push(`<div style="display:flex;gap:6pt;padding-left:16pt;margin-bottom:1.5pt"><span style="color:${s.accentColor};font-weight:700">–</span><span style="font-size:${s.bodySize};line-height:${s.lineHeight};color:#1e293b">${trimmed.replace(/^[-•*]\s*/, "")}</span></div>`)
+      continue
+    }
+    if (/^[-•*]\s/.test(trimmed)) {
+      htmlLines.push(`<div style="display:flex;gap:6pt;padding-left:6pt;margin-bottom:1.5pt"><span style="color:${s.accentColor};font-weight:700">·</span><span style="font-size:${s.bodySize};line-height:${s.lineHeight};color:#1e293b">${trimmed.replace(/^[-•*]\s*/, "")}</span></div>`)
+      continue
+    }
+    htmlLines.push(`<div style="font-size:${s.bodySize};line-height:${s.lineHeight};color:#1e293b;margin-bottom:2pt">${trimmed}</div>`)
+  }
 
   return `<!DOCTYPE html>
 <html>
@@ -83,32 +148,17 @@ function buildCVHtml(opts: PDFOptions): string {
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    font-family: ${fontFamily};
-    font-size: ${fontSize};
-    line-height: 1.4;
-    color: #1a1a1a;
-    padding: ${isUS ? "54pt 54pt" : "72pt 72pt"};
-  }
-  h1 { font-size: ${isUS ? "18pt" : "20pt"}; font-weight: bold; margin-bottom: 4pt; }
-  h2 {
-    font-size: ${isUS ? "11pt" : "12pt"};
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    border-bottom: 1pt solid #ddd;
-    padding-bottom: 4pt;
-    margin: 16pt 0 8pt 0;
-  }
-  pre {
-    white-space: pre-wrap;
-    font-family: inherit;
-    font-size: inherit;
-    line-height: 1.5;
+    font-family: ${s.font};
+    font-size: ${s.bodySize};
+    line-height: ${s.lineHeight};
+    color: #1e293b;
+    padding: 52pt 58pt;
+    background: #ffffff;
   }
 </style>
 </head>
 <body>
-  <pre>${opts.content.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>
+  ${htmlLines.join("\n  ")}
 </body>
 </html>`
 }
