@@ -77,6 +77,7 @@ const TOOLS = [
   { href: "/app/scholarships", label: "Scholarships", icon: Award, soon: false },
   { href: "/app/sop", label: "SOP Builder", icon: FileText, soon: false },
   { href: "/app/cv", label: "CV Builder", icon: ClipboardList, soon: false },
+  { href: "/app/resume", label: "Resume Builder", icon: Briefcase, soon: false },
   { href: "/app/professors", label: "Professor Finder", icon: Users, soon: false },
   { href: "/app/gap-fix", label: "Gap Fix", icon: Zap, soon: false },
   { href: "/app/career", label: "Career Outlook", icon: TrendingUp, soon: false },
@@ -92,7 +93,7 @@ const TOOL_GROUPS = [
   },
   {
     label: "Application",
-    tools: ["/app/sop", "/app/cv", "/app/professors", "/app/gap-fix"],
+    tools: ["/app/sop", "/app/cv", "/app/resume", "/app/professors", "/app/gap-fix"],
   },
   {
     label: "Guidance",

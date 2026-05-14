@@ -653,6 +653,56 @@ export const generateCvAction = async (req: CvGenerateRequest): Promise<CvResult
 	return response.json();
 };
 
+// ── Module 3: Resume Builder ──────────────────────────────────────────────────
+
+export type ResumeTemplate =
+	| "ats-clean"
+	| "google-faang"
+	| "startup-tech"
+	| "executive-professional"
+	| "data-science"
+	| "consulting-finance";
+
+export interface ResumeGenerateRequest {
+	resumeTemplate: ResumeTemplate;
+	location?: string;
+	phone?: string;
+	linkedin?: string;
+	github?: string;
+	portfolio?: string;
+	summary?: string;
+	targetRole?: string;
+	targetCompany?: string;
+	targetIndustry?: string;
+	workExperience?: string;
+	internships?: string;
+	education?: string;
+	technicalSkills?: string;
+	softSkills?: string;
+	projects?: string;
+	certifications?: string;
+	achievements?: string;
+	languages?: string;
+	volunteering?: string;
+	highlights?: string;
+}
+
+export interface ResumeResult {
+	resume: string;
+	template: ResumeTemplate;
+	sections: string[];
+}
+
+export const generateResumeAction = async (req: ResumeGenerateRequest): Promise<ResumeResult | null> => {
+	const response = await authFetch(`${BACKEND_URL}/resume/generate`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(req),
+	});
+	if (!response.ok) return null;
+	return response.json();
+};
+
 // ── Module 3: Professor Finder ────────────────────────────────────────────────
 
 export interface ProfessorResult {

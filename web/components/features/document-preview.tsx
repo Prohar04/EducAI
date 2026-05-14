@@ -167,6 +167,61 @@ const TEMPLATE_STYLES: Record<string, TemplateStyle> = {
     lineHeight: "1.8",
     bodySize: "1rem",
   },
+  // Resume templates
+  "ats-clean": {
+    fontFamily: "'Inter', Arial, Helvetica, sans-serif",
+    nameSize: "1.45rem",
+    sectionColor: "#374151",
+    sectionBorderColor: "#374151",
+    accentColor: "#374151",
+    lineHeight: "1.45",
+    bodySize: "0.875rem",
+  },
+  "google-faang": {
+    fontFamily: "'Inter', Arial, Helvetica, sans-serif",
+    nameSize: "1.55rem",
+    sectionColor: "#0f172a",
+    sectionBorderColor: "#1A73E8",
+    accentColor: "#1A73E8",
+    lineHeight: "1.5",
+    bodySize: "0.875rem",
+  },
+  "startup-tech": {
+    fontFamily: "'Inter', Arial, Helvetica, sans-serif",
+    nameSize: "1.6rem",
+    sectionColor: "#0f172a",
+    sectionBorderColor: "#4A90D9",
+    accentColor: "#4A90D9",
+    lineHeight: "1.5",
+    bodySize: "0.875rem",
+  },
+  "executive-professional": {
+    fontFamily: "'Georgia', 'Times New Roman', serif",
+    nameSize: "1.55rem",
+    sectionColor: "#1e3a5f",
+    sectionBorderColor: "#1e3a5f",
+    accentColor: "#1e3a5f",
+    lineHeight: "1.55",
+    bodySize: "0.9375rem",
+  },
+  "data-science": {
+    fontFamily: "'Inter', Arial, Helvetica, sans-serif",
+    nameSize: "1.45rem",
+    sectionColor: "#0F4C81",
+    sectionBorderColor: "#0F4C81",
+    accentColor: "#0F4C81",
+    lineHeight: "1.45",
+    bodySize: "0.875rem",
+  },
+  "consulting-finance": {
+    fontFamily: "'Times New Roman', Georgia, serif",
+    nameSize: "1.45rem",
+    sectionColor: "#1e3a5f",
+    sectionBorderColor: "#1e3a5f",
+    accentColor: "#1e3a5f",
+    lineHeight: "1.5",
+    bodySize: "0.9375rem",
+  },
 };
 
 const DEFAULT_STYLE: TemplateStyle = {
@@ -451,7 +506,7 @@ function renderSopDocument(lines: ParsedLine[], style: TemplateStyle): React.Rea
 interface DocumentPreviewProps {
   content: string;
   template: string;
-  mode: "cv" | "sop";
+  mode: "cv" | "sop" | "resume";
   className?: string;
 }
 
@@ -479,7 +534,7 @@ export default function DocumentPreview({ content, template, mode, className }: 
           borderRadius: "2px",
         }}
       >
-        {mode === "cv" ? renderCvDocument(lines, style) : renderSopDocument(lines, style)}
+        {mode === "sop" ? renderSopDocument(lines, style) : renderCvDocument(lines, style)}
       </div>
     </div>
   );

@@ -163,8 +163,77 @@ function buildCVHtml(opts: PDFOptions): string {
 </html>`
 }
 
+function buildResumeHtml(opts: PDFOptions): string {
+  const resumeStyles: Record<string, { font: string; accentColor: string; nameSize: string; bodySize: string; lineHeight: string; headerStyle: "border" | "bg" | "underline" }> = {
+    "ats-clean":              { font: "Arial, Helvetica, sans-serif", accentColor: "#374151", nameSize: "18pt", bodySize: "10pt",   lineHeight: "1.45", headerStyle: "border" },
+    "google-faang":           { font: "Arial, Helvetica, sans-serif", accentColor: "#1A73E8", nameSize: "19pt", bodySize: "10.5pt", lineHeight: "1.5",  headerStyle: "border" },
+    "startup-tech":           { font: "Arial, Helvetica, sans-serif", accentColor: "#4A90D9", nameSize: "20pt", bodySize: "10.5pt", lineHeight: "1.5",  headerStyle: "underline" },
+    "executive-professional": { font: "Georgia, 'Times New Roman', serif", accentColor: "#1e3a5f", nameSize: "20pt", bodySize: "11pt", lineHeight: "1.55", headerStyle: "bg" },
+    "data-science":           { font: "Arial, Helvetica, sans-serif", accentColor: "#0F4C81", nameSize: "18pt", bodySize: "10pt",   lineHeight: "1.45", headerStyle: "border" },
+    "consulting-finance":     { font: "'Times New Roman', Georgia, serif", accentColor: "#1e3a5f", nameSize: "18pt", bodySize: "10.5pt", lineHeight: "1.5", headerStyle: "bg" },
+  }
+
+  const s = resumeStyles[opts.template] ?? resumeStyles["ats-clean"]!
+
+  const sectionHeaderHtml = (text: string): string => {
+    switch (s.headerStyle) {
+      case "bg":
+        return `<div style="margin-top:10pt;margin-bottom:4pt;font-size:9pt;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;background:${s.accentColor};color:#fff;padding:3pt 6pt">${text}</div>`
+      case "underline":
+        return `<div style="margin-top:10pt;margin-bottom:4pt;font-size:10pt;font-weight:700;color:${s.accentColor};border-bottom:2pt solid ${s.accentColor};padding-bottom:2pt">${text}</div>`
+      default: // "border"
+        return `<div style="margin-top:10pt;margin-bottom:4pt;font-size:9pt;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#0f172a;border-bottom:1.5pt solid ${s.accentColor};padding-bottom:2pt">${text}</div>`
+    }
+  }
+
+  const lines = opts.content.split("\n")
+  const htmlLines: string[] = []
+  let nameAdded = false
+
+  for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i]
+    const trimmed = raw.trim()
+    if (!trimmed) { htmlLines.push("<div style='height:5pt'></div>"); continue }
+    if (_isUnderlineSep(trimmed)) continue
+
+    if (!nameAdded && !_isSectionHeader(trimmed) && !_isContactLine(trimmed)) {
+      nameAdded = true
+      htmlLines.push(`<div style="font-size:${s.nameSize};font-weight:700;color:#0f172a;margin-bottom:3pt">${trimmed}</div>`)
+      continue
+    }
+    if (!nameAdded) nameAdded = true
+
+    if (_isContactLine(trimmed) && i < 5) {
+      htmlLines.push(`<div style="font-size:9pt;color:#475569;margin-bottom:1.5pt">${trimmed}</div>`)
+      continue
+    }
+    if (_isSectionHeader(trimmed)) { htmlLines.push(sectionHeaderHtml(trimmed.replace(/:$/, ""))); continue }
+    if (/^\s{2,}[-•*]/.test(raw) || /^\s{4,}/.test(raw)) {
+      htmlLines.push(`<div style="display:flex;gap:5pt;padding-left:14pt;margin-bottom:1.5pt"><span style="color:${s.accentColor}">–</span><span style="font-size:${s.bodySize};line-height:${s.lineHeight};color:#1e293b">${trimmed.replace(/^[-•*]\s*/, "")}</span></div>`)
+      continue
+    }
+    if (/^[-•*]\s/.test(trimmed)) {
+      htmlLines.push(`<div style="display:flex;gap:5pt;padding-left:5pt;margin-bottom:1.5pt"><span style="color:${s.accentColor}">•</span><span style="font-size:${s.bodySize};line-height:${s.lineHeight};color:#1e293b">${trimmed.replace(/^[-•*]\s*/, "")}</span></div>`)
+      continue
+    }
+    htmlLines.push(`<div style="font-size:${s.bodySize};line-height:${s.lineHeight};color:#1e293b;margin-bottom:1.5pt">${trimmed}</div>`)
+  }
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>* { margin:0; padding:0; box-sizing:border-box; } body { font-family:${s.font}; font-size:${s.bodySize}; line-height:${s.lineHeight}; color:#1e293b; padding:48pt 52pt; background:#fff; }</style>
+</head>
+<body>${htmlLines.join("\n")}</body>
+</html>`
+}
+
 export async function generatePDF(opts: PDFOptions): Promise<Buffer> {
-  const html = opts.documentType === "sop" ? buildSOPHtml(opts) : buildCVHtml(opts)
+  const html =
+    opts.documentType === "sop" ? buildSOPHtml(opts) :
+    opts.documentType === "resume" ? buildResumeHtml(opts) :
+    buildCVHtml(opts)
 
   const htmlPdf = await import("html-pdf-node")
   const file = { content: html }
