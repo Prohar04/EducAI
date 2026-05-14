@@ -54,12 +54,15 @@ jobs:
         if: steps.validate.outputs.secrets_ready == 'true'
         run: |
           CLEAN_URL="${{ steps.validate.outputs.backend_url }}"
+          CRON_SECRET_CLEAN=$(printf '%s' "${{ secrets.CRON_SECRET }}" | tr -d '[:space:]')
+
           echo "Triggering job data refresh at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo "Backend: ${CLEAN_URL}/api/cron/jobs/refresh"
 
           CURL_EXIT=0
           HTTP_STATUS=$(curl -s -o /tmp/job_sync_response.json -w "%{http_code}" \
-            -X POST "${CLEAN_URL}/api/jobs/background-refresh" \
-            -H "x-cron-secret: ${CRON_SECRET}" \
+            -X POST "${CLEAN_URL}/api/cron/jobs/refresh" \
+            -H "Authorization: Bearer ${CRON_SECRET_CLEAN}" \
             -H "Content-Type: application/json" \
             --max-time 90 \
             --retry 2 \
