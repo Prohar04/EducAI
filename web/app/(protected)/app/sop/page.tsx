@@ -24,6 +24,7 @@ import { FadeIn } from "@/components/motion/FadeIn";
 import { StaggerChildren, StaggerItem } from "@/components/motion/FadeIn";
 import { generateSopAction, type SopTemplate, type SopResult } from "@/lib/auth/action";
 import DocumentTemplateSelector, { type SOPTemplate } from "@/components/features/document-template-selector";
+import DocumentPreview from "@/components/features/document-preview";
 
 const TEMPLATES: { value: SopTemplate; label: string; desc: string; badge?: string }[] = [
 	{ value: "formal-academic", label: "Formal Academic", desc: "Professional, structured academic prose" },
@@ -422,10 +423,12 @@ export default function SOPPage() {
 										</Button>
 									</div>
 								</div>
-								<div className="rounded-lg border border-border bg-background p-4 max-h-[70vh] overflow-y-auto">
-									<pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans text-foreground">
-										{result.sop}
-									</pre>
+								<div className="rounded-lg border border-border bg-[#f8f8f6] max-h-[70vh] overflow-y-auto p-3">
+									<DocumentPreview
+										content={result.sop}
+										template={sopTemplate}
+										mode="sop"
+									/>
 								</div>
 								<div className="mt-4 rounded-lg border border-[#C49A3C]/20 bg-[#C49A3C]/5 px-3 py-2">
 									<p className="text-xs text-[#C49A3C]">

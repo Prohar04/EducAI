@@ -24,6 +24,7 @@ import { FadeIn } from "@/components/motion/FadeIn";
 import { StaggerChildren, StaggerItem } from "@/components/motion/FadeIn";
 import { generateCvAction, type CvTemplate, type CvResult } from "@/lib/auth/action";
 import DocumentTemplateSelector, { type CVTemplate } from "@/components/features/document-template-selector";
+import DocumentPreview from "@/components/features/document-preview";
 
 const TEMPLATES: { value: CvTemplate; label: string; desc: string; badge?: string }[] = [
 	{ value: "minimal-academic", label: "Minimal Academic", desc: "Clean STEM grad CV — education & research first" },
@@ -426,10 +427,12 @@ export default function CVPage() {
 										</Button>
 									</div>
 								</div>
-								<div className="rounded-lg border border-border bg-background p-4 font-mono max-h-[70vh] overflow-y-auto">
-									<pre className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
-										{result.cv}
-									</pre>
+								<div className="rounded-lg border border-border bg-[#f8f8f6] max-h-[70vh] overflow-y-auto p-3">
+									<DocumentPreview
+										content={result.cv}
+										template={cvTemplate}
+										mode="cv"
+									/>
 								</div>
 								<div className="mt-4 rounded-lg border border-[#C49A3C]/20 bg-[#C49A3C]/5 px-3 py-2">
 									<p className="text-xs text-[#C49A3C]">
