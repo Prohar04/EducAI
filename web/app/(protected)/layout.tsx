@@ -19,7 +19,7 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
   if (!profile?.onboardingDone) redirect("/onboarding");
 
   return (
-    <div className="flex min-h-[100svh] flex-col overflow-x-hidden bg-background">
+    <div className="flex min-h-[100svh] flex-col bg-background">
       <Navbar user={session.user} />
       <main className="flex-1 min-h-0">
         <TransitionLayout>{children}</TransitionLayout>
