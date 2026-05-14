@@ -6,11 +6,12 @@ import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 // ─── Mock setup (must precede any dynamic imports) ───
 
-// Prisma client (controller uses it directly in verifyEmail)
+// Prisma client (controller uses it directly in verifyEmail and signup rollback)
 const mockPrismaUserUpdate = jest.fn();
+const mockPrismaUserDelete = jest.fn().mockResolvedValue(undefined);
 jest.unstable_mockModule('#src/config/database.ts', () => ({
   __esModule: true,
-  default: { user: { update: mockPrismaUserUpdate } },
+  default: { user: { update: mockPrismaUserUpdate, delete: mockPrismaUserDelete } },
 }));
 
 // User service
@@ -42,7 +43,7 @@ jest.unstable_mockModule('#src/services/token.service.ts', () => ({
 }));
 
 // Email service
-const mockSendVerificationEmail = jest.fn().mockResolvedValue(undefined);
+const mockSendVerificationEmail = jest.fn().mockResolvedValue({ success: true, provider: 'mock' });
 const mockSendPasswordResetEmail = jest.fn().mockResolvedValue(undefined);
 const mockSendScholarshipDeadlineAlert = jest.fn().mockResolvedValue(undefined);
 jest.unstable_mockModule('#src/services/email.service.ts', () => ({

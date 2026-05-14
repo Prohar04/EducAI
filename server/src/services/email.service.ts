@@ -5,28 +5,42 @@ import transporter, { EMAIL_FROM } from '#src/config/nodemailer.config.ts';
 const EMAIL_PROVIDER = process.env.EMAIL_PROVIDER || 'smtp';
 const IS_DEV = process.env.NODE_ENV !== 'production';
 
-async function sendMail(opts: { to: string; subject: string; html: string; text: string }): Promise<void> {
+interface SendMailResult {
+  success: boolean;
+  provider: string;
+  messageId?: string;
+  error?: string;
+}
+
+async function sendMail(opts: { to: string; subject: string; html: string; text: string }): Promise<SendMailResult> {
   if (EMAIL_PROVIDER === 'console') {
     console.log(`\n[EMAIL → ${opts.to}] ${opts.subject}\n${opts.text}\n`);
-    return;
+    return { success: true, provider: 'console', messageId: 'console-log' };
   }
+
   try {
-    await transporter.sendMail({ from: EMAIL_FROM, ...opts });
+    const info = await transporter.sendMail({ from: EMAIL_FROM, ...opts });
+    console.log(`[email] Sent to ${opts.to} | subject: "${opts.subject}" | messageId: ${info.messageId}`);
+    return { success: true, provider: EMAIL_PROVIDER, messageId: info.messageId };
   } catch (err) {
+    const errorMessage = (err as Error).message;
+    console.error(`[email] Failed to send to ${opts.to} | subject: "${opts.subject}" | error: ${errorMessage}`);
+
     if (IS_DEV) {
       // In development, fall back to console so signup/reset never fail locally
-      console.error('[Email delivery failed — printing to console instead]', (err as Error).message);
-      console.log(`\n[EMAIL → ${opts.to}] ${opts.subject}\n${opts.text}\n`);
-    } else {
-      throw err; // re-throw in production so callers handle it
+      console.log(`\n[EMAIL (fallback) → ${opts.to}] ${opts.subject}\n${opts.text}\n`);
+      return { success: true, provider: 'console-fallback', error: errorMessage };
     }
+
+    // In production, propagate so callers can handle it
+    return { success: false, provider: EMAIL_PROVIDER, error: errorMessage };
   }
 }
 
 export async function sendVerificationEmail(
   toEmail: string,
   verifyUrl: string
-): Promise<void> {
+): Promise<SendMailResult> {
   const subject = 'Verify your EducAI email';
 
   const html = `
@@ -52,13 +66,13 @@ export async function sendVerificationEmail(
 
   const text = `Verify your EducAI email\n\nClick the link below to verify your email (expires in 24 hours):\n${verifyUrl}\n\nIf you didn't create this account, you can safely ignore this email.`;
 
-  await sendMail({ to: toEmail, subject, html, text });
+  return sendMail({ to: toEmail, subject, html, text });
 }
 
 export async function sendPasswordResetEmail(
   toEmail: string,
   resetUrl: string
-): Promise<void> {
+): Promise<SendMailResult> {
   const subject = 'Reset your EducAI password';
 
   const html = `
@@ -84,7 +98,7 @@ export async function sendPasswordResetEmail(
 
   const text = `Reset your EducAI password\n\nClick the link below to set a new password (expires in 30 minutes):\n${resetUrl}\n\nIf you didn't request this, you can safely ignore this email.`;
 
-  await sendMail({ to: toEmail, subject, html, text });
+  return sendMail({ to: toEmail, subject, html, text });
 }
 
 export interface ScholarshipAlertItem {

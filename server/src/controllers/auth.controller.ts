@@ -62,7 +62,16 @@ async function sendVerification(userId: string, email: string) {
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
   const verifyUrl = `${frontendUrl}/auth/verify-email?token=${rawToken}`;
 
-  await sendVerificationEmail(email, verifyUrl);
+  console.log(`[auth] Sending verification email to ${email} | tokenId: ${rawToken.slice(0, 8)}...`);
+
+  const result = await sendVerificationEmail(email, verifyUrl);
+
+  if (result.success) {
+    console.log(`[auth] Verification email sent successfully to ${email} | provider: ${result.provider} | messageId: ${result.messageId}`);
+  } else {
+    console.error(`[auth] Failed to send verification email to ${email} | provider: ${result.provider} | error: ${result.error}`);
+    throw new Error(`Email delivery failed: ${result.error}`);
+  }
 }
 
 // ── REFRESH ────────────────────────────────────────────────────────
@@ -203,10 +212,18 @@ export const signup = async (req: Request, res: Response) => {
       }).catch((e) => console.error('Profile creation at signup failed (non-fatal):', e));
     }
 
-    // Fire-and-forget: email failures must not roll back account creation
-    sendVerification(newUser.id, newUser.email).catch((e) =>
-      console.error('Signup verification email failed (account created):', e),
-    );
+    // Fire-and-forget: email failures must roll back account creation
+    try {
+      await sendVerification(newUser.id, newUser.email);
+    } catch (emailError) {
+      // Roll back the user creation since email verification is required
+      await prisma.user.delete({ where: { id: newUser.id } });
+      console.error('[auth] Signup failed — rolled back user creation. Email error:', (emailError as Error).message);
+      return res.status(503).json({
+        message: 'Account creation failed. Email service is unavailable. Please try again later.',
+        code: 'EMAIL_SERVICE_UNAVAILABLE',
+      });
+    }
 
     res
       .status(201)
@@ -255,7 +272,6 @@ export const resendVerification = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
 
-    // Always return 200 generic regardless
     const genericMessage =
       'If an account exists, we sent a verification email.';
 
@@ -265,7 +281,15 @@ export const resendVerification = async (req: Request, res: Response) => {
 
     const user = await findUserByEmail(email);
     if (user && !user.emailVerified) {
-      await sendVerification(user.id, user.email);
+      try {
+        await sendVerification(user.id, user.email);
+      } catch (emailError) {
+        console.error('[auth] Resend verification failed:', (emailError as Error).message);
+        return res.status(503).json({
+          message: 'Email service unavailable. Please try again later.',
+          code: 'EMAIL_SERVICE_UNAVAILABLE',
+        });
+      }
     }
 
     // TODO: rate limit per IP/email

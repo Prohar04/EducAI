@@ -41,19 +41,35 @@ services:
         sync: false
       - key: GOOGLE_CALLBACK_URL
         sync: false   # https://<api-service>.onrender.com/auth/google/callback
-      # ── Email ────────────────────────────────────────────────────────────────
-      - key: EMAIL_HOST
-        value: smtp.resend.com
-      - key: EMAIL_PORT
-        value: "465"
-      - key: EMAIL_SECURE
-        value: "true"
-      - key: EMAIL_USER
-        value: resend
-      - key: EMAIL_PASS
-        sync: false   # Resend API key
+      # ── Email (Gmail via custom SMTP) ───────────────────────────────────────────────
+      # Gmail requires an App Password (16-char, no spaces) — generate at:
+      #   https://myaccount.google.com/apppasswords
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURE
+        value: "false"
+      - key: SMTP_USER
+        value: support.educai@gmail.com
+      - key: SMTP_PASS
+        sync: false   # Gmail App Password — set in Render dashboard secrets
       - key: EMAIL_FROM
-        value: "EducAI <noreply@yourdomain.com>"
+        value: "EducAI <support.educai@gmail.com>"
+      - key: FRONTEND_URL
+        value: https://educai-web.vercel.app
+      # ── Optional: Resend (alternative to Gmail) ───────────────────────────────────
+      # Comment out SMTP_* vars above and uncomment these if using Resend:
+      # - key: SMTP_HOST
+      #   value: smtp.resend.com
+      # - key: SMTP_PORT
+      #   value: "465"
+      # - key: SMTP_SECURE
+      #   value: "true"
+      # - key: SMTP_USER
+      #   value: resend
+      # - key: SMTP_PASS
+      #   sync: false   # Resend API key
       # ── Optional: Arcjet (bot/rate-limit protection) ─────────────────────────
       - key: ARCJET_KEY
         sync: false   # optional — leave empty to skip Arcjet
