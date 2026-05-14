@@ -12,9 +12,14 @@ def test_root():
 
 
 def test_health():
+    """Health endpoint always returns status=ok regardless of extra metadata fields."""
     response = client.get("/api/v1/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+    data = response.json()
+    assert data.get("status") == "ok"
+    # Endpoint may include extra fields (service, version, uptime, timestamp, environment).
+    # We only assert the contract field.
+    assert "service" in data
 
 
 def test_llm_health_returns_valid_shape():
