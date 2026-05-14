@@ -13,18 +13,17 @@ import {
 	Copy,
 	Download,
 	Loader2,
-	RefreshCw,
 	Sparkles,
 	Target,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FadeIn } from "@/components/motion/FadeIn";
 import { StaggerChildren, StaggerItem } from "@/components/motion/FadeIn";
 import { generateSopAction, type SopTemplate, type SopResult } from "@/lib/auth/action";
 import DocumentTemplateSelector, { type SOPTemplate } from "@/components/features/document-template-selector";
 import DocumentPreview from "@/components/features/document-preview";
+import { Eye } from "lucide-react";
 
 const TEMPLATES: { value: SopTemplate; label: string; desc: string; badge?: string }[] = [
 	{ value: "formal-academic", label: "Formal Academic", desc: "Professional, structured academic prose" },
@@ -131,6 +130,7 @@ export default function SOPPage() {
 	const [copied, setCopied] = useState(false);
 	const [downloading, setDownloading] = useState(false);
 	const [isPending, startTransition] = useTransition();
+	const [previewMode, setPreviewMode] = useState<"draft" | "ai">("draft");
 
 	// Target fields
 	const [targetProgram, setTargetProgram] = useState("");
@@ -155,8 +155,37 @@ export default function SOPPage() {
 	const [scholarshipAngle, setScholarshipAngle] = useState("");
 	const [highlights, setHighlights] = useState("");
 
+	function buildDraftSop(): string {
+		const lines: string[] = [];
+		if (targetProgram || targetUniversity) {
+			lines.push(`Statement of Purpose — ${targetProgram || "Graduate Program"}${targetUniversity ? ` at ${targetUniversity}` : ""}${targetCountry ? `, ${targetCountry}` : ""}`);
+			lines.push("─".repeat(60));
+			lines.push("");
+		}
+		if (sopPurpose) { lines.push(sopPurpose); lines.push(""); }
+		if (motivation) { lines.push(motivation); lines.push(""); }
+		if (academicBackground) { lines.push(academicBackground); lines.push(""); }
+		if (whySubject) { lines.push(whySubject); lines.push(""); }
+		if (researchInterests) { lines.push(researchInterests); lines.push(""); }
+		if (workExperience) { lines.push(workExperience); lines.push(""); }
+		if (projects) { lines.push(projects); lines.push(""); }
+		if (achievements) { lines.push(achievements); lines.push(""); }
+		if (whyUniversity || whyCountry) {
+			lines.push("Why this university / country");
+			if (whyUniversity) lines.push(whyUniversity);
+			if (whyCountry) lines.push(whyCountry);
+			lines.push("");
+		}
+		if (careerGoals) { lines.push(careerGoals); lines.push(""); }
+		if (challengesOvercome) { lines.push(challengesOvercome); lines.push(""); }
+		if (scholarshipAngle) { lines.push(scholarshipAngle); lines.push(""); }
+		if (highlights) { lines.push(highlights); lines.push(""); }
+		return lines.join("\n");
+	}
+
 	function handleGenerate() {
 		setError(null);
+		setPreviewMode("ai");
 		startTransition(async () => {
 			const res = await generateSopAction({
 				sopTemplate,
@@ -392,68 +421,83 @@ export default function SOPPage() {
 					</p>
 				</div>
 
-				{/* Output panel */}
+				{/* Output panel — always visible with live draft or AI result */}
 				<div className="lg:col-span-3">
-					{result ? (
-						<FadeIn>
-							<div className="rounded-xl border border-border bg-card p-5">
-								<div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
-									<div>
-										<h2 className="font-semibold">Your Statement of Purpose</h2>
-										<p className="text-xs text-muted-foreground">
-											{result.wordCount} words · {TEMPLATES.find(t => t.value === result.template)?.label ?? result.template}
-										</p>
-									</div>
-									<div className="flex items-center gap-2 flex-wrap">
-										<Button variant="outline" size="sm" onClick={handleCopy} className="gap-1.5">
-											{copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-											{copied ? "Copied!" : "Copy"}
-										</Button>
-										<Button variant="outline" size="sm" onClick={handleDownloadTxt} className="gap-1.5">
-											<Download className="h-3.5 w-3.5" />
-											.txt
-										</Button>
-										<Button variant="default" size="sm" onClick={handleDownloadPdf} disabled={downloading} className="gap-1.5">
-											{downloading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
-											PDF
-										</Button>
-										<Button variant="ghost" size="sm" onClick={handleGenerate} disabled={isPending} className="gap-1.5">
-											<RefreshCw className="h-3.5 w-3.5" />
-											Regenerate
-										</Button>
-									</div>
+					{(result || buildDraftSop().trim()) ? (
+						<div className="rounded-xl border border-border bg-card p-5">
+							<div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
+								<div className="flex gap-1 rounded-lg border border-border bg-muted/40 p-1">
+									<button
+										type="button"
+										onClick={() => setPreviewMode("draft")}
+										className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${previewMode === "draft" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+									>
+										<Eye className="h-3 w-3" /> Live Draft
+									</button>
+									{result && (
+										<button
+											type="button"
+											onClick={() => setPreviewMode("ai")}
+											className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${previewMode === "ai" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+										>
+											<Sparkles className="h-3 w-3" /> AI Result
+											{result && <span className="ml-1 text-muted-foreground">({result.wordCount}w)</span>}
+										</button>
+									)}
 								</div>
-								<div className="rounded-lg border border-border bg-[#f8f8f6] max-h-[70vh] overflow-y-auto p-3">
-									<DocumentPreview
-										content={result.sop}
-										template={sopTemplate}
-										mode="sop"
-									/>
+								<div className="flex items-center gap-2 flex-wrap">
+									{previewMode === "ai" && result && (
+										<>
+											<Button variant="outline" size="sm" onClick={handleCopy} className="gap-1.5">
+												{copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+												{copied ? "Copied!" : "Copy"}
+											</Button>
+											<Button variant="outline" size="sm" onClick={handleDownloadTxt} className="gap-1.5">
+												<Download className="h-3.5 w-3.5" /> .txt
+											</Button>
+											<Button variant="default" size="sm" onClick={handleDownloadPdf} disabled={downloading} className="gap-1.5">
+												{downloading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+												PDF
+											</Button>
+										</>
+									)}
+									<Button variant="ghost" size="sm" onClick={handleGenerate} disabled={isPending} className="gap-1.5">
+										{isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+										{isPending ? "Generating…" : "Generate with AI"}
+									</Button>
 								</div>
-								<div className="mt-4 rounded-lg border border-[#C49A3C]/20 bg-[#C49A3C]/5 px-3 py-2">
+							</div>
+							<div className="rounded-lg border border-border bg-[#f8f8f6] max-h-[70vh] overflow-y-auto p-3">
+								<DocumentPreview
+									content={previewMode === "ai" && result ? result.sop : buildDraftSop()}
+									template={sopTemplate}
+									mode="sop"
+								/>
+							</div>
+							{previewMode === "draft" && (
+								<div className="mt-3 rounded-lg border border-[#4A90D9]/20 bg-[#4A90D9]/5 px-3 py-2">
+									<p className="text-xs text-[#4A90D9]">
+										Live draft from your inputs — click &ldquo;Generate with AI&rdquo; to produce a polished SOP.
+									</p>
+								</div>
+							)}
+							{previewMode === "ai" && result && (
+								<div className="mt-3 rounded-lg border border-[#C49A3C]/20 bg-[#C49A3C]/5 px-3 py-2">
 									<p className="text-xs text-[#C49A3C]">
 										AI-generated — review, personalize, and tailor to each application before submitting.
 									</p>
 								</div>
-							</div>
-						</FadeIn>
+							)}
+						</div>
 					) : (
 						<div className="flex h-full min-h-[500px] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/50 p-10 text-center">
 							<div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
 								<BookOpen className="h-8 w-8 text-primary" />
 							</div>
-							<h3 className="mb-2 font-semibold">Your SOP will appear here</h3>
+							<h3 className="mb-2 font-semibold">Start typing to see a live preview</h3>
 							<p className="max-w-xs text-sm text-muted-foreground">
-								Pick a template, fill in your context, and click Generate.
+								Fill in the target application above — your SOP draft will appear here instantly.
 							</p>
-							<div className="mt-6 grid grid-cols-2 gap-2 text-left max-w-xs w-full">
-								{["10 professional templates", "PDF & TXT download", "Profile auto-injected", "600–850 words by default"].map(f => (
-									<div key={f} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-										<Check className="h-3 w-3 text-[#3D9970] shrink-0" />
-										{f}
-									</div>
-								))}
-							</div>
 						</div>
 					)}
 				</div>

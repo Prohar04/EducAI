@@ -13,18 +13,17 @@ import {
 	Download,
 	FileText,
 	Loader2,
-	RefreshCw,
 	Sparkles,
 	User,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FadeIn } from "@/components/motion/FadeIn";
 import { StaggerChildren, StaggerItem } from "@/components/motion/FadeIn";
 import { generateCvAction, type CvTemplate, type CvResult } from "@/lib/auth/action";
 import DocumentTemplateSelector, { type CVTemplate } from "@/components/features/document-template-selector";
 import DocumentPreview from "@/components/features/document-preview";
+import { Eye } from "lucide-react";
 
 const TEMPLATES: { value: CvTemplate; label: string; desc: string; badge?: string }[] = [
 	{ value: "minimal-academic", label: "Minimal Academic", desc: "Clean STEM grad CV — education & research first" },
@@ -129,6 +128,7 @@ export default function CVPage() {
 	const [copied, setCopied] = useState(false);
 	const [downloading, setDownloading] = useState(false);
 	const [isPending, startTransition] = useTransition();
+	const [previewMode, setPreviewMode] = useState<"draft" | "ai">("draft");
 
 	// Rich form state
 	const [phone, setPhone] = useState("");
@@ -153,8 +153,80 @@ export default function CVPage() {
 	const [references, setReferences] = useState("");
 	const [highlights, setHighlights] = useState("");
 
+	// Build a client-side draft preview from form fields (no API call)
+	function buildDraftCv(): string {
+		const contactParts = [phone, linkedin, github].filter(Boolean);
+		const lines: string[] = [];
+		lines.push("[Your Name — from profile]");
+		if (contactParts.length) lines.push(contactParts.join("  |  "));
+		lines.push("");
+		if (targetDegree || targetProgram || targetUniversity) {
+			lines.push("TARGET APPLICATION");
+			lines.push("──────────────────────────────");
+			if (targetDegree) lines.push(`Degree: ${targetDegree}`);
+			if (targetProgram) lines.push(`Program: ${targetProgram}`);
+			if (targetUniversity) lines.push(`University: ${targetUniversity}`);
+			if (targetCountry) lines.push(`Country: ${targetCountry}`);
+			lines.push("");
+		}
+		if (summary) {
+			lines.push("SUMMARY");
+			lines.push("──────────────────────────────");
+			lines.push(summary);
+			lines.push("");
+		}
+		if (workExperience || internships) {
+			lines.push("EXPERIENCE");
+			lines.push("──────────────────────────────");
+			if (workExperience) lines.push(workExperience);
+			if (internships) { lines.push(""); lines.push(internships); }
+			lines.push("");
+		}
+		if (technicalSkills || softSkills) {
+			lines.push("SKILLS");
+			lines.push("──────────────────────────────");
+			if (technicalSkills) lines.push(`Technical: ${technicalSkills}`);
+			if (softSkills) lines.push(`Soft: ${softSkills}`);
+			lines.push("");
+		}
+		if (projects) {
+			lines.push("PROJECTS");
+			lines.push("──────────────────────────────");
+			lines.push(projects);
+			lines.push("");
+		}
+		if (thesisOrResearch || publications) {
+			lines.push("RESEARCH & PUBLICATIONS");
+			lines.push("──────────────────────────────");
+			if (thesisOrResearch) lines.push(thesisOrResearch);
+			if (publications) { lines.push(""); lines.push(publications); }
+			lines.push("");
+		}
+		if (certifications || awards) {
+			lines.push("AWARDS & CERTIFICATIONS");
+			lines.push("──────────────────────────────");
+			if (certifications) lines.push(certifications);
+			if (awards) lines.push(awards);
+			lines.push("");
+		}
+		if (extracurriculars || volunteering) {
+			lines.push("ACTIVITIES");
+			lines.push("──────────────────────────────");
+			if (extracurriculars) lines.push(extracurriculars);
+			if (volunteering) lines.push(volunteering);
+			lines.push("");
+		}
+		if (highlights) {
+			lines.push("ADDITIONAL");
+			lines.push("──────────────────────────────");
+			lines.push(highlights);
+		}
+		return lines.join("\n");
+	}
+
 	function handleGenerate() {
 		setError(null);
+		setPreviewMode("ai");
 		startTransition(async () => {
 			const res = await generateCvAction({
 				cvTemplate,
@@ -396,51 +468,76 @@ export default function CVPage() {
 					</p>
 				</div>
 
-				{/* Output panel */}
+				{/* Output panel — always visible, shows live draft or AI result */}
 				<div className="lg:col-span-3">
-					{result ? (
-						<FadeIn>
-							<div className="rounded-xl border border-border bg-card p-5">
-								<div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
-									<div>
-										<h2 className="font-semibold">Your CV</h2>
-										<p className="text-xs text-muted-foreground capitalize">
-											{TEMPLATES.find(t => t.value === result.template)?.label ?? result.template} · {result.sections.join(" · ")}
-										</p>
-									</div>
-									<div className="flex items-center gap-2 flex-wrap">
-										<Button variant="outline" size="sm" onClick={handleCopy} className="gap-1.5">
-											{copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-											{copied ? "Copied!" : "Copy"}
-										</Button>
-										<Button variant="outline" size="sm" onClick={handleDownloadTxt} className="gap-1.5">
-											<Download className="h-3.5 w-3.5" />
-											.txt
-										</Button>
-										<Button variant="default" size="sm" onClick={handleDownloadPdf} disabled={downloading} className="gap-1.5">
-											{downloading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
-											PDF
-										</Button>
-										<Button variant="ghost" size="sm" onClick={handleGenerate} disabled={isPending} className="gap-1.5">
-											<RefreshCw className="h-3.5 w-3.5" />
-											Rebuild
-										</Button>
-									</div>
+					{(result || buildDraftCv().trim()) ? (
+						<div className="rounded-xl border border-border bg-card p-5">
+							{/* Tab switcher */}
+							<div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
+								<div className="flex gap-1 rounded-lg border border-border bg-muted/40 p-1">
+									<button
+										type="button"
+										onClick={() => setPreviewMode("draft")}
+										className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${previewMode === "draft" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+									>
+										<Eye className="h-3 w-3" /> Live Draft
+									</button>
+									{result && (
+										<button
+											type="button"
+											onClick={() => setPreviewMode("ai")}
+											className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${previewMode === "ai" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+										>
+											<Sparkles className="h-3 w-3" /> AI Result
+										</button>
+									)}
 								</div>
-								<div className="rounded-lg border border-border bg-[#f8f8f6] max-h-[70vh] overflow-y-auto p-3">
-									<DocumentPreview
-										content={result.cv}
-										template={cvTemplate}
-										mode="cv"
-									/>
+								<div className="flex items-center gap-2 flex-wrap">
+									{previewMode === "ai" && result && (
+										<>
+											<Button variant="outline" size="sm" onClick={handleCopy} className="gap-1.5">
+												{copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+												{copied ? "Copied!" : "Copy"}
+											</Button>
+											<Button variant="outline" size="sm" onClick={handleDownloadTxt} className="gap-1.5">
+												<Download className="h-3.5 w-3.5" /> .txt
+											</Button>
+											<Button variant="default" size="sm" onClick={handleDownloadPdf} disabled={downloading} className="gap-1.5">
+												{downloading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+												PDF
+											</Button>
+										</>
+									)}
+									<Button variant="ghost" size="sm" onClick={handleGenerate} disabled={isPending} className="gap-1.5">
+										{isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+										{isPending ? "Building…" : "Build with AI"}
+									</Button>
 								</div>
-								<div className="mt-4 rounded-lg border border-[#C49A3C]/20 bg-[#C49A3C]/5 px-3 py-2">
+							</div>
+
+							<div className="rounded-lg border border-border bg-[#f8f8f6] max-h-[70vh] overflow-y-auto p-3">
+								<DocumentPreview
+									content={previewMode === "ai" && result ? result.cv : buildDraftCv()}
+									template={cvTemplate}
+									mode="cv"
+								/>
+							</div>
+
+							{previewMode === "draft" && (
+								<div className="mt-3 rounded-lg border border-[#4A90D9]/20 bg-[#4A90D9]/5 px-3 py-2">
+									<p className="text-xs text-[#4A90D9]">
+										Live draft from your inputs — click &ldquo;Build with AI&rdquo; to generate a polished version.
+									</p>
+								</div>
+							)}
+							{previewMode === "ai" && result && (
+								<div className="mt-3 rounded-lg border border-[#C49A3C]/20 bg-[#C49A3C]/5 px-3 py-2">
 									<p className="text-xs text-[#C49A3C]">
 										AI-generated — review, edit, and fill in any [PLACEHOLDER] markers before submitting.
 									</p>
 								</div>
-							</div>
-						</FadeIn>
+							)}
+						</div>
 					) : (
 						<div className="flex h-full min-h-[500px] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/50 p-10 text-center">
 							<div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
