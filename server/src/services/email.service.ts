@@ -73,14 +73,24 @@ async function sendMail(
       `duration: ${durationMs}ms`
     );
 
+    // Map common error codes to user-friendly messages
+    let userMessage = errorMessage;
+    if (errorCode === 'ETIMEDOUT') {
+      userMessage = 'Email service timeout. Please try again later.';
+    } else if (errorCode === 'ECONNREFUSED') {
+      userMessage = 'Unable to connect to email service. Please try again later.';
+    } else if (errorCode === 'EAUTH' || errorCode === 'ENOTFOUND') {
+      userMessage = 'Email service configuration error. Please contact support.';
+    }
+
     if (IS_DEV) {
       // In development, fall back to console so signup/reset never fail locally
       console.log(`\n[EMAIL (SMTP error fallback) → ${opts.to}] ${opts.subject}\n${opts.text}\n`);
-      return { success: true, provider: 'console-fallback', error: errorMessage, durationMs };
+      return { success: true, provider: 'console-fallback', error: userMessage, durationMs };
     }
 
     // In production, propagate so callers can handle it
-    return { success: false, provider: EMAIL_PROVIDER, error: errorMessage, durationMs };
+    return { success: false, provider: EMAIL_PROVIDER, error: userMessage, durationMs };
   }
 }
 

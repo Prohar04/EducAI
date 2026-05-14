@@ -25,10 +25,12 @@ console.log('\n[nodemailer] Email configuration status:');
 console.log(`  SMTP provider configured: ${!!(host && user && pass) || !!(user && pass) ? 'yes' : 'no'}`);
 console.log(`  SMTP host: ${host || '(not set)'}`);
 console.log(`  SMTP port: ${port}`);
+console.log(`  SMTP secure: ${secure}`);
 console.log(`  SMTP user: ${user || '(not set)'}`);
 console.log(`  SMTP_PASS configured: ${!!pass ? 'yes' : 'no'}`);
 console.log(`  EMAIL_FROM: ${emailFrom || '(not set)'}`);
 console.log(`  FRONTEND_URL: ${frontendUrl || '(not set)'}`);
+console.log(`  Timeouts: connection=10s, greeting=10s, socket=15s`);
 
 // Validate required config in production
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
@@ -53,6 +55,10 @@ if (host && user && pass) {
     port,
     secure, // false for port 587 (STARTTLS), true for 465 (SSL)
     auth: { user, pass },
+    // Timeout settings to prevent long waits on network issues
+    connectionTimeout: 10000,  // 10 seconds to establish connection
+    greetingTimeout: 10000,    // 10 seconds to receive greeting from server
+    socketTimeout: 15000,      // 15 seconds of inactivity before timeout
   });
   EMAIL_CONFIGURED = true;
   console.log(`[nodemailer] ✓ Using custom SMTP: ${host}:${port} (user=${user})\n`);
@@ -61,6 +67,10 @@ if (host && user && pass) {
   transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: { user, pass },
+    // Timeout settings to prevent long waits on network issues
+    connectionTimeout: 10000,  // 10 seconds to establish connection
+    greetingTimeout: 10000,    // 10 seconds to receive greeting from server
+    socketTimeout: 15000,      // 15 seconds of inactivity before timeout
   });
   EMAIL_CONFIGURED = true;
   console.log('[nodemailer] ✓ Using Gmail service transport\n');

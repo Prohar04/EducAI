@@ -36,6 +36,7 @@ if (!email) {
 console.log('\n=== Email Configuration Status ===');
 const smtpHost = process.env.SMTP_HOST;
 const smtpPort = process.env.SMTP_PORT || '587';
+const smtpSecure = process.env.SMTP_SECURE === 'true';
 const smtpUser = process.env.SMTP_USER || process.env.EMAIL_USER;
 const smtpPass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
 const emailFrom = process.env.EMAIL_FROM;
@@ -43,6 +44,7 @@ const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 console.log(`SMTP_HOST: ${smtpHost || '(not set)'}`);
 console.log(`SMTP_PORT: ${smtpPort}`);
+console.log(`SMTP_SECURE: ${smtpSecure}`);
 console.log(`SMTP_USER: ${smtpUser || '(not set)'}`);
 console.log(`SMTP_PASS: ${smtpPass ? 'configured (' + smtpPass.length + ' chars)' : '(not set)'}`);
 console.log(`EMAIL_FROM: ${emailFrom || '(not set)'}`);
