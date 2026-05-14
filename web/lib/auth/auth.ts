@@ -297,6 +297,15 @@ export async function resendVerification(
 			},
 		);
 
+		// Handle email service unavailable error
+		if (response.status === 503) {
+			const data = await response.json().catch(() => null);
+			return {
+				success: false,
+				message: data?.message || "Email service unavailable. Please try again later.",
+			};
+		}
+
 		const data = await response.json().catch(() => null);
 		return {
 			success: true,

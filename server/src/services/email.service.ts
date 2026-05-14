@@ -10,47 +10,77 @@ interface SendMailResult {
   provider: string;
   messageId?: string;
   error?: string;
+  durationMs?: number;
 }
 
-async function sendMail(opts: { to: string; subject: string; html: string; text: string }): Promise<SendMailResult> {
+async function sendMail(
+  opts: { to: string; subject: string; html: string; text: string },
+  action?: string
+): Promise<SendMailResult> {
+  const startTime = Date.now();
+
   // Always-console mode (explicit opt-in via EMAIL_PROVIDER=console)
   if (EMAIL_PROVIDER === 'console') {
     console.log(`\n[EMAIL → ${opts.to}] ${opts.subject}\n${opts.text}\n`);
-    return { success: true, provider: 'console', messageId: 'console-log' };
+    const durationMs = Date.now() - startTime;
+    return { success: true, provider: 'console', messageId: 'console-log', durationMs };
   }
 
   // Guard: if no real SMTP credentials are configured, fail fast in production
   // rather than silently "succeeding" with jsonTransport (which discards the email).
   if (!EMAIL_CONFIGURED) {
     const msg = 'SMTP not configured — set SMTP_HOST, SMTP_USER, SMTP_PASS in environment';
-    console.error(`[email] ${msg}`);
+    const durationMs = Date.now() - startTime;
+    console.error(`[email] ${msg} | action: ${action || 'send'} | recipient: ${opts.to} | duration: ${durationMs}ms`);
 
     if (IS_DEV) {
       // Dev convenience: print link to console so local testing still works
       console.log(`\n[EMAIL (no-creds dev fallback) → ${opts.to}] ${opts.subject}\n${opts.text}\n`);
-      return { success: true, provider: 'console-fallback', messageId: 'no-creds-dev', error: msg };
+      return { success: true, provider: 'console-fallback', messageId: 'no-creds-dev', error: msg, durationMs };
     }
 
     // Production: return failure so callers can surface the error to the user
-    return { success: false, provider: 'none', error: msg };
+    return { success: false, provider: 'none', error: msg, durationMs };
   }
 
   try {
     const info = await transporter.sendMail({ from: EMAIL_FROM, ...opts });
-    console.log(`[email] Sent to ${opts.to} | subject: "${opts.subject}" | messageId: ${info.messageId}`);
-    return { success: true, provider: EMAIL_PROVIDER, messageId: info.messageId };
+    const durationMs = Date.now() - startTime;
+    console.log(
+      `[email] ✓ Sent successfully | ` +
+      `action: ${action || 'send'} | ` +
+      `recipient: ${opts.to} | ` +
+      `subject: "${opts.subject}" | ` +
+      `provider: ${EMAIL_PROVIDER} | ` +
+      `messageId: ${info.messageId} | ` +
+      `duration: ${durationMs}ms`
+    );
+    return { success: true, provider: EMAIL_PROVIDER, messageId: info.messageId, durationMs };
   } catch (err) {
-    const errorMessage = (err as Error).message;
-    console.error(`[email] Failed to send to ${opts.to} | subject: "${opts.subject}" | error: ${errorMessage}`);
+    const durationMs = Date.now() - startTime;
+    const error = err as Error;
+    const errorName = error.name || 'Error';
+    const errorMessage = error.message;
+    const errorCode = (error as any).code;
+
+    console.error(
+      `[email] ✗ Failed to send | ` +
+      `action: ${action || 'send'} | ` +
+      `recipient: ${opts.to} | ` +
+      `subject: "${opts.subject}" | ` +
+      `provider: ${EMAIL_PROVIDER} | ` +
+      `error: ${errorName}${errorCode ? ` (${errorCode})` : ''} - ${errorMessage} | ` +
+      `duration: ${durationMs}ms`
+    );
 
     if (IS_DEV) {
       // In development, fall back to console so signup/reset never fail locally
       console.log(`\n[EMAIL (SMTP error fallback) → ${opts.to}] ${opts.subject}\n${opts.text}\n`);
-      return { success: true, provider: 'console-fallback', error: errorMessage };
+      return { success: true, provider: 'console-fallback', error: errorMessage, durationMs };
     }
 
     // In production, propagate so callers can handle it
-    return { success: false, provider: EMAIL_PROVIDER, error: errorMessage };
+    return { success: false, provider: EMAIL_PROVIDER, error: errorMessage, durationMs };
   }
 }
 
@@ -83,7 +113,7 @@ export async function sendVerificationEmail(
 
   const text = `Verify your EducAI email\n\nClick the link below to verify your email (expires in 24 hours):\n${verifyUrl}\n\nIf you didn't create this account, you can safely ignore this email.`;
 
-  return sendMail({ to: toEmail, subject, html, text });
+  return sendMail({ to: toEmail, subject, html, text }, 'email-verification');
 }
 
 export async function sendPasswordResetEmail(
@@ -115,7 +145,7 @@ export async function sendPasswordResetEmail(
 
   const text = `Reset your EducAI password\n\nClick the link below to set a new password (expires in 30 minutes):\n${resetUrl}\n\nIf you didn't request this, you can safely ignore this email.`;
 
-  return sendMail({ to: toEmail, subject, html, text });
+  return sendMail({ to: toEmail, subject, html, text }, 'password-reset');
 }
 
 export interface ScholarshipAlertItem {
@@ -192,5 +222,5 @@ export async function sendScholarshipDeadlineAlert(
   const textLines = alerts.map((a) => `• ${a.scholarshipTitle} (${a.provider ?? 'Unknown'}) — deadline ${a.deadlineDate}, ${a.daysLeft} days left`);
   const text = `Scholarship Deadline Alert\n\nHi ${userName},\n\nYou have upcoming scholarship deadlines:\n${textLines.join('\n')}\n\nView all: ${scholarshipsUrl}`;
 
-  await sendMail({ to: toEmail, subject, html, text });
+  await sendMail({ to: toEmail, subject, html, text }, 'scholarship-alert');
 }
