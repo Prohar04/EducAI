@@ -67,12 +67,6 @@ export async function getJobRefreshStatus(req: AuthRequest, res: Response, next:
 }
 
 export async function triggerBackgroundRefresh(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
-  const cronSecret = req.headers["x-cron-secret"];
-  if (!cronSecret || cronSecret !== process.env.CRON_SECRET) {
-    res.status(401).json({ error: "Unauthorized" });
-    return;
-  }
-
   try {
     logger.info("[jobs] background refresh triggered");
     const result = await backgroundRefreshAll();
