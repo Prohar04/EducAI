@@ -50,28 +50,30 @@ if (IS_PRODUCTION) {
 
 if (host && user && pass) {
   // Custom SMTP — also covers smtp.gmail.com (the recommended path)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   transporter = nodemailer.createTransport({
     host,
     port,
     secure, // false for port 587 (STARTTLS), true for 465 (SSL)
     auth: { user, pass },
-    // Timeout settings to prevent long waits on network issues
-    connectionTimeout: 10000,  // 10 seconds to establish connection
-    greetingTimeout: 10000,    // 10 seconds to receive greeting from server
-    socketTimeout: 15000,      // 15 seconds of inactivity before timeout
-  });
+    family: 4, // Force IPv4 — Render free tier has no outbound IPv6
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+  } as any);
   EMAIL_CONFIGURED = true;
   console.log(`[nodemailer] ✓ Using custom SMTP: ${host}:${port} (user=${user})\n`);
 } else if (user && pass) {
   // Fallback: Gmail via "service" shorthand (EMAIL_USER + EMAIL_PASS)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: { user, pass },
-    // Timeout settings to prevent long waits on network issues
-    connectionTimeout: 10000,  // 10 seconds to establish connection
-    greetingTimeout: 10000,    // 10 seconds to receive greeting from server
-    socketTimeout: 15000,      // 15 seconds of inactivity before timeout
-  });
+    family: 4, // Force IPv4 — Render free tier has no outbound IPv6
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+  } as any);
   EMAIL_CONFIGURED = true;
   console.log('[nodemailer] ✓ Using Gmail service transport\n');
 } else {
