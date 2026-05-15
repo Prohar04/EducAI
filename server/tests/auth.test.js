@@ -46,10 +46,12 @@ jest.unstable_mockModule('#src/services/token.service.ts', () => ({
 const mockSendVerificationEmail = jest.fn().mockResolvedValue({ success: true, provider: 'mock' });
 const mockSendPasswordResetEmail = jest.fn().mockResolvedValue(undefined);
 const mockSendScholarshipDeadlineAlert = jest.fn().mockResolvedValue(undefined);
+const mockSendWelcomeEmail = jest.fn().mockResolvedValue(undefined);
 jest.unstable_mockModule('#src/services/email.service.ts', () => ({
   sendVerificationEmail: mockSendVerificationEmail,
   sendPasswordResetEmail: mockSendPasswordResetEmail,
   sendScholarshipDeadlineAlert: mockSendScholarshipDeadlineAlert,
+  sendWelcomeEmail: mockSendWelcomeEmail,
 }));
 
 // Email verification service
@@ -335,7 +337,7 @@ describe('Auth Endpoints', () => {
         expiresAt: new Date(Date.now() + 3600_000),
         usedAt: null,
       });
-      mockPrismaUserUpdate.mockResolvedValue({});
+      mockPrismaUserUpdate.mockResolvedValue({ email: baseUser.email, name: baseUser.name });
 
       const res = await request(app)
         .post('/auth/verify-email')
@@ -345,6 +347,7 @@ describe('Auth Endpoints', () => {
       expect(mockPrismaUserUpdate).toHaveBeenCalledWith({
         where: { id: baseUser.id },
         data: { emailVerified: true, isActive: true },
+        select: { email: true, name: true },
       });
       expect(mockMarkEmailVerificationTokenUsed).toHaveBeenCalledWith('tok-1');
     });

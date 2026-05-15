@@ -144,18 +144,25 @@ describe('POST /chat', () => {
       },
     });
 
+    const mockJsonBody = {
+      answer: 'Start with the saved Canadian program because it already aligns with your IELTS score.',
+      bullets: ['Your strongest fit is Example University.', 'The next hard deadline is December 15, 2026.'],
+      nextSteps: ['Finalize your SOP draft this month.'],
+      sources: [
+        { type: 'internal', title: 'Program: MSc Computer Science - Example University', id: 'program:program-1' },
+        { type: 'web', title: 'Example University admissions', url: 'https://example.edu/msc-cs' },
+      ],
+      confidence: 'high',
+    };
+    const bodyText = JSON.stringify(mockJsonBody);
     mockFetch.mockResolvedValue({
       ok: true,
-      json: async () => ({
-        answer: 'Start with the saved Canadian program because it already aligns with your IELTS score.',
-        bullets: ['Your strongest fit is Example University.', 'The next hard deadline is December 15, 2026.'],
-        nextSteps: ['Finalize your SOP draft this month.'],
-        sources: [
-          { type: 'internal', title: 'Program: MSc Computer Science - Example University', id: 'program:program-1' },
-          { type: 'web', title: 'Example University admissions', url: 'https://example.edu/msc-cs' },
-        ],
-        confidence: 'high',
-      }),
+      status: 200,
+      headers: { get: () => 'application/json' },
+      json: async () => mockJsonBody,
+      text: async () => bodyText,
+      arrayBuffer: async () => new TextEncoder().encode(bodyText).buffer,
+      clone: function() { return this; },
     });
   });
 

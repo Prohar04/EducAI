@@ -1,31 +1,25 @@
 import { Request, Response, NextFunction } from 'express';
-import aj from '#src/config/arcjet.ts';
-import { slidingWindow, shield } from '@arcjet/node';
 
-// Stricter Arcjet instance for auth routes
-const authAj = aj.withRule(
-  slidingWindow({
-    mode: 'LIVE',
-    interval: '15m',
-    max: 10, // 10 attempts per 15 minutes per IP
-  }),
-);
-
-const forgotPasswordAj = aj.withRule(
-  slidingWindow({
-    mode: 'LIVE',
-    interval: '1h',
-    max: 5, // 5 reset attempts per hour per IP
-  }),
-);
+// Skip Arcjet entirely in test/CI — the WASM analyzer requires a real HTTP runtime
+// and crashes with `Cannot read properties of undefined (reading 'arrayBuffer')` in Jest.
+const IS_TEST = process.env.NODE_ENV === 'test';
 
 async function applyArcjet(
-  instance: typeof aj,
+  ruleType: 'auth' | 'forgotPassword',
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
+  if (IS_TEST) return next();
+
   try {
+    const { default: aj } = await import('#src/config/arcjet.ts');
+    const { slidingWindow } = await import('@arcjet/node');
+
+    const instance = ruleType === 'forgotPassword'
+      ? aj.withRule(slidingWindow({ mode: 'LIVE', interval: '1h', max: 5 }))
+      : aj.withRule(slidingWindow({ mode: 'LIVE', interval: '15m', max: 10 }));
+
     const decision = await instance.protect(req);
     if (decision.isDenied()) {
       if (decision.reason.isRateLimit()) {
@@ -35,24 +29,20 @@ async function applyArcjet(
         });
         return;
       }
-      if (decision.reason.isBot()) {
-        res.status(403).json({ message: 'Request blocked.', code: 'BOT_DETECTED' });
-        return;
-      }
       res.status(403).json({ message: 'Request blocked.', code: 'FORBIDDEN' });
       return;
     }
     next();
   } catch {
-    // Never block requests due to Arcjet errors — fail open
+    // Fail open — never block requests due to Arcjet errors
     next();
   }
 }
 
 export function authRateLimit(req: Request, res: Response, next: NextFunction) {
-  return applyArcjet(authAj, req, res, next);
+  return applyArcjet('auth', req, res, next);
 }
 
 export function forgotPasswordRateLimit(req: Request, res: Response, next: NextFunction) {
-  return applyArcjet(forgotPasswordAj, req, res, next);
+  return applyArcjet('forgotPassword', req, res, next);
 }
