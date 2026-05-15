@@ -209,7 +209,7 @@ function RecommendedPrograms({ match }: { match: MatchLatestResponse | null }) {
       <ul className="space-y-2" aria-label="Recommended programs list">
         {topPrograms.map((result, i) => {
           const raw = result.rawData ?? {};
-          const title = (raw.program_title as string) ?? (raw.title as string) ?? "Unnamed Programme";
+          const title = (raw.program_title as string) ?? (raw.title as string) ?? "Unnamed Program";
           const university = (raw.university_name as string) ?? (raw.universityName as string) ?? "Unknown University";
           const country = (raw.country as string) ?? "";
           return (
@@ -478,7 +478,7 @@ function RoadmapPreview({ timeline }: { timeline: unknown }) {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold flex items-center gap-2">
           <Target className="size-5 text-primary" aria-hidden="true" />
-          Your Roadmap
+          Your Timeline
         </h2>
         <Link href="/app/timeline" className="text-sm text-primary hover:underline">
           {plan?.length ? "View Full" : "Generate"}
@@ -487,9 +487,9 @@ function RoadmapPreview({ timeline }: { timeline: unknown }) {
       {!plan?.length ? (
         <div className="flex flex-col items-center py-6 text-center">
           <Calendar className="size-8 text-muted-foreground/30 mb-2" aria-hidden="true" />
-          <p className="text-sm text-muted-foreground">No roadmap yet</p>
+          <p className="text-sm text-muted-foreground">No timeline yet</p>
           <p className="text-xs text-muted-foreground/60 mt-1">Generate a personalized application timeline</p>
-          <Link href="/app/timeline" className="mt-3 text-xs text-primary hover:underline">Generate Roadmap</Link>
+          <Link href="/app/timeline" className="mt-3 text-xs text-primary hover:underline">Generate Timeline</Link>
         </div>
       ) : (
         <>
@@ -499,7 +499,7 @@ function RoadmapPreview({ timeline }: { timeline: unknown }) {
               {roadmap.countryCode} · {roadmap.intake}
             </p>
           )}
-          <ul className="space-y-2" aria-label="Roadmap milestones">
+          <ul className="space-y-2" aria-label="Timeline milestones">
             {plan.slice(0, 4).map((month, idx) => (
               <li key={month.month} className="flex gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 hover:bg-white/[0.04] transition-colors">
                 <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-bold text-primary">

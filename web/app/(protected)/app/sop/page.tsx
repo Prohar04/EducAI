@@ -467,7 +467,7 @@ export default function SOPPage() {
 									</Button>
 								</div>
 							</div>
-							<div className="rounded-lg border border-border bg-[#f8f8f6] max-h-[70vh] overflow-y-auto p-3">
+							<div className="rounded-lg border border-border bg-muted/30 max-h-[70vh] overflow-y-auto p-3">
 								<DocumentPreview
 									content={previewMode === "ai" && result ? result.sop : buildDraftSop()}
 									template={sopTemplate}

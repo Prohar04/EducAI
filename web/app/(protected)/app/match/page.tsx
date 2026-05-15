@@ -91,7 +91,7 @@ function ResultCard({
   const [saving, setSaving] = useState(false);
 
   const raw = result.rawData ?? {};
-  const title        = (raw.program_title as string) ?? (raw.title as string) ?? "Unnamed Programme";
+  const title        = (raw.program_title as string) ?? (raw.title as string) ?? "Unnamed Program";
   const university   = (raw.university_name as string) ?? (raw.universityName as string) ?? "Unknown University";
   const country      = (raw.country as string) ?? "";
   const city         = (raw.city as string) ?? null;
@@ -385,7 +385,7 @@ export default function MatchPage() {
             AI Match
           </h1>
           <p className="mt-1 text-muted-foreground">
-            Programmes scraped and ranked live against your profile.
+            Programs scraped and ranked live against your profile.
           </p>
         </div>
         <Button
@@ -435,17 +435,17 @@ export default function MatchPage() {
           )}
           <span>
             {run.status === "done"
-              ? `${results.length} programme${results.length !== 1 ? "s" : ""} found · Last run: ${new Date(run.createdAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}`
+              ? `${results.length} program${results.length !== 1 ? "s" : ""} found · Last run: ${new Date(run.createdAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}`
               : run.status === "error"
                 ? `Match run failed. ${run.error?.includes("AI server unavailable") ? "The AI pipeline timed out — please try again." : (run.error ?? "Unknown error")} `
                 : progress < 20
                   ? `Preparing search… (${progress}%)`
                   : progress < 40
-                    ? `Searching for programmes… (${progress}%)`
+                    ? `Searching for programs… (${progress}%)`
                     : progress < 65
                       ? `Scraping university pages… (${progress}%)`
                       : progress < 85
-                        ? `Extracting and ranking programmes… (${progress}%)`
+                        ? `Extracting and ranking programs… (${progress}%)`
                         : `Finalising results… (${progress}%)`}
           </span>
         </div>
@@ -487,7 +487,7 @@ export default function MatchPage() {
         <div className="flex flex-col items-center rounded-xl border border-dashed border-border bg-card p-6 text-center sm:p-12">
           <MatchIllustration className="mb-4 h-32 w-auto text-primary opacity-75" />
           <p className="text-muted-foreground">
-            No match results yet. Click <strong>Run Match</strong> to scrape live programmes tailored to your profile.
+            No match results yet. Click <strong>Run Match</strong> to scrape live programs tailored to your profile.
           </p>
           <p className="mt-2 text-xs text-muted-foreground/70">
             Go to{" "}
@@ -525,7 +525,7 @@ export default function MatchPage() {
         <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border bg-card p-6 text-center sm:p-10">
           <MatchIllustration className="h-24 w-auto text-primary opacity-60" />
           <div className="space-y-1">
-            <p className="font-semibold text-foreground">No programmes found for your profile</p>
+            <p className="font-semibold text-foreground">No programs found for your profile</p>
             <p className="text-sm text-muted-foreground">
               The scraper searched but couldn&apos;t find strong matches. Try these fixes:
             </p>

@@ -41,7 +41,7 @@ const ACTION_CARDS = [
   {
     href: "/app/programs",
     icon: BookOpen,
-    title: "Find Programmes",
+    title: "Find Programs",
     description: "Browse universities worldwide filtered by your profile.",
     color: "from-[#4A90D9]/10 to-[#4A90D9]/5",
     border: "border-[#4A90D9]/20",
@@ -49,8 +49,8 @@ const ACTION_CARDS = [
   {
     href: "/app/match",
     icon: Sparkles,
-    title: "Match Programmes",
-    description: "AI ranks every programme by your admission likelihood.",
+    title: "Match Programs",
+    description: "AI ranks every program by your admission likelihood.",
     color: "from-[#4A90D9]/10 to-[#4A90D9]/5",
     border: "border-[#4A90D9]/20",
   },
@@ -58,7 +58,7 @@ const ACTION_CARDS = [
     href: "/app/saved",
     icon: Bookmark,
     title: "Saved",
-    description: "Review and compare your bookmarked programmes.",
+    description: "Review and compare your bookmarked programs.",
     color: "from-[#4A90D9]/10 to-[#4A90D9]/5",
     border: "border-[#4A90D9]/20",
   },
@@ -142,7 +142,7 @@ export default function HomeAnimations({
             <div className="flex-1">
               <p className="text-sm font-medium">Your profile is incomplete</p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Add your GPA, major, and English test score to get accurate programme matches.
+                Add your GPA, major, and English test score to get accurate program matches.
               </p>
             </div>
             <Link
@@ -286,7 +286,7 @@ export default function HomeAnimations({
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-xl border border-border bg-card p-4 text-center">
               <p className="text-2xl font-bold text-primary">{savedCount}</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">Saved programmes</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">Saved programs</p>
             </div>
             <div className="rounded-xl border border-border bg-card p-4 text-center">
               <p className="text-2xl font-bold text-primary">—</p>
@@ -339,10 +339,10 @@ export default function HomeAnimations({
               <CheckCircle2 className="mb-2 size-8 text-[#3D9970]" />
               <p className="font-medium">You&apos;re on track!</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                No immediate actions needed. Keep exploring programmes.
+                No immediate actions needed. Keep exploring programs.
               </p>
               <Link href="/app/programs" className="mt-4 text-sm font-medium text-primary hover:underline">
-                Browse programmes →
+                Browse programs →
               </Link>
             </div>
           )}

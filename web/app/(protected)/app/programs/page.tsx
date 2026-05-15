@@ -165,12 +165,12 @@ export default async function ProgramsPage({
 						<div>
 							<p className="font-semibold text-foreground">No fresh program data available right now</p>
 							<p className="mt-1 text-sm text-muted-foreground">
-								Fresh results are programmes verified within the last 7 days.
+								Fresh results are programs verified within the last 7 days.
 								{staleHiddenCount > 0 && (
 									<>
 										{" "}
 										<span className="font-medium text-foreground">
-											{staleHiddenCount} older programme{staleHiddenCount !== 1 ? "s" : ""} {staleHiddenCount !== 1 ? "are" : "is"} available in the cache.
+											{staleHiddenCount} older program{staleHiddenCount !== 1 ? "s" : ""} {staleHiddenCount !== 1 ? "are" : "is"} available in the cache.
 										</span>
 									</>
 								)}
@@ -198,8 +198,8 @@ export default async function ProgramsPage({
 							<div className="mb-4 flex items-start gap-3 rounded-xl border border-[#C49A3C]/40 bg-[#C49A3C]/10 px-4 py-3 text-sm text-[#C49A3C]">
 								<AlertTriangle className="mt-0.5 size-4 shrink-0" />
 								<div>
-									<span className="font-semibold">Showing cached/stale programmes.</span>{" "}
-									These results may be outdated. Visit the official programme page to confirm details before applying.
+									<span className="font-semibold">Showing cached/stale programs.</span>{" "}
+									These results may be outdated. Visit the official program page to confirm details before applying.
 								</div>
 							</div>
 						</FadeIn>
@@ -207,7 +207,7 @@ export default async function ProgramsPage({
 
 					<div className="mb-4 flex flex-wrap items-center justify-between gap-2">
 						<p className="text-sm text-muted-foreground">
-							{result.total.toLocaleString()} programme{result.total !== 1 ? "s" : ""} found
+							{result.total.toLocaleString()} program{result.total !== 1 ? "s" : ""} found
 							{profile && ranked.some((p) => p._score > 0) && (
 								<span className="ml-1 text-primary/70">(ranked by your profile)</span>
 							)}

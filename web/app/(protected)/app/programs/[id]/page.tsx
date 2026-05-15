@@ -153,7 +153,7 @@ export default async function ProgramDetailPage({
   ].filter((x): x is { href: string; label: string } => x !== null);
 
   const programLinks: { href: string; label: string; primary?: boolean }[] = [
-    program.sourceUrl           ? { href: program.sourceUrl,           label: "Official Programme Page", primary: true } : null,
+    program.sourceUrl           ? { href: program.sourceUrl,           label: "Official Program Page", primary: true } : null,
     program.applicationPortalUrl ? { href: program.applicationPortalUrl, label: "Application Portal" }                   : null,
   ].filter((x): x is { href: string; label: string; primary?: boolean } => x !== null);
 
@@ -177,12 +177,12 @@ export default async function ProgramDetailPage({
             <AlertTriangle className="mt-0.5 size-4 shrink-0 text-[#C49A3C]" />
             <div className="flex-1 min-w-0">
               <p className="font-semibold">
-                {freshnessStatus === "stale" ? "This programme data is outdated" : "This programme data may be outdated"}
+                {freshnessStatus === "stale" ? "This program data is outdated" : "This program data may be outdated"}
               </p>
               <p className="mt-0.5 text-xs text-[#C49A3C]/80">
                 {freshnessCfg.desc}.{" "}
                 {freshnessLabel && <>Last verified: <span className="font-semibold">{freshnessLabel}</span>. </>}
-                Always verify on the official programme page before applying.
+                Always verify on the official program page before applying.
               </p>
               {program.sourceUrl && (
                 <a
@@ -293,13 +293,13 @@ export default async function ProgramDetailPage({
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main content */}
         <div className="space-y-6 lg:col-span-2">
-          {/* Programme description */}
+          {/* Program description */}
           {program.description && (
             <FadeIn delay={0.08}>
               <section className="rounded-2xl border border-border bg-card p-6">
                 <h2 className="mb-3 flex items-center gap-2 font-bold">
                   <BookOpen className="size-4 text-primary" />
-                  About this programme
+                  About this program
                 </h2>
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   {program.description}
@@ -458,11 +458,11 @@ export default async function ProgramDetailPage({
             </FadeIn>
           )}
 
-          {/* Programme links */}
+          {/* Program links */}
           {programLinks.length > 0 && (
             <FadeIn delay={0.16}>
               <section className="rounded-2xl border border-border bg-card p-6">
-                <h2 className="mb-4 font-bold">Programme Links</h2>
+                <h2 className="mb-4 font-bold">Program Links</h2>
                 <div className="space-y-2.5">
                   {programLinks.map((link) => (
                     <ExternalLinkItem
@@ -499,7 +499,7 @@ export default async function ProgramDetailPage({
                 </p>
               )}
               <p className="mt-2 text-xs opacity-80">
-                Always confirm details on the official programme page before applying.
+                Always confirm details on the official program page before applying.
               </p>
             </div>
           </FadeIn>
@@ -524,7 +524,7 @@ export default async function ProgramDetailPage({
           <FadeIn delay={0.22}>
             <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5 text-center">
               <GraduationCap className="mx-auto mb-2 size-8 text-primary" />
-              <p className="mb-3 text-sm font-semibold">Save this programme</p>
+              <p className="mb-3 text-sm font-semibold">Save this program</p>
               <p className="mb-4 text-xs text-muted-foreground">
                 Saving adds it to your timeline, strategy analysis, and deadline tracker.
               </p>

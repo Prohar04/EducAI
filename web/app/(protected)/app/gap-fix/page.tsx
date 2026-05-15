@@ -290,7 +290,7 @@ function EvidencePanel({
                 gap: 6,
               }}
             >
-              {uploading ? "Uploading..." : "📎 Upload PDF"}
+              {uploading ? "Uploading..." : "Upload PDF"}
             </button>
 
             {uploadedPdf && (
@@ -373,7 +373,7 @@ function EvidencePanel({
               justifyContent: "center",
             }}
           >
-            {verifying ? "AI is verifying..." : "✓ Verify with AI"}
+            {verifying ? "Verifying evidence..." : "Verify Evidence"}
           </button>
 
           <p
@@ -530,7 +530,7 @@ function GapCard({
             marginTop: 4,
           }}
         >
-          ▼
+          {expanded ? "−" : "+"}
         </span>
       </div>
 
@@ -570,7 +570,6 @@ function GapCard({
                       border: "1px solid rgba(74,144,217,0.12)",
                     }}
                   >
-                    <span>↗</span>
                     <span>{link.title}</span>
                   </a>
                 ))}
@@ -804,7 +803,7 @@ export default function GapFixPage() {
       ) : !data || data.items.length === 0 ? (
         /* Empty state */
         <div style={{ textAlign: "center", padding: "60px 24px" }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>⚡</div>
+          <div style={{ fontSize: 48, marginBottom: 16, color: "#4A90D9" }}>◎</div>
           <h2
             style={{
               fontSize: 22,

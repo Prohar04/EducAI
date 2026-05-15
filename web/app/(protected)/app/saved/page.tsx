@@ -21,7 +21,7 @@ export default async function SavedProgramsPage() {
 			<FadeIn className="mb-8">
 				<h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Saved Programs</h1>
 				<p className="mt-1 text-muted-foreground">
-					Your bookmarked programmes.
+					Your bookmarked programs.
 				</p>
 			</FadeIn>
 
@@ -30,7 +30,7 @@ export default async function SavedProgramsPage() {
 				<SavedIllustration className="mb-3 h-28 w-auto text-primary opacity-75 sm:h-32" />
 					<h2 className="text-lg font-semibold">Nothing saved yet</h2>
 					<p className="mt-1 max-w-xs text-sm text-muted-foreground">
-						Browse programmes and click &quot;Save&quot; to bookmark them here.
+						Browse programs and click &quot;Save&quot; to bookmark them here.
 					</p>
 					<Link
 						href="/app/programs"

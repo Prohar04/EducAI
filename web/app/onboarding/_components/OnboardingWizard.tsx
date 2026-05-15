@@ -403,7 +403,7 @@ function Step3({ values, set }: StepProps) {
 						value={values.gre}
 						onChange={(e) => set("gre", e.target.value)}
 					/>
-					<p className="mt-1 text-xs text-muted-foreground">Top programmes expect 320+</p>
+					<p className="mt-1 text-xs text-muted-foreground">Top programs expect 320+</p>
 				</div>
 				<div>
 					<Label htmlFor="gmat" className="mb-1.5 block text-sm font-medium">GMAT Score <span className="text-xs text-muted-foreground">(optional)</span></Label>
@@ -416,7 +416,7 @@ function Step3({ values, set }: StepProps) {
 						value={values.gmat}
 						onChange={(e) => set("gmat", e.target.value)}
 					/>
-					<p className="mt-1 text-xs text-muted-foreground">MBA programmes typically require 600+</p>
+					<p className="mt-1 text-xs text-muted-foreground">MBA programs typically require 600+</p>
 				</div>
 			</div>
 		</div>
@@ -533,7 +533,7 @@ function Step4({ values, set }: StepProps) {
 				{values.fundingNeed === "true" && (
 					<div className="mt-2 flex items-center gap-2 rounded-lg border border-[#3D9970]/30 bg-[#3D9970]/5 px-3 py-2 text-xs text-[#3D9970]">
 						<CheckCircle2 className="size-3.5 shrink-0" />
-						Great — we&apos;ll highlight scholarship-eligible programmes for you.
+						Great — we&apos;ll highlight scholarship-eligible programs for you.
 					</div>
 				)}
 			</div>
@@ -799,7 +799,7 @@ export default function OnboardingWizard({
 				</nav>
 
 				<div className="mt-auto rounded-lg border border-border bg-card p-3 text-xs text-muted-foreground">
-					<p className="font-medium">Hi, {user.name} 👋</p>
+					<p className="font-medium">Hi, {user.name}</p>
 					<p className="mt-0.5">{user.email}</p>
 				</div>
 			</aside>
