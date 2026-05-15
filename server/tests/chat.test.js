@@ -161,8 +161,8 @@ describe('POST /chat', () => {
       headers: { get: () => 'application/json' },
       json: async () => mockJsonBody,
       text: async () => bodyText,
-      arrayBuffer: async () => new TextEncoder().encode(bodyText).buffer,
-      clone: function() { return this; },
+      arrayBuffer: async () => Buffer.from(bodyText).buffer,
+      clone: () => ({ ok: true, status: 200, json: async () => mockJsonBody, text: async () => bodyText }),
     });
   });
 
