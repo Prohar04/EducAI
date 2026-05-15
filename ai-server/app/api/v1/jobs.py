@@ -229,7 +229,7 @@ async def search_jobs(payload: JobSearchRequest) -> JobSearchResponse:
                 payload.page,
                 keyword=payload.keyword,
             )
-            if len(listings) >= 3:
+            if listings:
                 source_used = "adzuna"
         except Exception as e:
             logger.warning("Adzuna failed: %s", e)
@@ -247,15 +247,16 @@ async def search_jobs(payload: JobSearchRequest) -> JobSearchResponse:
                 keyword=payload.keyword,
                 date_posted=payload.date_posted,
             )
-            if len(jsearch_results) >= 3:
-                listings = jsearch_results
-                source_used = "jsearch"
-            elif len(jsearch_results) > 0:
+            if jsearch_results:
                 combined = listings + jsearch_results
                 listings = combined
                 source_used = "adzuna+jsearch" if source_used == "adzuna" else "jsearch"
         except Exception as e:
-            logger.warning("JSearch failed: %s", e)
+            status = getattr(getattr(e, "response", None), "status_code", None)
+            if status == 403:
+                logger.info("JSearch unavailable (not subscribed)")
+            else:
+                logger.warning("JSearch failed: %s", e)
 
     # SOURCE 3: NEVER use AI-generated jobs for user-facing search.
     # Return empty with fallback links instead.

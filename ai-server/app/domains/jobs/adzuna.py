@@ -46,39 +46,42 @@ async def fetch_adzuna_jobs(
 
     adzuna_country = ADZUNA_COUNTRIES[country_code.upper()]
 
-    job_type_label = {
+    # "intern" matches more Adzuna listings than "internship"; REMOTE/FULL_TIME need no suffix
+    job_type_suffix = {
         JobType.PART_TIME: "part time",
-        JobType.INTERNSHIP: "internship",
-        JobType.REMOTE: "remote",
+        JobType.INTERNSHIP: "intern",
+        JobType.REMOTE: "",
         JobType.FULL_TIME: "",
     }.get(job_type, "")
 
-    # If keyword is given (e.g. "Software Engineer"), use it as the primary search term;
-    # otherwise fall back to the field of study.
     search_term = keyword.strip() if keyword else field
-    what = f"{search_term} {job_type_label}".strip()
+    what = f"{search_term} {job_type_suffix}".strip()
 
-    params: dict[str, str | int] = {
+    base_params: dict[str, str | int] = {
         "app_id": ADZUNA_APP_ID,
         "app_key": ADZUNA_APP_KEY,
         "results_per_page": 10,
-        "what": what,
         "where": city,
     }
-
     if job_type == JobType.PART_TIME:
-        params["part_time"] = 1
+        base_params["part_time"] = 1
     if job_type == JobType.FULL_TIME:
-        params["full_time"] = 1
+        base_params["full_time"] = 1
+
+    url = f"{ADZUNA_BASE}/{adzuna_country}/search/{page}"
+    headers = {"Content-Type": "application/json"}
 
     async with httpx.AsyncClient(timeout=12.0) as client:
-        response = await client.get(
-            f"{ADZUNA_BASE}/{adzuna_country}/search/{page}",
-            params=params,
-            headers={"Content-Type": "application/json"},
-        )
+        response = await client.get(url, params={**base_params, "what": what}, headers=headers)
         response.raise_for_status()
         data = response.json()
+
+        # If too restrictive, retry with just the search term (no type suffix/flags)
+        if not data.get("results") and job_type_suffix:
+            fallback_params = {k: v for k, v in base_params.items() if k not in ("part_time", "full_time")}
+            response = await client.get(url, params={**fallback_params, "what": search_term}, headers=headers)
+            response.raise_for_status()
+            data = response.json()
 
     listings: List[JobListing] = []
     for job in data.get("results", []):
