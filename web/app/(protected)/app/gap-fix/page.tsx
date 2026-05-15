@@ -373,7 +373,7 @@ function EvidencePanel({
               justifyContent: "center",
             }}
           >
-            {verifying ? "ChatGPT is verifying..." : "✓ Verify with ChatGPT"}
+            {verifying ? "AI is verifying..." : "✓ Verify with AI"}
           </button>
 
           <p
