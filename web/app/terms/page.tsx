@@ -6,7 +6,7 @@ import LegalToc from "@/components/ui/legal-toc"
 export const metadata: Metadata = {
   title: "Terms of Service | EducAI Study Abroad Platform",
   description:
-    "Read EducAI's Terms of Service. Learn about acceptable use, AI-generated content policies, subscriptions, and user rights for our study abroad platform.",
+    "Read EducAI's Terms of Service. Learn about acceptable use, AI-generated content policies, free access, and user rights for our study abroad platform.",
   openGraph: {
     title: "Terms of Service | EducAI",
     description:
@@ -193,7 +193,7 @@ export default function TermsPage() {
                 <li style={liStyle}>Violate the terms of service of any connected third-party services including OpenAI, Google, or Serper</li>
               </ul>
               <p style={bodyStyle}>
-                Violations may result in immediate account suspension without refund of any paid subscription fees.
+                Violations may result in immediate account suspension.
               </p>
             </section>
 
@@ -222,22 +222,18 @@ export default function TermsPage() {
             {/* Section 7 */}
             <section id="section-7" style={sectionStyle}>
               <SectionDecor num="7" />
-              <h2 style={h2Style}>7. Subscription and Payments</h2>
-              <h3 style={h3Style}>7.1 Free Tier</h3>
+              <h2 style={h2Style}>7. Pricing and Plans</h2>
+              <h3 style={h3Style}>7.1 Free Access</h3>
               <p style={bodyStyle}>
-                EducAI offers a free tier with access to core features. Free tier usage limits are subject to change with notice.
+                EducAI is currently free to use. All core features — including program matching, scholarship discovery, AI strategy, SOP builder, CV builder, job finder, and timeline planner — are available at no cost and require no payment information.
               </p>
-              <h3 style={h3Style}>7.2 Paid Subscriptions</h3>
+              <h3 style={h3Style}>7.2 Future Paid Plans</h3>
               <p style={bodyStyle}>
-                Premium features may be available through paid subscription plans. Subscription fees are charged in advance and are non-refundable except where required by applicable law.
+                We may introduce optional premium features in the future. Any paid features will be clearly labelled, optional, and will not remove access to the current free feature set. We will provide advance notice before introducing any charges.
               </p>
-              <h3 style={h3Style}>7.3 Payment Processing</h3>
+              <h3 style={h3Style}>7.3 No Surprise Charges</h3>
               <p style={bodyStyle}>
-                Payments are processed by third-party payment providers. EducAI does not store full payment card information. You agree to the payment processor&apos;s terms of service.
-              </p>
-              <h3 style={h3Style}>7.4 Cancellation</h3>
-              <p style={bodyStyle}>
-                You may cancel your subscription at any time. Cancellation takes effect at the end of the current billing period. No partial refunds are provided for unused subscription time.
+                We will never charge you without explicit prior consent. No payment information is collected or stored by EducAI at this time.
               </p>
             </section>
 

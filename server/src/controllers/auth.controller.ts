@@ -34,6 +34,7 @@ import {
 import {
   sendPasswordResetEmail,
   sendVerificationEmail,
+  sendWelcomeEmail,
 } from '#src/services/email.service.ts';
 import {
   createEmailVerificationToken,
@@ -266,12 +267,19 @@ export const verifyEmail = async (req: Request, res: Response) => {
     }
 
     // Mark user as verified
-    await prisma.user.update({
+    const verifiedUser = await prisma.user.update({
       where: { id: record.userId },
       data: { emailVerified: true, isActive: true },
+      select: { email: true, name: true },
     });
 
     await markEmailVerificationTokenUsed(record.id);
+
+    // Fire-and-forget welcome email
+    const appUrl = process.env.FRONTEND_URL ?? 'https://educai-web.vercel.app';
+    sendWelcomeEmail(verifiedUser.email, verifiedUser.name ?? 'there', appUrl).catch((e) =>
+      console.error('[auth] Welcome email failed (non-fatal):', e),
+    );
 
     res.status(200).json({ message: 'Email verified successfully' });
   } catch (error) {
@@ -640,6 +648,71 @@ export const resetPassword = async (req: Request, res: Response) => {
     res.status(200).json({ message: 'Password updated successfully' });
   } catch (error) {
     console.error('Error in resetPassword:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// ── DELETE ACCOUNT ─────────────────────────────────────────────────────────────
+
+export const deleteAccount = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ message: 'Unauthorised' });
+
+    // Cascade delete via Prisma relations — all user data is removed
+    await prisma.user.delete({ where: { id: userId } });
+
+    // Clear auth cookies
+    const cookieOpts = { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax' as const };
+    res.clearCookie('accessToken', cookieOpts);
+    res.clearCookie('refreshToken', cookieOpts);
+
+    res.status(200).json({ message: 'Account permanently deleted' });
+  } catch (error) {
+    console.error('Error in deleteAccount:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// ── GDPR DATA EXPORT ──────────────────────────────────────────────────────────
+
+export const exportUserData = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ message: 'Unauthorised' });
+
+    const [user, profile, savedPrograms, matchRuns, roadmaps, strategies, gapFix, jobSearches] =
+      await Promise.all([
+        prisma.user.findUnique({
+          where: { id: userId },
+          select: { id: true, email: true, name: true, createdAt: true, emailVerified: true, oauthProvider: true },
+        }),
+        prisma.userProfile.findUnique({ where: { userId } }),
+        prisma.savedProgram.findMany({ where: { userId }, include: { program: { select: { title: true } } } }),
+        prisma.matchRun.findMany({ where: { userId }, select: { id: true, status: true, createdAt: true } }),
+        prisma.userRoadmap.findMany({ where: { userId }, select: { id: true, countryCode: true, intake: true, createdAt: true } }),
+        prisma.strategyReport.findMany({ where: { userId }, select: { id: true, countryCode: true, createdAt: true } }),
+        prisma.gapFixSession.findMany({ where: { userId }, select: { id: true, createdAt: true } }),
+        prisma.jobSearch.findMany({ where: { userId }, select: { id: true, countryCode: true, city: true, field: true, createdAt: true } }),
+      ]);
+
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      account: user,
+      profile,
+      savedPrograms: savedPrograms.map((s) => ({ savedAt: s.createdAt, program: s.program?.title })),
+      matchRuns,
+      roadmaps,
+      strategies,
+      gapFixSessions: gapFix,
+      jobSearches,
+    };
+
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="educai-data-export-${userId}.json"`);
+    res.status(200).json(exportData);
+  } catch (error) {
+    console.error('Error in exportUserData:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };

@@ -13,8 +13,11 @@ import {
   signout,
   signup,
   verifyEmail,
+  deleteAccount,
+  exportUserData,
 } from '#src/controllers/auth.controller.ts';
 import { authMiddleware } from '#src/middlewares/authenticate.ts';
+import { authRateLimit, forgotPasswordRateLimit } from '#src/middlewares/rateLimit.ts';
 
 const router = Router();
 
@@ -24,13 +27,13 @@ router.get('/google/callback', googleAuthCallback);
 router.get('/google/exchange', googleExchange);
 router.get('/google/failure', googleAuthFailure);
 
-// Local auth routes
-router.post('/signup', signup);
-router.post('/signin', signin);
+// Local auth routes — rate limited
+router.post('/signup', authRateLimit, signup);
+router.post('/signin', authRateLimit, signin);
 
-// Email verification
-router.post('/verify-email', verifyEmail);
-router.post('/resend-verification', resendVerification);
+// Email verification — rate limited
+router.post('/verify-email', authRateLimit, verifyEmail);
+router.post('/resend-verification', authRateLimit, resendVerification);
 
 // Get new access token using refresh token (POST preferred, GET for backward compat)
 router.post('/refresh', refresh);
@@ -43,9 +46,12 @@ router.get('/signout', authMiddleware, signout);
 // Current user profile
 router.get('/me', authMiddleware, me);
 
-// Password reset flow
-// TODO: Add rate limiting to /forgot-password to prevent abuse
-router.post('/forgot-password', forgotPassword);
-router.post('/reset-password', resetPassword);
+// Password reset flow — stricter rate limit on forgot-password
+router.post('/forgot-password', forgotPasswordRateLimit, forgotPassword);
+router.post('/reset-password', authRateLimit, resetPassword);
+
+// Account management (requires authentication)
+router.delete('/account', authMiddleware, deleteAccount);
+router.get('/export-data', authMiddleware, exportUserData);
 
 export default router;

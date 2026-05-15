@@ -27,6 +27,7 @@ const RESOURCE_LINKS: FooterLink[] = [
 ];
 
 const LEGAL_LINKS: FooterLink[] = [
+  { label: "Pricing", href: "/pricing" },
   { label: "Privacy Policy", href: "/privacy" },
   { label: "Terms of Service", href: "/terms" },
   { label: "Get Started", href: "/auth/signup" },

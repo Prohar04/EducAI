@@ -234,3 +234,57 @@ export async function sendScholarshipDeadlineAlert(
 
   await sendMail({ to: toEmail, subject, html, text }, 'scholarship-alert');
 }
+
+export async function sendWelcomeEmail(
+  toEmail: string,
+  userName: string,
+  appUrl: string,
+): Promise<void> {
+  const subject = 'Welcome to EducAI 🎓';
+  const dashboardUrl = `${appUrl}/app`;
+  const profileUrl = `${appUrl}/onboarding?edit=true`;
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 520px; margin: 0 auto; background: #080D18; color: #E8EEF8; border-radius: 12px; overflow: hidden;">
+      <div style="background: linear-gradient(135deg, #0D1526 0%, #1A2744 100%); padding: 32px 32px 24px;">
+        <h1 style="margin: 0; font-size: 26px; font-weight: 700; color: #fff;">Welcome to EducAI</h1>
+        <p style="margin: 8px 0 0; color: #7A8BA8; font-size: 15px;">Your AI-powered study abroad platform</p>
+      </div>
+      <div style="padding: 28px 32px;">
+        <p style="margin: 0 0 18px; font-size: 15px; color: #B8CCE8;">Hi ${userName},</p>
+        <p style="margin: 0 0 18px; font-size: 15px; color: #B8CCE8;">
+          Your email is verified and your account is ready. Here's what you can do next:
+        </p>
+        <div style="background: rgba(74,144,217,0.08); border: 1px solid rgba(74,144,217,0.2); border-radius: 8px; padding: 18px; margin-bottom: 20px;">
+          <ul style="margin: 0; padding-left: 18px; color: #B8CCE8; font-size: 14px; line-height: 1.8;">
+            <li>Complete your profile to get personalised program matches</li>
+            <li>Browse 30,000+ university programs worldwide</li>
+            <li>Discover scholarships you're eligible for</li>
+            <li>Generate your AI application strategy</li>
+            <li>Build your SOP and CV with AI assistance</li>
+          </ul>
+        </div>
+        <a href="${dashboardUrl}"
+          style="display: inline-block; padding: 13px 28px; background: #4A90D9; color: #fff;
+                 text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px;">
+          Go to Dashboard →
+        </a>
+        <p style="margin: 24px 0 0; font-size: 13px; color: #3D4F6B;">
+          Questions? Reply to this email or reach us at
+          <a href="mailto:support.educai@gmail.com" style="color: #4A90D9;">support.educai@gmail.com</a>
+        </p>
+      </div>
+      <div style="padding: 16px 32px; border-top: 1px solid rgba(255,255,255,0.06);">
+        <p style="margin: 0; font-size: 12px; color: #3D4F6B;">
+          EducAI &mdash; AI-powered study abroad platform &nbsp;|&nbsp;
+          <a href="${appUrl}/privacy" style="color: #3D4F6B;">Privacy</a> &nbsp;|&nbsp;
+          <a href="${appUrl}/terms" style="color: #3D4F6B;">Terms</a>
+        </p>
+      </div>
+    </div>
+  `;
+
+  const text = `Welcome to EducAI, ${userName}!\n\nYour email is verified. Get started at: ${dashboardUrl}\n\nWhat you can do:\n- Complete your profile\n- Browse 30,000+ university programs\n- Discover scholarships\n- Generate your AI strategy\n\nQuestions? support.educai@gmail.com`;
+
+  await sendMail({ to: toEmail, subject, html, text }, 'welcome');
+}
