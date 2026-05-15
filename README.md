@@ -7,6 +7,7 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-336791?logo=postgresql&logoColor=white)](https://neon.tech)
 [![Prisma](https://img.shields.io/badge/Prisma-7-2D3748?logo=prisma&logoColor=white)](https://prisma.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-4A90D9.svg)](LICENSE)
+[![Free](https://img.shields.io/badge/Pricing-Free%20forever-3D9970)](https://educai-web.vercel.app/pricing)
 
 > **AI-Powered Study Abroad Platform** — guiding international students
 > from profile setup to university acceptance with intelligent program
@@ -32,6 +33,7 @@
 - [Module Status](#module-status)
 - [Authentication](#authentication)
 - [Design System](#design-system)
+- [Pricing](#pricing)
 - [Legal](#legal)
 - [Author](#author)
 
@@ -115,7 +117,7 @@ from real job boards across 16+ countries.
 | :------- | :----------- |
 | **Career Outcome Predictor** | Employability score, career pathways, salary ranges, key skills, and industry trends |
 | **PR & Immigration Guide** | Step-by-step student visa, post-study work permit, and PR pathway per target country |
-| **Job Finder** | Real-time job listings from Adzuna, JSearch, and OpenAI fallback — part-time while studying or full-time after graduation |
+| **Job Finder** | Real-time job listings from Adzuna and JSearch — part-time while studying, internships, full-time after graduation, or remote |
 | **AI Advisor Chatbot** | Floating assistant on every page with full profile context, source citations, and education-domain scope |
 | **Education Pulse** | Daily curated news feed for international education, scholarships, and immigration updates |
 | **Daily Motivation** | A new motivational quote every day, rotating deterministically so every user sees the same quote |
@@ -534,27 +536,33 @@ See `SETUP_SECRETS.md` for the complete setup guide.
 | **Funding** | Scholarship Deadline Alerts | ✅ |
 | **Documents** | SOP Builder | ✅ |
 | **Documents** | CV Builder | ✅ |
+| **Documents** | Resume Builder | ✅ |
 | **Documents** | Professor Finder | ✅ |
 | **Documents** | Gap Fix Recommender | ✅ |
 | **Career** | Career Outcome Predictor | ✅ |
 | **Career** | PR & Immigration Guide | ✅ |
-| **Career** | Job Finder (Adzuna + JSearch + OpenAI) | ✅ |
+| **Career** | Job Finder (Adzuna + JSearch) | ✅ |
 | **Career** | AI Advisor Chatbot | ✅ |
 | **Content** | Education Pulse (daily news) | ✅ |
 | **Content** | Daily Motivational Quote | ✅ |
+| **Account** | GDPR data export (`GET /auth/export-data`) | ✅ |
+| **Account** | Self-service account deletion | ✅ |
+| **Account** | Welcome email on verification | ✅ |
 | **Legal** | Terms of Service | ✅ |
 | **Legal** | Privacy Policy | ✅ |
+| **Legal** | Pricing page | ✅ |
 
 ---
 
 ## Authentication
 
-- **Sign up** → email verification → sign in
+- **Sign up** → email verification → welcome email → sign in
 - **Sign in** → JWT access token (15 min) + refresh token (15 days)
 - **Remember Me** → optional 30-day session extension
 - **Google OAuth** → Passport.js redirect flow → account link or creation
-- **Security** → 5-attempt lockout · Argon2 password hashing · Arcjet bot protection
+- **Security** → 5-attempt lockout · Argon2 password hashing · Arcjet rate limiting on all auth routes · bot protection
 - **Profile gating** → all platform features require completed onboarding
+- **Account management** → self-service deletion with cascade + GDPR JSON data export
 - Sessions managed with iron-session on the Next.js side and raw JWTs on the Express API side
 
 ---
@@ -591,15 +599,31 @@ confident, and premium. One accent color. Depth through layering.
 
 ---
 
+## Pricing
+
+EducAI is **free forever**. All core features — program matching, scholarship
+discovery, AI strategy, SOP/CV builder, job finder, gap fix, timeline planner,
+immigration guide, and chatbot — are available at no cost with no credit card
+required.
+
+A Pro tier with priority AI processing and advanced features is planned for the
+future. The free tier will always remain fully functional.
+
+→ [educai-web.vercel.app/pricing](https://educai-web.vercel.app/pricing)
+
+---
+
 ## Legal
 
 - **Terms of Service** — <https://educai-web.vercel.app/terms>
 - **Privacy Policy** — <https://educai-web.vercel.app/privacy>
+- **Pricing** — <https://educai-web.vercel.app/pricing>
 - **Contact** — [support.educai@gmail.com](mailto:support.educai@gmail.com)
 - **Effective date** — February 1, 2026
 - **Last updated** — May 2026
 
-EducAI is GDPR-aware and CCPA-aware. We do not sell user data.
+EducAI is GDPR-aware and CCPA-aware. Users can export or permanently delete
+their data at any time from Profile → Settings. We do not sell user data.
 We do not use advertising cookies or third-party tracking pixels.
 
 ---
