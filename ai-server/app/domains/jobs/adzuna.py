@@ -62,10 +62,8 @@ async def fetch_adzuna_jobs(
         "app_id": ADZUNA_APP_ID,
         "app_key": ADZUNA_APP_KEY,
         "results_per_page": 10,
-        "page": page,
         "what": what,
         "where": city,
-        "content-type": "application/json",
     }
 
     if job_type == JobType.PART_TIME:
@@ -77,6 +75,7 @@ async def fetch_adzuna_jobs(
         response = await client.get(
             f"{ADZUNA_BASE}/{adzuna_country}/search/{page}",
             params=params,
+            headers={"Content-Type": "application/json"},
         )
         response.raise_for_status()
         data = response.json()

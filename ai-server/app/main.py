@@ -1,11 +1,9 @@
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # EducAI AI Server — FastAPI Microservice
-# ═══════════════════════════════════════════════════════════════════════════════
-# This FastAPI server handles all AI-driven operations for the EducAI platform:
-# - Conversational chatbot with profile context
-# - LLM-powered recommendations and scoring
-# - University program scraping and matching
-# - Application strategy generation
 # ═══════════════════════════════════════════════════════════════════════════════
 
 # BASE
