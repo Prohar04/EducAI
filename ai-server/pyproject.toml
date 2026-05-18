@@ -30,7 +30,10 @@ dependencies = [
 line-length = 120
 
 [tool.ruff.lint]
-# E501 line-too-long is suppressed by line-length above.
-# Keep standard rules otherwise.
 select = ["E", "F", "W"]
 ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+# main.py calls warnings.filterwarnings() and load_dotenv() before app imports
+# so that Firecrawl warnings are suppressed and env vars are loaded at startup.
+"app/main.py" = ["E402"]

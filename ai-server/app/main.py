@@ -1,12 +1,5 @@
-from dotenv import load_dotenv
+from . import _pre_init as _  # noqa: F401 — loads env vars and suppresses Firecrawl warning before app imports
 
-load_dotenv()
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# EducAI AI Server — FastAPI Microservice
-# ═══════════════════════════════════════════════════════════════════════════════
-
-# BASE
 from fastapi import APIRouter, Depends, FastAPI
 from fastapi.responses import Response
 
@@ -80,6 +73,12 @@ app.include_router(gap_fix_router, prefix="/api/v1/gap-fix")
 # ─────────────────────────────────────────────────────────────────────────────
 # Root & Health Endpoints
 # ─────────────────────────────────────────────────────────────────────────────
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+@app.get("/favicon.png", include_in_schema=False)
+async def favicon():
+    return Response(status_code=204)
 
 
 @app.get("/")
