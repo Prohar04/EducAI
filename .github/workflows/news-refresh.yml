@@ -2,7 +2,7 @@ name: News Refresh
 
 on:
   schedule:
-    - cron: "0 * * * *"   # Every hour
+    - cron: "0 6 * * *"   # Daily at 06:00 UTC
   workflow_dispatch:
 
 jobs:
@@ -55,18 +55,25 @@ jobs:
           CRON_SECRET_CLEAN=$(printf '%s' "${{ secrets.CRON_SECRET }}" | tr -d '[:space:]')
 
           HTTP_CODE=$(curl -s -o /tmp/r.txt -w "%{http_code}" \
-            --max-time 60 \
+            --max-time 120 \
+            --retry 2 --retry-delay 10 \
             -X POST "${BACKEND_URL_CLEAN}/api/news/refresh" \
-            -H "Authorization: Bearer ${CRON_SECRET_CLEAN}")
+            -H "Authorization: Bearer ${CRON_SECRET_CLEAN}" \
+            -H "Content-Type: application/json")
 
           RESPONSE=$(cat /tmp/r.txt)
           echo "Backend returned HTTP status: ${HTTP_CODE}"
           echo "Response: ${RESPONSE}"
 
-          # Fail on non-2xx responses
           if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
             echo "News refresh completed successfully."
             exit 0
+          elif [ "$HTTP_CODE" -eq 401 ]; then
+            echo "ERROR: Unauthorized — check CRON_SECRET matches the backend CRON_SECRET env var."
+            exit 1
+          elif [ "$HTTP_CODE" -eq 503 ]; then
+            echo "WARNING: AI search server unavailable. News cache not updated this run."
+            exit 1
           else
             echo "ERROR: News refresh failed with HTTP ${HTTP_CODE}"
             exit 1

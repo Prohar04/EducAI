@@ -739,3 +739,18 @@ model OAuthCode {
   @@map("oauth_codes")
 }
 
+// ── NEWS CACHE ─────────────────────────────────────────────────────
+// Stores AI-fetched news articles per category so the cache persists
+// across serverless invocations on both the backend and AI server.
+model NewsCache {
+  id         String   @id @default(cuid())
+  category   String   @unique @db.VarChar(50)
+  articles   Json
+  fetchedAt  DateTime @default(now()) @map("fetched_at") @db.Timestamp
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamp
+
+  @@index([category])
+  @@index([fetchedAt])
+  @@map("news_cache")
+}
+
