@@ -1,5 +1,6 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/client.ts';
+import logger from './logger.ts';
 
 // ── Configuration ──────────────────────────────────────────────────────────────
 
@@ -36,7 +37,7 @@ const connectionString = resolveConnectionString();
 const dbHost = (() => {
   try { return new URL(connectionString).hostname; } catch { return '<unparseable>'; }
 })();
-console.log(`[db] connecting to host=${dbHost} NODE_ENV=${node_env ?? 'unset'}`);
+logger.info(`[db] connecting to host=${dbHost} NODE_ENV=${node_env ?? 'unset'}`);
 
 // ── Connection Pool Configuration ──────────────────────────────────────────────
 // Neon: Serverless PostgreSQL (auto-pauses after inactivity)

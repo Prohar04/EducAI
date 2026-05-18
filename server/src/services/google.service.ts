@@ -1,4 +1,5 @@
 import prisma from '#src/config/database.ts';
+import logger from '#src/config/logger.ts';
 
 export async function CreateGoogleUser(profile: any) {
   try {
@@ -17,7 +18,7 @@ export async function CreateGoogleUser(profile: any) {
 
     return user;
   } catch (err) {
-    console.error('Error in creating user:', err);
+    logger.error('Error in creating user:', err);
     throw err;
   }
 }

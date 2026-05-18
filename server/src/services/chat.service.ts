@@ -1,5 +1,6 @@
 import prisma from '#src/config/database.ts';
 import { Prisma } from '#src/generated/client.ts';
+import logger from '#src/config/logger.ts';
 
 const AI_SERVER_URL             = process.env.AI_SERVER_URL             ?? 'http://localhost:8001';
 const AI_SERVER_API_KEY         = process.env.AI_SERVER_API_KEY         ?? '';
@@ -842,7 +843,7 @@ async function callDirectLLM(input: AnswerChatInput, ctx: CompactUserContext): P
       lastErr = err as Error;
       const is429 = err instanceof ChatServiceError && (err as ChatServiceError).statusCode === 429;
       if (!is429) allRateLimited = false;
-      console.warn(`[chat/direct] provider failed (${is429 ? '429' : (err as Error).message?.slice(0, 80) ?? 'unknown'}), trying next`);
+      logger.warn(`[chat/direct] provider failed (${is429 ? '429' : (err as Error).message?.slice(0, 80) ?? 'unknown'}), trying next`);
     }
   }
 
@@ -867,7 +868,7 @@ export async function answerChatMessage(input: AnswerChatInput): Promise<ChatRep
       return await callDirectLLM(input, userContext);
     } catch (err) {
       if (err instanceof ChatServiceError && err.statusCode === 429) throw err;
-      console.warn('[chat/service] direct LLM failed, falling back to ai-server', (err as Error).message);
+      logger.warn('[chat/service] direct LLM failed, falling back to ai-server', { message: (err as Error).message });
       // Fall through to ai-server path
     }
   }
@@ -892,7 +893,7 @@ export async function answerChatMessage(input: AnswerChatInput): Promise<ChatRep
       signal: AbortSignal.timeout(35_000), // 35s — reduced from 45s
     });
   } catch (error) {
-    console.error('[chat/service] ai-server unavailable', error);
+    logger.error('[chat/service] ai-server unavailable', { error });
     // If we had a direct provider but it failed, give a more specific message
     if (hasDirectProvider) {
       throw new ChatServiceError(502, 'The AI provider encountered an error. Please try again in a moment.');

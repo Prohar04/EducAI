@@ -45,6 +45,7 @@ import { saveUserSession } from '#src/services/session.service.ts';
 import { hashing, verifyHash } from '#src/utils/auth/hash.ts';
 import { AuthRequest } from '#src/types/authRequest.type.ts';
 import prisma from '#src/config/database.ts';
+import logger from '#src/config/logger.ts';
 
 // ── helpers ────────────────────────────────────────────────────────
 
@@ -63,14 +64,14 @@ async function sendVerification(userId: string, email: string) {
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
   const verifyUrl = `${frontendUrl}/auth/verify-email?token=${rawToken}`;
 
-  console.log(`[auth] Sending verification email to ${email} | tokenId: ${rawToken.slice(0, 8)}...`);
+  logger.info(`[auth] Sending verification email to ${email} | tokenId: ${rawToken.slice(0, 8)}...`);
 
   const result = await sendVerificationEmail(email, verifyUrl);
 
   if (result.success) {
-    console.log(`[auth] Verification email sent successfully to ${email} | provider: ${result.provider} | messageId: ${result.messageId}`);
+    logger.info(`[auth] Verification email sent to ${email}`, { provider: result.provider, messageId: result.messageId });
   } else {
-    console.error(`[auth] Failed to send verification email to ${email} | provider: ${result.provider} | error: ${result.error}`);
+    logger.error(`[auth] Failed to send verification email to ${email}`, { provider: result.provider, error: result.error });
     throw new Error(`Email delivery failed: ${result.error}`);
   }
 }
@@ -147,7 +148,7 @@ export const signup = async (req: Request, res: Response) => {
     }
 
     const tValidation = Date.now();
-    console.log(`[signup] validation done in ${tValidation - t0}ms`);
+    logger.info(`[signup] validation done in ${tValidation - t0}ms`);
 
     const existingUser = await findUserByEmail(email);
     if (existingUser) {
@@ -156,7 +157,7 @@ export const signup = async (req: Request, res: Response) => {
       }
       // Unverified — resend verification (email failure must not block the response)
       sendVerification(existingUser.id, existingUser.email).catch((e) =>
-        console.error('Resend verification email failed:', e),
+        logger.error('Resend verification email failed:', e),
       );
       return res
         .status(200)
@@ -164,11 +165,11 @@ export const signup = async (req: Request, res: Response) => {
     }
 
     const tDbLookup = Date.now();
-    console.log(`[signup] db lookup done in ${tDbLookup - tValidation}ms`);
+    logger.info(`[signup] db lookup done in ${tDbLookup - tValidation}ms`);
 
     const hashedPassword = await hashing(password);
     const tHash = Date.now();
-    console.log(`[signup] password hashing done in ${tHash - tDbLookup}ms`);
+    logger.info(`[signup] password hashing done in ${tHash - tDbLookup}ms`);
 
     const newUser: ReturnUserDto = await createUser({
       email: email.toLowerCase(),
@@ -219,21 +220,21 @@ export const signup = async (req: Request, res: Response) => {
           workExperienceMonths: profile.workExperienceMonths ?? undefined,
           onboardingDone: false,
         },
-      }).catch((e) => console.error('Profile creation at signup failed (non-fatal):', e));
+      }).catch((e) => logger.error('Profile creation at signup failed (non-fatal):', e));
     }
 
     const tUserCreate = Date.now();
-    console.log(`[signup] user created in ${tUserCreate - tHash}ms | userId=${newUser.id}`);
+    logger.info(`[signup] user created in ${tUserCreate - tHash}ms | userId=${newUser.id}`);
 
     // Fire-and-forget: email failures must roll back account creation
     try {
       await sendVerification(newUser.id, newUser.email);
       const tEmail = Date.now();
-      console.log(`[signup] email sent in ${tEmail - tUserCreate}ms | total=${tEmail - t0}ms`);
+      logger.info(`[signup] email sent in ${tEmail - tUserCreate}ms | total=${tEmail - t0}ms`);
     } catch (emailError) {
       // Roll back the user creation since email verification is required
       await prisma.user.delete({ where: { id: newUser.id } });
-      console.error('[auth] Signup failed — rolled back user creation. Email error:', (emailError as Error).message);
+      logger.error('[auth] Signup failed — rolled back user creation. Email error:', (emailError as Error).message);
       return res.status(503).json({
         message: 'Account creation failed. Email service is unavailable. Please try again later.',
         code: 'EMAIL_SERVICE_UNAVAILABLE',
@@ -244,7 +245,7 @@ export const signup = async (req: Request, res: Response) => {
       .status(201)
       .json({ message: 'Account created. Please check your email to verify.' });
   } catch (error) {
-    console.error('Error in signup:', error);
+    logger.error('Error in signup:', error);
     res.status(500).json({ message: 'User creation failed' });
   }
 };
@@ -278,12 +279,12 @@ export const verifyEmail = async (req: Request, res: Response) => {
     // Fire-and-forget welcome email
     const appUrl = process.env.FRONTEND_URL ?? 'https://educai-web.vercel.app';
     sendWelcomeEmail(verifiedUser.email, verifiedUser.name ?? 'there', appUrl).catch((e) =>
-      console.error('[auth] Welcome email failed (non-fatal):', e),
+      logger.error('[auth] Welcome email failed (non-fatal):', e),
     );
 
     res.status(200).json({ message: 'Email verified successfully' });
   } catch (error) {
-    console.error('Error in verifyEmail:', error);
+    logger.error('Error in verifyEmail:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -306,7 +307,7 @@ export const resendVerification = async (req: Request, res: Response) => {
       try {
         await sendVerification(user.id, user.email);
       } catch (emailError) {
-        console.error('[auth] Resend verification failed:', (emailError as Error).message);
+        logger.error('[auth] Resend verification failed:', (emailError as Error).message);
         return res.status(503).json({
           message: 'Email service unavailable. Please try again later.',
           code: 'EMAIL_SERVICE_UNAVAILABLE',
@@ -317,7 +318,7 @@ export const resendVerification = async (req: Request, res: Response) => {
     // TODO: rate limit per IP/email
     res.status(200).json({ message: genericMessage });
   } catch (error) {
-    console.error('Error in resendVerification:', error);
+    logger.error('Error in resendVerification:', error);
     res.status(200).json({ message: 'If an account exists, we sent a verification email.' });
   }
 };
@@ -388,7 +389,7 @@ export const signin = async (req: Request, res: Response) => {
       refreshToken,
     });
   } catch (error) {
-    console.error('Error in signin:', error);
+    logger.error('Error in signin:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -413,7 +414,7 @@ export const me = async (req: AuthRequest, res: Response) => {
       isActive: user.isActive,
     });
   } catch (error) {
-    console.error('Error in me:', error);
+    logger.error('Error in me:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -431,7 +432,7 @@ export const signout = async (req: AuthRequest, res: Response) => {
 
   if (typeof req.logout === 'function') {
     req.logout(err => {
-      if (err) console.error('Logout error:', err);
+      if (err) logger.error('Logout error:', err);
     });
   }
   if (req.session) {
@@ -455,10 +456,10 @@ export const googleAuthCallback = GOOGLE_OAUTH_ENABLED
   (req: Request, res: Response, next: NextFunction) => {
     passport.authenticate('google', { session: false }, (err: any, user: any, info: any) => {
       if (err) {
-        console.error('[google callback] passport error:', err);
+        logger.error('[google callback] passport error:', err);
       }
       if (!user) {
-        console.warn('[google callback] no user returned, info:', info);
+        logger.warn('[google callback] no user returned, info:', info);
         const frontend = process.env.FRONTEND_URL || 'http://localhost:3000';
         return res.redirect(`${frontend}/auth/signin?error=oauth_failed`);
       }
@@ -490,11 +491,11 @@ export const googleAuthCallback = GOOGLE_OAUTH_ENABLED
       });
 
       const frontend = process.env.FRONTEND_URL || 'http://localhost:3000';
-      console.log(`[google callback] code issued for user ${user.id}, expires ${expiresAt.toISOString()}`);
+      logger.info(`[google callback] code issued for user ${user.id}, expires ${expiresAt.toISOString()}`);
 
       return res.redirect(`${frontend}/api/auth/google/callback?code=${rawCode}`);
     } catch (error) {
-      console.error('Error in Google auth callback:', error);
+      logger.error('Error in Google auth callback:', error);
       const frontend = process.env.FRONTEND_URL || 'http://localhost:3000';
       return res.redirect(`${frontend}/auth/signin?error=oauth_failed`);
     }
@@ -513,13 +514,13 @@ export const googleExchange = async (req: Request, res: Response) => {
   const entry = await prisma.oAuthCode.findUnique({ where: { codeHash } });
 
   if (!entry) {
-    console.warn('[google exchange] code not found (hash:', codeHash.slice(0, 8), '...)');
+    logger.warn(`[google exchange] code not found (hash: ${codeHash.slice(0, 8)}...)`);
     return res.status(401).json({ message: 'Invalid or expired code' });
   }
 
   if (entry.expiresAt < new Date()) {
     await prisma.oAuthCode.delete({ where: { codeHash } });
-    console.warn('[google exchange] code expired for user', entry.userId);
+    logger.warn(`[google exchange] code expired for user ${entry.userId}`);
     return res.status(401).json({ message: 'Invalid or expired code' });
   }
 
@@ -531,7 +532,7 @@ export const googleExchange = async (req: Request, res: Response) => {
     return res.status(404).json({ message: 'User not found' });
   }
 
-  console.log(`[google exchange] tokens issued for user ${user.id} (${user.email})`);
+  logger.info(`[google exchange] tokens issued for user ${user.id} (${user.email})`);
 
   return res.status(200).json({
     accessToken: entry.accessToken,
@@ -584,7 +585,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
     // TODO: rate limit per IP/email
     res.status(200).json({ message: genericMessage });
   } catch (error) {
-    console.error('Error in forgotPassword:', error);
+    logger.error('Error in forgotPassword:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -647,7 +648,7 @@ export const resetPassword = async (req: Request, res: Response) => {
 
     res.status(200).json({ message: 'Password updated successfully' });
   } catch (error) {
-    console.error('Error in resetPassword:', error);
+    logger.error('Error in resetPassword:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -669,7 +670,7 @@ export const deleteAccount = async (req: AuthRequest, res: Response) => {
 
     res.status(200).json({ message: 'Account permanently deleted' });
   } catch (error) {
-    console.error('Error in deleteAccount:', error);
+    logger.error('Error in deleteAccount:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -712,7 +713,7 @@ export const exportUserData = async (req: AuthRequest, res: Response) => {
     res.setHeader('Content-Disposition', `attachment; filename="educai-data-export-${userId}.json"`);
     res.status(200).json(exportData);
   } catch (error) {
-    console.error('Error in exportUserData:', error);
+    logger.error('Error in exportUserData:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };

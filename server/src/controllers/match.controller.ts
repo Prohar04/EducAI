@@ -12,6 +12,7 @@ import { Prisma, ProgramLevel } from '../generated/client.ts';
 import { AuthRequest } from '#src/types/authRequest.type.ts';
 import { performIngest, normalizeLevel, CountryInput } from '#services/ingest.service.ts';
 import { toUSD } from '#src/utils/exchangeRates.ts';
+import logger from '#src/config/logger.ts';
 
 const AI_SERVER_URL     = process.env.AI_SERVER_URL     ?? 'http://localhost:8001';
 const AI_SERVER_API_KEY = process.env.AI_SERVER_API_KEY ?? '';
@@ -200,7 +201,7 @@ export const runMatch = async (req: AuthRequest, res: Response) => {
 type ProfileShape = NonNullable<Awaited<ReturnType<typeof prisma['userProfile']['findUnique']>>>;
 
 async function runMatchBackground(runId: string, userId: string, profile: ProfileShape) {
-  const log = (msg: string) => console.log(`[match:${runId}] ${msg}`);
+  const log = (msg: string) => logger.info(`[match:${runId}] ${msg}`);
 
   const setProgress = (n: number) =>
     prisma.matchRun.update({ where: { id: runId }, data: { progress: n } }).catch(() => {});
@@ -336,7 +337,7 @@ async function runMatchBackground(runId: string, userId: string, profile: Profil
     log(`done — ${ranked.length} results`);
 
   } catch (err) {
-    console.error(`[match:${runId}] unhandled:`, err);
+    logger.error(`[match:${runId}] unhandled:`, { err });
     await markError(err);
   }
 }

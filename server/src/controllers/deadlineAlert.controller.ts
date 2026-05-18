@@ -15,16 +15,17 @@ import {
   getRecentAlerts,
   getRecentAlertCount,
 } from '#src/services/deadlineAlert.service.ts';
+import logger from '#src/config/logger.ts';
 
 // POST /deadline-alerts/run
 // Auth handled by authenticateCron middleware in the router.
 export const triggerAlertRun = async (req: Request, res: Response) => {
   try {
     const result = await runDeadlineAlertJob();
-    console.info('[deadline-alerts:run] completed', result);
+    logger.info('[deadline-alerts:run] completed', { data: result });
     res.status(200).json({ ok: true, ...result });
   } catch (err) {
-    console.error('[deadline-alerts:run]', err);
+    logger.error('[deadline-alerts:run]', { err });
     res.status(500).json({ message: 'Alert job failed', error: (err as Error).message });
   }
 };
@@ -47,7 +48,7 @@ export const listPendingAlerts = async (req: AuthRequest, res: Response) => {
     }));
     res.status(200).json({ alerts: forUser });
   } catch (err) {
-    console.error('[deadline-alerts:pending]', err);
+    logger.error('[deadline-alerts:pending]', { err });
     res.status(500).json({ message: 'Failed to fetch pending alerts' });
   }
 };
@@ -60,7 +61,7 @@ export const listRecentAlerts = async (req: AuthRequest, res: Response) => {
     const alerts = await getRecentAlerts(userId);
     res.status(200).json({ alerts });
   } catch (err) {
-    console.error('[deadline-alerts:recent]', err);
+    logger.error('[deadline-alerts:recent]', { err });
     res.status(500).json({ message: 'Failed to fetch recent alerts' });
   }
 };
@@ -73,7 +74,7 @@ export const getAlertCount = async (req: AuthRequest, res: Response) => {
     const count = await getRecentAlertCount(userId);
     res.status(200).json({ count });
   } catch (err) {
-    console.error('[deadline-alerts:count]', err);
+    logger.error('[deadline-alerts:count]', { err });
     res.status(500).json({ count: 0 });
   }
 };

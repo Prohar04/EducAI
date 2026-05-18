@@ -1,11 +1,13 @@
 import nodemailer from 'nodemailer';
+import logger from './logger.ts';
 
 // Support two modes:
 // 1. Gmail via smtp.gmail.com:587 with SMTP_USER + SMTP_PASS (App Password)
 // 2. Custom SMTP via SMTP_HOST + SMTP_PORT + SMTP_SECURE + SMTP_USER + SMTP_PASS
 
 const host = process.env.SMTP_HOST;
-const port = parseInt(process.env.SMTP_PORT || '587', 10);
+const rawPort = parseInt(process.env.SMTP_PORT || '587', 10);
+const port = Number.isNaN(rawPort) || rawPort < 1 || rawPort > 65535 ? 587 : rawPort;
 const secure = process.env.SMTP_SECURE === 'true';
 const user = process.env.SMTP_USER || process.env.EMAIL_USER;
 const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
@@ -21,16 +23,16 @@ export let EMAIL_CONFIGURED = false;
 let transporter: nodemailer.Transporter;
 
 // ── Startup validation and logging ────────────────────────────────────
-console.log('\n[nodemailer] Email configuration status:');
-console.log(`  SMTP provider configured: ${!!(host && user && pass) || !!(user && pass) ? 'yes' : 'no'}`);
-console.log(`  SMTP host: ${host || '(not set)'}`);
-console.log(`  SMTP port: ${port}`);
-console.log(`  SMTP secure: ${secure}`);
-console.log(`  SMTP user: ${user || '(not set)'}`);
-console.log(`  SMTP_PASS configured: ${!!pass ? 'yes' : 'no'}`);
-console.log(`  EMAIL_FROM: ${emailFrom || '(not set)'}`);
-console.log(`  FRONTEND_URL: ${frontendUrl || '(not set)'}`);
-console.log(`  Timeouts: connection=10s, greeting=10s, socket=15s`);
+logger.info('[nodemailer] Email configuration status', {
+  smtpConfigured: !!(host && user && pass) || !!(user && pass),
+  smtpHost: host || '(not set)',
+  smtpPort: port,
+  smtpSecure: secure,
+  smtpUser: user || '(not set)',
+  smtpPassConfigured: !!pass,
+  emailFrom: emailFrom || '(not set)',
+  frontendUrl: frontendUrl || '(not set)',
+});
 
 // Validate required config in production
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
@@ -43,8 +45,7 @@ if (IS_PRODUCTION) {
   if (!frontendUrl) missingVars.push('FRONTEND_URL');
 
   if (missingVars.length > 0) {
-    console.error(`[nodemailer] ⚠️  PRODUCTION ERROR: Missing required environment variables: ${missingVars.join(', ')}`);
-    console.error('[nodemailer] Email verification will fail. Signup and password reset will not work.');
+    logger.error(`[nodemailer] PRODUCTION: Missing required environment variables: ${missingVars.join(', ')}. Email verification will fail.`);
   }
 }
 
@@ -62,7 +63,7 @@ if (host && user && pass) {
     socketTimeout: 15000,
   } as any);
   EMAIL_CONFIGURED = true;
-  console.log(`[nodemailer] ✓ Using custom SMTP: ${host}:${port} (user=${user})\n`);
+  logger.info(`[nodemailer] Using custom SMTP: ${host}:${port}`, { user });
 } else if (user && pass) {
   // Fallback: Gmail via "service" shorthand (EMAIL_USER + EMAIL_PASS)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -75,13 +76,10 @@ if (host && user && pass) {
     socketTimeout: 15000,
   } as any);
   EMAIL_CONFIGURED = true;
-  console.log('[nodemailer] ✓ Using Gmail service transport\n');
+  logger.info('[nodemailer] Using Gmail service transport');
 } else {
   // No credentials — use jsonTransport (dev/test stub; does NOT send real email)
-  console.warn(
-    '[nodemailer] ⚠  No SMTP credentials found (SMTP_HOST + SMTP_USER + SMTP_PASS).' +
-    ' Email sending is DISABLED. Set EMAIL_PROVIDER=console to suppress this in development.\n',
-  );
+  logger.warn('[nodemailer] No SMTP credentials found (SMTP_HOST + SMTP_USER + SMTP_PASS). Email sending is DISABLED.');
   transporter = nodemailer.createTransport({ jsonTransport: true });
   // EMAIL_CONFIGURED stays false
 }

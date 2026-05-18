@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import { z } from 'zod';
+import logger from '#src/config/logger.ts';
 import {
   searchScholarships,
   getScholarshipById,
@@ -67,7 +68,7 @@ export async function listScholarships(req: Request & { userId?: string }, res: 
     });
     res.status(200).json({ ...result, fetchedAt: new Date().toISOString() });
   } catch (err) {
-    console.error('[scholarship:list]', err);
+    logger.error('[scholarship:list]', { err });
     res.status(500).json({ message: 'Failed to fetch scholarships' });
   }
 }
@@ -82,7 +83,7 @@ export async function getScholarship(req: Request & { userId?: string }, res: Re
     }
     res.status(200).json(scholarship);
   } catch (err) {
-    console.error('[scholarship:get]', err);
+    logger.error('[scholarship:get]', { err });
     res.status(500).json({ message: 'Failed to fetch scholarship' });
   }
 }
@@ -93,7 +94,7 @@ export async function listUpcomingDeadlines(req: Request & { userId?: string }, 
     const deadlines = await getUpcomingDeadlines(isNaN(daysAhead) ? 90 : daysAhead);
     res.status(200).json({ deadlines });
   } catch (err) {
-    console.error('[scholarship:deadlines]', err);
+    logger.error('[scholarship:deadlines]', { err });
     res.status(500).json({ message: 'Failed to fetch upcoming deadlines' });
   }
 }
@@ -127,7 +128,7 @@ export async function listEligibleScholarships(req: Request & { userId?: string 
     });
     res.status(200).json({ items: results });
   } catch (err) {
-    console.error('[scholarship:eligible]', err);
+    logger.error('[scholarship:eligible]', { err });
     res.status(500).json({ message: 'Failed to compute eligible scholarships' });
   }
 }
@@ -183,7 +184,7 @@ export async function checkScholarshipEligibility(
     const result = await checkEligibility(id, mergedProfile);
     res.status(200).json(result);
   } catch (err) {
-    console.error('[scholarship:eligibility]', err);
+    logger.error('[scholarship:eligibility]', { err });
     res.status(500).json({ message: 'Failed to check eligibility' });
   }
 }
@@ -196,7 +197,7 @@ export async function refreshScholarships(
     const result = await runLiveScholarshipRefresh({ force: true });
     res.status(200).json(result);
   } catch (err) {
-    console.error('[scholarship:refresh]', err);
+    logger.error('[scholarship:refresh]', { err });
     res.status(500).json({ message: 'Live scholarship refresh failed' });
   }
 }
@@ -244,7 +245,7 @@ export async function getScholarshipProbability(
     });
     res.status(200).json(result);
   } catch (err) {
-    console.error('[scholarship:probability]', err);
+    logger.error('[scholarship:probability]', { err });
     res.status(500).json({ message: 'Failed to compute funding probability' });
   }
 }

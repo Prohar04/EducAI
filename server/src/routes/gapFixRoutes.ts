@@ -4,6 +4,7 @@ import { authMiddleware } from '#src/middlewares/authenticate.ts';
 import { AuthRequest } from '#src/types/authRequest.type.ts';
 import prisma from '#src/config/database.ts';
 import { uploadEvidencePDF, deleteEvidencePDF } from '#src/services/supabaseStorageService.ts';
+import logger from '#src/config/logger.ts';
 
 const router = Router();
 router.use(authMiddleware);
@@ -133,7 +134,7 @@ router.post('/analyze', async (req: Request, res: Response): Promise<void> => {
       critical_gap: analysis.critical_gap,
     });
   } catch (err) {
-    console.error('Gap Fix analyze error:', err);
+    logger.error('Gap Fix analyze error:', { err });
     res.status(500).json({ error: 'Analysis failed. Please try again.' });
   }
 });
@@ -161,7 +162,7 @@ router.post('/:id/upload-pdf', upload.single('pdf'), async (req: Request, res: R
       message: "PDF uploaded. Click 'Verify with AI' to verify your evidence.",
     });
   } catch (err) {
-    console.error('PDF upload error:', err);
+    logger.error('PDF upload error:', { err });
     const errorMessage = err instanceof Error ? err.message : 'PDF upload failed';
     res.status(500).json({ error: errorMessage });
   }
@@ -227,7 +228,7 @@ router.post('/:id/verify', async (req: Request, res: Response): Promise<void> =>
       item: { ...updated, resourceLinks: parseResourceLinks(updated.resourceLinks) },
     });
   } catch (err) {
-    console.error('Gap Fix verify error:', err);
+    logger.error('Gap Fix verify error:', { err });
     res.status(500).json({ error: 'Verification failed. Please try again.' });
   }
 });
@@ -256,7 +257,7 @@ router.delete('/:id', async (req: Request, res: Response): Promise<void> => {
   // Delete associated Supabase file if present (non-fatal)
   if (item.pdfStoragePath) {
     deleteEvidencePDF(item.pdfStoragePath).catch((err) =>
-      console.warn('[gap-fix] Failed to delete Supabase file:', err)
+      logger.warn('[gap-fix] Failed to delete Supabase file:', { err })
     );
   }
 

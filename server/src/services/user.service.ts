@@ -1,4 +1,5 @@
 import prisma from '#src/config/database.ts';
+import logger from '#src/config/logger.ts';
 import { CreateUserDto, ReturnUserDto } from './dto/createUser.dto.ts';
 
 export async function findUserByEmail(email: string) {
@@ -9,7 +10,7 @@ export async function findUserByEmail(email: string) {
     
     return user;
   } catch (err) {
-    console.error('User Not Found:', err);
+    logger.error('User Not Found:', err);
     throw err;
   }
 }
@@ -21,7 +22,7 @@ export async function findUserById(id: string) {
     });
     return user;
   } catch (err) {
-    console.error('User Not Found:', err);
+    logger.error('User Not Found:', err);
     throw err;
   }
 }
@@ -49,7 +50,7 @@ export async function createUser(data: CreateUserDto): Promise<ReturnUserDto> {
 
     return newUser;
   } catch (err) {
-    console.error('Error in creating user:', err);
+    logger.error('Error in creating user:', err);
     throw err;
   }
 }
@@ -62,7 +63,7 @@ export async function verifyUserEmail(userId: string) {
     });
     return user as ReturnUserDto;
   } catch (err) {
-    console.error('Error in verifying email:', err);
+    logger.error('Error in verifying email:', err);
     throw err;
   }
 }
@@ -77,7 +78,7 @@ export async function updateUserPassword(
       data: { passwordHash },
     });
   } catch (err) {
-    console.error('Error updating user password:', err);
+    logger.error('Error updating user password:', err);
     throw err;
   }
 }

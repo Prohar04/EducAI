@@ -1,4 +1,5 @@
 import { hash, verify } from 'argon2';
+import logger from '#src/config/logger.ts';
 
 export const hashing = async (password: string) => {
   const hashedPass = await hash(password);
@@ -10,7 +11,7 @@ export const verifyHash = async (hashedPassword: string, password: string) => {
     const isValid = await verify(hashedPassword, password);
     return isValid;
   } catch (err) {
-    console.error('Error in verifying password:', err);
+    logger.error('Error in verifying password:', err);
     throw err;
   }
 };

@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
+import logger from '#src/config/logger.ts';
 
 /**
  * Constant-time string comparison to prevent timing attacks
@@ -23,11 +24,11 @@ export function authenticateCron(req: Request, res: Response, next: NextFunction
   if (!cronSecret) {
     if (process.env.NODE_ENV !== 'production') {
       // Allow in development for testing
-      console.warn('[cron-auth] CRON_SECRET not set - allowing in non-production');
+      logger.warn('[cron-auth] CRON_SECRET not set - allowing in non-production');
       next();
       return;
     }
-    console.error('[cron-auth] CRON_SECRET is not configured on the server');
+    logger.error('[cron-auth] CRON_SECRET is not configured on the server');
     res.status(500).json({ error: 'Cron authentication is not configured' });
     return;
   }

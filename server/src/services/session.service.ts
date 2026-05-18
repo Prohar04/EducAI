@@ -1,4 +1,5 @@
 import prisma from '#config/database.ts';
+import logger from '#config/logger.ts';
 import { Store } from 'express-session';
 
 export class PrismaSessionStore extends Store {
@@ -139,7 +140,7 @@ export async function saveUserSession(
       },
     });
   } catch (err) {
-    console.error('Error saving user session:', err);
+    logger.error('Error saving user session:', err);
     throw err;
   }
 }

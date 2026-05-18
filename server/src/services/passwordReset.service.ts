@@ -1,4 +1,5 @@
 import prisma from '#src/config/database.ts';
+import logger from '#src/config/logger.ts';
 
 export async function createPasswordResetToken(
   userId: string,
@@ -14,7 +15,7 @@ export async function createPasswordResetToken(
       },
     });
   } catch (err) {
-    console.error('Error creating password reset token:', err);
+    logger.error('Error creating password reset token:', err);
     throw err;
   }
 }
@@ -25,7 +26,7 @@ export async function findPasswordResetToken(tokenHash: string) {
       where: { tokenHash },
     });
   } catch (err) {
-    console.error('Error finding password reset token:', err);
+    logger.error('Error finding password reset token:', err);
     throw err;
   }
 }
@@ -37,7 +38,7 @@ export async function markPasswordResetTokenUsed(tokenId: string) {
       data: { usedAt: new Date() },
     });
   } catch (err) {
-    console.error('Error marking password reset token as used:', err);
+    logger.error('Error marking password reset token as used:', err);
     throw err;
   }
 }

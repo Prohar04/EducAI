@@ -3,6 +3,7 @@ import type { Request, Response } from 'express';
 import { authenticateCron } from '#src/middlewares/authenticateCron.ts';
 import { backgroundRefreshAll } from '#src/services/jobService.ts';
 import { runDataSync } from '#src/services/dataSync.service.ts';
+import logger from '#src/config/logger.ts';
 
 const router = Router();
 
@@ -12,12 +13,12 @@ const router = Router();
 // POST /api/cron/jobs/refresh - refresh job data from external APIs
 router.post('/jobs/refresh', authenticateCron, async (_req: Request, res: Response): Promise<void> => {
   try {
-    console.log('[cron] Starting jobs data refresh');
+    logger.info('[cron] Starting jobs data refresh');
     const result = await backgroundRefreshAll();
-    console.log('[cron] Jobs refresh completed');
+    logger.info('[cron] Jobs refresh completed');
     res.json({ success: true, data: result });
   } catch (err) {
-    console.error('[cron] jobs refresh error:', err);
+    logger.error('[cron] jobs refresh error:', { err });
     res.status(500).json({ error: 'Job refresh failed' });
   }
 });
@@ -35,7 +36,7 @@ router.post('/news/refresh', authenticateCron, async (req: Request, res: Respons
     });
 
     if (!aiRes.ok) {
-      console.warn('[cron] news refresh: AI server returned', aiRes.status);
+      logger.warn('[cron] news refresh: AI server returned ' + aiRes.status);
       res.json({ success: false, message: 'AI server unavailable', timestamp: new Date().toISOString() });
       return;
     }
@@ -43,7 +44,7 @@ router.post('/news/refresh', authenticateCron, async (req: Request, res: Respons
     const data = await aiRes.json();
     res.json({ success: true, data, timestamp: new Date().toISOString() });
   } catch (err) {
-    console.error('[cron] news refresh error:', err);
+    logger.error('[cron] news refresh error:', { err });
     res.status(500).json({ error: 'News refresh failed' });
   }
 });
@@ -92,7 +93,7 @@ router.post('/freshness/update', authenticateCron, async (req: Request, res: Res
 
     res.json({ ok: true, source });
   } catch (err) {
-    console.error('[cron] freshness update error:', err);
+    logger.error('[cron] freshness update error:', { err });
     res.status(500).json({ error: 'Freshness update failed' });
   }
 });
@@ -100,9 +101,9 @@ router.post('/freshness/update', authenticateCron, async (req: Request, res: Res
 // POST /api/cron/refresh-programs - refresh programs data from external source
 router.post('/refresh-programs', authenticateCron, async (_req: Request, res: Response): Promise<void> => {
   try {
-    console.log('[cron] Starting programs data refresh');
+    logger.info('[cron] Starting programs data refresh');
     const result = await runDataSync('programs', 'cron', 'cron');
-    console.log('[cron] Programs refresh completed:', result.status);
+    logger.info('[cron] Programs refresh completed:', { status: result.status });
 
     // Keep DataFreshness in sync so the /freshness endpoint reflects the latest state
     const prisma = (await import('#src/config/database.ts')).default;
@@ -126,7 +127,7 @@ router.post('/refresh-programs', authenticateCron, async (_req: Request, res: Re
 
     res.json({ success: true, target: 'programs', status: result.status, finishedAt: result.finishedAt });
   } catch (err) {
-    console.error('[cron] programs refresh error:', err);
+    logger.error('[cron] programs refresh error:', { err });
     res.status(500).json({ error: 'Programs refresh failed' });
   }
 });
@@ -134,9 +135,9 @@ router.post('/refresh-programs', authenticateCron, async (_req: Request, res: Re
 // POST /api/cron/refresh-scholarships - refresh scholarships data from external source
 router.post('/refresh-scholarships', authenticateCron, async (_req: Request, res: Response): Promise<void> => {
   try {
-    console.log('[cron] Starting scholarships data refresh');
+    logger.info('[cron] Starting scholarships data refresh');
     const result = await runDataSync('scholarships', 'cron', 'cron');
-    console.log('[cron] Scholarships refresh completed:', result.status);
+    logger.info('[cron] Scholarships refresh completed:', { status: result.status });
 
     // Keep DataFreshness in sync so the /freshness endpoint reflects the latest state
     const prisma = (await import('#src/config/database.ts')).default;
@@ -160,7 +161,7 @@ router.post('/refresh-scholarships', authenticateCron, async (_req: Request, res
 
     res.json({ success: true, target: 'scholarships', status: result.status, finishedAt: result.finishedAt });
   } catch (err) {
-    console.error('[cron] scholarships refresh error:', err);
+    logger.error('[cron] scholarships refresh error:', { err });
     res.status(500).json({ error: 'Scholarships refresh failed' });
   }
 });
@@ -178,7 +179,7 @@ router.post('/refresh-news', authenticateCron, async (_req: Request, res: Respon
     });
 
     if (!aiRes.ok) {
-      console.warn('[cron] refresh-news: AI server returned', aiRes.status);
+      logger.warn('[cron] refresh-news: AI server returned ' + aiRes.status);
       res.json({ success: false, message: 'AI server unavailable', timestamp: new Date().toISOString() });
       return;
     }
@@ -186,7 +187,7 @@ router.post('/refresh-news', authenticateCron, async (_req: Request, res: Respon
     const data = await aiRes.json();
     res.json({ success: true, data, timestamp: new Date().toISOString() });
   } catch (err) {
-    console.error('[cron] refresh-news error:', err);
+    logger.error('[cron] refresh-news error:', { err });
     res.status(500).json({ error: 'News refresh failed' });
   }
 });
@@ -194,11 +195,11 @@ router.post('/refresh-news', authenticateCron, async (_req: Request, res: Respon
 // POST /api/cron/refresh-visa - refresh visa/timeline data (placeholder - no external source yet)
 router.post('/refresh-visa', authenticateCron, async (_req: Request, res: Response): Promise<void> => {
   try {
-    console.log('[cron] Visa data refresh called - no external source configured');
+    logger.info('[cron] Visa data refresh called - no external source configured');
     // TODO: Add visa data refresh when external source is available
     res.json({ success: true, message: 'Visa refresh not implemented - no external source', timestamp: new Date().toISOString() });
   } catch (err) {
-    console.error('[cron] visa refresh error:', err);
+    logger.error('[cron] visa refresh error:', { err });
     res.status(500).json({ error: 'Visa refresh failed' });
   }
 });

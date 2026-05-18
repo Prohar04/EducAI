@@ -10,6 +10,7 @@ import { Response } from 'express';
 import { AuthRequest } from '#src/types/authRequest.type.ts';
 import prisma from '#src/config/database.ts';
 import { Prisma } from '../generated/client.ts';
+import logger from '#src/config/logger.ts';
 
 const AI_SERVER_URL     = process.env.AI_SERVER_URL     ?? 'http://localhost:8888';
 const AI_SERVER_API_KEY = process.env.AI_SERVER_API_KEY ?? '';
@@ -150,7 +151,7 @@ export const generateStrategy = async (req: AuthRequest, res: Response) => {
 
     if (!aiRes.ok) {
       const errText = await aiRes.text().catch(() => 'unknown error');
-      console.error('[strategy/generate] ai-server error:', aiRes.status, errText);
+      logger.error('[strategy/generate] ai-server error:', { status: aiRes.status, errText });
       res.status(502).json({ message: 'AI server error. Please try again.' });
       return;
     }
@@ -170,7 +171,7 @@ export const generateStrategy = async (req: AuthRequest, res: Response) => {
 
     res.json({ ...saved, cached: false });
   } catch (err) {
-    console.error('[strategy/generate]', err);
+    logger.error('[strategy/generate]', { err });
     res.status(500).json({ message: 'Failed to generate strategy' });
   }
 };
@@ -195,7 +196,7 @@ export const getLatestStrategy = async (req: AuthRequest, res: Response) => {
 
     res.json(report);
   } catch (err) {
-    console.error('[strategy/latest]', err);
+    logger.error('[strategy/latest]', { err });
     res.status(500).json({ message: 'Failed to fetch strategy report' });
   }
 };

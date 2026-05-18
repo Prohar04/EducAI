@@ -1,6 +1,7 @@
 import { Strategy as GoogleStrategy } from 'passport-google-oauth2';
 import passport from 'passport';
 import prisma from './database.ts';
+import logger from './logger.ts';
 import { CreateGoogleUser } from '#src/services/google.service.ts';
 import { findUserByEmail, findUserById } from '#src/services/user.service.ts';
 
@@ -13,9 +14,7 @@ const GOOGLE_CALLBACK_URL =
 export const GOOGLE_OAUTH_ENABLED = !!(GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET);
 
 if (!GOOGLE_OAUTH_ENABLED) {
-  console.warn(
-    '[google.config] GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET not set — Google OAuth disabled'
-  );
+  logger.warn('[google.config] GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET not set — Google OAuth disabled');
 }
 
 if (GOOGLE_OAUTH_ENABLED) passport.use(
@@ -51,10 +50,7 @@ if (GOOGLE_OAUTH_ENABLED) passport.use(
               });
             } else if (user.oauthId !== profile.id) {
               // oauthId mismatch — keep existing, log but do not crash
-              console.warn(
-                `[google.config] oauthId mismatch for user ${user.id}: ` +
-                  `stored="${user.oauthId}" vs profile="${profile.id}". Keeping stored value.`
-              );
+              logger.warn(`[google.config] oauthId mismatch for user ${user.id}: stored="${user.oauthId}" vs profile="${profile.id}". Keeping stored value.`);
             }
             return done(null, user);
           } else if (!user.oauthProvider) {

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { performIngest, CountryInput } from '#services/ingest.service.ts';
 import prisma from '#src/config/database.ts';
+import logger from '#src/config/logger.ts';
 
 // ── Security ─────────────────────────────────────────────────────────────── //
 
@@ -42,7 +43,7 @@ export const ingestModule1 = async (req: Request, res: Response) => {
     const counts = await performIngest(body.countries, body.runId);
     res.status(200).json({ ok: true, upserted: counts, runId: body.runId });
   } catch (err) {
-    console.error('[ingest] error:', err);
+    logger.error('[ingest] error:', { err });
     res.status(500).json({ ok: false, error: 'Ingestion failed', details: String(err) });
   }
 };

@@ -3,6 +3,7 @@ import type { Request, Response } from 'express';
 import { authMiddleware } from '#src/middlewares/authenticate.ts';
 import { sopGenerateHandler } from '#src/controllers/sop.controller.ts';
 import { generatePDF } from '#src/services/pdfGeneratorService.ts';
+import logger from '#src/config/logger.ts';
 
 const router = Router();
 router.use(authMiddleware);
@@ -40,7 +41,7 @@ router.post('/download-pdf', async (req: Request, res: Response): Promise<void> 
     });
     res.send(pdfBuffer);
   } catch (err) {
-    console.error('PDF generation error:', err);
+    logger.error('PDF generation error:', { err });
     res.status(500).json({ error: 'PDF generation failed' });
   }
 });

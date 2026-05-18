@@ -1,4 +1,5 @@
 import transporter, { EMAIL_FROM, EMAIL_CONFIGURED } from '#src/config/nodemailer.config.ts';
+import logger from '#src/config/logger.ts';
 
 // EMAIL_PROVIDER=console  → print link to stdout (dev default when no creds configured)
 // EMAIL_PROVIDER=smtp|gmail → send via nodemailer
@@ -21,7 +22,7 @@ async function sendMail(
 
   // Always-console mode (explicit opt-in via EMAIL_PROVIDER=console)
   if (EMAIL_PROVIDER === 'console') {
-    console.log(`\n[EMAIL → ${opts.to}] ${opts.subject}\n${opts.text}\n`);
+    logger.info(`[EMAIL → ${opts.to}] ${opts.subject}\n${opts.text}`);
     const durationMs = Date.now() - startTime;
     return { success: true, provider: 'console', messageId: 'console-log', durationMs };
   }
@@ -31,11 +32,11 @@ async function sendMail(
   if (!EMAIL_CONFIGURED) {
     const msg = 'SMTP not configured — set SMTP_HOST, SMTP_USER, SMTP_PASS in environment';
     const durationMs = Date.now() - startTime;
-    console.error(`[email] ${msg} | action: ${action || 'send'} | recipient: ${opts.to} | duration: ${durationMs}ms`);
+    logger.error(`[email] ${msg} | action: ${action || 'send'} | recipient: ${opts.to} | duration: ${durationMs}ms`);
 
     if (IS_DEV) {
-      // Dev convenience: print link to console so local testing still works
-      console.log(`\n[EMAIL (no-creds dev fallback) → ${opts.to}] ${opts.subject}\n${opts.text}\n`);
+      // Dev convenience: print link to logger so local testing still works
+      logger.info(`[EMAIL (no-creds dev fallback) → ${opts.to}] ${opts.subject}\n${opts.text}`);
       return { success: true, provider: 'console-fallback', messageId: 'no-creds-dev', error: msg, durationMs };
     }
 
@@ -46,15 +47,14 @@ async function sendMail(
   try {
     const info = await transporter.sendMail({ from: EMAIL_FROM, ...opts });
     const durationMs = Date.now() - startTime;
-    console.log(
-      `[email] ✓ Sent successfully | ` +
-      `action: ${action || 'send'} | ` +
-      `recipient: ${opts.to} | ` +
-      `subject: "${opts.subject}" | ` +
-      `provider: ${EMAIL_PROVIDER} | ` +
-      `messageId: ${info.messageId} | ` +
-      `duration: ${durationMs}ms`
-    );
+    logger.info('[email] Sent successfully', {
+      action: action || 'send',
+      recipient: opts.to,
+      subject: opts.subject,
+      provider: EMAIL_PROVIDER,
+      messageId: info.messageId,
+      durationMs,
+    });
     return { success: true, provider: EMAIL_PROVIDER, messageId: info.messageId, durationMs };
   } catch (err) {
     const durationMs = Date.now() - startTime;
@@ -63,15 +63,14 @@ async function sendMail(
     const errorMessage = error.message;
     const errorCode = (error as any).code;
 
-    console.error(
-      `[email] ✗ Failed to send | ` +
-      `action: ${action || 'send'} | ` +
-      `recipient: ${opts.to} | ` +
-      `subject: "${opts.subject}" | ` +
-      `provider: ${EMAIL_PROVIDER} | ` +
-      `error: ${errorName}${errorCode ? ` (${errorCode})` : ''} - ${errorMessage} | ` +
-      `duration: ${durationMs}ms`
-    );
+    logger.error('[email] Failed to send', {
+      action: action || 'send',
+      recipient: opts.to,
+      subject: opts.subject,
+      provider: EMAIL_PROVIDER,
+      error: `${errorName}${errorCode ? ` (${errorCode})` : ''} - ${errorMessage}`,
+      durationMs,
+    });
 
     // Map common error codes to user-friendly messages
     let userMessage = errorMessage;
@@ -84,8 +83,8 @@ async function sendMail(
     }
 
     if (IS_DEV) {
-      // In development, fall back to console so signup/reset never fail locally
-      console.log(`\n[EMAIL (SMTP error fallback) → ${opts.to}] ${opts.subject}\n${opts.text}\n`);
+      // In development, fall back to logger so signup/reset never fail locally
+      logger.info(`[EMAIL (SMTP error fallback) → ${opts.to}] ${opts.subject}\n${opts.text}`);
       return { success: true, provider: 'console-fallback', error: userMessage, durationMs };
     }
 

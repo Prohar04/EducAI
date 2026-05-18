@@ -1,4 +1,5 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js"
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import logger from '#src/config/logger.ts';
 
 const BUCKET_NAME = process.env.SUPABASE_EVIDENCE_BUCKET || 'evidence';
 const SIGNED_URL_TTL_SECONDS = 604800; // 7 days
@@ -12,7 +13,7 @@ function getClient(): SupabaseClient | null {
 
   if (!url || !key) {
     if (!_configured) {
-      console.warn('[supabase] SUPABASE_URL or SUPABASE_SERVICE_KEY not configured. Upload will fail.');
+      logger.warn('[supabase] SUPABASE_URL or SUPABASE_SERVICE_KEY not configured. Upload will fail.');
       _configured = true;
     }
     return null;
@@ -90,7 +91,7 @@ export async function generateSignedUrl(storagePath: string): Promise<string> {
 export async function deleteEvidencePDF(storagePath: string): Promise<void> {
   const supabase = getClient();
   if (!supabase) {
-    console.warn('[supabase] Cannot delete - storage not configured');
+    logger.warn('[supabase] Cannot delete - storage not configured');
     return;
   }
   try {

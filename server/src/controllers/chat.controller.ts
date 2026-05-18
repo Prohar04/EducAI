@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { z } from 'zod';
 import { AuthRequest } from '#src/types/authRequest.type.ts';
 import { ChatServiceError, answerChatMessage } from '#src/services/chat.service.ts';
+import logger from '#src/config/logger.ts';
 
 // ── Schemas ────────────────────────────────────────────────────────────────────
 // Validation schemas for chat requests and conversation history
@@ -51,7 +52,7 @@ export const postChat = async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    console.error('[chat/post]', error);
+    logger.error('[chat/post]', { error });
     res.status(500).json({ message: 'Failed to answer chat request' });
   }
 };

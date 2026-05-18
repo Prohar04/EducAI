@@ -11,6 +11,7 @@ import { Response } from 'express';
 import { AuthRequest } from '#src/types/authRequest.type.ts';
 import prisma from '#src/config/database.ts';
 import { Prisma } from '../generated/client.ts';
+import logger from '#src/config/logger.ts';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -464,7 +465,7 @@ export const getTimelineInputs = async (req: AuthRequest, res: Response) => {
       scholarships,
     });
   } catch (err) {
-    console.error('[timeline/inputs]', err);
+    logger.error('[timeline/inputs]', { err });
     res.status(500).json({ message: 'Failed to fetch timeline inputs' });
   }
 };
@@ -615,7 +616,7 @@ export const generateTimeline = async (req: AuthRequest, res: Response) => {
 
     res.json(roadmap);
   } catch (err) {
-    console.error('[timeline/generate]', err);
+    logger.error('[timeline/generate]', { err });
     res.status(500).json({ message: 'Failed to generate timeline' });
   }
 };
@@ -640,7 +641,7 @@ export const getLatestTimeline = async (req: AuthRequest, res: Response) => {
 
     res.json(roadmap);
   } catch (err) {
-    console.error('[timeline/latest]', err);
+    logger.error('[timeline/latest]', { err });
     res.status(500).json({ message: 'Failed to fetch roadmap' });
   }
 };
@@ -703,7 +704,7 @@ export const updateTaskStatus = async (req: AuthRequest, res: Response) => {
 
     res.json(updated);
   } catch (err) {
-    console.error('[timeline/tasks]', err);
+    logger.error('[timeline/tasks]', { err });
     res.status(500).json({ message: 'Failed to update task status' });
   }
 };
