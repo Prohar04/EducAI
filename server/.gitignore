@@ -10,3 +10,4 @@ node_modules
 # /prisma/migrations  <-- intentionally tracked so CI can run prisma migrate deploy
 /prisma/generated
 /src/generated
+

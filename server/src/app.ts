@@ -45,7 +45,7 @@ const app = express();
 // so req.ip, req.secure, and secure cookies work correctly behind load balancers.
 app.set('trust proxy', 1);
 
-app.use(helmet());
+app.use((helmet as any)());
 const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000')
   .split(',')
   .map(o => o.trim())
