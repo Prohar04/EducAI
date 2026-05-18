@@ -22,7 +22,7 @@ def _build_neon_url(url: str) -> str:
     - connection_limit : keeps pool size small for serverless
     """
     sep = "&" if "?" in url else "?"
-    return f"{url}{sep}pgbouncer=true&connect_timeout=30&connection_limit=1"
+    return f"{url}{sep}pgbouncer=true&connect_timeout=30&pool_timeout=30&connection_limit=1"
 
 
 # Ensure DATABASE_URL is visible to the Prisma client at import time

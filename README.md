@@ -67,12 +67,12 @@ from real job boards across 16+ countries.
 | Service | URL |
 | :------- | :--- |
 | **Frontend** (Vercel) | [educai-web.vercel.app](https://educai-web.vercel.app) |
-| **Express API** (Render) | [educai-api-91ai.onrender.com](https://educai-api-91ai.onrender.com) |
-| **AI Server** (Render) | [educai-ai-rd5y.onrender.com](https://educai-ai-rd5y.onrender.com) |
+| **Express API** (Vercel) | [eduai-server.vercel.app](https://eduai-server.vercel.app) |
+| **AI Server** (Vercel) | [educai-ai-server.vercel.app](https://educai-ai-server.vercel.app) |
 | **Database** | Neon PostgreSQL — serverless, ap-southeast-1 |
 
-> **Free-tier note:** Render services spin down after inactivity.
-> The first request after idle may take 30–60 seconds.
+> **Serverless note:** All three services run as Vercel serverless functions.
+> Cold starts on the first request after idle may take a few seconds.
 
 ### Recommended Demo Flow
 
@@ -384,19 +384,33 @@ Open <http://localhost:3000> and sign up to begin.
 
 | Variable | Required | Description |
 | :-------- | :------: | :---------- |
-| `DATABASE_URL` | ✅ | Neon pooler connection string |
+| `DATABASE_URL` | ✅ | Neon pooler connection string (takes priority over NODE_ENV-based selection) |
+| `DATABASE_URL_CLOUD` | ✅ | Neon cloud connection string (used when `DATABASE_URL` is unset) |
+| `DATABASE_URL_LOCAL` | Optional | Local Postgres URL for development |
 | `JWT_SECRET` | ✅ | 32+ character access token secret |
 | `REFRESH_JWT_SECRET` | ✅ | 32+ character refresh token secret |
 | `SESSION_SECRET` | ✅ | Express session secret |
 | `AI_SERVER_URL` | ✅ | FastAPI base URL |
-| `AI_SERVER_API_KEY` | ✅ | Shared secret with AI server |
+| `AI_SERVER_API_KEY` | ✅ | Shared secret with AI server (must match `MASTER_APIKEY`) |
+| `FRONTEND_URL` | ✅ | Frontend origin — used for CORS and email links |
+| `INGEST_API_KEY` | ✅ | Shared secret for internal module1 ingest endpoint |
 | `ARCJET_KEY` | Recommended | Rate limiting and bot protection |
 | `CRON_SECRET` | Recommended | Protects deadline alert cron endpoint |
+| `OPENAI_API_KEY` | Recommended | Primary LLM — GPT-4o-mini (SOP, CV, chat, professor finder) |
+| `OPENROUTER_API_KEY` | Optional | LLM fallback if `OPENAI_API_KEY` is unset |
+| `SERPER_API_KEY` | Optional | Web search — professor finder and scholarship data |
 | `GOOGLE_CLIENT_ID` | Optional | Google OAuth client ID |
 | `GOOGLE_CLIENT_SECRET` | Optional | Google OAuth client secret |
-| `EMAIL_HOST` | Optional | SMTP host (Resend in production) |
-| `EMAIL_USER` | Optional | SMTP username |
-| `EMAIL_PASS` | Optional | SMTP password |
+| `GOOGLE_CALLBACK_URL` | Optional | Google OAuth callback URL |
+| `SMTP_HOST` | Optional | SMTP host (`smtp.gmail.com` or `smtp.resend.com`) |
+| `SMTP_PORT` | Optional | SMTP port (`465` for SSL, `587` for STARTTLS) |
+| `SMTP_SECURE` | Optional | `true` for port 465, `false` for port 587 |
+| `SMTP_USER` | Optional | SMTP username / email address |
+| `SMTP_PASS` | Optional | SMTP password or app password |
+| `EMAIL_FROM` | Optional | Sender name and address, e.g. `"EducAI <support@example.com>"` |
+| `SUPABASE_URL` | Optional | Supabase project URL — Gap Fix evidence storage |
+| `SUPABASE_SERVICE_KEY` | Optional | Supabase service role key — server-side only, never expose to frontend |
+| `SUPABASE_EVIDENCE_BUCKET` | Optional | Supabase storage bucket name (default: `evidence`) |
 | `ADZUNA_APP_ID` | Optional | Adzuna Job API — App ID |
 | `ADZUNA_APP_KEY` | Optional | Adzuna Job API — App Key |
 | `RAPIDAPI_KEY` | Optional | JSearch via RapidAPI — Job Finder fallback |
@@ -408,18 +422,22 @@ Open <http://localhost:3000> and sign up to begin.
 | `SESSION_SECRET_KEY` | ✅ | iron-session key (32+ chars) |
 | `BACKEND_URL` | ✅ | Express API base URL |
 | `JWT_SECRET` | ✅ | Must match server `JWT_SECRET` |
+| `NEXT_PUBLIC_BASE_URL` | Optional | Canonical frontend URL (used for absolute links) |
+| `NEXT_PUBLIC_FRONTEND_URL` | Optional | Frontend origin — used client-side |
+| `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | Optional | Plausible Analytics domain (privacy-first, no cookies) |
+| `NEXT_PUBLIC_SENTRY_DSN` | Optional | Sentry DSN for frontend error tracking |
+| `SENTRY_AUTH_TOKEN` | Optional | Sentry auth token for source map uploads |
 
 ### `ai-server/.env`
 
 | Variable | Required | Description |
 | :-------- | :------: | :---------- |
 | `MASTER_APIKEY` | ✅ | Must match `AI_SERVER_API_KEY` on Express server |
+| `INGEST_API_KEY` | ✅ | Must match `INGEST_API_KEY` on Express server |
 | `OPENAI_API_KEY` | Recommended | Primary LLM — GPT-4o-mini |
-| `GROQ_API_KEY` | Optional | Free-tier LLM fallback |
-| `OPENROUTER_API_KEY` | Optional | Secondary LLM fallback |
-| `GEMINI_API_KEY` | Optional | Tertiary LLM fallback |
+| `OPENROUTER_API_KEY` | Optional | LLM fallback if `OPENAI_API_KEY` is unset |
 | `SERPER_API_KEY` | Optional | Web search — professor finder and news |
-| `FIRECRAWL_API_KEY` | Optional | Live university page scraping |
+| `FIRECRAWL_API_KEY` | Optional | Live university page scraping for program matching |
 | `ADZUNA_APP_ID` | Optional | Adzuna Job API — App ID |
 | `ADZUNA_APP_KEY` | Optional | Adzuna Job API — App Key |
 | `RAPIDAPI_KEY` | Optional | JSearch via RapidAPI — global job fallback |
@@ -450,33 +468,79 @@ cd server && npx prisma validate && npx prisma generate
 
 ## Deployment
 
-| Layer | Platform | Notes |
-| :---- | :------- | :---- |
-| Frontend | [Vercel](https://vercel.com) | Auto-deploy on push to `main`, Singapore region |
-| Express API | [Render](https://render.com) | `render.yaml` blueprint included |
-| FastAPI AI Server | [Render](https://render.com) | Separate service in `render.yaml` |
-| Database | [Neon](https://neon.tech) | Serverless PostgreSQL, free tier |
+### Services
+
+| Service | Platform | Runtime | Region | Auto-deploy |
+| :------ | :------- | :------ | :----- | :---------- |
+| **Frontend** | [Vercel](https://vercel.com) | Next.js serverless | Singapore (`sin1`) | Push to `main` |
+| **Express API** | [Vercel](https://vercel.com) | Node.js serverless | Auto | Push to `main` |
+| **FastAPI AI Server** | [Vercel](https://vercel.com) | Python ASGI serverless | Auto | Push to `main` |
+| **Database** | [Neon](https://neon.tech) | PostgreSQL | `ap-southeast-1` | Serverless, always-on |
+
+### Step-by-Step First Deploy
+
+#### 1 — Database
+
+```bash
+cd server
+npm run db:migrate:deploy   # apply all pending migrations to Neon
+npm run seed:scholarships   # seed 28 real-world scholarships
+npm run seed:visa           # seed visa milestone templates (US, UK, CA, AU, DE)
+```
+
+#### 2 — Express API (Vercel)
+
+Connect the `Prohar04/EducAI` repo on Vercel, set the root directory to `server/`.
+The `server/vercel.json` routes all requests to the Express entry point.
+Add environment variables in **Project → Settings → Environment Variables**.
+
+#### 3 — FastAPI AI Server (Vercel)
+
+Connect the same repo, set the root directory to `ai-server/`.
+The `ai-server/vercel.json` routes all requests to `app/main.py` via Vercel's
+Python ASGI runtime. Add environment variables in the same way.
+
+#### 4 — Frontend (Vercel)
+
+Connect the same repo, set the root directory to `web/`.
+The `web/vercel.json` configures the Singapore region, security headers, and
+font cache headers automatically.
+
+#### 5 — Link the services
+
+Set these cross-service values once all three Vercel projects are live:
+
+| Project | Variable | Value |
+| :------ | :------- | :---- |
+| Express API | `AI_SERVER_URL` | FastAPI AI server URL from Vercel |
+| Express API | `AI_SERVER_API_KEY` | Must match `MASTER_APIKEY` on AI server |
+| FastAPI AI Server | `SERVER_BASE_URL` | Express API URL from Vercel |
+| FastAPI AI Server | `INGEST_API_KEY` | Must match `INGEST_API_KEY` on Express API |
+| Frontend | `BACKEND_URL` | Express API URL from Vercel |
 
 ### Health Endpoints
 
 | Endpoint | Purpose |
 | :-------- | :------- |
 | `GET /health` | Express API liveness |
-| `GET /health/db` | Database connectivity check |
+| `GET /health/db` | Database connectivity + user count |
+| `GET /health/timeline` | Visa template seed check |
 | `GET /api/v1/health` | AI server liveness |
 | `GET /api/v1/health/llm` | LLM provider connection status |
 
-### First Production Deploy
+### Makefile Targets
+
+A `Makefile` is included for common deployment and dev tasks:
 
 ```bash
-cd server
-npm run db:migrate:deploy
-npm run seed:scholarships
-npm run seed:visa
+make setup          # full first-time setup: install + migrate + seed
+make dev            # start Express and FastAPI in parallel (Ctrl+C to stop both)
+make test           # run all test suites (server + ai-server)
+make server-migrate # run prisma migrate deploy + prisma generate
+make server-seed    # seed scholarships and visa templates
 ```
 
-Import `render.yaml` in the Render dashboard to create both backend
-services with pre-configured environment variables and health check paths.
+Deployments are triggered automatically by Vercel on every push to `main`.
 
 ### Required GitHub Secrets
 
@@ -484,16 +548,18 @@ Add these in **GitHub → Settings → Secrets and variables → Actions**:
 
 | Secret | Used by |
 | :----- | :------ |
-| `DATABASE_URL` | Neon DB Migrate job |
-| `JWT_SECRET` | Server and Web jobs |
-| `AI_SERVER_API_KEY` | Server and AI Server jobs |
-| `OPENAI_API_KEY` | AI Server — primary LLM |
-| `CRON_SECRET` | Scholarship alerts workflow |
-| `ADZUNA_APP_ID` | Job Finder Source 1 (optional) |
-| `ADZUNA_APP_KEY` | Job Finder Source 1 (optional) |
-| `RAPIDAPI_KEY` | Job Finder Source 2 (optional) |
-| `DOCKERHUB_USERNAME` | Docker Build and Deploy jobs |
-| `DOCKERHUB_TOKEN` | Docker Build and Deploy jobs |
+| `DATABASE_URL` | CI — DB Migrate job |
+| `JWT_SECRET` | CI — Server and Web jobs |
+| `AI_SERVER_API_KEY` | CI — Server and AI Server jobs |
+| `INGEST_API_KEY` | CI — AI Server ingest pipeline |
+| `OPENAI_API_KEY` | CI — AI Server primary LLM |
+| `CRON_SECRET` | Scheduled — scholarship alerts workflow |
+| `BACKEND_URL` | Scheduled — data-sync workflow |
+| `ADZUNA_APP_ID` | CI — Job Finder Source 1 (optional) |
+| `ADZUNA_APP_KEY` | CI — Job Finder Source 1 (optional) |
+| `RAPIDAPI_KEY` | CI — Job Finder Source 2 (optional) |
+| `DOCKERHUB_USERNAME` | CI — Docker Build and Deploy jobs |
+| `DOCKERHUB_TOKEN` | CI — Docker Build and Deploy jobs |
 
 See `SETUP_SECRETS.md` for the complete setup guide.
 
@@ -620,7 +686,7 @@ future. The free tier will always remain fully functional.
 - **Pricing** — <https://educai-web.vercel.app/pricing>
 - **Contact** — [support.educai@gmail.com](mailto:support.educai@gmail.com)
 - **Effective date** — February 1, 2026
-- **Last updated** — May 2026
+- **Last updated** — May 2026 (env vars refresh)
 
 EducAI is GDPR-aware and CCPA-aware. Users can export or permanently delete
 their data at any time from Profile → Settings. We do not sell user data.
