@@ -19,7 +19,7 @@ jobs:
         run: |
           ERRORS=""
 
-          BACKEND_URL_CLEAN=$(printf '%s' "$BACKEND_URL" | tr -d '[:space:]')
+          BACKEND_URL_CLEAN=$(printf '%s' "$BACKEND_URL" | tr -d '[:space:]' | sed 's|/*$||')
           CRON_SECRET_CLEAN=$(printf '%s' "$CRON_SECRET" | tr -d '[:space:]')
 
           if [ -z "$BACKEND_URL_CLEAN" ]; then
@@ -55,68 +55,72 @@ jobs:
       - name: Refresh programs data
         if: steps.validate.outputs.secrets_ready == 'true'
         run: |
-          BACKEND_URL_CLEAN=$(printf '%s' "${{ secrets.BACKEND_URL }}" | tr -d '[:space:]')
+          BACKEND_URL_CLEAN=$(printf '%s' "${{ secrets.BACKEND_URL }}" | tr -d '[:space:]' | sed 's|/*$||')
           CRON_SECRET_CLEAN=$(printf '%s' "${{ secrets.CRON_SECRET }}" | tr -d '[:space:]')
 
           HTTP_CODE=$(curl -s -o /tmp/p.txt -w "%{http_code}" \
-            --max-time 300 \
+            -L --max-time 300 \
             -X POST "${BACKEND_URL_CLEAN}/api/cron/refresh-programs" \
             -H "Authorization: Bearer ${CRON_SECRET_CLEAN}")
 
           echo "Programs refresh: HTTP ${HTTP_CODE}"
           if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
             echo "ERROR: Programs refresh failed with HTTP ${HTTP_CODE}"
+            cat /tmp/p.txt
             exit 1
           fi
 
       - name: Refresh scholarships data
         if: steps.validate.outputs.secrets_ready == 'true'
         run: |
-          BACKEND_URL_CLEAN=$(printf '%s' "${{ secrets.BACKEND_URL }}" | tr -d '[:space:]')
+          BACKEND_URL_CLEAN=$(printf '%s' "${{ secrets.BACKEND_URL }}" | tr -d '[:space:]' | sed 's|/*$||')
           CRON_SECRET_CLEAN=$(printf '%s' "${{ secrets.CRON_SECRET }}" | tr -d '[:space:]')
 
           HTTP_CODE=$(curl -s -o /tmp/s.txt -w "%{http_code}" \
-            --max-time 300 \
+            -L --max-time 300 \
             -X POST "${BACKEND_URL_CLEAN}/api/cron/refresh-scholarships" \
             -H "Authorization: Bearer ${CRON_SECRET_CLEAN}")
 
           echo "Scholarships refresh: HTTP ${HTTP_CODE}"
           if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
             echo "ERROR: Scholarships refresh failed with HTTP ${HTTP_CODE}"
+            cat /tmp/s.txt
             exit 1
           fi
 
       - name: Refresh news cache
         if: steps.validate.outputs.secrets_ready == 'true'
         run: |
-          BACKEND_URL_CLEAN=$(printf '%s' "${{ secrets.BACKEND_URL }}" | tr -d '[:space:]')
+          BACKEND_URL_CLEAN=$(printf '%s' "${{ secrets.BACKEND_URL }}" | tr -d '[:space:]' | sed 's|/*$||')
           CRON_SECRET_CLEAN=$(printf '%s' "${{ secrets.CRON_SECRET }}" | tr -d '[:space:]')
 
           HTTP_CODE=$(curl -s -o /tmp/n.txt -w "%{http_code}" \
-            --max-time 180 \
+            -L --max-time 180 \
             -X POST "${BACKEND_URL_CLEAN}/api/cron/refresh-news" \
             -H "Authorization: Bearer ${CRON_SECRET_CLEAN}")
 
           echo "News refresh: HTTP ${HTTP_CODE}"
           if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
             echo "ERROR: News refresh failed with HTTP ${HTTP_CODE}"
+            cat /tmp/n.txt
             exit 1
           fi
 
       - name: Refresh visa data
         if: steps.validate.outputs.secrets_ready == 'true'
         run: |
-          BACKEND_URL_CLEAN=$(printf '%s' "${{ secrets.BACKEND_URL }}" | tr -d '[:space:]')
+          BACKEND_URL_CLEAN=$(printf '%s' "${{ secrets.BACKEND_URL }}" | tr -d '[:space:]' | sed 's|/*$||')
           CRON_SECRET_CLEAN=$(printf '%s' "${{ secrets.CRON_SECRET }}" | tr -d '[:space:]')
 
           HTTP_CODE=$(curl -s -o /tmp/v.txt -w "%{http_code}" \
-            --max-time 180 \
+            -L --max-time 180 \
             -X POST "${BACKEND_URL_CLEAN}/api/cron/refresh-visa" \
             -H "Authorization: Bearer ${CRON_SECRET_CLEAN}")
 
           echo "Visa data refresh: HTTP ${HTTP_CODE}"
           if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
             echo "ERROR: Visa data refresh failed with HTTP ${HTTP_CODE}"
+            cat /tmp/v.txt
             exit 1
           fi
 

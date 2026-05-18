@@ -15,7 +15,7 @@ jobs:
         run: |
           ERRORS=""
 
-          BACKEND_URL_CLEAN=$(printf '%s' "$BACKEND_URL" | tr -d '[:space:]')
+          BACKEND_URL_CLEAN=$(printf '%s' "$BACKEND_URL" | tr -d '[:space:]' | sed 's|/*$||')
           CRON_SECRET_CLEAN=$(printf '%s' "$CRON_SECRET" | tr -d '[:space:]')
 
           if [ -z "$BACKEND_URL_CLEAN" ]; then
@@ -51,11 +51,11 @@ jobs:
       - name: Refresh news
         if: steps.validate.outputs.secrets_ready == 'true'
         run: |
-          BACKEND_URL_CLEAN=$(printf '%s' "${{ secrets.BACKEND_URL }}" | tr -d '[:space:]')
+          BACKEND_URL_CLEAN=$(printf '%s' "${{ secrets.BACKEND_URL }}" | tr -d '[:space:]' | sed 's|/*$||')
           CRON_SECRET_CLEAN=$(printf '%s' "${{ secrets.CRON_SECRET }}" | tr -d '[:space:]')
 
           HTTP_CODE=$(curl -s -o /tmp/r.txt -w "%{http_code}" \
-            --max-time 120 \
+            -L --max-time 120 \
             --retry 2 --retry-delay 10 \
             -X POST "${BACKEND_URL_CLEAN}/api/news/refresh" \
             -H "Authorization: Bearer ${CRON_SECRET_CLEAN}" \

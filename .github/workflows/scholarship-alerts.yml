@@ -5,7 +5,7 @@ name: Scholarship Deadline Alerts
 # and is protected by CRON_SECRET (Authorization: Bearer <token>).
 #
 # Required GitHub Actions secrets (Settings → Secrets → Actions):
-#   BACKEND_URL   — e.g. https://educai-jva1.onrender.com  (no trailing slash)
+#   BACKEND_URL   — e.g. https://eduai-server.vercel.app  (no trailing slash)
 #   CRON_SECRET   — must match CRON_SECRET env var on the server
 
 on:
@@ -25,7 +25,7 @@ jobs:
         run: |
           ERRORS=""
 
-          BACKEND_URL_CLEAN=$(printf '%s' "$BACKEND_URL" | tr -d '[:space:]')
+          BACKEND_URL_CLEAN=$(printf '%s' "$BACKEND_URL" | tr -d '[:space:]' | sed 's|/*$||')
           CRON_SECRET_CLEAN=$(printf '%s' "$CRON_SECRET" | tr -d '[:space:]')
 
           if [ -z "$BACKEND_URL_CLEAN" ]; then
@@ -61,12 +61,13 @@ jobs:
       - name: Trigger alert job
         if: steps.validate.outputs.secrets_ready == 'true'
         run: |
-          BACKEND_URL_CLEAN=$(printf '%s' "${{ secrets.BACKEND_URL }}" | tr -d '[:space:]')
+          BACKEND_URL_CLEAN=$(printf '%s' "${{ secrets.BACKEND_URL }}" | tr -d '[:space:]' | sed 's|/*$||')
           CRON_SECRET_CLEAN=$(printf '%s' "${{ secrets.CRON_SECRET }}" | tr -d '[:space:]')
 
           echo "Triggering scholarship deadline alerts at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
           HTTP_STATUS=$(curl -s -o /tmp/alerts_response.json -w "%{http_code}" \
+            -L \
             -X POST "${BACKEND_URL_CLEAN}/deadline-alerts/run" \
             -H "Authorization: Bearer ${CRON_SECRET_CLEAN}" \
             -H "Content-Type: application/json" \

@@ -28,13 +28,13 @@ jobs:
         run: |
           MISSING=false
 
-          # Strip any accidental whitespace/newlines from secrets before checking
-          BACKEND_URL_CLEAN=$(printf '%s' "$BACKEND_URL" | tr -d '[:space:]')
+          # Strip whitespace/newlines and trailing slash (Vercel 308-redirects trailing-slash URLs)
+          BACKEND_URL_CLEAN=$(printf '%s' "$BACKEND_URL" | tr -d '[:space:]' | sed 's|/*$||')
           CRON_SECRET_CLEAN=$(printf '%s' "$CRON_SECRET" | tr -d '[:space:]')
 
           if [ -z "$BACKEND_URL_CLEAN" ]; then
             echo "::warning::BACKEND_URL secret is not configured. Skipping sync."
-            echo "   To enable: Settings → Secrets → Actions → BACKEND_URL = https://your-backend.onrender.com"
+            echo "   To enable: Settings → Secrets → Actions → BACKEND_URL = https://eduai-server.vercel.app"
             MISSING=true
           else
             # Validate URL format — must start with http:// or https://
@@ -45,7 +45,7 @@ jobs:
               *)
                 echo "::warning::BACKEND_URL does not start with http:// or https:// — value is malformed. Skipping sync."
                 echo "   Current value prefix: ${BACKEND_URL_CLEAN:0:20}..."
-                echo "   Fix: Settings → Secrets → Actions → BACKEND_URL = https://your-backend.onrender.com"
+                echo "   Fix: Settings → Secrets → Actions → BACKEND_URL = https://eduai-server.vercel.app"
                 MISSING=true
                 ;;
             esac
@@ -82,6 +82,7 @@ jobs:
           CURL_EXIT=0
           HTTP_STATUS=$(curl -s -o /tmp/sync_response.json -w "%{http_code}" \
             --fail-with-body \
+            -L \
             -X POST "${CLEAN_URL}/data-sync/run" \
             -H "Authorization: Bearer ${CRON_SECRET}" \
             -H "Content-Type: application/json" \
@@ -124,6 +125,9 @@ jobs:
             exit 0
           elif [ "$HTTP_STATUS" -eq 401 ] || [ "$HTTP_STATUS" -eq 403 ]; then
             echo "::error::Authorization failed ($HTTP_STATUS). Verify CRON_SECRET matches server CRON_SECRET env var."
+            exit 1
+          elif [ "$HTTP_STATUS" -eq 308 ] || [ "$HTTP_STATUS" -eq 301 ] || [ "$HTTP_STATUS" -eq 302 ]; then
+            echo "::error::Backend returned a redirect ($HTTP_STATUS) even after following with -L. Verify BACKEND_URL uses https:// and has no trailing slash. Current prefix: ${CLEAN_URL:0:50}"
             exit 1
           elif [ "$HTTP_STATUS" -eq 000 ]; then
             echo "::error::Could not connect to backend. Verify BACKEND_URL is correct and the server is running."
