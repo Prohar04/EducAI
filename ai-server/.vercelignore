@@ -1,0 +1,22 @@
+# Ignore local python virtual environments
+.venv/
+venv/
+
+# Ignore local OS-specific Prisma engine caches
+.prisma-cache/
+
+# Ignore python compile caches
+__pycache__/
+*.pyc
+
+# Ignore testing suites and scrapers cache
+tests/
+scraped_content/
+
+# Ignore Git files
+.git/
+.github/
+
+# Ignore local locks and full pyproject configs to force Vercel to use requirements.txt
+pyproject.toml
+uv.lock
