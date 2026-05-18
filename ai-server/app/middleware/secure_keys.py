@@ -1,3 +1,4 @@
+import hmac
 from fastapi import HTTPException, Security
 from fastapi.security import APIKeyHeader
 from starlette import status
@@ -14,7 +15,7 @@ async def checkApiKey(incoming_key: str = Security(api_key_header)):
             detail="Server misconfigured: MASTER_APIKEY not set",
         )
 
-    if not incoming_key or incoming_key != master_key:
+    if not incoming_key or not hmac.compare_digest(incoming_key, master_key):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Unauthorized: Invalid or missing API Key",

@@ -10,6 +10,7 @@ import passport from 'passport';
 
 import prisma from './config/database.ts';
 import { authMiddleware } from './middlewares/authenticate.ts';
+import { authenticateCron } from './middlewares/authenticateCron.ts';
 import authRoutes from './routes/auth.router.ts';
 import userRoutes from './routes/user.router.ts';
 import universityRoutes from './routes/university.router.ts';
@@ -45,7 +46,7 @@ const app = express();
 // so req.ip, req.secure, and secure cookies work correctly behind load balancers.
 app.set('trust proxy', 1);
 
-app.use((helmet as any)());
+app.use(helmet());
 const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000')
   .split(',')
   .map(o => o.trim())
@@ -108,7 +109,7 @@ app.get('/health', (_req, res) => {
   });
 });
 
-app.get('/health/db', async (req, res) => {
+app.get('/health/db', authenticateCron, async (_req, res) => {
   try {
     const [users, countries, universities, programs, requirements, deadlines] = await Promise.all([
       prisma.user.count(),
@@ -133,7 +134,7 @@ app.get('/health/db', async (req, res) => {
   }
 });
 
-app.get('/health/schema', async (_req, res) => {
+app.get('/health/schema', authenticateCron, async (_req, res) => {
   const tables: Record<string, boolean> = {};
   try { await prisma.country.count();     tables.countries     = true; } catch { tables.countries     = false; }
   try { await prisma.university.count();  tables.universities  = true; } catch { tables.universities  = false; }
@@ -146,7 +147,7 @@ app.get('/health/schema', async (_req, res) => {
   );
 });
 
-app.get('/health/timeline', async (_req, res) => {
+app.get('/health/timeline', authenticateCron, async (_req, res) => {
   try {
     const [visaTemplateCount, roadmapCount] = await Promise.all([
       prisma.visaTimelineTemplate.count(),

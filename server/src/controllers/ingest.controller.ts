@@ -44,7 +44,7 @@ export const ingestModule1 = async (req: Request, res: Response) => {
     res.status(200).json({ ok: true, upserted: counts, runId: body.runId });
   } catch (err) {
     logger.error('[ingest] error:', { err });
-    res.status(500).json({ ok: false, error: 'Ingestion failed', details: String(err) });
+    res.status(500).json({ ok: false, error: 'Ingestion failed' });
   }
 };
 
@@ -66,6 +66,6 @@ export const getModule1Stats = async (req: Request, res: Response) => {
       ]);
     res.status(200).json({ countries, universities, programs, requirements, deadlines, matchRuns, matchResults });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch stats', details: String(err) });
+    res.status(500).json({ error: 'Failed to fetch stats' });
   }
 };

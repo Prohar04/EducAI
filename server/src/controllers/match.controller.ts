@@ -205,11 +205,13 @@ async function runMatchBackground(runId: string, userId: string, profile: Profil
 
   const setProgress = (n: number) =>
     prisma.matchRun.update({ where: { id: runId }, data: { progress: n } }).catch(() => {});
-  const markError = (err: unknown) =>
-    prisma.matchRun.update({
+  const markError = (err: unknown) => {
+    logger.error(`[match:${runId}] background error:`, err);
+    return prisma.matchRun.update({
       where: { id: runId },
-      data: { status: 'error', error: String(err).slice(0, 500), progress: 0 },
+      data: { status: 'error', error: 'Matching failed. Please try again.', progress: 0 },
     }).catch(() => {});
+  };
 
   try {
     await prisma.matchRun.update({ where: { id: runId }, data: { status: 'running', progress: 10 } });
@@ -311,28 +313,29 @@ async function runMatchBackground(runId: string, userId: string, profile: Profil
 
     await setProgress(95);
 
-    // ── Persist match results ──────────────────────────────────────────
-    if (ranked.length > 0) {
-      await prisma.matchResult.createMany({
-        data: ranked.map(r => ({
-          runId,
-          programId: r.programId ?? null,
-          score:     r.score,
-          reasons:   r.reasons   as unknown as Prisma.InputJsonValue,
-          rawData:   (r.rawData  ?? null) as unknown as Prisma.InputJsonValue,
-        })),
+    // ── Persist match results (atomic: results + status update together) ──
+    await prisma.$transaction(async (tx) => {
+      if (ranked.length > 0) {
+        await tx.matchResult.createMany({
+          data: ranked.map(r => ({
+            runId,
+            programId: r.programId ?? null,
+            score:     r.score,
+            reasons:   r.reasons   as unknown as Prisma.InputJsonValue,
+            rawData:   (r.rawData  ?? null) as unknown as Prisma.InputJsonValue,
+          })),
+        });
+      }
+      await tx.matchRun.update({
+        where: { id: runId },
+        data:  {
+          status:   'done',
+          progress: 100,
+          error: ranked.length === 0
+            ? 'No programmes found for your profile. Try adjusting your preferences.'
+            : null,
+        },
       });
-    }
-
-    await prisma.matchRun.update({
-      where: { id: runId },
-      data:  {
-        status:   'done',
-        progress: 100,
-        error: ranked.length === 0
-          ? 'No programmes found for your profile. Try adjusting your preferences.'
-          : null,
-      },
     });
     log(`done — ${ranked.length} results`);
 

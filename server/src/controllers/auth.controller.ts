@@ -49,6 +49,8 @@ import logger from '#src/config/logger.ts';
 
 // ── helpers ────────────────────────────────────────────────────────
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
 const LOCKOUT_THRESHOLD = 5;
 const LOCKOUT_DURATION_MS = 10 * 60 * 1000; // 10 minutes
 const DEFAULT_REFRESH_TTL_DAYS = 15;
@@ -131,6 +133,10 @@ export const signup = async (req: Request, res: Response) => {
       return res
         .status(400)
         .json({ message: 'Email, password and name are required' });
+    }
+
+    if (typeof email !== 'string' || !EMAIL_RE.test(email)) {
+      return res.status(422).json({ message: 'Invalid email address' });
     }
 
     // Validate password strength (same rules as resetPassword)
@@ -298,7 +304,7 @@ export const resendVerification = async (req: Request, res: Response) => {
     const genericMessage =
       'If an account exists, we sent a verification email.';
 
-    if (!email || typeof email !== 'string') {
+    if (!email || typeof email !== 'string' || !EMAIL_RE.test(email)) {
       return res.status(200).json({ message: genericMessage });
     }
 
@@ -559,8 +565,8 @@ export const forgotPassword = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
 
-    if (!email || typeof email !== 'string') {
-      return res.status(422).json({ message: 'Email is required' });
+    if (!email || typeof email !== 'string' || !EMAIL_RE.test(email)) {
+      return res.status(422).json({ message: 'Invalid email address' });
     }
 
     const genericMessage =
