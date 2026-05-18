@@ -56,6 +56,7 @@ export default [
       'logs/**',
       'prisma/**',
       'dist/**',
+      'api/**',
       '.eslintrc.js',
       './src/generated/**',
     ],
