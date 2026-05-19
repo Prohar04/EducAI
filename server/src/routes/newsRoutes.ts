@@ -90,22 +90,33 @@ router.post("/refresh", authenticateCron, async (_req: Request, res: Response) =
   const results: Record<string, string> = {}
   let anySuccess = false
 
-  await Promise.all(
-    ALL_CATEGORIES.map(async (cat) => {
-      const articles = await fetchCategoryFromAiServer(cat)
-      if (!articles) {
-        results[cat] = "failed"
-        return
-      }
-      await prisma.newsCache.upsert({
-        where: { category: cat },
-        update: { articles: articles as object[], fetchedAt: new Date() },
-        create: { category: cat, articles: articles as object[], fetchedAt: new Date() },
+  try {
+    await Promise.all(
+      ALL_CATEGORIES.map(async (cat) => {
+        try {
+          const articles = await fetchCategoryFromAiServer(cat)
+          if (!articles) {
+            results[cat] = "failed"
+            return
+          }
+          await prisma.newsCache.upsert({
+            where: { category: cat },
+            update: { articles: articles as object[], fetchedAt: new Date() },
+            create: { category: cat, articles: articles as object[], fetchedAt: new Date() },
+          })
+          results[cat] = "ok"
+          anySuccess = true
+        } catch (catErr) {
+          logger.error(`News refresh error for category "${cat}":`, { err: catErr })
+          results[cat] = "error"
+        }
       })
-      results[cat] = "ok"
-      anySuccess = true
-    })
-  )
+    )
+  } catch (err) {
+    logger.error("News refresh unexpected error:", { err })
+    res.status(500).json({ success: false, error: "Unexpected error during news refresh", timestamp: new Date().toISOString() })
+    return
+  }
 
   logger.info("News refresh complete:", results)
 
