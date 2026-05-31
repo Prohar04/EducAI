@@ -30,6 +30,7 @@ import {
   SlidersHorizontal,
   Tag,
   Calendar,
+  Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1211,6 +1212,26 @@ export default function JobsClient() {
                           Search on Indeed →
                         </a>
                       </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Region availability notice for live jobs */}
+              {!result.ai_fallback_used && result.total > 0 && (
+                <div className="rounded-xl border border-[#4A90D9]/20 bg-[#4A90D9]/5 px-4 py-3">
+                  <div className="flex items-start gap-2.5">
+                    <Info className="mt-0.5 size-4 shrink-0 text-[#4A90D9]" />
+                    <div className="flex-1 text-sm text-[#4A90D9]/90">
+                      <p className="font-medium text-[#4A90D9]">
+                        📍 Verify Region Availability
+                      </p>
+                      <p className="mt-0.5">
+                        These jobs are sourced from {result.source_used === "adzuna" ? "Adzuna" : result.source_used === "jsearch" ? "Indeed/LinkedIn" : "live job boards"} for{" "}
+                        {selectedCity}, {selectedCountry?.name}.
+                        Some positions may have region-specific requirements or availability restrictions.
+                        Always verify on the official job posting before applying to confirm the role is open in your location.
+                      </p>
                     </div>
                   </div>
                 </div>
