@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { saveProgram, unsaveProgram } from "@/lib/auth/action";
+import { useState } from "react";
+import { useSWRConfig } from "swr";
 import { Button } from "@/components/ui/button";
 
 interface SaveButtonProps {
@@ -12,19 +11,52 @@ interface SaveButtonProps {
 
 export default function SaveButton({ programId, initialSaved = false }: SaveButtonProps) {
 	const [saved, setSaved] = useState(initialSaved);
-	const [isPending, startTransition] = useTransition();
-	const router = useRouter();
+	const [isPending, setIsPending] = useState(false);
+	const { mutate } = useSWRConfig();
 
-	function toggle() {
-		startTransition(async () => {
+	async function toggle() {
+		setIsPending(true);
+		const newSavedState = !saved;
+
+		try {
 			if (saved) {
-				await unsaveProgram(programId);
+				// Unsave
+				const response = await fetch(`/api/saved-programs?programId=${encodeURIComponent(programId)}`, {
+					method: "DELETE",
+					credentials: "include",
+				});
+
+				if (!response.ok) {
+					throw new Error("Failed to unsave program");
+				}
 			} else {
-				await saveProgram(programId);
+				// Save
+				const response = await fetch("/api/saved-programs", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					credentials: "include",
+					body: JSON.stringify({ programId }),
+				});
+
+				if (!response.ok) {
+					throw new Error("Failed to save program");
+				}
 			}
-			setSaved((prev) => !prev);
-			router.refresh();
-		});
+
+			// Update local state
+			setSaved(newSavedState);
+
+			// Trigger SWR revalidation for saved programs list
+			await mutate("/api/saved-programs");
+		} catch (error) {
+			console.error("Save/unsave error:", error);
+			// Revert on error
+			setSaved(!newSavedState);
+		} finally {
+			setIsPending(false);
+		}
 	}
 
 	return (

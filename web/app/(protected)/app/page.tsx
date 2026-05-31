@@ -65,22 +65,49 @@ function getProfileCompleteness(profile: UserProfile): number {
 
 function buildUpcomingDeadlines(savedPrograms: SavedProgramItem[], nowTs: number): DeadlineItem[] {
   const deadlines: DeadlineItem[] = [];
+
   for (const item of savedPrograms) {
     if (!item.program.deadlines?.length) continue;
+
     for (const dl of item.program.deadlines) {
-      const ts = new Date(dl.deadline).getTime();
+      // Parse deadline date safely
+      const deadlineDate = new Date(dl.deadline);
+
+      // Skip invalid dates
+      if (isNaN(deadlineDate.getTime())) {
+        console.warn(`Invalid deadline date for program ${item.program.id}:`, dl.deadline);
+        continue;
+      }
+
+      const ts = deadlineDate.getTime();
+
+      // Skip past deadlines
       if (ts < nowTs) continue;
+
       const daysLeft = Math.ceil((ts - nowTs) / (1000 * 60 * 60 * 24));
+
       deadlines.push({
         id: dl.id,
         title: `${item.program.title} — ${dl.term ?? "Application"}`,
-        date: new Date(dl.deadline).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }),
+        date: deadlineDate.toLocaleDateString("en-US", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+          timeZone: "UTC" // Ensure consistent timezone
+        }),
         type: "application",
         priority: daysLeft <= 30 ? "high" : daysLeft <= 90 ? "medium" : "low",
       });
     }
   }
-  deadlines.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  // Sort by timestamp (not string date) for accurate ordering
+  deadlines.sort((a, b) => {
+    const dateA = new Date(a.date).getTime();
+    const dateB = new Date(b.date).getTime();
+    return dateA - dateB;
+  });
+
   return deadlines;
 }
 
@@ -480,7 +507,10 @@ function RoadmapPreview({ timeline }: { timeline: unknown }) {
           <Target className="size-5 text-primary" aria-hidden="true" />
           Your Timeline
         </h2>
-        <Link href="/app/timeline" className="text-sm text-primary hover:underline">
+        <Link
+          href={plan?.length ? "/app/timeline?view=full" : "/app/timeline"}
+          className="text-sm text-primary hover:underline"
+        >
           {plan?.length ? "View Full" : "Generate"}
         </Link>
       </div>
@@ -523,13 +553,14 @@ function RoadmapPreview({ timeline }: { timeline: unknown }) {
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 
 export default async function StudyPlanPage() {
+  // Session and profile are already validated by the layout, so we can safely fetch them here
   const [session, profile, match, savedPrograms, timeline, newsItems] = await Promise.allSettled([
     getSession(),
     getUserProfile(),
-    getMatchLatest().catch(() => null),
-    getSavedPrograms().catch(() => []),
-    getLatestTimeline().catch(() => null),
-    fetchEducationPulse().catch(() => []),
+    getMatchLatest().catch((err) => { console.error("Match fetch failed:", err); return null; }),
+    getSavedPrograms().catch((err) => { console.error("Saved programs fetch failed:", err); return []; }),
+    getLatestTimeline().catch((err) => { console.error("Timeline fetch failed:", err); return null; }),
+    fetchEducationPulse().catch((err) => { console.error("News fetch failed:", err); return []; }),
   ]);
 
   const sessionData = session.status === "fulfilled" ? session.value : null;
@@ -539,6 +570,7 @@ export default async function StudyPlanPage() {
   const timelineData = timeline.status === "fulfilled" ? timeline.value : null;
   const newsData = newsItems.status === "fulfilled" ? newsItems.value.slice(0, 4) : [];
 
+  // These checks are redundant since layout already validates, but kept for safety
   if (!sessionData) redirect("/auth/signin");
   if (!profileData || !profileData.onboardingDone) redirect("/onboarding");
 

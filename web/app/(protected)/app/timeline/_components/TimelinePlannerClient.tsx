@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { useFirstVisit } from "@/lib/hooks/use-first-visit";
 import {
@@ -379,6 +380,10 @@ export default function TimelinePlannerClient({
 	initialInputs: TimelineInputs | null;
 	defaultCountry: string;
 }) {
+	const searchParams = useSearchParams();
+	const viewMode = searchParams?.get("view");
+	const isFullView = viewMode === "full";
+
 	const isFirstVisit = useFirstVisit("timeline");
 	const [roadmap, setRoadmap] = useState<UserRoadmap | null>(initialRoadmap);
 	const [inputs, setInputs] = useState<TimelineInputs | null>(initialInputs);
@@ -797,7 +802,7 @@ export default function TimelinePlannerClient({
 								key={month.month}
 								month={month}
 								roadmapId={roadmap!.id}
-								defaultOpen={i === 0 || month.month === currentMonthKey}
+								defaultOpen={isFullView || i === 0 || month.month === currentMonthKey}
 								isCurrentMonth={month.month === currentMonthKey}
 								onStatusChange={handleToggleTask}
 								updatingId={updatingTaskId}

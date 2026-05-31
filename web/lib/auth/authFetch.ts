@@ -1,4 +1,4 @@
-import { getSession, deleteSession } from "./session";
+import { getSessionOrNull, deleteSession } from "./session";
 import { redirect } from "next/navigation";
 
 export interface FetchOptions extends RequestInit {
@@ -9,20 +9,38 @@ export const authFetch = async (
 	url: string | URL,
 	options: FetchOptions = {},
 ) => {
-	const session = await getSession();
+	const session = await getSessionOrNull();
+
+	// If no session, don't attempt the request - redirect immediately
+	if (!session) {
+		redirect("/auth/signin?reason=no_session");
+	}
 
 	options.headers = {
 		...options.headers,
-		Authorization: `Bearer ${session?.accessToken}`,
+		Authorization: `Bearer ${session.accessToken}`,
 	};
 
 	const response = await fetch(url, options);
 
 	if (response.status === 401) {
-		// Middleware should have refreshed the access token before this render.
-		// A 401 here means the session is genuinely invalid — force re-login.
-		await deleteSession();
-		redirect("/auth/signin");
+		// 401 could mean expired token or invalid session
+		// Check if the error response indicates a specific issue
+		try {
+			const errorData = await response.clone().json();
+			const errorMessage = errorData?.message?.toLowerCase() || "";
+
+			// Only delete session and redirect if it's a genuine auth failure
+			// Not for temporary network issues or rate limits
+			if (errorMessage.includes("invalid") || errorMessage.includes("expired") || errorMessage.includes("unauthorized")) {
+				await deleteSession();
+				redirect("/auth/signin?reason=session_expired");
+			}
+		} catch {
+			// If we can't parse the error, assume it's a genuine auth failure
+			await deleteSession();
+			redirect("/auth/signin?reason=auth_error");
+		}
 	}
 
 	return response;
