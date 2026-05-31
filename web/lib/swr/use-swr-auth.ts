@@ -3,6 +3,11 @@
 import useSWR, { type SWRResponse } from "swr";
 import { BACKEND_URL } from "@/constants/constants";
 
+interface ApiError extends Error {
+  status?: number;
+  info?: unknown;
+}
+
 /**
  * Custom SWR hook with authenticated fetching
  *
@@ -14,7 +19,7 @@ import { BACKEND_URL } from "@/constants/constants";
  * @param key - SWR cache key (endpoint path or null to skip fetching)
  * @returns SWR response with data, error, isLoading, and mutate
  */
-export function useSwrAuth<T = any>(
+export function useSwrAuth<T = unknown>(
   key: string | null
 ): SWRResponse<T, Error> {
   return useSWR<T, Error>(
@@ -30,9 +35,9 @@ export function useSwrAuth<T = any>(
 
       // Handle non-OK responses
       if (!response.ok) {
-        const error = new Error(`API error: ${response.status}`);
-        (error as any).status = response.status;
-        (error as any).info = await response.json().catch(() => null);
+        const error: ApiError = new Error(`API error: ${response.status}`);
+        error.status = response.status;
+        error.info = await response.json().catch(() => null);
         throw error;
       }
 
