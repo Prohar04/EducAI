@@ -1,11 +1,12 @@
 import { Router } from 'express';
 import { searchPrograms, getProgramById } from '#src/controllers/program.controller.ts';
+import { optionalAuthMiddleware } from '#src/middlewares/authenticate.ts';
 import prisma from '#src/config/database.ts';
 
 const router = Router();
 
-// GET /programs?country=US&level=MSC&field=Computer%20Science&q=data&page=1&limit=20
-router.get('/', searchPrograms);
+// GET /programs — optional auth enables global profile-aware ranking for signed-in users
+router.get('/', optionalAuthMiddleware, searchPrograms);
 
 // GET /programs/ids — returns all program IDs for sitemap generation (public, read-only)
 router.get('/ids', async (_req, res) => {

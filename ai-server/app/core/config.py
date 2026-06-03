@@ -60,6 +60,9 @@ class Settings(BaseSettings):
     )
     INGEST_API_KEY: Optional[str] = Field(default=None, validation_alias="INGEST_API_KEY")
 
+    # Redis (optional — news cache falls back to in-memory when absent)
+    REDIS_URL: Optional[str] = Field(default=None, validation_alias="REDIS_URL")
+
     PROJECT_NAME: str = "Educai AI Server"
     DEBUG: bool | str = False
 

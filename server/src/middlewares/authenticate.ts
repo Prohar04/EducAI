@@ -3,6 +3,38 @@ import { Response, NextFunction } from 'express';
 import { AuthRequest } from '#src/types/authRequest.type.ts';
 import { findUserById } from '#src/services/user.service.ts';
 
+// ── Optional Authentication Middleware ────────────────────────────────────────
+/**
+ * Middleware: optionalAuthMiddleware
+ *
+ * Attempts to authenticate the request via a Bearer token.
+ * On success, sets req.userId and calls next().
+ * On failure (missing, invalid, or expired token), calls next() anyway —
+ * the route handler must check whether req.userId is populated.
+ *
+ * Use on routes that serve both authenticated and anonymous users.
+ */
+export async function optionalAuthMiddleware(
+  req: AuthRequest,
+  _res: Response,
+  next: NextFunction
+) {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) return next();
+
+    const token = authHeader.split(' ')[1];
+    const userId = await verifyAccessToken(token);
+    if (!userId || typeof userId !== 'string') return next();
+
+    const user = await findUserById(userId);
+    if (user?.isActive) req.userId = userId;
+  } catch {
+    // Token invalid/expired — proceed as anonymous
+  }
+  next();
+}
+
 // ── Authentication Middleware ──────────────────────────────────────────────────
 /**
  * Middleware: authMiddleware
