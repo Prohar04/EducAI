@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 	const timeoutId  = setTimeout(() => controller.abort(), PROXY_TIMEOUT_MS);
 
 	try {
-		const response = await fetch(`${BACKEND_URL}/chat`, {
+		const response = await fetch(`${BACKEND_URL}/chat/answer`, {
 			method:  "POST",
 			headers: {
 				"Content-Type": "application/json",

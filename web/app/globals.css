@@ -2,6 +2,9 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+@source "../components/auth/**/*.tsx";
+@source "../app/auth/**/*.tsx";
+
 @custom-variant dark (&:is(.dark *));
 
 /* ── Design system tokens — BMW iX3 deep navy ────────────────────────────── */

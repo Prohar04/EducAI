@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { ExternalLink, Search, Sparkles, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -108,26 +109,46 @@ export default function NlpSearchPanel() {
 					) : (
 						<div className="grid gap-2 sm:grid-cols-2">
 							{results.map((r, i) => (
-								<a
-									key={i}
-									href={r.url}
-									target="_blank"
-									rel="noopener noreferrer"
-									className="flex flex-col rounded-lg border border-border bg-background p-3 text-sm transition-colors hover:border-primary/40 hover:bg-accent/50"
-								>
-									<div className="mb-1 flex items-start justify-between gap-2">
-										<span className="font-medium leading-snug line-clamp-2">
-											{r.title}
-										</span>
-										<ExternalLink className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-									</div>
-									<p className="text-xs text-muted-foreground line-clamp-2">
-										{r.snippet}
-									</p>
-									<p className="mt-1.5 text-xs text-primary/70 truncate">
-										{r.url}
-									</p>
-								</a>
+								r.programId ? (
+									<Link
+										key={i}
+										href={`/app/programs/${r.programId}`}
+										className="flex flex-col rounded-lg border border-border bg-background p-3 text-sm transition-colors hover:border-primary/40 hover:bg-accent/50"
+									>
+										<div className="mb-1 flex items-start justify-between gap-2">
+											<span className="font-medium leading-snug line-clamp-2">
+												{r.title}
+											</span>
+										</div>
+										<p className="text-xs text-muted-foreground line-clamp-2">
+											{r.snippet}
+										</p>
+										<p className="mt-1.5 text-xs text-primary/70 truncate">
+											{r.url}
+										</p>
+									</Link>
+								) : (
+									<a
+										key={i}
+										href={r.url}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="flex flex-col rounded-lg border border-border bg-background p-3 text-sm transition-colors hover:border-primary/40 hover:bg-accent/50"
+									>
+										<div className="mb-1 flex items-start justify-between gap-2">
+											<span className="font-medium leading-snug line-clamp-2">
+												{r.title}
+											</span>
+											<ExternalLink className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+										</div>
+										<p className="text-xs text-muted-foreground line-clamp-2">
+											{r.snippet}
+										</p>
+										<p className="mt-1.5 text-xs text-primary/70 truncate">
+											{r.url}
+										</p>
+									</a>
+								)
 							))}
 						</div>
 					)}

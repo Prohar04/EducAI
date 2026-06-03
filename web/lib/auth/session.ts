@@ -97,9 +97,7 @@ export async function updateTokens({
 	if (!payload) throw new Error("Session not found");
 
 	const newPayload: Session = {
-		user: {
-			...payload.user,
-		},
+		...payload,
 		accessToken,
 		refreshToken,
 	};

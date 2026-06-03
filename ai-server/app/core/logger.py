@@ -15,7 +15,7 @@ stream_handler.setFormatter(log_format)
 
 if not logger.handlers:
     logger.addHandler(stream_handler)
-    
+
     if not is_vercel:
         log_dir = "logs"
         if not os.path.exists(log_dir):

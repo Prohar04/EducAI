@@ -94,11 +94,9 @@ async function downloadAsPdf(
 ) {
 	setDownloading(true);
 	try {
-		const API = process.env.NEXT_PUBLIC_BACKEND_URL || "";
-		const res = await fetch(`${API}/sop/download-pdf`, {
+		const res = await fetch(`/api/sop/download-pdf`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			credentials: "include",
 			body: JSON.stringify({ content, template, targetUniversity }),
 		});
 		if (!res.ok) throw new Error("Download failed");

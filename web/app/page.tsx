@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 86_400;
+export const revalidate = 3_600;
 
 const FEATURES = [
   { icon: "🎓", title: "Program Match",     description: "AI-ranked universities by fit score across GPA, language, budget, and career goals." },

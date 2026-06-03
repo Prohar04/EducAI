@@ -73,7 +73,7 @@ export const metadata: Metadata = {
       "Find the right university program, discover scholarships, and build your step-by-step application strategy — powered by live data and AI reasoning.",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og-image.svg",
         width: 1200,
         height: 630,
         alt: "EducAI — AI-Powered Study Abroad Platform",
@@ -85,7 +85,7 @@ export const metadata: Metadata = {
     title: "EducAI — AI-Powered Study Abroad Platform",
     description:
       "Find the right university program, discover scholarships, and build your step-by-step application strategy — powered by live data and AI reasoning.",
-    images: ["/og-image.png"],
+    images: ["/og-image.svg"],
     creator: "@educai",
   },
   alternates: {

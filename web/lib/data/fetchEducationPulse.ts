@@ -68,6 +68,23 @@ function stripHtml(html: string): string {
     .trim();
 }
 
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&rsquo;/g, "'")
+    .replace(/&lsquo;/g, "'")
+    .replace(/&ldquo;/g, "“")
+    .replace(/&rdquo;/g, "”")
+    .replace(/&ndash;/g, "–")
+    .replace(/&mdash;/g, "—")
+    .replace(/&nbsp;/g, " ");
+}
+
 function guessReadTime(text: string): number {
   return Math.max(1, Math.round(text.split(" ").length / 200));
 }
@@ -111,11 +128,19 @@ function extractItems(xml: string): Array<Record<string, unknown>> {
 }
 
 async function fetchFeedItems(url: string): Promise<Array<Record<string, unknown>>> {
-  const response = await fetch(url, {
-    headers: {
-      accept: "application/rss+xml, application/xml;q=0.9, text/xml;q=0.8, */*;q=0.5",
-    },
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5_000);
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      headers: {
+        accept: "application/rss+xml, application/xml;q=0.9, text/xml;q=0.8, */*;q=0.5",
+      },
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
 
   if (!response.ok) {
     throw new Error(`Failed to load feed: ${response.status}`);
@@ -171,7 +196,7 @@ async function _fetchEducationPulse(): Promise<FeedItem[]> {
           const snippet = stripHtml(raw).slice(0, 220);
           allItems.push({
             id: `${source.name}-${i}-${getEntryDate(entry)}`,
-            title: toText(entry.title) || "Untitled",
+            title: decodeHtmlEntities(toText(entry.title) || "Untitled"),
             snippet: snippet || "Click to read the full article.",
             region: source.region,
             topic: source.topic,

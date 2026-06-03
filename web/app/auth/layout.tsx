@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "@/app/globals.css";
 import React, { PropsWithChildren } from "react";
 import { AuthBrandPanel } from "@/components/auth/AuthBrandPanel";
 

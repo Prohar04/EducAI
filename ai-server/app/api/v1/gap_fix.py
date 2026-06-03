@@ -40,7 +40,7 @@ class EvidenceVerifyResponse(BaseModel):
     score_impact: str  # "full" | "partial" | "none"
 
 
-@router.post("/verify-evidence", response_model=EvidenceVerifyResponse, dependencies=[Depends(checkApiKey)])
+@router.post("/verify-evidence", response_model=EvidenceVerifyResponse)
 async def verify_evidence(req: EvidenceVerifyRequest) -> EvidenceVerifyResponse:
     """
     Verify student evidence using the configured LLM.
@@ -133,7 +133,7 @@ class GapAnalysisRequest(BaseModel):
     target_field: str = "General"
 
 
-@router.post("/analyze", dependencies=[Depends(checkApiKey)])
+@router.post("/analyze")
 async def analyze_gaps(req: GapAnalysisRequest) -> dict[str, Any]:
     """
     Analyze user profile and return list of actionable gaps.

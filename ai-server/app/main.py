@@ -43,32 +43,38 @@ app.include_router(health_router, prefix="/api/v1")
 # ─────────────────────────────────────────────────────────────────────────────
 # Protected Routes (Require API Key Authentication)
 # ─────────────────────────────────────────────────────────────────────────────
-# AI Chatbot: Conversational interface with full user profile context
-app.include_router(chat_router, prefix="/api/v1")
+# All routes registered via protected_router require API key validation
+# The checkApiKey dependency is executed once per request before route handling
+protected_router = APIRouter(dependencies=[Depends(checkApiKey)])
 
+# AI Chatbot: Conversational interface with full user profile context
+protected_router.include_router(chat_router, prefix="/api/v1")
 
 # Data utility endpoint
-@app.get("/data")
+@protected_router.get("/data")
 async def get_data(server_name: str = Depends(checkApiKey)):
     """Protected data endpoint - requires valid API key via checkApiKey dependency."""
     return {"message": f"Hello {server_name}, here is your data."}
 
-
 # AI Recommendations: Personalized suggestions based on user profile
-app.include_router(recommendations_router, prefix="/api/v1/edu")
+protected_router.include_router(recommendations_router, prefix="/api/v1/edu")
 
 # Module 1 Operations: Program matching, scraping, and synchronization
-app.include_router(module1_sync_router, prefix="/api/v1/module1")
+protected_router.include_router(module1_sync_router, prefix="/api/v1/module1")
 # Web scraping for live university program data
-app.include_router(scrape_match_router, prefix="/api/v1/module1")
+protected_router.include_router(scrape_match_router, prefix="/api/v1/module1")
 # Application strategy and planning
-app.include_router(strategy_router, prefix="/api/v1/module1")
+protected_router.include_router(strategy_router, prefix="/api/v1/module1")
 # Job Finder: live job search for international students
-app.include_router(jobs_router, prefix="/api/v1")
+protected_router.include_router(jobs_router, prefix="/api/v1")
 # Education News: categorized news with in-memory caching
-app.include_router(news_router, prefix="/api/v1/news")
+protected_router.include_router(news_router, prefix="/api/v1/news")
 # Gap Fix: AI evidence verification
-app.include_router(gap_fix_router, prefix="/api/v1/gap-fix")
+protected_router.include_router(gap_fix_router, prefix="/api/v1/gap-fix")
+
+# Include the protected router in the main FastAPI application
+app.include_router(protected_router)
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Root & Health Endpoints
@@ -102,16 +108,3 @@ async def health_root():
 async def health_root_head():
     return Response(status_code=200)
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Protected Router Setup
-# ─────────────────────────────────────────────────────────────────────────────
-# All routes registered via protected_router require API key validation
-# The checkApiKey dependency is executed once per request before route handling
-protected_router = APIRouter(dependencies=[Depends(checkApiKey)])
-
-
-# protected_router.include_router(recommendations_router, prefix="/api/v1/edu")
-
-
-app.include_router(protected_router)

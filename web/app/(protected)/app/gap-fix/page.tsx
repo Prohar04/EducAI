@@ -165,6 +165,7 @@ function EvidencePanel({
         item.id,
         text.trim() || null,
         url.trim() || null,
+        uploadedPdf,
       );
       if (!result || result.error) {
         setLocalError(result?.feedback ?? result?.error ?? "Verification failed");
@@ -616,10 +617,19 @@ export default function GapFixPage() {
   const [filter, setFilter] = useState<string>("all");
 
   const load = useCallback(() => {
-    getGapFixItemsAction().then(result => {
-      setData(result);
-      setLoading(false);
-    });
+    getGapFixItemsAction()
+      .then((result) => {
+        if (!result) {
+          setError("Failed to load gap analysis. Please try again.");
+        } else {
+          setData(result);
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Failed to load gap analysis. Please try again.");
+        setLoading(false);
+      });
   }, []);
 
   useEffect(() => {

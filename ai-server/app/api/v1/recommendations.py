@@ -12,7 +12,7 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 from prisma.fields import Json
 
 from ...core.logger import logger
-from ...db.prisma_connect import db
+from ...db.prisma_connect import db, ensure_connected
 from ...domains.reasoning.rag_pipeline import edu_rag_pipeline
 from ...schemas.education import (
     EduContextRecord,
@@ -40,6 +40,7 @@ async def submit_preferences(
     2. Fires an async background task that runs the full RAG pipeline.
     3. Returns `{"status": "processing", "task_id": "<uuid>"}` immediately.
     """
+    await ensure_connected()
     try:
         pref_record = await db.eduuserpreference.create(
             data={
@@ -77,6 +78,7 @@ async def submit_preferences(
 )
 async def list_all_preferences() -> List[EduPreferenceRecord]:
     """Return every row in `edu_user_preferences` for inspection."""
+    await ensure_connected()
     rows = await db.eduuserpreference.find_many(order={"createdAt": "desc"})
     return [
         EduPreferenceRecord(
@@ -100,6 +102,7 @@ async def list_all_preferences() -> List[EduPreferenceRecord]:
 )
 async def list_all_recommendations() -> List[EduRecommendationRecord]:
     """Return every row in `edu_recommendations` for inspection."""
+    await ensure_connected()
     rows = await db.edurecommendation.find_many(order={"createdAt": "desc"})
     return [
         EduRecommendationRecord(
@@ -126,6 +129,7 @@ async def list_all_recommendations() -> List[EduRecommendationRecord]:
 )
 async def list_full_context() -> List[EduContextRecord]:
     """Return every `edu_user_preferences` row joined with its recommendations."""
+    await ensure_connected()
     prefs = await db.eduuserpreference.find_many(
         include={
             "recommendations": {

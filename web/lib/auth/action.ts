@@ -514,6 +514,7 @@ export interface IntelligentSearchResult {
 	title: string;
 	url: string;
 	snippet: string;
+	programId?: string | null;
 }
 
 export interface IntelligentSearchResponse {
@@ -1013,6 +1014,7 @@ export const verifyGapFixEvidenceAction = async (
 	itemId: string,
 	evidenceText: string | null,
 	evidenceUrl: string | null,
+	pdfUrl: string | null = null,
 ): Promise<{
 	success: boolean;
 	verified: boolean;
@@ -1028,7 +1030,7 @@ export const verifyGapFixEvidenceAction = async (
 	const response = await authFetch(`${BACKEND_URL}/api/gap-fix/${itemId}/verify`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ evidenceText, evidenceUrl }),
+		body: JSON.stringify({ evidenceText, evidenceUrl, pdfUrl }),
 	});
 	if (!response.ok) {
 		const data = await response.json() as { error?: string; message?: string };

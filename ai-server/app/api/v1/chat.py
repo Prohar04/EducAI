@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import time
+from collections import OrderedDict
 from typing import Any, Dict, List, Literal, Optional, Tuple
 from urllib.parse import urlparse
 
@@ -23,6 +24,35 @@ router = APIRouter(tags=["Chat"])
 
 SEARCH_CACHE_TTL_SECONDS = 24 * 60 * 60
 PAGE_CACHE_TTL_SECONDS = 7 * 24 * 60 * 60
+
+
+class _TTLCache:
+    """Simple bounded TTL cache. Thread-safety not needed (asyncio single-thread)."""
+    def __init__(self, maxsize: int, ttl: float) -> None:
+        self._maxsize = maxsize
+        self._ttl = ttl
+        self._store: OrderedDict = OrderedDict()
+
+    def get(self, key: str):
+        entry = self._store.get(key)
+        if entry is None:
+            return None
+        ts, value = entry
+        if time.time() - ts > self._ttl:
+            del self._store[key]
+            return None
+        self._store.move_to_end(key)
+        return (ts, value)
+
+    def set(self, key: str, value) -> None:
+        if key in self._store:
+            self._store.move_to_end(key)
+        self._store[key] = (time.time(), value)
+        while len(self._store) > self._maxsize:
+            self._store.popitem(last=False)
+
+    def __contains__(self, key: str) -> bool:
+        return self.get(key) is not None
 MAX_WEB_RESULTS = 5
 MAX_WEB_PAGES = 3
 MAX_INTERNAL_PROGRAMS = 8
@@ -67,7 +97,7 @@ _EDUCATION_KEYWORDS: frozenset[str] = frozenset(
 )
 
 # Keywords that signal clearly off-topic content (block list)
-_OFFOPIC_KEYWORDS: frozenset[str] = frozenset(
+_OFFTOPIC_KEYWORDS: frozenset[str] = frozenset(
     {
         "recipe", "cook", "cooking", "bake", "baking", "food", "restaurant",
         "movie", "movies", "film", "films", "netflix", "series", "tv show",
@@ -93,13 +123,13 @@ def _is_off_topic(message: str) -> bool:
         return False
 
     # If clearly off-topic domain keyword is present → block
-    if any(kw in lowered for kw in _OFFOPIC_KEYWORDS):
+    if any(kw in lowered for kw in _OFFTOPIC_KEYWORDS):
         return True
 
     return False
 
-SEARCH_CACHE: Dict[str, Tuple[float, List[Dict[str, Any]]]] = {}
-PAGE_CACHE: Dict[str, Tuple[float, str]] = {}
+SEARCH_CACHE = _TTLCache(maxsize=500, ttl=SEARCH_CACHE_TTL_SECONDS)
+PAGE_CACHE    = _TTLCache(maxsize=500, ttl=PAGE_CACHE_TTL_SECONDS)
 
 _web_search_client: Optional[WebSearch] = None
 _firecrawl_client: Optional[FirecrawlClient] = None
@@ -252,7 +282,7 @@ class ChatAnswerResponse(BaseModel):
     confidence: Literal["high", "medium", "low"] = "medium"
 
 
-_OFFOPIC_RESPONSE = ChatAnswerResponse(
+_OFFTOPIC_RESPONSE = ChatAnswerResponse(
     answer=(
         "I'm your study-abroad sidekick, not the answer machine for the entire universe 😄 "
         "I can help with admissions, scholarships, visas, funding, professor outreach, "
@@ -529,20 +559,19 @@ def _get_firecrawl_client() -> Optional[FirecrawlClient]:
 
 async def _search_web(query: str) -> List[Dict[str, Any]]:
     cached = SEARCH_CACHE.get(query)
-    now = time.time()
-    if cached and now - cached[0] < SEARCH_CACHE_TTL_SECONDS:
-        return cached[1]
-
+    if cached is not None:
+        _, value = cached
+        return value
     results = await _get_web_search_client().search(query, num_results=MAX_WEB_RESULTS)
-    SEARCH_CACHE[query] = (now, results)
+    SEARCH_CACHE.set(query, results)
     return results
 
 
 async def _fetch_page_extract(url: str) -> str:
     cached = PAGE_CACHE.get(url)
-    now = time.time()
-    if cached and now - cached[0] < PAGE_CACHE_TTL_SECONDS:
-        return cached[1]
+    if cached is not None:
+        _, value = cached
+        return value
 
     firecrawl = _get_firecrawl_client()
     if not firecrawl:
@@ -554,7 +583,7 @@ async def _fetch_page_extract(url: str) -> str:
 
     cleaned = " ".join(raw_text.split())
     cleaned = cleaned[:2400]
-    PAGE_CACHE[url] = (now, cleaned)
+    PAGE_CACHE.set(url, cleaned)
     return cleaned
 
 
@@ -800,7 +829,6 @@ def normalize_chat_response(
     )
 
 
-@router.post("/chat", response_model=ChatAnswerResponse, deprecated=True)
 @router.post("/chat/answer", response_model=ChatAnswerResponse)
 async def answer_chat(request: ChatAnswerRequest) -> ChatAnswerResponse:
     message = request.message.strip()
@@ -808,7 +836,7 @@ async def answer_chat(request: ChatAnswerRequest) -> ChatAnswerResponse:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Message is required.")
 
     if _is_off_topic(message):
-        return _OFFOPIC_RESPONSE
+        return _OFFTOPIC_RESPONSE
 
     needs_internal, needs_web = _route_intent(message, request.userContext)
 
