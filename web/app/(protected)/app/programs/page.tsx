@@ -143,8 +143,8 @@ export default async function ProgramsPage({
 				subtitle="Find your perfect university programs ranked by fit score"
 				badges={
 					<>
-						<HeaderBadge>500+ Programs</HeaderBadge>
-						<HeaderBadge>AI-Ranked</HeaderBadge>
+						<HeaderBadge>{result ? `${result.total.toLocaleString()} Program${result.total !== 1 ? "s" : ""}` : "Programs"}</HeaderBadge>
+						<HeaderBadge>Profile-Ranked</HeaderBadge>
 						<HeaderBadge variant="outline">Live Data</HeaderBadge>
 					</>
 				}

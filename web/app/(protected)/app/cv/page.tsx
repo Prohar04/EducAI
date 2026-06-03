@@ -11,10 +11,13 @@ import {
 	ChevronUp,
 	Copy,
 	Download,
+	Edit3,
 	FileText,
 	Loader2,
+	Save,
 	Sparkles,
 	User,
+	X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -119,16 +122,87 @@ async function downloadAsPdf(
 	}
 }
 
+// ── Inline CV Editor ─────────────────────────────────────────────────────────
+
+function InlineCvEditor({
+	initialContent,
+	onSave,
+	onDiscard,
+}: {
+	initialContent: string;
+	onSave: (text: string) => void;
+	onDiscard: () => void;
+}) {
+	const [text, setText] = useState(initialContent);
+	const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+
+	return (
+		<div className="space-y-3">
+			<div className="flex items-center justify-between gap-2 rounded-lg border border-[#4A90D9]/25 bg-[#4A90D9]/5 px-3 py-2">
+				<p className="text-xs text-[#4A90D9]">
+					Editing your CV directly — changes won&rsquo;t affect the AI generation inputs.
+					{" "}<span className="font-medium">{wordCount} words</span>
+				</p>
+				<div className="flex gap-2">
+					<button
+						type="button"
+						onClick={onDiscard}
+						className="inline-flex items-center gap-1 rounded-md border border-border px-2.5 py-1 text-xs text-muted-foreground hover:bg-muted transition-colors"
+					>
+						<X className="h-3 w-3" /> Discard
+					</button>
+					<button
+						type="button"
+						onClick={() => onSave(text)}
+						className="inline-flex items-center gap-1 rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+					>
+						<Save className="h-3 w-3" /> Save edits
+					</button>
+				</div>
+			</div>
+			<textarea
+				value={text}
+				onChange={(e) => setText(e.target.value)}
+				className="w-full min-h-[60vh] rounded-lg border border-border bg-background p-4 font-mono text-xs text-foreground leading-relaxed focus:outline-none focus:ring-1 focus:ring-ring resize-y"
+				spellCheck
+				placeholder="Your CV content..."
+			/>
+			<div className="flex justify-end gap-2">
+				<button
+					type="button"
+					onClick={onDiscard}
+					className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted transition-colors"
+				>
+					<X className="h-3 w-3" /> Discard changes
+				</button>
+				<button
+					type="button"
+					onClick={() => onSave(text)}
+					className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+				>
+					<Save className="h-3 w-3" /> Save &amp; preview
+				</button>
+			</div>
+		</div>
+	);
+}
+
 export default function CVPage() {
 	const isFirstVisit = useFirstVisit("cv");
 	const [cvTemplate, setCvTemplate] = useState<CvTemplate>("minimal-academic");
 	const [docTemplate, setDocTemplate] = useState<CVTemplate>("us_standard");
 	const [result, setResult] = useState<CvResult | null>(null);
+	const [editedCv, setEditedCv] = useState<string | null>(null); // user-edited version
+	const [editMode, setEditMode] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [copied, setCopied] = useState(false);
 	const [downloading, setDownloading] = useState(false);
 	const [isPending, startTransition] = useTransition();
 	const [previewMode, setPreviewMode] = useState<"draft" | "ai">("draft");
+
+	// The active CV content: user edits override the AI result
+	const activeCv = editedCv ?? result?.cv ?? "";
+	const hasEdits = editedCv !== null && editedCv !== result?.cv;
 
 	// Rich form state
 	const [phone, setPhone] = useState("");
@@ -257,20 +331,22 @@ export default function CVPage() {
 				return;
 			}
 			setResult(res);
+			setEditedCv(null); // reset edits when regenerating
+			setEditMode(false);
 		});
 	}
 
 	function handleCopy() {
-		if (!result) return;
-		navigator.clipboard.writeText(result.cv).then(() => {
+		if (!activeCv) return;
+		navigator.clipboard.writeText(activeCv).then(() => {
 			setCopied(true);
 			setTimeout(() => setCopied(false), 2000);
 		});
 	}
 
 	function handleDownloadTxt() {
-		if (!result) return;
-		const blob = new Blob([result.cv], { type: "text/plain" });
+		if (!activeCv) return;
+		const blob = new Blob([activeCv], { type: "text/plain" });
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement("a");
 		a.href = url;
@@ -280,8 +356,18 @@ export default function CVPage() {
 	}
 
 	function handleDownloadPdf() {
-		if (!result) return;
-		downloadAsPdf(result.cv, docTemplate, setDownloading);
+		if (!activeCv) return;
+		downloadAsPdf(activeCv, docTemplate, setDownloading);
+	}
+
+	function handleSaveEdit(text: string) {
+		setEditedCv(text);
+		setEditMode(false);
+	}
+
+	function handleDiscardEdit() {
+		setEditedCv(null);
+		setEditMode(false);
 	}
 
 	return (
@@ -493,8 +579,12 @@ export default function CVPage() {
 									)}
 								</div>
 								<div className="flex items-center gap-2 flex-wrap">
-									{previewMode === "ai" && result && (
+									{previewMode === "ai" && result && !editMode && (
 										<>
+											<Button variant="outline" size="sm" onClick={() => setEditMode(true)} className="gap-1.5">
+												<Edit3 className="h-3.5 w-3.5" />
+												{hasEdits ? "Edit again" : "Edit"}
+											</Button>
 											<Button variant="outline" size="sm" onClick={handleCopy} className="gap-1.5">
 												{copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
 												{copied ? "Copied!" : "Copy"}
@@ -508,32 +598,44 @@ export default function CVPage() {
 											</Button>
 										</>
 									)}
-									<Button variant="ghost" size="sm" onClick={handleGenerate} disabled={isPending} className="gap-1.5">
-										{isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-										{isPending ? "Building…" : "Build with AI"}
-									</Button>
+									{!editMode && (
+										<Button variant="ghost" size="sm" onClick={handleGenerate} disabled={isPending} className="gap-1.5">
+											{isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+											{isPending ? "Building…" : "Build with AI"}
+										</Button>
+									)}
 								</div>
 							</div>
 
-							<div className="rounded-lg border border-border bg-muted/30 max-h-[70vh] overflow-y-auto p-3">
-								<DocumentPreview
-									content={previewMode === "ai" && result ? result.cv : buildDraftCv()}
-									template={cvTemplate}
-									mode="cv"
+							{/* Inline edit mode */}
+							{editMode && result ? (
+								<InlineCvEditor
+									initialContent={activeCv}
+									onSave={handleSaveEdit}
+									onDiscard={handleDiscardEdit}
 								/>
-							</div>
+							) : (
+								<div className="rounded-lg border border-border bg-muted/30 max-h-[70vh] overflow-y-auto p-3">
+									<DocumentPreview
+										content={previewMode === "ai" && result ? activeCv : buildDraftCv()}
+										template={cvTemplate}
+										mode="cv"
+									/>
+								</div>
+							)}
 
-							{previewMode === "draft" && (
+							{!editMode && previewMode === "draft" && (
 								<div className="mt-3 rounded-lg border border-[#4A90D9]/20 bg-[#4A90D9]/5 px-3 py-2">
 									<p className="text-xs text-[#4A90D9]">
 										Live draft from your inputs — click &ldquo;Build with AI&rdquo; to generate a polished version.
 									</p>
 								</div>
 							)}
-							{previewMode === "ai" && result && (
+							{!editMode && previewMode === "ai" && result && (
 								<div className="mt-3 rounded-lg border border-[#C49A3C]/20 bg-[#C49A3C]/5 px-3 py-2">
 									<p className="text-xs text-[#C49A3C]">
-										AI-generated — review, edit, and fill in any [PLACEHOLDER] markers before submitting.
+										AI-generated — use the <strong>Edit</strong> button to refine any section before downloading.
+										{hasEdits && <span className="ml-1 text-[#3D9970] font-medium">✓ Your edits are saved.</span>}
 									</p>
 								</div>
 							)}

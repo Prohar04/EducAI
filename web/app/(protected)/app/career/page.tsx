@@ -215,7 +215,13 @@ export default function CareerPage() {
             )}
           </div>
 
-          <div className="rounded-xl border border-[#C49A3C]/20 bg-[#C49A3C]/[0.05] px-4 py-3" role="note">
+          <div className="rounded-xl border border-[#C49A3C]/20 bg-[#C49A3C]/[0.05] px-4 py-3 space-y-1" role="note">
+            <p className="text-xs font-semibold text-[#C49A3C]">Data sources &amp; disclaimer</p>
+            {(result as { salaryDataSource?: string }).salaryDataSource && (
+              <p className="text-xs text-[#C49A3C]/80">
+                Salary benchmarks sourced from: {(result as { salaryDataSource?: string }).salaryDataSource}
+              </p>
+            )}
             <p className="text-xs text-[#C49A3C]/90">{result.disclaimer}</p>
           </div>
         </div>

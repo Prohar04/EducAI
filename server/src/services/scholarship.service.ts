@@ -307,78 +307,143 @@ export async function checkEligibility(
   let totalWeight = 0;
   let earnedWeight = 0;
 
-  // --- GPA check ---
+  // ── 1. GPA check (weight 25) ──────────────────────────────────────────────
   if (scholarship.minGpa) {
-    totalWeight += 30;
+    totalWeight += 25;
     const normalised = normalizeGpa(profile.gpa, profile.gpaScale);
     if (normalised !== null && normalised >= scholarship.minGpa) {
+      const margin = normalised - scholarship.minGpa;
+      earnedWeight += margin >= 0.3 ? 25 : margin >= 0.1 ? 22 : 18; // tiered — exceeding min scores better
       met.push(`GPA meets minimum (${gpaLabel(profile.gpa, profile.gpaScale)} ≥ ${scholarship.minGpa}/4.0)`);
-      earnedWeight += 30;
+    } else if (normalised !== null) {
+      // Below minimum — 0 credit, hard miss
+      missing.push(`GPA below minimum (need ≥ ${scholarship.minGpa}/4.0, have ${gpaLabel(profile.gpa, profile.gpaScale)})`);
+      actions.push(`Aim to raise your GPA to at least ${scholarship.minGpa}/4.0 before applying`);
     } else {
-      const needed = scholarship.minGpa;
-      missing.push(`GPA below minimum (need ≥ ${needed}/4.0, have ${gpaLabel(profile.gpa, profile.gpaScale)})`);
-      actions.push(`Aim to raise your GPA to at least ${needed}/4.0 before applying`);
+      earnedWeight += 10; // GPA not provided — partial credit
+      met.push('GPA not provided — provide your GPA for accurate eligibility check');
+      actions.push('Add your GPA and scale to your profile for an accurate eligibility assessment');
     }
   } else {
-    // No GPA requirement
     met.push('No minimum GPA requirement');
-    totalWeight += 10;
-    earnedWeight += 10;
+    totalWeight += 8;
+    earnedWeight += 8;
   }
 
-  // --- Degree level check ---
+  // ── 2. Degree level check (weight 20) ────────────────────────────────────
   if (scholarship.level) {
     totalWeight += 20;
     const profileLevel = (profile.intendedLevel ?? profile.level ?? '').toUpperCase();
     if (profileLevel === scholarship.level.toString()) {
       met.push(`Degree level matches (${scholarship.level})`);
       earnedWeight += 20;
+    } else if (!profileLevel) {
+      earnedWeight += 8; // unknown — partial
+      met.push('Target degree level not set — update your profile to confirm eligibility');
+      actions.push(`Set your target degree level in your profile (this scholarship is for ${scholarship.level})`);
     } else {
-      missing.push(`Degree level mismatch (scholarship is for ${scholarship.level}, you are targeting ${profileLevel || 'unknown'})`);
-      actions.push(`This scholarship is specifically for ${scholarship.level} programmes`);
+      missing.push(`Degree level mismatch (scholarship is for ${scholarship.level}, you are targeting ${profileLevel})`);
+      actions.push(`This scholarship is specifically for ${scholarship.level} programmes — it does not apply to ${profileLevel}`);
     }
   }
 
-  // --- Nationality check ---
+  // ── 3. Field of study match (weight 15) ──────────────────────────────────
+  if (scholarship.field && scholarship.field.toLowerCase() !== 'all fields') {
+    totalWeight += 15;
+    const schField = scholarship.field.toLowerCase();
+    const profileMajor = (
+      profile.intendedAbroadMajor ?? profile.majorOrTrack ?? profile.intendedMajor ?? ''
+    ).toLowerCase();
+
+    const fieldWords = schField.split(/[\s,/&]+/).filter(w => w.length > 3);
+    const majorWords = profileMajor.split(/[\s,/&]+/).filter(w => w.length > 3);
+    const hasFieldMatch =
+      schField.includes(profileMajor) ||
+      profileMajor.includes(schField) ||
+      fieldWords.some(fw => majorWords.some(mw => fw.includes(mw) || mw.includes(fw)));
+
+    if (profileMajor && hasFieldMatch) {
+      met.push(`Field of study matches (${scholarship.field})`);
+      earnedWeight += 15;
+    } else if (!profileMajor) {
+      earnedWeight += 5; // unknown
+      met.push('Intended major not set — add your field of study to verify field eligibility');
+      actions.push(`This scholarship targets ${scholarship.field}. Set your intended major to check field eligibility.`);
+    } else {
+      missing.push(`Field mismatch: scholarship is for ${scholarship.field}, your target is ${profile.intendedAbroadMajor ?? profile.majorOrTrack ?? profile.intendedMajor}`);
+      actions.push(`Look for scholarships specifically for ${profile.intendedAbroadMajor ?? profile.majorOrTrack ?? 'your field'} — or check if this scholarship has a broader field category`);
+    }
+  } else if (scholarship.field?.toLowerCase() === 'all fields') {
+    met.push('Open to all fields of study');
+    totalWeight += 15;
+    earnedWeight += 15;
+  }
+
+  // ── 4. Nationality check (weight 20) ─────────────────────────────────────
   const eligibleNats = scholarship.eligibleNationalities as string[] | null;
   if (eligibleNats && eligibleNats.length > 0) {
-    totalWeight += 25;
-    const profileCountries = profile.targetCountries ?? [];
-    // We can't know student nationality from profile alone; treat as partial/unknown
+    totalWeight += 20;
+    // We cannot determine nationality from the profile (it isn't stored).
+    // Give partial credit and ask them to verify — not a hard miss.
     met.push('Nationality eligibility: verify you are from an eligible country');
-    earnedWeight += 12; // partial credit
-    actions.push(`Confirm your nationality is in the eligible list: ${eligibleNats.slice(0, 5).join(', ')}${eligibleNats.length > 5 ? '...' : ''}`);
+    earnedWeight += 10; // partial — unknown
+    actions.push(`Confirm your nationality is in the eligible list: ${eligibleNats.slice(0, 5).join(', ')}${eligibleNats.length > 5 ? ' and others' : ''}`);
   } else {
     met.push('Open to all nationalities');
-    totalWeight += 25;
-    earnedWeight += 25;
+    totalWeight += 20;
+    earnedWeight += 20;
   }
 
-  // --- English test check ---
+  // ── 5. English test check (weight 12) ────────────────────────────────────
   if (scholarship.requiresEnglishTest) {
-    totalWeight += 15;
+    totalWeight += 12;
     if (profile.englishTestType && profile.englishScore) {
+      // Score-based tiered credit
+      let engCredit = 12;
+      if (profile.englishTestType === 'IELTS') {
+        engCredit = profile.englishScore >= 7.5 ? 12 : profile.englishScore >= 7.0 ? 10 : profile.englishScore >= 6.5 ? 8 : 4;
+      } else if (profile.englishTestType === 'TOEFL') {
+        engCredit = profile.englishScore >= 105 ? 12 : profile.englishScore >= 95 ? 10 : profile.englishScore >= 80 ? 8 : 4;
+      }
+      earnedWeight += engCredit;
       met.push(`English test provided (${profile.englishTestType}: ${profile.englishScore})`);
-      earnedWeight += 15;
+      if (engCredit < 10) {
+        actions.push('Consider retaking your English test to improve your score — most competitive scholarships expect IELTS ≥ 7.0 or TOEFL ≥ 95');
+      }
     } else {
-      missing.push('English proficiency test required (IELTS/TOEFL)');
-      actions.push('Take IELTS or TOEFL and achieve the required score before applying');
+      missing.push('English proficiency test required (IELTS/TOEFL) — not provided');
+      actions.push('Take IELTS ≥ 7.0 or TOEFL ≥ 95 before applying — most scholarships require this');
+    }
+  } else {
+    if (profile.englishTestType) {
+      met.push(`English test on file (${profile.englishTestType}: ${profile.englishScore}) — strengthens application`);
+      totalWeight += 5;
+      earnedWeight += 5;
     }
   }
 
-  // --- Financial need check ---
+  // ── 6. Financial need check (weight 8) ───────────────────────────────────
   if (scholarship.financialNeedRequired) {
-    totalWeight += 10;
+    totalWeight += 8;
     if (profile.fundingNeed === true) {
       met.push('Financial need requirement met (you indicated funding need)');
-      earnedWeight += 10;
+      earnedWeight += 8;
     } else {
       missing.push('This scholarship requires demonstrated financial need');
-      actions.push('Prepare financial need documentation (income statements, bank statements)');
+      actions.push('Prepare financial documentation (family income statements, bank statements) to demonstrate need');
     }
   }
 
-  const score = totalWeight > 0 ? Math.round((earnedWeight / totalWeight) * 100) : 50;
+  // ── 7. Graduation timing sanity check (weight 0 — advisory only) ─────────
+  if (profile.graduationYear) {
+    const currentYear = new Date().getFullYear();
+    if (profile.graduationYear < currentYear - 5) {
+      actions.push(`Many scholarships require recent graduation (within 3–5 years). Your graduation year (${profile.graduationYear}) may exclude you from some awards — verify the scholarship's recency requirement.`);
+    }
+  }
+
+  const rawScore = totalWeight > 0 ? (earnedWeight / totalWeight) * 100 : 50;
+  const score = Math.round(Math.min(100, Math.max(0, rawScore)));
 
   let status: EligibilityResult['status'];
   if (missing.length === 0) {

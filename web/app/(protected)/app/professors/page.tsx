@@ -125,10 +125,14 @@ function ProfessorCard({
 				<div className="flex-1 min-w-0">
 					<div className="flex items-center gap-2 flex-wrap">
 						<h3 className="font-semibold leading-snug truncate">{professor.name}</h3>
-						{professor.sourceVerified && (
+						{professor.sourceVerified ? (
 							<span className="inline-flex items-center gap-1 rounded-full bg-[#3D9970]/10 px-1.5 py-0.5 text-[10px] font-medium text-[#3D9970]">
 								<CheckCircle className="h-2.5 w-2.5" />
-								Source-backed
+								Web-verified
+							</span>
+						) : (
+							<span className="inline-flex items-center gap-1 rounded-full bg-[#C49A3C]/10 px-1.5 py-0.5 text-[10px] font-medium text-[#C49A3C]">
+								AI-suggested · verify before contacting
 							</span>
 						)}
 					</div>
