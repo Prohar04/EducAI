@@ -22,6 +22,9 @@ jest.unstable_mockModule('#src/middlewares/authenticate.ts', () => ({
     req.userId = 'user-123';
     next();
   },
+  // optionalAuthMiddleware added here so the program router doesn't receive
+  // undefined when chat.test.js replaces the entire authenticate module.
+  optionalAuthMiddleware: (_req, _res, next) => next(),
 }));
 
 const mockFetch = jest.fn();
