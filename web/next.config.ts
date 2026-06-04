@@ -3,6 +3,15 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: "standalone",
   experimental: {
+    // Disable the client-side router cache for dynamically-rendered routes.
+    // Without this, Next.js serves visited pages from in-memory cache for up to
+    // 30 s (dynamic) or 5 min (static) — causing stale data on navigation.
+    // Setting dynamic: 0 forces a fresh server request on every route visit.
+    // Static assets (landing page) still get 30 s to avoid unnecessary fetches.
+    staleTimes: {
+      dynamic: 0,
+      static: 30,
+    },
     optimizePackageImports: [
       "lucide-react",
       "framer-motion",
@@ -51,6 +60,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: false,
   async headers() {
     return [
+      // ── Immutable static assets (hashed filenames — safe to cache forever) ──
       {
         source: "/_next/static/:path*",
         headers: [
@@ -67,6 +77,24 @@ const nextConfig: NextConfig = {
         source: "/:path*.js",
         headers: [
           { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      // ── API routes — never cache; always serve fresh data ────────────────────
+      // Prevents Vercel's CDN and the browser from caching JSON responses that
+      // contain user-specific or real-time data (match results, timeline, etc.).
+      {
+        source: "/api/:path*",
+        headers: [
+          { key: "Cache-Control", value: "no-store, no-cache, must-revalidate" },
+          { key: "Pragma", value: "no-cache" },
+        ],
+      },
+      // ── Protected app routes — must never be edge-cached ─────────────────────
+      {
+        source: "/app/:path*",
+        headers: [
+          { key: "Cache-Control", value: "no-store, no-cache, must-revalidate" },
+          { key: "Pragma", value: "no-cache" },
         ],
       },
     ];

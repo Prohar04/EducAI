@@ -16,6 +16,15 @@ export const authFetch = async (
 		redirect("/auth/signin?reason=no_session");
 	}
 
+	// Always bypass the Next.js data cache for authenticated requests.
+	// Every authFetch call is user-specific — caching would serve one user's
+	// data to another user, or serve stale data after mutations.
+	// This is the root cause of pages showing old data until hard-refresh.
+	options = {
+		cache: "no-store",
+		...options,          // caller can still override if they explicitly need caching
+	};
+
 	options.headers = {
 		...options.headers,
 		Authorization: `Bearer ${session.accessToken}`,

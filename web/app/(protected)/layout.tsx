@@ -7,6 +7,12 @@ import type { ReactNode } from "react";
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
+
+// Force every route under /app to be dynamically rendered — never statically
+// cached at the page level. Combined with cache: 'no-store' in authFetch and
+// staleTimes.dynamic: 0 in next.config.ts, this eliminates all three caching
+// layers that were causing stale data on normal (non-hard-refresh) navigation.
+export const dynamic = "force-dynamic";
 import { Navbar } from "@/components/app/Navbar";
 import { LazyChatbotWidget } from "@/components/app/LazyChatbotWidget";
 import { TransitionLayout } from "@/components/motion/TransitionLayout";
