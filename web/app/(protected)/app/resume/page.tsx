@@ -26,6 +26,8 @@ import { StaggerChildren, StaggerItem } from "@/components/motion/FadeIn";
 import { generateResumeAction, type ResumeTemplate, type ResumeResult } from "@/lib/auth/action";
 import DocumentPreview from "@/components/features/document-preview";
 
+export const dynamic = "force-dynamic";
+
 // ── Template definitions ─────────────────────────────────────────────────────
 
 const TEMPLATES: { value: ResumeTemplate; label: string; desc: string; badge?: string }[] = [

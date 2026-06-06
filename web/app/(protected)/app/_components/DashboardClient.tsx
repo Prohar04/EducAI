@@ -568,28 +568,18 @@ export default function DashboardClient({ initialSession, initialProfile, initia
     "/api/saved-programs",
     fetcher,
     {
-      revalidateOnFocus: false,
       fallbackData: { savedPrograms: [] },
-      dedupingInterval: 5000,
     }
   );
 
   const { data: matchData } = useSWR<MatchLatestResponse>(
     "/api/match/latest",
     fetcher,
-    {
-      revalidateOnFocus: false,
-      dedupingInterval: 10000,
-    }
   );
 
   const { data: timelineData } = useSWR<UserRoadmapSummary>(
     "/api/timeline/latest",
     fetcher,
-    {
-      revalidateOnFocus: false,
-      dedupingInterval: 10000,
-    }
   );
 
   const savedProgramsData = React.useMemo(() => savedPrograms?.savedPrograms ?? [], [savedPrograms]);

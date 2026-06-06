@@ -13,6 +13,8 @@ import { FadeIn } from "@/components/motion/FadeIn";
 import { StaggerChildren, StaggerItem } from "@/components/motion/FadeIn";
 import { AlertTriangle, Database } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 function levelLabel(level: string) {
 	const map: Record<string, string> = {
 		BSC: "Bachelor's",

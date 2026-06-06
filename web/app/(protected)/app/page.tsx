@@ -4,6 +4,8 @@ import { getUserProfile } from "@/lib/auth/action";
 import { fetchEducationPulse } from "@/lib/data/fetchEducationPulse";
 import DashboardClient from "./_components/DashboardClient";
 
+export const dynamic = "force-dynamic";
+
 
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 

@@ -14,6 +14,8 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { EmployabilityGauge } from "@/components/features/career/employability-gauge";
 import { predictCareerAction, type CareerResult } from "@/lib/auth/action";
 
+export const dynamic = "force-dynamic";
+
 const OUTLOOK_STYLES = {
   Excellent: { badge: "success" as const, bar: "bg-[#3D9970]" },
   Good: { badge: "info" as const, bar: "bg-[#4A90D9]" },

@@ -22,6 +22,8 @@ import { Button } from "@/components/ui/button";
 import { MatchIllustration } from "@/components/illustrations";
 import { StaggerChildren, StaggerItem } from "@/components/motion/FadeIn";
 
+export const dynamic = "force-dynamic";
+
 const LEVEL_LABELS: Record<string, string> = {
   BSC: "Bachelor's",
   MSC: "Master's",

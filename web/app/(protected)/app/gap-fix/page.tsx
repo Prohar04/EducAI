@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback, useTransition } from "react";
-import dynamic from "next/dynamic";
+import NextDynamic from "next/dynamic";
 import { useFirstVisit } from "@/lib/hooks/use-first-visit";
 import {
+
   getGapFixItemsAction,
   analyzeGapFixItemsAction,
   uploadGapFixPDFAction,
@@ -14,7 +15,9 @@ import {
   type GapFixDataV2,
 } from "@/lib/auth/action";
 
-const GapFixAnimation = dynamic(
+export const dynamic = "force-dynamic";
+
+const GapFixAnimation = NextDynamic(
   () => import("@/components/animations/gap-fix-animation"),
   { ssr: false, loading: () => null },
 );

@@ -18,11 +18,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/motion/FadeIn";
 import {
+
 	getImmigrationGuideAction,
 	type ImmigrationResult,
 	type CountryPathway,
 	type ImmigrationStep,
 } from "@/lib/auth/action";
+
+export const dynamic = "force-dynamic";
 
 const FEASIBILITY_STYLES = {
 	High: { badge: "bg-[#3D9970]/10 text-[#3D9970] border-[#3D9970]/30", dot: "bg-[#3D9970]" },

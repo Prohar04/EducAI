@@ -1,6 +1,8 @@
 import { getEligibleScholarships, getUpcomingScholarshipDeadlines } from "@/lib/auth/action";
 import ScholarshipsClient from "./_components/ScholarshipsClient";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = { title: "Scholarships · EducAI" };
 
 export default async function ScholarshipsPage() {

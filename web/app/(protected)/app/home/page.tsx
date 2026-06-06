@@ -1,6 +1,8 @@
 // This route is retired — redirect all visitors to the main dashboard
 import { redirect } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 export default function HomePage() {
   redirect("/app/dashboard");
 }

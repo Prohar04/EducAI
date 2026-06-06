@@ -26,6 +26,8 @@ import SaveButton from "../_components/SaveButton";
 import { FadeIn } from "@/components/motion/FadeIn";
 import type { FreshnessStatus } from "@/types/auth.type";
 
+export const dynamic = "force-dynamic";
+
 const LEVEL_LABELS: Record<string, string> = {
   BSC: "Bachelor's",
   MSC: "Master's",

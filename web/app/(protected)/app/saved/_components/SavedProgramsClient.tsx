@@ -34,11 +34,6 @@ export default function SavedProgramsClient() {
   const { data: saved, error, isLoading } = useSWR<SavedProgramItem[]>(
     "/api/saved-programs",
     fetcher,
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: true,
-      dedupingInterval: 5000,
-    }
   );
 
   return (

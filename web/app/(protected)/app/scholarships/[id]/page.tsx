@@ -15,6 +15,8 @@ import { COUNTRIES } from "@/lib/data/countries";
 import { FadeIn } from "@/components/motion/FadeIn";
 import type { ScholarshipItem } from "@/types/auth.type";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = { title: "Scholarship Detail · EducAI" };
 
 function countryName(code: string | null | undefined) {

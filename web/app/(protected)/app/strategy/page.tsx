@@ -5,6 +5,8 @@ import {
 } from "@/lib/auth/action";
 import StrategyReportClient from "./_components/StrategyReportClient";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = { title: "Application Strategy · EducAI" };
 
 export default async function StrategyPage() {

@@ -24,6 +24,8 @@ import { SmartAutocomplete, type SuggestionItem } from "@/components/forms/Smart
 import { searchProfessorsAction, getUserProfile, type ProfessorResult } from "@/lib/auth/action";
 import { COUNTRIES } from "@/lib/data/countries";
 
+export const dynamic = "force-dynamic";
+
 const RESEARCH_TOPIC_SUGGESTIONS: SuggestionItem[] = [
 	{ value: "nlp", label: "Natural Language Processing" },
 	{ value: "computer_vision", label: "Computer Vision" },

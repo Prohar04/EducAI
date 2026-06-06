@@ -28,6 +28,8 @@ import DocumentTemplateSelector, { type CVTemplate } from "@/components/features
 import DocumentPreview from "@/components/features/document-preview";
 import { Eye } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 const TEMPLATES: { value: CvTemplate; label: string; desc: string; badge?: string }[] = [
 	{ value: "minimal-academic", label: "Minimal Academic", desc: "Clean STEM grad CV — education & research first" },
 	{ value: "research-focused", label: "Research Focused", desc: "Research experience & publications lead", badge: "PhD" },

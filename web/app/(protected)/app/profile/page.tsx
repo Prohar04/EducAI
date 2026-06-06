@@ -5,6 +5,8 @@ import Link from "next/link";
 import ProfileEditForm from "./_components/ProfileEditForm";
 import DangerZone from "./_components/DangerZone";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = { title: "Edit Profile · EducAI" };
 
 export default async function ProfilePage() {

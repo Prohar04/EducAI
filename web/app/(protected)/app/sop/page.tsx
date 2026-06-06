@@ -25,6 +25,8 @@ import DocumentTemplateSelector, { type SOPTemplate } from "@/components/feature
 import DocumentPreview from "@/components/features/document-preview";
 import { Eye } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 const TEMPLATES: { value: SopTemplate; label: string; desc: string; badge?: string }[] = [
 	{ value: "formal-academic", label: "Formal Academic", desc: "Professional, structured academic prose" },
 	{ value: "research-focused", label: "Research Focused", desc: "Emphasizes research trajectory & curiosity", badge: "PhD" },

@@ -44,17 +44,9 @@ export function useSwrAuth<T = unknown>(
       return response.json();
     },
     {
-      // Don't revalidate on focus to reduce API calls
-      revalidateOnFocus: false,
-
-      // Revalidate on reconnect
-      revalidateOnReconnect: true,
-
-      // Keep previous data while revalidating to prevent flickering
-      keepPreviousData: true,
-
-      // Deduplicate requests
-      dedupingInterval: 5000,
+      // Inherit global swrConfig — don't override here so the fix in
+      // lib/swr/config.ts (revalidateOnMount: true, dedupingInterval: 0)
+      // applies to all callers of this hook automatically.
     }
   );
 }

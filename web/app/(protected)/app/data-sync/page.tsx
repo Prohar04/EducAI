@@ -28,6 +28,8 @@ import {
 } from "@/lib/auth/action";
 import { cn } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function timeAgo(iso: string | null | undefined): string {
