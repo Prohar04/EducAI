@@ -9,6 +9,8 @@
  * - Obvious nonsense or too-short inputs are rejected before hitting search.
  */
 
+import logger from '#src/config/logger.ts';
+
 const SERPER_URL = 'https://google.serper.dev/search';
 const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
@@ -144,10 +146,11 @@ function isValidQuery(text: string): boolean {
 }
 
 type RawResult = { title: string; link: string; snippet: string };
+type SearchOutcome = { results: RawResult[]; providerError?: string };
 
-async function serperSearch(query: string, numResults = 10): Promise<RawResult[]> {
+async function serperSearch(query: string, numResults = 10): Promise<SearchOutcome> {
   const apiKey = process.env.SERPER_APIKEY || process.env.SERPER_API_KEY;
-  if (!apiKey) return [];
+  if (!apiKey) return { results: [], providerError: 'SERPER_API_KEY is not set on this server' };
 
   try {
     const response = await fetch(SERPER_URL, {
@@ -156,25 +159,42 @@ async function serperSearch(query: string, numResults = 10): Promise<RawResult[]
       body: JSON.stringify({ q: query, num: numResults }),
       signal: AbortSignal.timeout(8_000),
     });
-    if (!response.ok) return [];
+    if (!response.ok) {
+      const bodyText = await response.text().catch(() => '');
+      logger.error(`[professors] Serper request failed: HTTP ${response.status} ${bodyText.slice(0, 300)}`);
+      const reason = response.status === 401 || response.status === 403
+        ? 'Serper API key was rejected (invalid, revoked, or expired)'
+        : response.status === 429
+        ? 'Serper API quota/rate limit exceeded'
+        : `Serper API returned HTTP ${response.status}`;
+      return { results: [], providerError: reason };
+    }
     const data = await response.json() as { organic?: Array<{ title?: string; link?: string; snippet?: string }> };
-    return (data.organic ?? []).map(r => ({ title: r.title ?? '', link: r.link ?? '', snippet: r.snippet ?? '' }));
-  } catch {
-    return [];
+    return { results: (data.organic ?? []).map(r => ({ title: r.title ?? '', link: r.link ?? '', snippet: r.snippet ?? '' })) };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.error(`[professors] Serper request threw: ${message}`);
+    const reason = message.toLowerCase().includes('timeout') || message.toLowerCase().includes('abort')
+      ? 'Serper API request timed out'
+      : `Serper API request failed: ${message}`;
+    return { results: [], providerError: reason };
   }
 }
+
+type ExtractOutcome = { professors: ProfessorResult[]; providerError?: string };
 
 async function extractProfessors(
   searchResults: RawResult[],
   req: ProfessorSearchRequest,
-): Promise<ProfessorResult[]> {
+): Promise<ExtractOutcome> {
   const openaiKey = process.env.OPENAI_API_KEY;
   const openrouterKey = process.env.OPENROUTER_API_KEY;
   const apiKey = openaiKey || openrouterKey;
   const apiUrl = openaiKey ? OPENAI_URL : OPENROUTER_URL;
   const model = openaiKey ? 'gpt-4o-mini' : 'openai/gpt-4o-mini';
 
-  if (!apiKey || searchResults.length === 0) return [];
+  if (!apiKey) return { professors: [], providerError: 'No OPENAI_API_KEY or OPENROUTER_API_KEY set on this server' };
+  if (searchResults.length === 0) return { professors: [] };
 
   // Score and sort results — profile pages first
   const scored = searchResults
@@ -263,13 +283,22 @@ Return ONLY the JSON array. No explanation, no markdown.`;
       signal: AbortSignal.timeout(15_000),
     });
 
-    if (!response.ok) return [];
+    if (!response.ok) {
+      const bodyText = await response.text().catch(() => '');
+      logger.error(`[professors] LLM extractor request failed: HTTP ${response.status} ${bodyText.slice(0, 300)}`);
+      const reason = response.status === 401 || response.status === 403
+        ? 'AI extractor API key was rejected (invalid, revoked, or expired)'
+        : response.status === 429
+        ? 'AI extractor quota/rate limit exceeded'
+        : `AI extractor API returned HTTP ${response.status}`;
+      return { professors: [], providerError: reason };
+    }
 
     const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
     const content = data?.choices?.[0]?.message?.content?.trim() ?? '';
     const cleaned = content.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim();
     const parsed = JSON.parse(cleaned) as unknown;
-    if (!Array.isArray(parsed)) return [];
+    if (!Array.isArray(parsed)) return { professors: [], providerError: 'AI extractor returned a non-array response' };
 
     const extracted = (parsed as Array<Record<string, unknown>>)
       .filter(p => {
@@ -311,11 +340,20 @@ Return ONLY the JSON array. No explanation, no markdown.`;
       return bScore - aScore;
     });
 
-    return extracted
-      .slice(0, 5)
-      .map(({ _profileScore: _, isProfilePage: __, ...rest }) => rest);
-  } catch {
-    return [];
+    return {
+      professors: extracted
+        .slice(0, 5)
+        .map(({ _profileScore: _, isProfilePage: __, ...rest }) => rest),
+    };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.error(`[professors] LLM extractor threw: ${message}`);
+    const reason = message.toLowerCase().includes('timeout') || message.toLowerCase().includes('abort')
+      ? 'AI extractor request timed out'
+      : message.toLowerCase().includes('json')
+      ? 'AI extractor returned invalid JSON'
+      : `AI extractor request failed: ${message}`;
+    return { professors: [], providerError: reason };
   }
 }
 
@@ -380,7 +418,7 @@ export async function searchProfessors(req: ProfessorSearchRequest): Promise<Pro
   const broadQuery = buildBroadQuery(req);
 
   // Run both searches in parallel; profile query gets 8 results, broad gets 6
-  const [profileResults, broadResults] = await Promise.all([
+  const [profileOutcome, broadOutcome] = await Promise.all([
     serperSearch(profileQuery, 8),
     serperSearch(broadQuery, 6),
   ]);
@@ -388,16 +426,35 @@ export async function searchProfessors(req: ProfessorSearchRequest): Promise<Pro
   // Deduplicate by URL, keeping profile-query results first (higher priority)
   const seen = new Set<string>();
   const combined: RawResult[] = [];
-  for (const r of [...profileResults, ...broadResults]) {
+  for (const r of [...profileOutcome.results, ...broadOutcome.results]) {
     if (r.link && !seen.has(r.link)) {
       seen.add(r.link);
       combined.push(r);
     }
   }
 
-  const professors = await extractProfessors(combined, req);
+  // If BOTH search calls failed at the provider level (not just "zero organic
+  // results"), surface that clearly instead of the generic "no results" copy —
+  // this is almost always an invalid/expired/rate-limited API key, not a bad query.
+  const searchProviderError = profileOutcome.providerError && broadOutcome.providerError
+    ? profileOutcome.providerError
+    : undefined;
 
-  const warning = professors.length === 0 && combined.length === 0
+  if (searchProviderError) {
+    logger.error(`[professors] both Serper calls failed: ${searchProviderError}`);
+    return {
+      query: profileQuery,
+      results: [],
+      searchedAt: new Date().toISOString(),
+      warning: `Professor search provider error: ${searchProviderError}. This is a server configuration issue, not a bad search query — check the SERPER_API_KEY on the deployment.`,
+    };
+  }
+
+  const { professors, providerError: extractProviderError } = await extractProfessors(combined, req);
+
+  const warning = extractProviderError
+    ? `AI extraction provider error: ${extractProviderError}. This is a server configuration issue — check the OPENAI_API_KEY / OPENROUTER_API_KEY on the deployment.`
+    : professors.length === 0 && combined.length === 0
     ? 'No web results found. Check your search terms or try a different university name.'
     : professors.length === 0 && combined.length > 0
     ? 'Search returned results but no verified professors could be extracted. Try a more specific research area or university name.'
