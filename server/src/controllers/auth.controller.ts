@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { toUSD } from '#src/utils/exchangeRates.ts';
 import crypto from 'crypto';
 import passport from 'passport';
-import { GOOGLE_OAUTH_ENABLED } from '../config/google.config.ts';
+import { GOOGLE_CALLBACK_URL, GOOGLE_OAUTH_ENABLED } from '../config/google.config.ts';
 import {
   createUser,
   findUserByEmail,
@@ -453,8 +453,33 @@ export const signout = async (req: AuthRequest, res: Response) => {
 const _googleAuthDisabled = (_req: Request, res: Response) =>
   res.status(503).json({ message: 'Google OAuth is not configured on this server.' });
 
+function resolveGoogleCallbackUrl(req: Request) {
+  const requested = req.query.redirect_uri;
+
+  if (typeof requested === 'string') {
+    try {
+      const callbackUrl = new URL(requested);
+      if (callbackUrl.pathname === '/api/auth/google/callback') {
+        return callbackUrl.toString();
+      }
+    } catch {
+      logger.warn(`[google auth] ignoring invalid redirect_uri: ${requested}`);
+    }
+  }
+
+  return GOOGLE_CALLBACK_URL;
+}
+
 export const googleAuth = GOOGLE_OAUTH_ENABLED
-  ? passport.authenticate('google', { scope: ['email', 'profile'] })
+  ? (req: Request, res: Response, next: NextFunction) => {
+      passport.authenticate(
+        'google',
+        {
+          scope: ['email', 'profile'],
+          callbackURL: resolveGoogleCallbackUrl(req),
+        } as any
+      )(req, res, next);
+    }
   : _googleAuthDisabled;
 
 export const googleAuthCallback = GOOGLE_OAUTH_ENABLED
