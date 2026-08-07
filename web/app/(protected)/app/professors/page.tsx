@@ -25,6 +25,12 @@ import { searchProfessorsAction, getUserProfile, type ProfessorResult } from "@/
 import { COUNTRIES } from "@/lib/data/countries";
 
 export const dynamic = "force-dynamic";
+// The search chains two parallel Serper calls (up to 15s each) followed by an
+// LLM extraction pass (up to 15s) on the backend — comfortably over Vercel's
+// default 10s function limit. Raise this route's ceiling so the platform
+// doesn't kill the request out from under a legitimately slow-but-successful
+// search.
+export const maxDuration = 45;
 
 const RESEARCH_TOPIC_SUGGESTIONS: SuggestionItem[] = [
 	{ value: "nlp", label: "Natural Language Processing" },

@@ -157,7 +157,7 @@ async function serperSearch(query: string, numResults = 10): Promise<SearchOutco
       method: 'POST',
       headers: { 'X-API-KEY': apiKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({ q: query, num: numResults }),
-      signal: AbortSignal.timeout(8_000),
+      signal: AbortSignal.timeout(15_000),
     });
     if (!response.ok) {
       const bodyText = await response.text().catch(() => '');
