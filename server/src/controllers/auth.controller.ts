@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { toUSD } from '#src/utils/exchangeRates.ts';
 import crypto from 'crypto';
 import passport from 'passport';
-import { GOOGLE_CALLBACK_URL, GOOGLE_OAUTH_ENABLED } from '../config/google.config.ts';
+import { GOOGLE_OAUTH_ENABLED } from '../config/google.config.ts';
 import {
   createUser,
   findUserByEmail,
@@ -453,32 +453,22 @@ export const signout = async (req: AuthRequest, res: Response) => {
 const _googleAuthDisabled = (_req: Request, res: Response) =>
   res.status(503).json({ message: 'Google OAuth is not configured on this server.' });
 
-function resolveGoogleCallbackUrl(req: Request) {
-  const requested = req.query.redirect_uri;
-
-  if (typeof requested === 'string') {
-    try {
-      const callbackUrl = new URL(requested);
-      if (callbackUrl.pathname === '/api/auth/google/callback') {
-        return callbackUrl.toString();
-      }
-    } catch {
-      logger.warn(`[google auth] ignoring invalid redirect_uri: ${requested}`);
-    }
-  }
-
-  return GOOGLE_CALLBACK_URL;
-}
-
+// IMPORTANT: Google must always redirect back to THIS server's own
+// /auth/google/callback (GOOGLE_CALLBACK_URL), never straight to the
+// frontend. googleAuthCallback below is what actually talks to Google,
+// builds/finds the user, and mints the short-lived one-time exchange
+// code before handing off to the frontend. If passport's callbackURL is
+// pointed at the frontend instead, Google redirects there directly with
+// its OWN authorization code — googleAuthCallback never runs, no
+// exchange-code row is ever created, and the frontend's later call to
+// /auth/google/exchange 404s/401s on a code that was never stored,
+// which is exactly the "Google sign-in timed out" bug. (A previous
+// version of this file overrode callbackURL per-request from a
+// ?redirect_uri= query param for this exact — mistaken — purpose; that
+// override has been removed.)
 export const googleAuth = GOOGLE_OAUTH_ENABLED
   ? (req: Request, res: Response, next: NextFunction) => {
-      passport.authenticate(
-        'google',
-        {
-          scope: ['email', 'profile'],
-          callbackURL: resolveGoogleCallbackUrl(req),
-        } as any
-      )(req, res, next);
+      passport.authenticate('google', { scope: ['email', 'profile'] })(req, res, next);
     }
   : _googleAuthDisabled;
 
