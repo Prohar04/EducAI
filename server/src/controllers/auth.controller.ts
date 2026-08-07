@@ -515,7 +515,10 @@ export const googleAuthCallback = GOOGLE_OAUTH_ENABLED
       // Cookies set here (localhost:8000) are not readable by the frontend (localhost:3000).
       const rawCode = crypto.randomBytes(32).toString('hex');
       const codeHash = hashTokenCrypto(rawCode);
-      const expiresAt = new Date(Date.now() + 120_000); // 2 minutes
+      // 30s grace window — short enough to keep replay risk minimal now that
+      // the code isn't deleted on first read (see googleExchange), but long
+      // enough to comfortably cover a duplicate/retry request from the browser.
+      const expiresAt = new Date(Date.now() + 30_000);
 
       await prisma.oAuthCode.create({
         data: { codeHash, userId: user.id, accessToken, refreshToken, expiresAt },
@@ -550,13 +553,19 @@ export const googleExchange = async (req: Request, res: Response) => {
   }
 
   if (entry.expiresAt < new Date()) {
-    await prisma.oAuthCode.delete({ where: { codeHash } });
+    await prisma.oAuthCode.delete({ where: { codeHash } }).catch(() => {});
     logger.warn(`[google exchange] code expired for user ${entry.userId}`);
     return res.status(401).json({ message: 'Invalid or expired code' });
   }
 
-  // Single-use: delete immediately
-  await prisma.oAuthCode.delete({ where: { codeHash } });
+  // Deliberately NOT deleted here. The callback can legitimately be hit twice
+  // in quick succession (duplicate tab, browser back/forward, a stray reload of
+  // the /api/auth/google/callback URL) — deleting on first read turned every
+  // second hit into a hard 401 ("Google sign-in timed out"), even though the
+  // sign-in itself succeeded. Instead the code's lifetime is a short grace
+  // window (see expiresAt in googleAuthCallback below) and it self-expires —
+  // any request landing within that window, first or duplicate, gets the same
+  // tokens. Rows are swept lazily on the expired-code path above.
 
   const user = await findUserById(entry.userId);
   if (!user) {
