@@ -25,6 +25,10 @@ export const searchUniversities = async (req: Request, res: Response) => {
   const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20));
   const skip = (pageNum - 1) * limitNum;
 
+  // Only surface universities whose data has been refreshed within the last 10 days.
+  const MAX_DATA_AGE_MS = 10 * 24 * 60 * 60 * 1000;
+  const freshSince = new Date(Date.now() - MAX_DATA_AGE_MS);
+
   const respondWithFallback = (reason: 'empty' | 'error') => {
     const { items, total } = searchFallbackUniversities({ country, q, skip, take: limitNum });
     const noDataMessage = total === 0 ? 'No matching universities found.' : undefined;
@@ -40,7 +44,9 @@ export const searchUniversities = async (req: Request, res: Response) => {
   };
 
   try {
-    const where: Prisma.UniversityWhereInput = {};
+    const where: Prisma.UniversityWhereInput = {
+      updatedAt: { gte: freshSince },
+    };
     if (country) where.country = { code: country.toUpperCase() };
     if (q) where.name = { contains: q, mode: 'insensitive' };
 
