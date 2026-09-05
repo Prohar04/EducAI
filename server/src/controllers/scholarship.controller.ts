@@ -8,9 +8,12 @@ import {
   checkEligibility,
   predictFundingProbability,
   getEligibleScholarships,
+  computeMatchScore,
 } from '#src/services/scholarship.service.ts';
 import { runLiveScholarshipRefresh } from '#src/services/liveScholarship.service.ts';
 import { searchFallbackScholarships } from '#src/services/scholarshipFallback.service.ts';
+import { discoverScholarships } from '#src/services/aiScholarshipSearch.service.ts';
+import { resolveCountryCode } from '#src/utils/countries.ts';
 import prisma from '#src/config/database.ts';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -32,6 +35,53 @@ const SearchQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).optional().default(20),
 });
 
+type ProfileForScore = NonNullable<Parameters<typeof computeMatchScore>[1]>;
+
+interface MergedScholarship {
+  id: string;
+  title: string;
+  countryCode: string | null;
+  level: string | null;
+  fundingType: string | null;
+  minGpa: number | null;
+  field: string | null;
+  deadlines?: Array<{ deadline: string | Date | null }>;
+  tags?: string[] | null;
+  userMatchScore?: number;
+  matchReasons?: string[];
+  [key: string]: unknown;
+}
+
+const SOURCE_RANK: Record<string, number> = { ai: 0, serper: 0, database: 1, local: 2 };
+
+/** Nearest deadline as an epoch (ms); unknown deadlines sort last. */
+function nearestDeadline(item: MergedScholarship): number {
+  const raw = item.deadlines?.[0]?.deadline;
+  if (!raw) return Number.POSITIVE_INFINITY;
+  const t = new Date(raw).getTime();
+  return Number.isNaN(t) ? Number.POSITIVE_INFINITY : t;
+}
+
+/**
+ * Detect a country in the free-text query. Handles exact matches
+ * ("germany", "USA"), multi-word names ("united kingdom") and a country
+ * mentioned alongside other terms ("germany DAAD").
+ */
+function detectCountryInQuery(q?: string): { code: string | null; isPureCountry: boolean } {
+  const raw = q?.trim();
+  if (!raw) return { code: null, isPureCountry: false };
+
+  const whole = resolveCountryCode(raw);
+  if (whole) return { code: whole, isPureCountry: true };
+
+  const words = raw.split(/[\s,]+/).filter(Boolean);
+  const grams = [...words];
+  for (let i = 0; i < words.length - 1; i++) grams.push(`${words[i]} ${words[i + 1]}`);
+
+  const hits = [...new Set(grams.map((g) => resolveCountryCode(g)).filter((c): c is string => !!c))];
+  return hits.length === 1 ? { code: hits[0], isPureCountry: false } : { code: null, isPureCountry: false };
+}
+
 export async function listScholarships(req: Request & { userId?: string }, res: Response) {
   const parsed = SearchQuerySchema.safeParse(req.query);
   if (!parsed.success) {
@@ -40,72 +90,160 @@ export async function listScholarships(req: Request & { userId?: string }, res: 
   }
 
   const { q, countryCode, level, field, fundingType, financialNeed, page, limit } = parsed.data;
+  const financialNeedBool = financialNeed === 'true' ? true : undefined;
 
-  const respondWithFallback = (reason: 'empty' | 'error') => {
-    const { items, total } = searchFallbackScholarships({
-      q,
-      countryCode,
+  // ── 1. Resolve an effective country ────────────────────────────────────────
+  // A country can arrive as an explicit filter OR be named in the free-text
+  // query. When the query *is* just a country name we drop it as a title
+  // filter so we still return that country's scholarships.
+  const explicitCode = resolveCountryCode(countryCode) ?? (countryCode ? countryCode.toUpperCase() : null);
+  const detected = explicitCode ? { code: null, isPureCountry: false } : detectCountryInQuery(q);
+  const effectiveCountry = explicitCode ?? detected.code ?? undefined;
+  const textQuery = detected.isPureCountry ? undefined : q;
+
+  // ── 2. Load profile for personalised ranking ──────────────────────────────
+  let profileForScore: ProfileForScore | null = null;
+  try {
+    const userProfile = req.userId ? await getUserProfile(req.userId) : null;
+    if (userProfile) {
+      profileForScore = {
+        intendedLevel: userProfile.intendedLevel,
+        intendedAbroadMajor: (userProfile as unknown as { intendedAbroadMajor?: string }).intendedAbroadMajor,
+        intendedMajor: userProfile.intendedMajor,
+        majorOrTrack: userProfile.majorOrTrack,
+        targetCountries: userProfile.targetCountries as string[] | null,
+        fundingNeed: userProfile.fundingNeed,
+        gpa: userProfile.gpa,
+        gpaScale: userProfile.gpaScale,
+      };
+    }
+  } catch (err) {
+    logger.warn('[scholarship:list] profile load failed', { err });
+  }
+
+  const pool = Math.max(limit * 3, 60);
+
+  // ── 3. Query every source concurrently ───────────────────────────────────
+  //   web search (OpenAI → Serper fallback) → database → bundled JSON
+  const [aiOutcome, dbOutcome, localOutcome] = await Promise.all([
+    discoverScholarships({
+      q: textQuery,
+      countryCode: effectiveCountry,
       level,
       field,
       fundingType,
-      financialNeed: financialNeed === 'true' ? true : undefined,
-      skip: (page - 1) * limit,
-      take: limit,
-    });
-    res.status(200).json({
-      items,
-      total,
-      page,
-      limit,
-      personalised: false,
-      source: 'fallback',
-      fallbackReason: reason,
-      fetchedAt: new Date().toISOString(),
-    });
+      financialNeed: financialNeedBool,
+      limit: Math.min(limit, 15),
+    }).catch((err) => {
+      logger.warn('[scholarship:list] web discovery failed', { err });
+      return null;
+    }),
+    searchScholarships({
+      q: textQuery,
+      countryCode: effectiveCountry,
+      level,
+      field,
+      fundingType,
+      financialNeed: financialNeedBool,
+      page: 1,
+      limit: pool,
+      userProfile: profileForScore,
+    }).catch((err) => {
+      logger.warn('[scholarship:list] database search failed', { err });
+      return null;
+    }),
+    Promise.resolve()
+      .then(() =>
+        searchFallbackScholarships({
+          q: textQuery,
+          countryCode: effectiveCountry,
+          level,
+          field,
+          fundingType,
+          financialNeed: financialNeedBool,
+          skip: 0,
+          take: pool,
+        }),
+      )
+      .catch((err) => {
+        logger.warn('[scholarship:list] local search failed', { err });
+        return { items: [], total: 0 };
+      }),
+  ]);
+
+  // ── 4. Merge, de-duplicating by title + country ─────────────────────────
+  const seen = new Set<string>();
+  const merged: MergedScholarship[] = [];
+  const pushAll = (items: unknown[], source: string) => {
+    for (const raw of items) {
+      const item = raw as MergedScholarship;
+      const key = `${(item.title ?? '').toLowerCase().trim()}|${item.countryCode ?? ''}`;
+      if (!item.title || seen.has(key)) continue;
+      seen.add(key);
+      // Shallow copy — local/fallback items come from a shared module cache and
+      // must not be mutated by the ranking step below.
+      merged.push({ ...item, _source: source });
+    }
   };
 
-  try {
-    // Optionally load user profile for personalised ranking
-    const userProfile = req.userId ? await getUserProfile(req.userId) : null;
+  const aiItems = aiOutcome?.items ?? [];
+  const aiSource = aiOutcome?.provider === 'serper' ? 'serper' : 'ai';
+  pushAll(aiItems, aiSource);
+  pushAll(dbOutcome?.items ?? [], 'database');
+  pushAll(localOutcome.items ?? [], 'local');
 
-    const result = await searchScholarships({
-      q,
-      countryCode,
-      level,
-      field,
-      fundingType,
-      financialNeed: financialNeed === 'true' ? true : undefined,
-      page,
-      limit,
-      userProfile: userProfile
-        ? {
-          intendedLevel: userProfile.intendedLevel,
-          intendedAbroadMajor: (userProfile as unknown as { intendedAbroadMajor?: string }).intendedAbroadMajor,
-          intendedMajor: userProfile.intendedMajor,
-          majorOrTrack: userProfile.majorOrTrack,
-          targetCountries: userProfile.targetCountries as string[] | null,
-          fundingNeed: userProfile.fundingNeed,
-          gpa: userProfile.gpa,
-          gpaScale: userProfile.gpaScale,
-        }
-        : null,
-    });
-
-    if (result.total === 0) {
-      respondWithFallback('empty');
-      return;
+  // ── 5. Rank ──────────────────────────────────────────────────────────────
+  let personalised = false;
+  if (profileForScore) {
+    personalised = true;
+    for (const item of merged) {
+      const { score, reasons } = computeMatchScore(
+        {
+          level: item.level ?? null,
+          countryCode: item.countryCode ?? null,
+          fundingType: item.fundingType ?? null,
+          minGpa: item.minGpa ?? null,
+          field: item.field ?? null,
+        },
+        profileForScore,
+      );
+      item.userMatchScore = score;
+      item.matchReasons = reasons;
     }
-
-    res.status(200).json({ ...result, source: 'database', fetchedAt: new Date().toISOString() });
-  } catch (err) {
-    logger.error('[scholarship:list]', { err });
-    try {
-      respondWithFallback('error');
-    } catch (fallbackErr) {
-      logger.error('[scholarship:list:fallback]', { err: fallbackErr });
-      res.status(500).json({ message: 'Failed to fetch scholarships' });
-    }
+    merged.sort(
+      (a, b) =>
+        (b.userMatchScore ?? 0) - (a.userMatchScore ?? 0) ||
+        (SOURCE_RANK[a._source as string] ?? 9) - (SOURCE_RANK[b._source as string] ?? 9) ||
+        nearestDeadline(a) - nearestDeadline(b),
+    );
   }
+  // Without a profile the insertion order (web → database → local) is kept.
+
+  // ── 6. Paginate ─────────────────────────────────────────────────────────
+  const total = merged.length;
+  const start = (page - 1) * limit;
+  const items = merged.slice(start, start + limit).map(({ _source, ...rest }) => {
+    void _source;
+    return rest;
+  });
+
+  res.status(200).json({
+    items,
+    total,
+    page,
+    limit,
+    personalised,
+    source: 'hybrid',
+    sources: {
+      ai: aiOutcome?.provider === 'openai' ? aiItems.length : 0,
+      web: aiOutcome?.provider === 'serper' ? aiItems.length : 0,
+      database: dbOutcome?.items?.length ?? 0,
+      local: localOutcome.items?.length ?? 0,
+    },
+    aiProvider: aiOutcome?.provider ?? null,
+    country: effectiveCountry ?? null,
+    fetchedAt: new Date().toISOString(),
+  });
 }
 
 export async function getScholarship(req: Request & { userId?: string }, res: Response) {

@@ -380,6 +380,17 @@ export interface ScholarshipListResult {
 	limit: number;
 	total: number;
 	personalised?: boolean;
+	// Hybrid search metadata (present on GET /scholarships)
+	source?: "hybrid" | "database" | "fallback";
+	sources?: {
+		ai: number;
+		web: number;
+		database: number;
+		local: number;
+	};
+	aiProvider?: "openai" | "serper" | null;
+	country?: string | null;
+	fetchedAt?: string;
 }
 
 export interface EligibilityResult {

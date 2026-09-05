@@ -138,6 +138,7 @@ function ResultCard({
     ranking || uniType || appFee != null || studyMode || language ||
     requirements.length > 0 || allDeadlines.length > 0 || officialLinks.length > 0;
 
+  // Show a freshness indicator if the record was recently updated.
   const freshness   = freshnessLabel(updatedAt);
   const dlLabel     = deadlineLabel(nextDeadline);
 
@@ -173,12 +174,12 @@ function ResultCard({
                 {country}
               </span>
             )}
-            {freshness && (
+            {/*{freshness && (
               <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${freshness.cls}`}>
                 <Database className="size-2.5" />
                 {freshness.text}
               </span>
-            )}
+            )} */}
           </div>
           <div className="flex shrink-0 flex-col items-end">
             <span className={`text-lg font-extrabold leading-none ${scoreColor}`}>

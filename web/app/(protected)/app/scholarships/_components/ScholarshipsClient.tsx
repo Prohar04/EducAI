@@ -1059,6 +1059,13 @@ export default function ScholarshipsClient({
 						</div>
 					) : (
 						<>
+							{results.aiProvider && (
+								<p className="mb-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+									<RefreshCw className="size-3" />
+									Includes live results from {results.aiProvider === "openai" ? "web search" : "Serper"}
+									{results.country ? ` for ${results.country}` : ""}.
+								</p>
+							)}
 							<StaggerChildren stagger={0.05} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
 								{results.items.map((s) => (
 									<StaggerItem key={s.id}>

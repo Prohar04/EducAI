@@ -91,7 +91,7 @@ function gpaLabel(gpa: number | null | undefined, scale: string | null | undefin
 
 // ── Profile-based match scoring ────────────────────────────────────────────────
 
-function computeMatchScore(
+export function computeMatchScore(
   scholarship: { level: string | null; countryCode: string | null; fundingType: string | null; minGpa: number | null; field: string | null },
   profile: NonNullable<ScholarshipFilters['userProfile']>,
 ): { score: number; reasons: string[] } {

@@ -30,7 +30,7 @@ export interface LiveRefreshOptions {
 
 // ─── Internal Types ───────────────────────────────────────────────────────────
 
-interface SerperResult {
+export interface SerperResult {
   title: string;
   snippet: string;
   link: string;
@@ -108,7 +108,7 @@ function buildSearchQueries(options: LiveRefreshOptions): string[] {
 
 // ─── Serper Search ────────────────────────────────────────────────────────────
 
-async function searchSerper(query: string, apiKey: string): Promise<SerperResult[]> {
+export async function searchSerper(query: string, apiKey: string): Promise<SerperResult[]> {
   const response = await fetch('https://google.serper.dev/search', {
     method: 'POST',
     headers: {
