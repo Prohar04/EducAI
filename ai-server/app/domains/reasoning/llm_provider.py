@@ -559,10 +559,71 @@ def parse_json_response(content: str) -> Any:
             except json.JSONDecodeError:
                 pass
 
+    # 4. Salvage a truncated response.
+    #
+    # A model that hits its token ceiling stops mid-array, so nothing above can
+    # parse: there is no closing bracket for the direct attempt or the regex to
+    # find. Discarding the whole response loses every complete record the model
+    # did produce. Recover them by walking the text and keeping each balanced
+    # top-level object.
+    salvaged = _salvage_truncated_objects(content)
+    records = [o for o in salvaged if _looks_like_program_record(o)]
+    if records:
+        logger.warning(
+            "Recovered %d complete record(s) from an unparseable LLM response"
+            " (likely truncated at the token ceiling)",
+            len(records),
+        )
+        return {"programs": records}
+
     raise json.JSONDecodeError(
         f"Cannot parse LLM response as JSON (first 200 chars): {original[:200]!r}",
         original,
         0,
+    )
+
+
+def _salvage_truncated_objects(content: str) -> list:
+    """Return every complete JSON object found in `content`, at any nesting depth.
+
+    A truncated response never closes its outer wrapper, so the records worth
+    keeping are the balanced objects nested inside it. Tracks starts on a stack
+    and records each object as it closes, respecting string literals so a brace
+    inside a value cannot terminate one early. Incomplete objects are dropped.
+    """
+    objects: list = []
+    stack: list = []
+    in_string = False
+    escaped = False
+
+    for i, ch in enumerate(content):
+        if in_string:
+            if escaped:
+                escaped = False
+            elif ch == "\\":
+                escaped = True
+            elif ch == '"':
+                in_string = False
+            continue
+
+        if ch == '"':
+            in_string = True
+        elif ch == "{":
+            stack.append(i)
+        elif ch == "}" and stack:
+            begin = stack.pop()
+            try:
+                objects.append(json.loads(content[begin : i + 1]))
+            except json.JSONDecodeError:
+                pass
+
+    return objects
+
+
+def _looks_like_program_record(item: object) -> bool:
+    """Whether a salvaged object is a programme record rather than a wrapper."""
+    return isinstance(item, dict) and (
+        "program_title" in item or "university_name" in item
     )
 
 

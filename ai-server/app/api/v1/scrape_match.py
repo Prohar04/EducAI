@@ -445,7 +445,12 @@ async def _extract_chunk(
             prompt=user_prompt,
             system_prompt=_EXTRACT_SYSTEM,
             temperature=0.0,
-            max_tokens=2048,
+            # Chunks are capped at 48k characters of scraped university pages,
+            # which yields far more JSON than 2048 tokens can hold. The model
+            # was truncating mid-array, the response failed to parse, and every
+            # programme extracted from that chunk was discarded — the endpoint
+            # returned 0 results while the scrape itself had worked perfectly.
+            max_tokens=8192,
             json_mode=True,
         )
         data = parse_json_response(content)
