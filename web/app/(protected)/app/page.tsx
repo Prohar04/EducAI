@@ -7,6 +7,24 @@ import DashboardClient from "./_components/DashboardClient";
 export const dynamic = "force-dynamic";
 
 
+/** Active scholarships, from the same endpoint the marketing site reads. */
+async function getPublicScholarshipCount(): Promise<number | null> {
+  const base = process.env.BACKEND_URL;
+  if (!base) return null;
+
+  try {
+    const res = await fetch(`${base.replace(/\/+$/, "")}/public/stats`, {
+      next: { revalidate: 300 },
+      signal: AbortSignal.timeout(4_000),
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { scholarships?: number };
+    return typeof data.scholarships === "number" ? data.scholarships : null;
+  } catch {
+    return null;
+  }
+}
+
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 
 export default async function StudyPlanPage() {
@@ -21,11 +39,17 @@ export default async function StudyPlanPage() {
   // Fetch news server-side (static data that doesn't need SWR)
   const news = await fetchEducationPulse().catch(() => []);
 
+  // The scholarship tile used to be a hardcoded 28 while the rest of the app
+  // showed the real figure, so the dashboard contradicted the page one click
+  // away. Null hides the tile rather than showing a number we cannot stand by.
+  const scholarshipCount = await getPublicScholarshipCount();
+
   return (
     <DashboardClient
       initialSession={session}
       initialProfile={profile}
       initialNews={news.slice(0, 4)}
+      scholarshipCount={scholarshipCount}
     />
   );
 }

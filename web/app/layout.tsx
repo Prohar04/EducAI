@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
+import { StaleBuildReset } from "@/components/app/StaleBuildReset";
 import { NoiseTexture } from "@/components/ui/noise-texture";
 import { NavProgress } from "@/components/ui/nav-progress";
 import { ServiceWorkerRegistrar } from "@/components/app/ServiceWorkerRegistrar";
@@ -151,6 +152,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}
       >
+        <StaleBuildReset />
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

@@ -176,14 +176,19 @@ interface StatsProps {
   savedCount: number;
   matchCount: number;
   deadlineCount: number;
+  /** Live count; null when the API could not be reached, which hides the tile. */
+  scholarshipCount: number | null;
 }
 
-function StatsRow({ savedCount, matchCount, deadlineCount }: StatsProps) {
+function StatsRow({ savedCount, matchCount, deadlineCount, scholarshipCount }: StatsProps) {
   const stats = [
     { icon: Bookmark, label: "Programs Saved", value: savedCount, color: "text-primary" },
     { icon: Sparkles, label: "Programs Matched", value: matchCount, color: "text-[#4A90D9]" },
     { icon: Calendar, label: "Upcoming Deadlines", value: deadlineCount, color: "text-[#C49A3C]" },
-    { icon: Award, label: "Scholarships Available", value: 28, color: "text-[#3D9970]" },
+    // Was hardcoded to 28 while the scholarships page showed the real total.
+    ...(scholarshipCount !== null
+      ? [{ icon: Award, label: "Scholarships Available", value: scholarshipCount, color: "text-[#3D9970]" }]
+      : []),
   ] as const;
 
   return (
@@ -560,9 +565,10 @@ export interface DashboardClientProps {
   initialSession: Session;
   initialProfile: UserProfile;
   initialNews: FeedItem[];
+  scholarshipCount: number | null;
 }
 
-export default function DashboardClient({ initialSession, initialProfile, initialNews }: DashboardClientProps) {
+export default function DashboardClient({ initialSession, initialProfile, initialNews, scholarshipCount }: DashboardClientProps) {
   // Use SWR for real-time data with fallback to server props
   const { data: savedPrograms, error: savedError, isLoading: savedLoading } = useSWR<{ savedPrograms: SavedProgramItem[] }>(
     "/api/saved-programs",
@@ -628,6 +634,7 @@ export default function DashboardClient({ initialSession, initialProfile, initia
         savedCount={savedProgramsData.length}
         matchCount={matchCount}
         deadlineCount={upcomingDeadlines.length}
+        scholarshipCount={scholarshipCount}
       />
 
       <QuickActions />

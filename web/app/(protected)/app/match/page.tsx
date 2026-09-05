@@ -426,8 +426,32 @@ export default function MatchPage() {
     if (!runId || (status !== "running" && status !== "pending")) return;
 
     let cancelled = false;
+    // A run that stops reporting used to be polled forever, leaving a confident
+    // progress bar frozen mid-way with no way for the user to tell it had
+    // stalled. Give up after a bounded window and say so.
+    const startedAt = Date.now();
+    const POLL_TIMEOUT_MS = 90_000;
+
     const interval = setInterval(async () => {
       if (cancelled) return;
+
+      if (Date.now() - startedAt > POLL_TIMEOUT_MS) {
+        clearInterval(interval);
+        setLatestMatch((prev) =>
+          prev?.run
+            ? {
+                ...prev,
+                run: {
+                  ...prev.run,
+                  status: "error",
+                  error: "This run stopped responding. Please try again.",
+                },
+              }
+            : prev,
+        );
+        return;
+      }
+
       try {
         const s = await getMatchRunStatus(runId);
         if (!s || cancelled) return;

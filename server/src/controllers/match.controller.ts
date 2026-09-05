@@ -17,11 +17,14 @@ import logger from '#src/config/logger.ts';
 const AI_SERVER_URL     = process.env.AI_SERVER_URL     ?? 'http://localhost:8001';
 const AI_SERVER_API_KEY = process.env.AI_SERVER_API_KEY ?? '';
 const CACHE_TTL_MS      = 24 * 60 * 60 * 1000; // 24 hours
-// A cache miss used to allow 3 x 120s plus backoff — over six minutes before
-// the user saw anything. Scraping now runs behind an already-delivered result
-// (see runMatchBackground), so it gets one shorter attempt and one retry.
-const AI_TIMEOUT_MS     = 45_000;
-const AI_MAX_RETRIES    = 2;
+// The scraper is only reached when the database holds nothing for this search,
+// and it now runs inside the request. The whole handler must fit the function's
+// 45s budget, so a single attempt with a hard ceiling well inside it.
+const AI_TIMEOUT_MS     = 20_000;
+const AI_MAX_RETRIES    = 1;
+
+/** A run older than this that is still 'running' is treated as dead. */
+const STALE_RUN_MS      = 3 * 60 * 1000;
 const AI_RETRY_BASE_MS  = 1_000;
 
 // ── Major synonym map (mirrors Python taxonomy for DB cache-hit ranking) ── //
@@ -176,6 +179,22 @@ export const runMatch = async (req: AuthRequest, res: Response) => {
     return;
   }
 
+  // Close out runs that can never finish. Before the work moved inline, a run
+  // interrupted mid-flight stayed 'running' forever — and because the guard
+  // below refuses to start a second run while one is active, a single dead run
+  // permanently locked the user out of matching.
+  await prisma.matchRun.updateMany({
+    where: {
+      userId,
+      status:    { in: ['pending', 'running'] },
+      createdAt: { lt: new Date(Date.now() - STALE_RUN_MS) },
+    },
+    data: {
+      status: 'error',
+      error:  'This run did not finish. Please try again.',
+    },
+  });
+
   // Prevent duplicate concurrent jobs
   const existing = await prisma.matchRun.findFirst({
     where: { userId, status: { in: ['pending', 'running'] } },
@@ -190,85 +209,34 @@ export const runMatch = async (req: AuthRequest, res: Response) => {
     data: { userId, status: 'pending', progress: 0 },
   });
 
-  // Respond immediately so the client is not blocked
-  res.status(200).json({ runId: run.id, status: 'pending' });
+  // Run to completion before responding.
+  //
+  // This used to respond first and finish the work in a setImmediate callback.
+  // On a long-lived server that is fine; on a serverless platform the function
+  // is frozen the moment the response is flushed, so the callback was killed
+  // partway through and the run sat at 'running' forever — the client polled
+  // indefinitely and, because getLatestMatch returns the newest run whatever
+  // its status, the user's previous good results were hidden behind it.
+  //
+  // Ranking is a single query now, so the common path finishes in well under
+  // the function's budget. The client contract is unchanged: it still receives
+  // a runId and polls, it just finds the run already finished.
+  await runMatchBackground(run.id, userId, profile);
 
-  // Launch background worker after response is sent
-  setImmediate(() => {
-    void runMatchBackground(run.id, userId, profile);
+  const finished = await prisma.matchRun.findUnique({
+    where:  { id: run.id },
+    select: { status: true, progress: true, error: true },
+  });
+
+  res.status(200).json({
+    runId:    run.id,
+    status:   finished?.status   ?? 'done',
+    progress: finished?.progress ?? 100,
+    error:    finished?.error    ?? null,
   });
 };
 
 // ── Background worker ────────────────────────────────────────────────────── //
-
-/**
- * Refresh the stored programme corpus for a search, without the caller waiting.
- *
- * Invoked only when the database already answered the user's request, so this
- * exists purely to improve the *next* run. Every failure is swallowed and
- * logged: nothing here can affect a match the user has already been given.
- */
-async function refreshCorpusInBackground(
-  runId: string,
-  userId: string,
-  profile: ProfileShape,
-  ctx: {
-    targetCountries: string[];
-    intendedLevel: string;
-    intendedMajor: string;
-    cacheKey: string;
-  },
-): Promise<void> {
-  const log = (msg: string) => logger.info(`[match:${runId}] [bg-refresh] ${msg}`);
-
-  try {
-    const aiRes = await fetchAiWithRetry(`${AI_SERVER_URL}/api/v1/module1/scrape-match`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(AI_SERVER_API_KEY ? { 'X-API-KEY': AI_SERVER_API_KEY } : {}),
-      },
-      body: JSON.stringify({
-        user_id:           userId,
-        run_id:            runId,
-        target_countries:  ctx.targetCountries,
-        intended_level:    ctx.intendedLevel,
-        intended_major:    ctx.intendedMajor,
-        budget_max_usd:    profile.budgetAmountUSD
-                           ?? (profile.budgetMax != null
-                               ? (toUSD(profile.budgetMax, profile.budgetCurrency ?? 'USD') ?? 30_000)
-                               : 30_000),
-        gpa:               profile.gpa             ?? 0,
-        english_test_type: profile.englishTestType ?? null,
-        english_score:     profile.englishScore    ?? null,
-      }),
-    }, log);
-
-    if (!aiRes.ok) {
-      log(`ai-server ${aiRes.status} — corpus left as-is`);
-      return;
-    }
-
-    const aiData = (await aiRes.json()) as AiScrapeResponse;
-    const normalizedCountries = aiData.normalized?.countries ?? [];
-    if (!normalizedCountries.length) {
-      log('nothing returned to ingest');
-      return;
-    }
-
-    const counts = await performIngest(normalizedCountries, runId);
-    log(`ingest done: ${JSON.stringify(counts)}`);
-
-    await prisma.dataSourceMeta.upsert({
-      where:  { cacheKey: ctx.cacheKey },
-      create: { cacheKey: ctx.cacheKey, lastScrapedAt: new Date(), parserVersion: '1' },
-      update: { lastScrapedAt: new Date() },
-    });
-    log('cache marked fresh — next run will be served straight from the DB');
-  } catch (err) {
-    log(`non-fatal: ${err}`);
-  }
-}
 
 type ProfileShape = NonNullable<Awaited<ReturnType<typeof prisma['userProfile']['findUnique']>>>;
 
@@ -389,12 +357,12 @@ async function runMatchBackground(runId: string, userId: string, profile: Profil
         await setProgress(80);
       }
     } else if (!isFresh) {
-      // Results are already in hand. Refresh the corpus without holding up the
-      // response; failures here are logged and never surface to the user.
-      log('scheduling background corpus refresh');
-      void refreshCorpusInBackground(runId, userId, profile, {
-        targetCountries, intendedLevel, intendedMajor, cacheKey,
-      });
+      // The corpus is stale but the database still answered, so the user has
+      // results. Refreshing it here would mean either making them wait for a
+      // crawl or deferring it — and deferred work does not survive the function
+      // freeze. The scheduled Data Sync Agent workflow refreshes the corpus
+      // twice daily, which is the right place for it.
+      log('corpus stale — leaving the refresh to the scheduled sync');
     }
 
     await setProgress(95);
@@ -554,29 +522,44 @@ async function rankFromDB(
     .slice(0, 20);
 }
 
+// Shared by both lookups in getLatestMatch.
+const MATCH_RESULT_INCLUDE = {
+  results: {
+    orderBy: { score: 'desc' },
+    include: {
+      program: {
+        include: {
+          university:   { include: { country: true } },
+          deadlines:    { orderBy: { deadline: 'asc' } },
+          requirements: true,
+        },
+      },
+    },
+  },
+} satisfies Prisma.MatchRunInclude;
+
 // ── GET /match/latest ────────────────────────────────────────────────────── //
 
 export const getLatestMatch = async (req: AuthRequest, res: Response) => {
   const userId = req.userId!;
   try {
-    const run = await prisma.matchRun.findFirst({
-      where:   { userId },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        results: {
-          orderBy: { score: 'desc' },
-          include: {
-            program: {
-              include: {
-                university:   { include: { country: true } },
-                deadlines:    { orderBy: { deadline: 'asc' } },
-                requirements: true,
-              },
-            },
-          },
-        },
-      },
-    });
+    // Prefer the newest run that actually produced results. A failed or
+    // interrupted run used to win on createdAt alone and render an empty state,
+    // which made a user's existing matches look deleted when they were still
+    // sitting in the database behind it.
+    const run =
+      (await prisma.matchRun.findFirst({
+        where:   { userId, status: 'done', results: { some: {} } },
+        orderBy: { createdAt: 'desc' },
+        include: MATCH_RESULT_INCLUDE,
+      })) ??
+      (await prisma.matchRun.findFirst({
+        where:   { userId },
+        orderBy: { createdAt: 'desc' },
+        include: MATCH_RESULT_INCLUDE,
+      }));
+
+
 
     if (!run) { res.status(200).json({ run: null }); return; }
 
