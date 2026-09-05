@@ -1,7 +1,7 @@
 import prisma from '#src/config/database.ts';
 import logger from '#src/config/logger.ts';
 
-const DEFAULT_REFRESH_TTL_DAYS = 14;
+const DEFAULT_REFRESH_TTL_DAYS = 30;
 
 export async function saveRefreshToken(
   userId: string,

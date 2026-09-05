@@ -64,7 +64,8 @@ export async function GET(req: NextRequest) {
 		},
 		accessToken,
 		refreshToken,
-		rememberMe: false,
+		// Treat OAuth the same as any other sign-in — a persistent 30-day session.
+		rememberMe: true,
 	});
 
 	redirect("/app");

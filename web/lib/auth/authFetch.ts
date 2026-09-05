@@ -1,9 +1,15 @@
 import { getSessionOrNull, deleteSession } from "./session";
+import { refreshToken as refreshAccessToken } from "./auth";
 import { redirect } from "next/navigation";
 
 export interface FetchOptions extends RequestInit {
 	headers?: Record<string, string>;
 }
+
+const isAuthFailure = (message: string) =>
+	message.includes("invalid") ||
+	message.includes("expired") ||
+	message.includes("unauthorized");
 
 export const authFetch = async (
 	url: string | URL,
@@ -25,33 +31,51 @@ export const authFetch = async (
 		...options,          // caller can still override if they explicitly need caching
 	};
 
-	options.headers = {
-		...options.headers,
-		Authorization: `Bearer ${session.accessToken}`,
-	};
+	const doFetch = (accessToken: string) =>
+		fetch(url, {
+			...options,
+			headers: {
+				...options.headers,
+				Authorization: `Bearer ${accessToken}`,
+			},
+		});
 
-	const response = await fetch(url, options);
+	let response = await doFetch(session.accessToken);
 
+	// On a 401, first try to silently refresh the access token using the
+	// refresh token (both are 30-day tokens). Only if that fails do we treat
+	// the session as genuinely dead and bounce to sign-in. This stops users
+	// from being logged out "after some time" just because the short-lived
+	// access token rotated between requests.
 	if (response.status === 401) {
-		// 401 could mean expired token or invalid session
-		// Check if the error response indicates a specific issue
+		const refreshed = await refreshAccessToken(session.refreshToken).catch(
+			() => null,
+		);
+
+		if (refreshed) {
+			response = await doFetch(refreshed);
+			if (response.status !== 401) {
+				return response;
+			}
+		}
+
+		let reason: string | null = null;
 		try {
 			const errorData = await response.clone().json();
 			const errorMessage = errorData?.message?.toLowerCase() || "";
-
-			// Only delete session and redirect if it's a genuine auth failure
-			// Not for temporary network issues or rate limits
-			if (errorMessage.includes("invalid") || errorMessage.includes("expired") || errorMessage.includes("unauthorized")) {
-				await deleteSession();
-				redirect("/auth/signin?reason=session_expired");
+			if (isAuthFailure(errorMessage)) {
+				reason = "session_expired";
 			}
 		} catch {
 			// If we can't parse the error, assume it's a genuine auth failure
+			reason = "auth_error";
+		}
+
+		if (reason) {
 			await deleteSession();
-			redirect("/auth/signin?reason=auth_error");
+			redirect(`/auth/signin?reason=${reason}`);
 		}
 	}
 
 	return response;
 };
-

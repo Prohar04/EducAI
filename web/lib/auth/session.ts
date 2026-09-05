@@ -19,7 +19,7 @@ function getEncodedKey(): Uint8Array {
 export async function createSession(payload: Session) {
 	const encodedKey = getEncodedKey();
 	const rememberMe = payload.rememberMe ?? false;
-	const ttlDays = 14;
+	const ttlDays = 30;
 	const expiredAt = new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000);
 
 	const fullPayload: Session = {
@@ -31,7 +31,7 @@ export async function createSession(payload: Session) {
 	const session = await new SignJWT(fullPayload as unknown as Record<string, unknown>)
 		.setProtectedHeader({ alg: "HS256" })
 		.setIssuedAt()
-		.setExpirationTime("14d")
+		.setExpirationTime("30d")
 		.sign(encodedKey);
 
 	(await cookies()).set("session", session, {

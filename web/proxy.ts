@@ -5,7 +5,12 @@ const secretKey = process.env.SESSION_SECRET_KEY || "";
 const encodedKey = new TextEncoder().encode(secretKey);
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
 
-const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
+// Sessions live for 30 days regardless of the "remember me" choice — the
+// access + refresh tokens are both minted with a 30-day TTL, so there is no
+// reason to expire the browser session sooner. (Previously non-remember-me
+// sessions were killed after 15 minutes of inactivity, which logged Google
+// and plain sign-in users out "after some time".)
+const IDLE_TIMEOUT_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 const REMEMBER_ME_TIMEOUT_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 function toSignin(req: NextRequest, reason?: string, clearSession?: boolean) {
@@ -88,14 +93,14 @@ export async function proxy(req: NextRequest) {
 
     // ── Re-sign session cookie with updated tokens + lastActiveAt ───
     const now = Date.now();
-    const ttlDays = 14;
+    const ttlDays = 30;
     const expiredAt = new Date(now + ttlDays * 24 * 60 * 60 * 1000);
 
     const updatedPayload = { ...session, accessToken, refreshToken, lastActiveAt: now };
     const newToken = await new SignJWT(updatedPayload as unknown as Record<string, unknown>)
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
-      .setExpirationTime("14d")
+      .setExpirationTime("30d")
       .sign(encodedKey);
 
     const response = NextResponse.next();

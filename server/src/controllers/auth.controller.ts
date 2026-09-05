@@ -53,8 +53,8 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 const LOCKOUT_THRESHOLD = 5;
 const LOCKOUT_DURATION_MS = 10 * 60 * 1000; // 10 minutes
-const DEFAULT_REFRESH_TTL_DAYS = 14;
-const REMEMBER_ME_TTL_DAYS = 14;
+const DEFAULT_REFRESH_TTL_DAYS = 30;
+const REMEMBER_ME_TTL_DAYS = 30;
 
 async function sendVerification(userId: string, email: string) {
   const rawToken = crypto.randomBytes(32).toString('hex');
@@ -496,10 +496,12 @@ export const googleAuthCallback = GOOGLE_OAUTH_ENABLED
         return res.status(401).json({ message: 'Authentication failed' });
       }
 
-      const { accessToken, refreshToken } = await generateTokens(user.id);
+      const { accessToken, refreshToken } = await generateTokens(user.id, {
+        refreshTtlDays: DEFAULT_REFRESH_TTL_DAYS,
+      });
 
       const hashedRefreshToken = hashTokenCrypto(refreshToken);
-      await saveRefreshToken(user.id, hashedRefreshToken);
+      await saveRefreshToken(user.id, hashedRefreshToken, DEFAULT_REFRESH_TTL_DAYS);
 
       // Store tokens as a short-lived one-time code in DB (survives restarts, works in multi-instance).
       // Cookies set here (localhost:8000) are not readable by the frontend (localhost:3000).
