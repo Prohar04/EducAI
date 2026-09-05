@@ -53,8 +53,8 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 const LOCKOUT_THRESHOLD = 5;
 const LOCKOUT_DURATION_MS = 10 * 60 * 1000; // 10 minutes
-const DEFAULT_REFRESH_TTL_DAYS = 15;
-const REMEMBER_ME_TTL_DAYS = 30;
+const DEFAULT_REFRESH_TTL_DAYS = 14;
+const REMEMBER_ME_TTL_DAYS = 14;
 
 async function sendVerification(userId: string, email: string) {
   const rawToken = crypto.randomBytes(32).toString('hex');

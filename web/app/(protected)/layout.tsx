@@ -16,6 +16,7 @@ export const dynamic = "force-dynamic";
 import { Navbar } from "@/components/app/Navbar";
 import { LazyChatbotWidget } from "@/components/app/LazyChatbotWidget";
 import { TransitionLayout } from "@/components/motion/TransitionLayout";
+import { TokenStorageSync } from "@/components/auth/TokenStorageSync";
 
 export default async function ProtectedLayout({ children }: { children: ReactNode }) {
   // Use getSessionOrNull to avoid premature redirects during cookie read
@@ -38,6 +39,7 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
 
     return (
       <div className="flex min-h-[100svh] flex-col bg-background">
+        <TokenStorageSync accessToken={retrySession.accessToken} refreshToken={retrySession.refreshToken} />
         <Navbar user={retrySession.user} />
         <main className="flex-1 min-h-0">
           <TransitionLayout>{children}</TransitionLayout>
@@ -52,6 +54,7 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
 
   return (
     <div className="flex min-h-[100svh] flex-col bg-background">
+      <TokenStorageSync accessToken={session.accessToken} refreshToken={session.refreshToken} />
       <Navbar user={session.user} />
       <main className="flex-1 min-h-0">
         <TransitionLayout>{children}</TransitionLayout>

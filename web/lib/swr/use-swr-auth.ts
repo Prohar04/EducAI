@@ -8,11 +8,22 @@ interface ApiError extends Error {
   info?: unknown;
 }
 
+function getStoredAccessToken(): string | null {
+  try {
+    return localStorage.getItem("accessToken");
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Custom SWR hook with authenticated fetching
  *
  * This hook wraps useSWR and provides:
  * - Automatic authentication via cookies (session cookie is sent automatically)
+ * - A localStorage-token fallback when the cookie request fails (network
+ *   error, or a 401 — e.g. third-party cookies blocked, cross-origin cookie
+ *   dropped) so the request gets a second try with an Authorization header
  * - Proper error handling
  * - TypeScript type safety
  *
@@ -25,13 +36,33 @@ export function useSwrAuth<T = unknown>(
   return useSWR<T, Error>(
     key,
     async (url: string) => {
-      // Fetch with credentials to include session cookie
-      const response = await fetch(`${BACKEND_URL}${url}`, {
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const fetchOnce = (extraHeaders?: Record<string, string>) =>
+        fetch(`${BACKEND_URL}${url}`, {
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            ...extraHeaders,
+          },
+        });
+
+      let response: Response;
+      try {
+        response = await fetchOnce();
+      } catch (networkError) {
+        // The cookie-based request couldn't even complete — fall back to a
+        // token from localStorage if we have one, otherwise rethrow.
+        const token = getStoredAccessToken();
+        if (!token) throw networkError;
+        response = await fetchOnce({ Authorization: `Bearer ${token}` });
+      }
+
+      if (response.status === 401) {
+        // Cookie auth was rejected — retry once with the mirrored token.
+        const token = getStoredAccessToken();
+        if (token) {
+          response = await fetchOnce({ Authorization: `Bearer ${token}` });
+        }
+      }
 
       // Handle non-OK responses
       if (!response.ok) {

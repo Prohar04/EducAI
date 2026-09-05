@@ -88,15 +88,14 @@ export async function proxy(req: NextRequest) {
 
     // ── Re-sign session cookie with updated tokens + lastActiveAt ───
     const now = Date.now();
-    const rememberMe = session.rememberMe ?? false;
-    const ttlDays = rememberMe ? 30 : 15;
+    const ttlDays = 14;
     const expiredAt = new Date(now + ttlDays * 24 * 60 * 60 * 1000);
 
     const updatedPayload = { ...session, accessToken, refreshToken, lastActiveAt: now };
     const newToken = await new SignJWT(updatedPayload as unknown as Record<string, unknown>)
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
-      .setExpirationTime(rememberMe ? "30d" : "15d")
+      .setExpirationTime("14d")
       .sign(encodedKey);
 
     const response = NextResponse.next();

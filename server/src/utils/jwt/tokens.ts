@@ -9,8 +9,8 @@ if (!ACCESS_SECRET || !REFRESH_SECRET) {
   throw new Error('JWT secrets are not defined in environment variables');
 }
 
-const ACCESS_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '5m';
-const REFRESH_EXPIRES_IN = process.env.REFRESH_JWT_EXPIRES_IN || '15d';
+const ACCESS_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '14d';
+const REFRESH_EXPIRES_IN = process.env.REFRESH_JWT_EXPIRES_IN || '14d';
 
 export const generateTokens = async (
   userId: string,
@@ -83,6 +83,8 @@ export const hasExpired = (token: string, type: 'access' | 'refresh') => {
 }
 
 
+const COOKIE_MAX_AGE_MS = 14 * 24 * 60 * 60 * 1000;
+
 export const saveToCookie = async (
   res: any,
   refreshToken: string,
@@ -92,11 +94,13 @@ export const saveToCookie = async (
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.COOKIE_SAME_SITE || 'strict',
+    maxAge: COOKIE_MAX_AGE_MS,
   });
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.COOKIE_SAME_SITE || 'strict',
+    maxAge: COOKIE_MAX_AGE_MS,
   });
 };
 

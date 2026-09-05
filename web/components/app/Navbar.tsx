@@ -202,6 +202,12 @@ export function Navbar({ user }: { user: Session["user"] }) {
 
   const handleSignOut = async () => {
     await fetch("/api/signout", { method: "POST" });
+    try {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+    } catch {
+      // localStorage unavailable — ignore
+    }
     router.push("/auth/signin");
     router.refresh();
   };
