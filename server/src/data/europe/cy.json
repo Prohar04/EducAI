@@ -1,0 +1,47 @@
+[
+  {
+    "name": "University of Cyprus",
+    "countryCode": "CY",
+    "city": "Nicosia",
+    "website": "https://www.ucy.ac.cy/en/",
+    "description": "Cyprus's top-ranked and first public university, with strengths in economics, engineering, and the sciences, and tuition fees equal for local and international students.",
+    "sourceUrl": "https://famagusta-gazette.com/university-of-cyprus-has-been-ranked-525th-worldwide/",
+    "ranking": "QS World University Rankings 2027: #525",
+    "universityType": "Public",
+    "admissionsUrl": "",
+    "tuitionUrl": "https://www.ucy.ac.cy/study/undergraduate-studies/tuition-fees/?lang=en",
+    "scholarshipsUrl": "",
+    "internationalUrl": "https://www.ucy.ac.cy/internationalsupport/non-eu-citizens/entry-permit/students/",
+    "applicationPortalUrl": ""
+  },
+  {
+    "name": "Cyprus University of Technology",
+    "countryCode": "CY",
+    "city": "Limassol",
+    "website": "https://www.cut.ac.cy/",
+    "description": "A public Cypriot university specializing in applied and technological sciences, including engineering, health sciences, and communication and media studies.",
+    "sourceUrl": "https://www.topuniversities.com/universities/cyprus-university-technology",
+    "ranking": "QS World University Rankings 2027: #701-710",
+    "universityType": "Public",
+    "admissionsUrl": "https://www.cut.ac.cy/studies/admissions/",
+    "tuitionUrl": "",
+    "scholarshipsUrl": "",
+    "internationalUrl": "",
+    "applicationPortalUrl": ""
+  },
+  {
+    "name": "University of Nicosia",
+    "countryCode": "CY",
+    "city": "Nicosia",
+    "website": "https://www.unic.ac.cy/",
+    "description": "The largest university in Cyprus, a private institution offering a broad range of programs and hosting a large international student body, including a well-known medical school.",
+    "sourceUrl": "https://www.cbn.com.cy/article/130868/university-of-nicosia-ranked-among-the-world-s-top-universities-in-qs-world-university-rankings-2027",
+    "ranking": "QS World University Rankings 2027: positioned among world's top universities (specific band not verified)",
+    "universityType": "Private",
+    "admissionsUrl": "https://www.unic.ac.cy/nicosia/study-at-unic/admission-requirements/",
+    "tuitionUrl": "https://www.unic.ac.cy/nicosia/tuition-and-fees/",
+    "scholarshipsUrl": "https://www.unic.ac.cy/nicosia/scholarships-financial-aid/",
+    "internationalUrl": "https://www.unic.ac.cy/nicosia/study-at-unic/international-student-support/",
+    "applicationPortalUrl": "https://www.unic.ac.cy/apply/"
+  }
+]

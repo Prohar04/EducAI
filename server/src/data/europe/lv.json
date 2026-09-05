@@ -1,0 +1,47 @@
+[
+  {
+    "name": "University of Latvia",
+    "countryCode": "LV",
+    "city": "Riga",
+    "website": "https://www.lu.lv/en/",
+    "description": "Latvia's largest and oldest comprehensive university, offering broad programs across natural sciences, humanities, social sciences, and law.",
+    "sourceUrl": "https://www.topuniversities.com/universities/university-latvia",
+    "ranking": "QS World University Rankings 2026: #801-850",
+    "universityType": "Public",
+    "admissionsUrl": "https://www.lu.lv/en/admission/admission-procedure/",
+    "tuitionUrl": "",
+    "scholarshipsUrl": "https://www.lu.lv/en/admission/scholarships-and-student-loans/fees-grants-and-scholarships/",
+    "internationalUrl": "https://www.lu.lv/en/admission/for-international-students/",
+    "applicationPortalUrl": ""
+  },
+  {
+    "name": "Riga Technical University",
+    "countryCode": "LV",
+    "city": "Riga",
+    "website": "https://www.rtu.lv/en",
+    "description": "Latvia's leading technical university, offering more than 35 English-taught programmes in engineering, IT, and architecture across several campuses.",
+    "sourceUrl": "https://www.unirank.org/lv/uni/riga-technical-university/",
+    "ranking": "QS World University Rankings 2027: #751-760",
+    "universityType": "Public",
+    "admissionsUrl": "https://www.rtu.lv/en/admission-5",
+    "tuitionUrl": "https://international.rtu.lv/tuition-fees/",
+    "scholarshipsUrl": "https://www.rtu.lv/en/studies/scholarships-2",
+    "internationalUrl": "",
+    "applicationPortalUrl": "https://apply.rtu.lv/"
+  },
+  {
+    "name": "Riga Stradiņš University",
+    "countryCode": "LV",
+    "city": "Riga",
+    "website": "https://www.rsu.lv/en",
+    "description": "A Latvian university specializing in health sciences, medicine, and social sciences, with a large international student community drawn from more than 70 countries.",
+    "sourceUrl": "https://www.rsu.lv/en/about-us/rankings",
+    "ranking": "QS World University Rankings 2026: #1001-1200",
+    "universityType": "Public",
+    "admissionsUrl": "https://www.rsu.lv/en/study-here/admissions",
+    "tuitionUrl": "https://www.rsu.lv/en/tuition-fee-discounts",
+    "scholarshipsUrl": "",
+    "internationalUrl": "https://www.rsu.lv/en/study-here/your-start-riga",
+    "applicationPortalUrl": ""
+  }
+]

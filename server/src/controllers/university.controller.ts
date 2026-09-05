@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '#src/config/database.ts';
 import { Prisma } from '../generated/client.ts';
+import { searchFallbackUniversities } from '#src/services/universityFallback.service.ts';
 
 // ── Controllers ────────────────────────────────────────────────────────────────
 
@@ -13,14 +14,32 @@ import { Prisma } from '../generated/client.ts';
  *   - page: page number (default 1)
  *   - limit: results per page, max 100 (default 20)
  * Returns paginated list of universities with country details.
+ *
+ * If the primary (database) search throws or has no rows, this falls back to the
+ * bundled static dataset in `server/src/data` so the endpoint still returns
+ * results. Fallback responses are flagged with `source: 'fallback'`.
  */
 export const searchUniversities = async (req: Request, res: Response) => {
-  try {
-    const { country, q, page = '1', limit = '20' } = req.query as Record<string, string>;
-    const pageNum = Math.max(1, parseInt(page) || 1);
-    const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20));
-    const skip = (pageNum - 1) * limitNum;
+  const { country, q, page = '1', limit = '20' } = req.query as Record<string, string>;
+  const pageNum = Math.max(1, parseInt(page) || 1);
+  const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20));
+  const skip = (pageNum - 1) * limitNum;
 
+  const respondWithFallback = (reason: 'empty' | 'error') => {
+    const { items, total } = searchFallbackUniversities({ country, q, skip, take: limitNum });
+    const noDataMessage = total === 0 ? 'No matching universities found.' : undefined;
+    return res.status(200).json({
+      items,
+      page: pageNum,
+      limit: limitNum,
+      total,
+      source: 'fallback',
+      fallbackReason: reason,
+      ...(noDataMessage && { noDataMessage }),
+    });
+  };
+
+  try {
     const where: Prisma.UniversityWhereInput = {};
     if (country) where.country = { code: country.toUpperCase() };
     if (q) where.name = { contains: q, mode: 'insensitive' };
@@ -36,9 +55,14 @@ export const searchUniversities = async (req: Request, res: Response) => {
       prisma.university.count({ where }),
     ]);
 
-    const noDataMessage = total === 0 ? 'No data available yet. Run sync.' : undefined;
-    res.status(200).json({ items, page: pageNum, limit: limitNum, total, ...(noDataMessage && { noDataMessage }) });
+    if (total === 0) return respondWithFallback('empty');
+
+    res.status(200).json({ items, page: pageNum, limit: limitNum, total, source: 'database' });
   } catch {
-    res.status(500).json({ message: 'Failed to search universities' });
+    try {
+      return respondWithFallback('error');
+    } catch {
+      return res.status(500).json({ message: 'Failed to search universities' });
+    }
   }
 };

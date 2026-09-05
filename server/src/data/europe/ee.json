@@ -1,0 +1,47 @@
+[
+  {
+    "name": "University of Tartu",
+    "countryCode": "EE",
+    "city": "Tartu",
+    "website": "https://ut.ee/en",
+    "description": "Estonia's oldest and highest-ranked university, recognized internationally for research strength in medicine, computer science, and life sciences.",
+    "sourceUrl": "https://www.topuniversities.com/universities/university-tartu",
+    "ranking": "QS World University Rankings 2026: #362",
+    "universityType": "Public",
+    "admissionsUrl": "https://ut.ee/en/content/bachelors-and-masters-studies-university-tartu",
+    "tuitionUrl": "https://ut.ee/en/content/cost-tuition",
+    "scholarshipsUrl": "https://ut.ee/en/content/scholarship-information",
+    "internationalUrl": "https://ut.ee/en/getting-started-international-students",
+    "applicationPortalUrl": ""
+  },
+  {
+    "name": "Tallinn University of Technology (TalTech)",
+    "countryCode": "EE",
+    "city": "Tallinn",
+    "website": "https://taltech.ee/en",
+    "description": "Estonia's leading technical university, offering English-taught engineering, IT, and business programs with tuition waivers available for top candidates.",
+    "sourceUrl": "https://www.topuniversities.com/universities/tallinn-university-technology-taltech",
+    "ranking": "QS World University Rankings 2026: #635",
+    "universityType": "Public",
+    "admissionsUrl": "",
+    "tuitionUrl": "",
+    "scholarshipsUrl": "",
+    "internationalUrl": "",
+    "applicationPortalUrl": ""
+  },
+  {
+    "name": "Tallinn University",
+    "countryCode": "EE",
+    "city": "Tallinn",
+    "website": "https://www.tlu.ee/en",
+    "description": "An Estonian public university focused on education, humanities, and social sciences, ranked among the top universities in Estonia for education and training.",
+    "sourceUrl": "https://www.unirank.org/ee/uni/tallinn-university/",
+    "ranking": "QS World University Rankings 2027: #901-950",
+    "universityType": "Public",
+    "admissionsUrl": "https://www.tlu.ee/en/admissions",
+    "tuitionUrl": "https://www.tlu.ee/en/tuition-fees",
+    "scholarshipsUrl": "https://www.tlu.ee/en/scholarships",
+    "internationalUrl": "https://www.tlu.ee/en/welcome-web",
+    "applicationPortalUrl": ""
+  }
+]

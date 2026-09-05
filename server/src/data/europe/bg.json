@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Sofia University \"St. Kliment Ohridski\"",
+    "countryCode": "BG",
+    "city": "Sofia",
+    "website": "https://www.uni-sofia.bg/index.php/eng",
+    "description": "Bulgaria's oldest and highest-ranked university, with broad strengths across sciences, humanities and social sciences.",
+    "sourceUrl": "https://www.bta.bg/en/news/913930-sofia-university-ranks-731-740-globally-among-1-500-universities",
+    "ranking": "QS World University Rankings 2026: #731-740",
+    "universityType": "Public",
+    "admissionsUrl": "https://www.uni-sofia.bg/index.php/eng/admission",
+    "tuitionUrl": "https://www.uni-sofia.bg/index.php/eng/admission/international_students/tuition_fees_in_sofia_university_for_the_academic_2025_2026_year",
+    "scholarshipsUrl": "",
+    "internationalUrl": "https://www.uni-sofia.bg/index.php/eng/admission/international_students",
+    "applicationPortalUrl": ""
+  },
+  {
+    "name": "Technical University of Sofia",
+    "countryCode": "BG",
+    "city": "Sofia",
+    "website": "https://tu-sofia.bg/en",
+    "description": "Bulgaria's largest technical university, specializing in engineering, IT, electronics and technology fields, and part of a European alliance of technical universities.",
+    "sourceUrl": "https://www.timeshighereducation.com/world-university-rankings/technical-university-sofia",
+    "ranking": "THE World University Rankings 2026: #1501+",
+    "universityType": "Public",
+    "admissionsUrl": "https://priem.tu-sofia.bg",
+    "tuitionUrl": "https://priem.tu-sofia.bg/university/197",
+    "scholarshipsUrl": "",
+    "internationalUrl": "",
+    "applicationPortalUrl": "https://priem.tu-sofia.bg"
+  },
+  {
+    "name": "American University in Bulgaria",
+    "countryCode": "BG",
+    "city": "Blagoevgrad",
+    "website": "https://www.aubg.edu/",
+    "description": "The first American-style liberal arts institution in Eastern Europe, accredited by the US-based NECHE, drawing students from over 40 countries.",
+    "sourceUrl": "https://en.wikipedia.org/wiki/American_University_in_Bulgaria",
+    "ranking": "",
+    "universityType": "Private",
+    "admissionsUrl": "https://www.aubg.edu/admissions/costs-and-aid-faq",
+    "tuitionUrl": "https://www.aubg.edu/admissions/costs-and-aid-faq",
+    "scholarshipsUrl": "https://www.aubg.edu/admissions/bachelors/cost-aid/scholarships-for-current-students/",
+    "internationalUrl": "",
+    "applicationPortalUrl": ""
+  },
+  {
+    "name": "University of National and World Economy",
+    "countryCode": "BG",
+    "city": "Sofia",
+    "website": "https://www.unwe.bg/en/",
+    "description": "The oldest and largest business and economics university in Bulgaria and Southeast Europe, offering programs in economics, business, law and political science.",
+    "sourceUrl": "https://en.wikipedia.org/wiki/University_of_National_and_World_Economy",
+    "ranking": "QS EECA University Rankings 2025: #80",
+    "universityType": "Public",
+    "admissionsUrl": "http://priem.unwe.bg/",
+    "tuitionUrl": "",
+    "scholarshipsUrl": "",
+    "internationalUrl": "https://www.unwe.bg/international/en",
+    "applicationPortalUrl": "https://student.unwe.bg/"
+  }
+]

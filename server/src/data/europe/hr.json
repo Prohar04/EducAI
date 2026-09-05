@@ -1,0 +1,62 @@
+[
+  {
+    "name": "University of Zagreb",
+    "countryCode": "HR",
+    "city": "Zagreb",
+    "website": "https://www.unizg.hr/",
+    "description": "Croatia's oldest and largest university, and the top-ranked Croatian institution, offering a comprehensive range of disciplines across more than 30 constituent faculties and academies.",
+    "sourceUrl": "https://www.topuniversities.com/universities/university-zagreb",
+    "ranking": "QS World University Rankings 2026: #701-710",
+    "universityType": "Public",
+    "admissionsUrl": "",
+    "tuitionUrl": "",
+    "scholarshipsUrl": "",
+    "internationalUrl": "https://www.unizg.hr/homepage/international-students/",
+    "applicationPortalUrl": ""
+  },
+  {
+    "name": "University of Split",
+    "countryCode": "HR",
+    "city": "Split",
+    "website": "https://unist.hr/en",
+    "description": "A public university on the Adriatic coast with faculties spanning medicine, maritime studies, engineering, law, economics and the humanities, offering several programs taught in English.",
+    "sourceUrl": "https://www.unirank.org/hr/uni/university-of-split/",
+    "ranking": "QS World University Rankings 2027: #1201-1400",
+    "universityType": "Public",
+    "admissionsUrl": "",
+    "tuitionUrl": "",
+    "scholarshipsUrl": "",
+    "internationalUrl": "https://unist.hr/international-cooperation-16171/16171",
+    "applicationPortalUrl": ""
+  },
+  {
+    "name": "University of Rijeka",
+    "countryCode": "HR",
+    "city": "Rijeka",
+    "website": "https://uniri.hr/en/",
+    "description": "A state university with faculties across the Kvarner region, offering English-taught programs in fields including medicine, biotechnology, mathematics and international business.",
+    "sourceUrl": "https://www.unirank.org/hr/uni/university-of-rijeka/",
+    "ranking": "QS World University Rankings 2027: #1201-1400",
+    "universityType": "Public",
+    "admissionsUrl": "",
+    "tuitionUrl": "",
+    "scholarshipsUrl": "",
+    "internationalUrl": "https://uniri.hr/en/studies/students-at-the-university-of-rijeka/",
+    "applicationPortalUrl": ""
+  },
+  {
+    "name": "University of Zadar",
+    "countryCode": "HR",
+    "city": "Zadar",
+    "website": "https://www.unizd.hr/",
+    "description": "The oldest university in Croatia, tracing its origins to 1396, with strengths in humanities, archaeology and social sciences.",
+    "sourceUrl": "https://www.universityguru.com/university/university-of-zadar-zadar",
+    "ranking": "QS EECA University Rankings: #301",
+    "universityType": "Public",
+    "admissionsUrl": "",
+    "tuitionUrl": "",
+    "scholarshipsUrl": "",
+    "internationalUrl": "",
+    "applicationPortalUrl": ""
+  }
+]

@@ -1,0 +1,47 @@
+[
+  {
+    "name": "Comenius University Bratislava",
+    "countryCode": "SK",
+    "city": "Bratislava",
+    "website": "https://uniba.sk/en/",
+    "description": "Slovakia's oldest and largest university, and the only Slovak institution consistently ranked in the QS World University Rankings top 1,000, with strengths across medicine, law, natural sciences and humanities.",
+    "sourceUrl": "https://uniba.sk/en/news-detail/back_to_page/tlacove-spravy-3/article/uk-opaet-jedinou-slovenskou-univerzitou-v-prvej-tisicke-rebrickov-qs-wur-a-the-impact-rankings/",
+    "ranking": "QS World University Rankings 2026: #684",
+    "universityType": "Public",
+    "admissionsUrl": "",
+    "tuitionUrl": "",
+    "scholarshipsUrl": "",
+    "internationalUrl": "",
+    "applicationPortalUrl": ""
+  },
+  {
+    "name": "Slovak University of Technology in Bratislava",
+    "countryCode": "SK",
+    "city": "Bratislava",
+    "website": "https://www.stuba.sk/",
+    "description": "The largest and oldest university of technology in Slovakia, with faculties covering civil, mechanical, electrical and chemical engineering as well as informatics.",
+    "sourceUrl": "https://www.stuba.sk/english/university/about-us/profile-and-rankings.html?page_id=8198",
+    "ranking": "QS World University Rankings 2027: #951-1000",
+    "universityType": "Public",
+    "admissionsUrl": "",
+    "tuitionUrl": "",
+    "scholarshipsUrl": "",
+    "internationalUrl": "",
+    "applicationPortalUrl": ""
+  },
+  {
+    "name": "Slovak Medical University in Bratislava",
+    "countryCode": "SK",
+    "city": "Bratislava",
+    "website": "https://www.szu.sk/",
+    "description": "A specialized state university focused on medicine, public health and postgraduate medical education, established in 2002.",
+    "sourceUrl": "https://en.wikipedia.org/wiki/Slovak_Medical_University",
+    "ranking": "",
+    "universityType": "Public",
+    "admissionsUrl": "",
+    "tuitionUrl": "",
+    "scholarshipsUrl": "",
+    "internationalUrl": "",
+    "applicationPortalUrl": ""
+  }
+]

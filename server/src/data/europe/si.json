@@ -1,0 +1,47 @@
+[
+  {
+    "name": "University of Ljubljana",
+    "countryCode": "SI",
+    "city": "Ljubljana",
+    "website": "https://www.uni-lj.si/",
+    "description": "Slovenia's largest and highest-ranked university, achieving its best-ever QS Europe result in 2026, with wide-ranging strengths including agriculture and forestry, geography, linguistics, pharmacy and physics.",
+    "sourceUrl": "https://www.uni-lj.si/en/news/2026-01-28-university-of-ljubljana-among-the-top-200-european-universities-in-the-qs-europe-rankings-for-the-first-time",
+    "ranking": "QS World University Rankings 2026: #535 (QS Europe 2026: #197)",
+    "universityType": "Public",
+    "admissionsUrl": "",
+    "tuitionUrl": "",
+    "scholarshipsUrl": "",
+    "internationalUrl": "",
+    "applicationPortalUrl": ""
+  },
+  {
+    "name": "University of Maribor",
+    "countryCode": "SI",
+    "city": "Maribor",
+    "website": "https://www.um.si/en/",
+    "description": "Slovenia's second-largest and second-oldest university, offering programs across seventeen faculties including engineering, medicine, law and business.",
+    "sourceUrl": "https://www.study.eu/university/university-of-maribor/rankings",
+    "ranking": "QS World University Rankings 2027: #901-950",
+    "universityType": "Public",
+    "admissionsUrl": "https://www.um.si/en/study/enrol-at-the-um/",
+    "tuitionUrl": "",
+    "scholarshipsUrl": "",
+    "internationalUrl": "https://www.um.si/en/international-students/",
+    "applicationPortalUrl": "https://moja.um.si/en/Strani/default.aspx"
+  },
+  {
+    "name": "University of Primorska",
+    "countryCode": "SI",
+    "city": "Koper",
+    "website": "https://www.upr.si/en/",
+    "description": "A public university on Slovenia's coast established in 2003, with faculties spanning humanities, management, mathematics and natural sciences, tourism, health sciences and education.",
+    "sourceUrl": "https://www.unirank.org/si/uni/university-of-primorska/",
+    "ranking": "QS World University Rankings 2027: #1201-1400",
+    "universityType": "Public",
+    "admissionsUrl": "https://www.upr.si/en/study--enrolment/",
+    "tuitionUrl": "https://www.upr.si/en/study--enrolment/529-tuition-fees/",
+    "scholarshipsUrl": "https://www.upr.si/en/students-up/scholarship-fund-of-up/",
+    "internationalUrl": "https://welcome.upr.si/en/",
+    "applicationPortalUrl": ""
+  }
+]

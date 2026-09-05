@@ -1,0 +1,17 @@
+[
+  {
+    "name": "University of Luxembourg",
+    "countryCode": "LU",
+    "city": "Luxembourg City",
+    "website": "https://www.uni.lu/en/",
+    "description": "Luxembourg's only public university, a young, internationally oriented institution with strengths in finance, law, and computer science, where around 60% of students are international.",
+    "sourceUrl": "https://www.topuniversities.com/universities/university-luxembourg",
+    "ranking": "QS World University Rankings 2026: #381",
+    "universityType": "Public",
+    "admissionsUrl": "https://www.uni.lu/en/admissions/bachelor-master/",
+    "tuitionUrl": "",
+    "scholarshipsUrl": "https://www.uni.lu/en/mobility/outgoing-student-mobility/scholarships/",
+    "internationalUrl": "https://www.uni.lu/en/admissions/admission-criteria/",
+    "applicationPortalUrl": ""
+  }
+]

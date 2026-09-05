@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Vilnius University",
+    "countryCode": "LT",
+    "city": "Vilnius",
+    "website": "https://www.vu.lt/en/",
+    "description": "Lithuania's oldest and largest university, founded in 1579, with strong programs across humanities, natural sciences, medicine, and law.",
+    "sourceUrl": "https://www.lrt.lt/en/news-in-english/19/2596154/vilnius-university-slips-in-global-rankings-but-remains-lithuania-s-top-institution",
+    "ranking": "QS World University Rankings 2026: #446",
+    "universityType": "Public",
+    "admissionsUrl": "https://www.vu.lt/en/admissions",
+    "tuitionUrl": "",
+    "scholarshipsUrl": "https://www.vu.lt/en/students/services-for-students/finance",
+    "internationalUrl": "https://www.vu.lt/en/admissions/for-exchange-and-visiting-students",
+    "applicationPortalUrl": ""
+  },
+  {
+    "name": "Kaunas University of Technology",
+    "countryCode": "LT",
+    "city": "Kaunas",
+    "website": "https://en.ktu.edu/",
+    "description": "A leading Lithuanian technical university known for engineering, technology, and interdisciplinary research, with over 10,000 students from more than 80 countries.",
+    "sourceUrl": "https://en.ktu.edu/news/qs-europe-2026-rankings-ktu-is-in-europes-top-25/",
+    "ranking": "QS World University Rankings 2026: #741",
+    "universityType": "Public",
+    "admissionsUrl": "https://admissions.ktu.edu/",
+    "tuitionUrl": "",
+    "scholarshipsUrl": "",
+    "internationalUrl": "https://admissions.ktu.edu/exchange-students/",
+    "applicationPortalUrl": "https://apply.ktu.edu/"
+  },
+  {
+    "name": "Vilnius Gediminas Technical University (VILNIUS TECH)",
+    "countryCode": "LT",
+    "city": "Vilnius",
+    "website": "https://vilniustech.lt/",
+    "description": "Lithuania's leading technical university, founded in 1956, with particular strength in architecture, civil engineering, and the built environment.",
+    "sourceUrl": "https://www.topuniversities.com/universities/vilnius-tech-vilnius-gediminas-technical-university",
+    "ranking": "QS World University Rankings 2027: #791-800",
+    "universityType": "Public",
+    "admissionsUrl": "https://vilniustech.lt/stojantiesiems/",
+    "tuitionUrl": "https://vilniustech.lt/stojantiesiems/bakalauro-studijos/studiju-kaina/",
+    "scholarshipsUrl": "https://vilniustech.lt/studijos/stipendijos-ir-studiju-finansavimas/",
+    "internationalUrl": "https://vilniustech.lt/universitetas/tarptautiskumas/",
+    "applicationPortalUrl": "https://priemimas.vilniustech.lt/login"
+  },
+  {
+    "name": "Vytautas Magnus University",
+    "countryCode": "LT",
+    "city": "Kaunas",
+    "website": "https://www.vdu.lt/en/",
+    "description": "A humanities- and liberal-arts-oriented Lithuanian university offering many English-taught bachelor's and master's programs to an international community from nearly 80 countries.",
+    "sourceUrl": "https://www.unirank.org/lt/uni/vytautas-magnus-university/",
+    "ranking": "QS World University Rankings 2027: #751-760",
+    "universityType": "Public",
+    "admissionsUrl": "https://www.vdu.lt/en/studies/degree-studies/",
+    "tuitionUrl": "",
+    "scholarshipsUrl": "https://www.vdu.lt/en/studies/scholarships/",
+    "internationalUrl": "https://www.vdu.lt/en/international-cooperation/for-students/",
+    "applicationPortalUrl": "https://vytautasmagnus.dreamapply.com/"
+  }
+]
