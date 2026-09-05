@@ -6,13 +6,28 @@ interface PDFOptions {
   targetUniversity?: string
 }
 
+/** Rich text editor output is an HTML fragment; older callers still pass plain text. */
+function isHtmlFragment(s: string): boolean {
+  return /<\/?(p|div|h[1-6]|ul|ol|li|br|strong|em|blockquote)\b[^>]*>/i.test(s)
+}
+
+function sanitiseFragment(s: string): string {
+  return s
+    .replace(/<\/?(?:html|head|body|!doctype)[^>]*>/gi, "")
+    .replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, "")
+    .replace(/\son\w+="[^"]*"/gi, "")
+    .trim()
+}
+
 function buildSOPHtml(opts: PDFOptions): string {
-  const paragraphs = opts.content
-    .split("\n\n")
-    .map(p => p.trim())
-    .filter(Boolean)
-    .map(p => `<p>${p.replace(/\n/g, "<br>")}</p>`)
-    .join("\n")
+  const body = isHtmlFragment(opts.content)
+    ? sanitiseFragment(opts.content)
+    : opts.content
+        .split("\n\n")
+        .map(p => p.trim())
+        .filter(Boolean)
+        .map(p => `<p>${p.replace(/\n/g, "<br>")}</p>`)
+        .join("\n")
 
   return `<!DOCTYPE html>
 <html>
@@ -53,6 +68,14 @@ function buildSOPHtml(opts: PDFOptions): string {
     text-indent: 24pt;
   }
   .content p:first-child { text-indent: 0; }
+  .content h3 {
+    font-size: 12.5pt;
+    font-weight: bold;
+    margin: 20pt 0 8pt;
+    text-indent: 0;
+  }
+  .content ul, .content ol { margin: 0 0 16pt 24pt; }
+  .content li { margin-bottom: 6pt; text-align: justify; }
   .footer {
     margin-top: 48pt;
     font-size: 10pt;
@@ -65,7 +88,7 @@ function buildSOPHtml(opts: PDFOptions): string {
   <div class="header">Statement of Purpose</div>
   <div class="title">Statement of Purpose</div>
   ${opts.targetUniversity ? `<div class="target">${opts.targetUniversity}</div>` : ""}
-  <div class="content">${paragraphs}</div>
+  <div class="content">${body}</div>
   <div class="footer">${opts.authorName} · ${new Date().getFullYear()}</div>
 </body>
 </html>`

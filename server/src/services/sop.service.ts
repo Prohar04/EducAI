@@ -455,18 +455,22 @@ ${contextLines || 'No additional context provided.'}
 
 CRITICAL RULES:
 - Do NOT invent specific institutions, professors, awards, publications, or experiences not mentioned above.
-- Write ONLY the SOP text. No titles, no headings, no word-count marker, no meta-commentary.
-- If context is sparse, follow the structural contract with plausible generalizations — do not fabricate specifics.`;
+- If context is sparse, follow the structural contract with plausible generalizations — do not fabricate specifics.
+
+OUTPUT FORMAT — return a clean semantic HTML fragment for a rich text editor:
+- Wrap every paragraph in <p>…</p>. One <p> per paragraph of the structural contract.
+- Use <strong> and <em> sparingly, only for genuine emphasis.
+- Only when the template's structure calls for labelled sections, introduce them with <h3>…</h3>.
+- Use <ul><li>…</li></ul> only where a real list is warranted (rare in an SOP).
+- Do NOT include <html>, <head>, <body>, <style>, class or style attributes, markdown, code fences, a document title, a word-count marker, or any meta-commentary.
+- Output the HTML fragment only — nothing before or after it.`;
 
   if (!apiKey) {
     const fallback = [
-      `Statement of Purpose — ${cfg.label}`,
-      '',
-      `[Configure OPENAI_API_KEY or OPENROUTER_API_KEY to enable AI-generated SOP.]`,
-      '',
-      `Applying for: ${req.targetProgram ?? req.intendedLevel ?? 'Graduate Program'}${req.targetUniversity ? ` at ${req.targetUniversity}` : ''}.`,
-      `Template selected: ${cfg.label}. Once an API key is configured, this template will generate output with the following structure:`,
-      cfg.structure.map((s, i) => `  ${i + 1}. ${s}`).join('\n'),
+      `<p><strong>[Configure OPENAI_API_KEY or OPENROUTER_API_KEY to enable AI-generated SOP.]</strong></p>`,
+      `<p>Applying for: ${escapeHtml(req.targetProgram ?? req.intendedLevel ?? 'Graduate Program')}${req.targetUniversity ? ` at ${escapeHtml(req.targetUniversity)}` : ''}.</p>`,
+      `<p>Template selected: ${escapeHtml(cfg.label)}. Once an API key is configured, this template will generate output with the following structure:</p>`,
+      `<ol>${cfg.structure.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ol>`,
     ].join('\n');
     return { sop: fallback, wordCount: 0, template: req.sopTemplate, sopType };
   }
@@ -492,13 +496,53 @@ CRITICAL RULES:
   if (!response.ok) throw new Error(`LLM error: ${response.status}`);
 
   const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
-  const sop = data?.choices?.[0]?.message?.content?.trim() ?? '';
-  if (!sop) throw new Error('Empty LLM response');
+  const raw = data?.choices?.[0]?.message?.content?.trim() ?? '';
+  if (!raw) throw new Error('Empty LLM response');
+
+  const sop = normaliseSopHtml(raw);
 
   return {
     sop,
-    wordCount: sop.split(/\s+/).length,
+    wordCount: htmlWordCount(sop),
     template: req.sopTemplate,
     sopType,
   };
+}
+
+// ── HTML helpers ──────────────────────────────────────────────────────────────
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/**
+ * Coerce the model output into a safe SOP HTML fragment:
+ * strip code fences and document scaffolding, drop style/class attributes and
+ * disallowed tags, and fall back to paragraph-wrapping plain text.
+ */
+function normaliseSopHtml(input: string): string {
+  let html = input
+    .replace(/^\s*```(?:html)?\s*/i, '')
+    .replace(/\s*```\s*$/i, '')
+    .replace(/<\/?(?:html|head|body|!doctype)[^>]*>/gi, '')
+    .replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, '')
+    .replace(/\s(?:style|class|id)="[^"]*"/gi, '')
+    .replace(/\son\w+="[^"]*"/gi, '')
+    .trim();
+
+  const hasBlockHtml = /<\/?(p|h[1-6]|ul|ol|li|blockquote|br|strong|em)\b/i.test(html);
+  if (!hasBlockHtml) {
+    html = html
+      .split(/\n{2,}/)
+      .map(p => p.trim())
+      .filter(Boolean)
+      .map(p => `<p>${escapeHtml(p).replace(/\n/g, '<br>')}</p>`)
+      .join('\n');
+  }
+  return html;
+}
+
+function htmlWordCount(html: string): number {
+  const text = html.replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;/gi, ' ').replace(/\s+/g, ' ').trim();
+  return text ? text.split(' ').length : 0;
 }

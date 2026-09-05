@@ -23,6 +23,7 @@ import { StaggerChildren, StaggerItem } from "@/components/motion/FadeIn";
 import { generateSopAction, type SopTemplate, type SopResult } from "@/lib/auth/action";
 import DocumentTemplateSelector, { type SOPTemplate } from "@/components/features/document-template-selector";
 import DocumentPreview from "@/components/features/document-preview";
+import RichTextEditor, { countWords, htmlToText } from "@/components/features/rich-text-editor";
 import { Eye } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -110,11 +111,10 @@ async function downloadAsPdf(
 		a.click();
 		URL.revokeObjectURL(url);
 	} catch {
-		// Fallback to browser print
+		// Fallback to browser print — content is an HTML fragment.
 		const win = window.open("", "_blank");
 		if (!win) return;
-		const escaped = content.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-		win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:Georgia,serif;font-size:12pt;line-height:1.7;color:#000;padding:1in 1.1in}pre{white-space:pre-wrap;font-family:inherit}</style></head><body><pre>${escaped}</pre><script>window.onload=function(){window.print()}<\/script></body></html>`);
+		win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:Georgia,serif;font-size:12pt;line-height:1.7;color:#000;padding:1in 1.1in}p{text-align:justify;margin:0 0 1rem}h3{font-size:1.05rem;margin:1.4rem 0 .6rem}</style></head><body>${content}<script>window.onload=function(){window.print()}<\/script></body></html>`);
 		win.document.close();
 	} finally {
 		setDownloading(false);
@@ -131,6 +131,8 @@ export default function SOPPage() {
 	const [downloading, setDownloading] = useState(false);
 	const [isPending, startTransition] = useTransition();
 	const [previewMode, setPreviewMode] = useState<"draft" | "ai">("draft");
+	// The editable SOP shown in the rich text editor (HTML). Seeded from the AI result.
+	const [editorHtml, setEditorHtml] = useState("");
 
 	// Target fields
 	const [targetProgram, setTargetProgram] = useState("");
@@ -154,6 +156,8 @@ export default function SOPPage() {
 	const [challengesOvercome, setChallengesOvercome] = useState("");
 	const [scholarshipAngle, setScholarshipAngle] = useState("");
 	const [highlights, setHighlights] = useState("");
+
+	const editorWordCount = editorHtml ? countWords(editorHtml) : 0;
 
 	function buildDraftSop(): string {
 		const lines: string[] = [];
@@ -214,20 +218,21 @@ export default function SOPPage() {
 				return;
 			}
 			setResult(res);
+			setEditorHtml(res.sop);
 		});
 	}
 
 	function handleCopy() {
-		if (!result) return;
-		navigator.clipboard.writeText(result.sop).then(() => {
+		if (!editorHtml) return;
+		navigator.clipboard.writeText(htmlToText(editorHtml)).then(() => {
 			setCopied(true);
 			setTimeout(() => setCopied(false), 2000);
 		});
 	}
 
 	function handleDownloadTxt() {
-		if (!result) return;
-		const blob = new Blob([result.sop], { type: "text/plain" });
+		if (!editorHtml) return;
+		const blob = new Blob([htmlToText(editorHtml)], { type: "text/plain" });
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement("a");
 		a.href = url;
@@ -237,8 +242,8 @@ export default function SOPPage() {
 	}
 
 	function handleDownloadPdf() {
-		if (!result) return;
-		downloadAsPdf(result.sop, docTemplate, targetUniversity, setDownloading);
+		if (!editorHtml) return;
+		downloadAsPdf(editorHtml, docTemplate, targetUniversity, setDownloading);
 	}
 
 	return (
@@ -440,8 +445,8 @@ export default function SOPPage() {
 											onClick={() => setPreviewMode("ai")}
 											className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${previewMode === "ai" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}
 										>
-											<Sparkles className="h-3 w-3" /> AI Result
-											{result && <span className="ml-1 text-muted-foreground">({result.wordCount}w)</span>}
+											<Sparkles className="h-3 w-3" /> AI Draft — Editable
+											{result && <span className="ml-1 text-muted-foreground">({editorWordCount}w)</span>}
 										</button>
 									)}
 								</div>
@@ -467,13 +472,17 @@ export default function SOPPage() {
 									</Button>
 								</div>
 							</div>
-							<div className="rounded-lg border border-border bg-muted/30 max-h-[70vh] overflow-y-auto p-3">
-								<DocumentPreview
-									content={previewMode === "ai" && result ? result.sop : buildDraftSop()}
-									template={sopTemplate}
-									mode="sop"
+							{previewMode === "ai" && result ? (
+								<RichTextEditor
+									value={editorHtml}
+									onChange={setEditorHtml}
+									placeholder="Your AI draft will appear here — edit it freely."
 								/>
-							</div>
+							) : (
+								<div className="rounded-lg border border-border bg-muted/30 max-h-[70vh] overflow-y-auto p-3">
+									<DocumentPreview content={buildDraftSop()} template={sopTemplate} mode="sop" />
+								</div>
+							)}
 							{previewMode === "draft" && (
 								<div className="mt-3 rounded-lg border border-[#4A90D9]/20 bg-[#4A90D9]/5 px-3 py-2">
 									<p className="text-xs text-[#4A90D9]">
@@ -484,7 +493,7 @@ export default function SOPPage() {
 							{previewMode === "ai" && result && (
 								<div className="mt-3 rounded-lg border border-[#C49A3C]/20 bg-[#C49A3C]/5 px-3 py-2">
 									<p className="text-xs text-[#C49A3C]">
-										AI-generated — review, personalize, and tailor to each application before submitting.
+										AI-generated draft — edit directly above with the toolbar, then copy or download. Review and tailor to each application before submitting.
 									</p>
 								</div>
 							)}

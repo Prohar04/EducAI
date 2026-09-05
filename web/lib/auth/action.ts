@@ -586,6 +586,7 @@ export interface SopGenerateRequest {
 }
 
 export interface SopResult {
+	/** Semantic HTML fragment (<p>, <h3>, <ul>…) for the rich text editor. */
 	sop: string;
 	wordCount: number;
 	template: SopTemplate;
