@@ -190,9 +190,9 @@ export default function RichTextEditor({
 				)}
 			</div>
 
-			<div className="relative">
+			<div className="relative rounded-b-lg bg-white">
 				{isEmpty && (
-					<span className="pointer-events-none absolute left-6 top-5 text-sm text-muted-foreground">{placeholder}</span>
+					<span className="pointer-events-none absolute left-6 top-5 text-sm text-slate-400">{placeholder}</span>
 				)}
 				<div
 					ref={ref}
@@ -206,7 +206,7 @@ export default function RichTextEditor({
 					}}
 					onFocus={() => setFocused(true)}
 					onPaste={onPaste}
-					className="rte-surface max-w-none overflow-y-auto px-6 py-5 text-[0.95rem] leading-8 text-[#1e293b] focus:outline-none"
+					className="rte-surface max-w-none overflow-y-auto rounded-b-lg bg-white px-6 py-5 text-[0.95rem] leading-8 text-[#1e293b] focus:outline-none"
 					style={{ fontFamily, minHeight, maxHeight: "62vh" }}
 				/>
 			</div>
