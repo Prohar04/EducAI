@@ -423,6 +423,16 @@ async function rankFromDB(
     where: {
       universityId: { in: uniIds },
       level,
+      // Never rank an intake the user can no longer apply to. Programs with no
+      // recorded deadline are kept — missing data is not a closed deadline.
+      AND: [
+        {
+          OR: [
+            { deadlines: { some: { deadline: { gte: new Date() } } } },
+            { deadlines: { none: {} } },
+          ],
+        },
+      ],
       OR: terms.length
         ? [
             ...terms.map(t => ({ field: { contains: t, mode: 'insensitive' as const } })),

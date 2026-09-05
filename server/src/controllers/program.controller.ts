@@ -126,6 +126,17 @@ export const searchPrograms = async (req: AuthRequest, res: Response) => {
       ];
     }
 
+    // Scholarships already exclude entries whose every deadline has passed;
+    // programs did not, so a closed intake stayed listed and rankable. Programs
+    // with no deadline data recorded are kept — absence is not evidence the
+    // intake has closed.
+    const notExpiredFilter: Prisma.ProgramWhereInput = {
+      OR: [
+        { deadlines: { some: { deadline: { gte: new Date() } } } },
+        { deadlines: { none: {} } },
+      ],
+    };
+
     const freshFilter: Prisma.ProgramWhereInput = {
       OR: [
         { lastVerifiedAt: { gte: sevenDaysAgo } },
@@ -140,8 +151,8 @@ export const searchPrograms = async (req: AuthRequest, res: Response) => {
     };
 
     const where: Prisma.ProgramWhereInput = freshOnly
-      ? { AND: [baseWhere, freshFilter] }
-      : baseWhere;
+      ? { AND: [baseWhere, notExpiredFilter, freshFilter] }
+      : { AND: [baseWhere, notExpiredFilter] };
 
     // ── Attempt to load user profile for ranking ────────────────────────────
     let profile: UserProfile | null = null;

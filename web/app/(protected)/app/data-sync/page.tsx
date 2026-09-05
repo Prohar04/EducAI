@@ -179,10 +179,12 @@ function FreshnessCard({
           <div>
             <p className="text-sm font-semibold">{sourceNiceLabel(source.sourceKey)}</p>
             <p className="text-xs text-muted-foreground">
-              {source.activeRecordCount.toLocaleString()} {sourceItemLabel(source.sourceKey)} available
-              {source.recordCount > source.activeRecordCount && (
-                <> · {source.recordCount.toLocaleString()} total incl. expired</>
-              )}
+              {(source.activeRecordCount ?? source.recordCount).toLocaleString()}{" "}
+              {sourceItemLabel(source.sourceKey)} available
+              {source.activeRecordCount !== undefined &&
+                source.recordCount > source.activeRecordCount && (
+                  <> · {source.recordCount.toLocaleString()} total incl. expired</>
+                )}
             </p>
           </div>
         </div>
