@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { recoverFromChunkError } from "@/lib/chunk-recovery";
 import Link from "next/link";
 
 export default function GlobalError({

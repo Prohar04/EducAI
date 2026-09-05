@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { timingSafeEqual } from 'node:crypto';
 import { performIngest, CountryInput } from '#services/ingest.service.ts';
 import prisma from '#src/config/database.ts';
 import logger from '#src/config/logger.ts';
@@ -7,13 +8,22 @@ import logger from '#src/config/logger.ts';
 
 const CONFIGURED_KEY = process.env.INGEST_API_KEY;
 
+/** Constant-time comparison so response timing cannot leak the key. */
+function safeEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  // timingSafeEqual throws on length mismatch, which would itself be a signal.
+  if (bufA.length !== bufB.length) return false;
+  return timingSafeEqual(bufA, bufB);
+}
+
 function verifyIngestKey(req: Request, res: Response): boolean {
   if (!CONFIGURED_KEY) {
     res.status(503).json({ error: 'INGEST_API_KEY is not configured on this server' });
     return false;
   }
   const provided = req.headers['x-ingest-key'];
-  if (!provided || provided !== CONFIGURED_KEY) {
+  if (typeof provided !== 'string' || !safeEqual(provided, CONFIGURED_KEY)) {
     res.status(401).json({ error: 'Unauthorized: missing or invalid X-INGEST-KEY header' });
     return false;
   }

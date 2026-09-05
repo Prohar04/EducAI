@@ -7,7 +7,7 @@ import StrategyReportClient from "./_components/StrategyReportClient";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Application Strategy · EducAI" };
+export const metadata = { title: "Application Strategy" };
 
 export default async function StrategyPage() {
 	const profile = await getUserProfile();

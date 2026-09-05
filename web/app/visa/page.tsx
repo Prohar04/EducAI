@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     "Complete student visa guide for international students. Learn how to apply for study visas in Germany, Canada, UK, Australia, and the USA — including documents, timelines, costs, and post-study work rights.",
   alternates: { canonical: "https://educai-web.vercel.app/visa" },
   openGraph: {
-    title: "Student Visa Guide for International Students · EducAI",
+    title: "Student Visa Guide for International Students",
     description:
       "Complete student visa guide: Germany, Canada, UK, Australia, USA. Documents, timelines, costs, and post-study work rights explained.",
     url: "https://educai-web.vercel.app/visa",

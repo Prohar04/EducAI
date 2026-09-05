@@ -3,7 +3,7 @@ import ScholarshipsClient from "./_components/ScholarshipsClient";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Scholarships · EducAI" };
+export const metadata = { title: "Scholarships" };
 
 export default async function ScholarshipsPage() {
 	const [deadlines, eligible] = await Promise.all([

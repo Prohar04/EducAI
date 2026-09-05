@@ -38,7 +38,7 @@ import newsRoutes from './routes/newsRoutes.ts';
 import currencyRoutes from './routes/currency.router.ts';
 import freshnessRoutes from './routes/freshness.router.ts';
 import cronRoutes from './routes/cron.router.ts';
-// import { PrismaSessionStore } from './services/session.service.ts';
+import { PrismaSessionStore } from './services/session.service.ts';
 
 const app = express();
 
@@ -74,6 +74,11 @@ if (!sessionSecret && process.env.NODE_ENV === 'production') {
 }
 app.use(
   session({
+    // Without an explicit store express-session falls back to MemoryStore, which
+    // is per-process: any restart, redeploy or second instance drops every
+    // session — including in-flight OAuth handshake state. Persist to Postgres
+    // so the handshake survives whichever instance handles the callback.
+    store: new PrismaSessionStore(),
     secret: sessionSecret || 'dev-only-secret',
     resave: false,
     saveUninitialized: false,

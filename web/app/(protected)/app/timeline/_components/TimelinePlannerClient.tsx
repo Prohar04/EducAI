@@ -21,6 +21,7 @@ import {
 } from "@/lib/auth/action";
 import { Reveal } from "@/components/motion/Reveal";
 import { COUNTRIES } from "@/lib/data/countries";
+import { upcomingIntakes } from "@/lib/intakes";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -106,9 +107,8 @@ const PRIORITY_COLOURS: Record<TaskPriority, string> = {
 	low: "text-muted-foreground",
 };
 
-const INTAKES = [
-	"Fall 2025", "Spring 2026", "Fall 2026", "Spring 2027", "Fall 2027", "Spring 2028",
-];
+// Derived from today so a past intake can never be offered.
+const INTAKES = upcomingIntakes(6);
 
 // ── Derived helpers ───────────────────────────────────────────────────────────
 

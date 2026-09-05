@@ -10,6 +10,7 @@ import { convert, toUSD, RATES_ARE_LIVE } from "@/lib/utils/exchangeRates";
 import { SmartAutocomplete, type SuggestionItem } from "@/components/forms/SmartAutocomplete";
 import { MAJORS } from "@/lib/data/majors";
 import type { UserProfile, OnboardingFormState } from "@/types/auth.type";
+import { upcomingIntakes } from "@/lib/intakes";
 
 // ─── Suggestion lists ─────────────────────────────────────────────────────────
 
@@ -67,10 +68,9 @@ const STAGES = [
 
 const LEVELS = ["BSc", "MSc", "PhD", "MBA", "Diploma"];
 
-const INTAKES = [
-	"Fall 2025", "Spring 2026", "Fall 2026", "Spring 2027",
-	"Fall 2028", "Spring 2028",
-];
+// Was a hand-maintained list: it had skipped Fall 2027 entirely and listed
+// 2028 out of order, so users could not select their actual intake.
+const INTAKES = upcomingIntakes(6);
 
 const ENGLISH_TESTS = ["None", "IELTS", "TOEFL", "PTE", "Duolingo"];
 

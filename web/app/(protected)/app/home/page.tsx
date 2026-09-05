@@ -1,3 +1,5 @@
+export const metadata = { title: "Home" };
+
 // This route is retired — redirect all visitors to the main dashboard
 import { redirect } from "next/navigation";
 

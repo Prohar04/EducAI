@@ -7,7 +7,7 @@ import TimelinePlannerClient from "./_components/TimelinePlannerClient";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Application Timeline · EducAI" };
+export const metadata = { title: "Application Timeline" };
 
 export default async function TimelinePage() {
 	const profile = await getUserProfile();

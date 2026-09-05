@@ -1,3 +1,5 @@
+export const metadata = { title: "Programs" };
+
 import Link from "next/link";
 import { searchPrograms, getSavedPrograms, getUserProfile } from "@/lib/auth/action";
 import { PageHeader } from "@/components/layout/page-header";

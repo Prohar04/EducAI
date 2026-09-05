@@ -337,10 +337,25 @@ export async function gapFixDeleteEvidenceHandler(req: Request, res: Response): 
     if (!ev) { res.status(404).json({ error: 'Evidence not found' }); return; }
 
     if (ev.fileName && !ev.url) {
+      // On-disk names are `${Date.now()}-${sanitisedOriginalName}` and the upload
+      // directory is shared by every user, so a suffix match on the original name
+      // also matches other people's uploads — two users with `transcript.pdf`
+      // would delete each other's file. Only unlink when the match is
+      // unambiguous; otherwise leave the file orphaned, which is recoverable in a
+      // way that deleting someone else's evidence is not.
       const UPLOAD_DIR = getGapFixUploadDir();
+      const safe = ev.fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
       const files = fs.existsSync(UPLOAD_DIR) ? fs.readdirSync(UPLOAD_DIR) : [];
-      const match = files.find(f => f.endsWith(`-${ev.fileName}`));
-      if (match) fs.unlinkSync(path.join(UPLOAD_DIR, match));
+      const matches = files.filter(f => /^\d+-/.test(f) && f.slice(f.indexOf('-') + 1) === safe);
+
+      if (matches.length === 1) {
+        fs.unlinkSync(path.join(UPLOAD_DIR, matches[0]));
+      } else if (matches.length > 1) {
+        logger.warn(
+          `[gapfix] ambiguous file delete skipped evidenceId=${evidenceId} ` +
+          `name=${safe} candidates=${matches.length}`
+        );
+      }
     }
 
     await prisma.gapFixEvidence.delete({ where: { id: evidenceId } });

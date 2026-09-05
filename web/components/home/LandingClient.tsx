@@ -85,7 +85,10 @@ export default function LandingClient({ isLoggedIn }: LandingClientProps) {
         </Link>
 
         {/* Center links — desktop */}
-        <div style={{ display: "flex", alignItems: "center", gap: 32 }} className="hidden md:flex">
+        {/* `display` must stay out of this inline style: it outranks the
+            `hidden md:flex` classes and forces the links visible on mobile,
+            where they collide with the logo. */}
+        <div style={{ alignItems: "center", gap: 32 }} className="hidden md:flex">
           {[
             { label: "Features", href: "#features" },
             { label: "How it works", href: "#how-it-works" },

@@ -2,6 +2,7 @@
  *  Auth endpoint tests – lockout, remember-me TTL,
  *  email verification, signup, signin, refresh
  * ────────────────────────────────────────────── */
+import { EventEmitter } from 'node:events';
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 // ─── Mock setup (must precede any dynamic imports) ───
@@ -77,6 +78,14 @@ jest.unstable_mockModule('#src/services/passwordReset.service.ts', () => ({
 // Session service
 jest.unstable_mockModule('#src/services/session.service.ts', () => ({
   saveUserSession: jest.fn().mockResolvedValue({}),
+  // app.ts constructs this at import time for the express-session store.
+  // The in-memory stand-in keeps the suite off the database.
+  PrismaSessionStore: class extends EventEmitter {
+    get(_sid, cb) { cb(null); }
+    set(_sid, _session, cb) { cb?.(); }
+    destroy(_sid, cb) { cb?.(); }
+    touch(_sid, _session, cb) { cb?.(); }
+  },
 }));
 
 // Google service (imported by google.config.ts)

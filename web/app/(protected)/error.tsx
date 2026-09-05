@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { recoverFromChunkError } from "@/lib/chunk-recovery";
 import Link from "next/link";
 import { AlertTriangle, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,9 @@ export default function ProtectedError({
   reset: () => void;
 }) {
   useEffect(() => {
+    // A stale tab after a deploy is recoverable — reload onto the new build
+    // instead of showing an error the user cannot act on.
+    if (recoverFromChunkError(error)) return;
     console.error("[AppError]", error);
   }, [error]);
 

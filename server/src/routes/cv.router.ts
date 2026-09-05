@@ -4,9 +4,12 @@ import { authMiddleware } from '#src/middlewares/authenticate.ts';
 import { cvGenerateHandler } from '#src/controllers/cv.controller.ts';
 import { generatePDF } from '#src/services/pdfGeneratorService.ts';
 import logger from '#src/config/logger.ts';
+import { aiRateLimit } from '#src/middlewares/rateLimit.ts';
 
 const router = Router();
 router.use(authMiddleware);
+// Per-caller quota on the paid generation paths (POST only).
+router.use(aiRateLimit);
 
 // POST /cv/generate — generate a CV using profile context + LLM
 router.post('/generate', cvGenerateHandler);

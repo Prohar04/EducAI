@@ -3,7 +3,7 @@ import SavedProgramsClient from "./_components/SavedProgramsClient";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Saved Programs · EducAI",
+  title: "Saved Programs",
   description: "Your bookmarked university programs",
 };
 

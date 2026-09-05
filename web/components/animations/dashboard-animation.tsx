@@ -72,6 +72,12 @@ export default function DashboardAnimation({
 			rafRef.current = requestAnimationFrame(render);
 			if (now - lastFrame < INTERVAL) return;
 			lastFrame = now;
+			// Nothing is measurable until the canvas has a laid-out size, and
+			// drawing at zero width produces negative geometry downstream.
+			if (W <= 0 || H <= 0) {
+				init();
+				if (W <= 0 || H <= 0) return;
+			}
 			ctx.clearRect(0, 0, W, H);
 			t += 0.04;
 
@@ -109,7 +115,12 @@ export default function DashboardAnimation({
 			const barAreaY = padY;
 
 			const barGap = 6;
-			const barW = (chartW - barGap * (bars.length - 1)) / bars.length;
+			// Clamp: before layout settles offsetWidth is 0, which drives barW
+			// negative and makes createRadialGradient throw IndexSizeError every frame.
+			const barW = Math.max(
+				1,
+				(chartW - barGap * (bars.length - 1)) / bars.length,
+			);
 			bars.forEach((b, i) => {
 				const bx = padX + i * (barW + barGap);
 				const bh = chartH * b.current;

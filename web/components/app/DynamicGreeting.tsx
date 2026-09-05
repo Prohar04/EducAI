@@ -1,16 +1,31 @@
 "use client"
 
+import { useEffect, useState } from "react"
+
 interface Props {
   name?: string | null
 }
 
+function partOfDay(date: Date) {
+  const hour = date.getHours()
+  return hour < 12 ? "Morning" : hour < 17 ? "Afternoon" : "Evening"
+}
+
 export function DynamicGreeting({ name }: Props) {
-  const hour = new Date().getHours()
-  const timeOfDay = hour < 12 ? "Morning" : hour < 17 ? "Afternoon" : "Evening"
+  // The server renders in its own timezone, so the greeting it produces can
+  // disagree with the browser's — a hydration mismatch (React #418) that makes
+  // React discard the server HTML and re-render. Settle on the server's value
+  // for the first paint, then correct it to the viewer's local time on mount.
+  const [timeOfDay, setTimeOfDay] = useState(() => partOfDay(new Date()))
+
+  useEffect(() => {
+    setTimeOfDay(partOfDay(new Date()))
+  }, [])
+
   const firstName = name?.split(" ")[0] ?? "there"
 
   return (
-    <div suppressHydrationWarning>
+    <div>
       <p style={{
         fontSize: 11,
         fontWeight: 500,
@@ -18,7 +33,7 @@ export function DynamicGreeting({ name }: Props) {
         textTransform: "uppercase",
         color: "#2A3A52",
         marginBottom: 10,
-      }}>
+      }} suppressHydrationWarning>
         Good {timeOfDay}
       </p>
       <h1 style={{

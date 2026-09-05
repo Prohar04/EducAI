@@ -3,6 +3,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import { authMiddleware } from '#src/middlewares/authenticate.ts';
 import { getGapFixUploadDir } from '#src/config/paths.ts';
+import { aiRateLimit } from '#src/middlewares/rateLimit.ts';
 import {
   gapFixGenerateHandler,
   gapFixGetSessionHandler,
@@ -38,6 +39,8 @@ const upload = multer({
 
 const router = Router();
 router.use(authMiddleware);
+// Per-caller quota on the paid generation paths (POST only).
+router.use(aiRateLimit);
 
 // Analysis
 router.post('/analyze', gapFixGenerateHandler);

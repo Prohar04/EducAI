@@ -25,7 +25,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const country = getCountryBySlug(slug);
-  if (!country) return { title: "Country Not Found · EducAI" };
+  if (!country) return { title: "Country Not Found" };
 
   return {
     title: `${country.headline}`,

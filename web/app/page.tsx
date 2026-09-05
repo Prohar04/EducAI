@@ -109,6 +109,10 @@ export default async function HomePage() {
             display: "flex",
             alignItems: "center",
             position: "relative",
+            // The decorative orbital canvas sits at right:-5%; clip it here so it
+            // cannot widen the document. `clip` (not `hidden`) keeps position:
+            // sticky working for descendants.
+            overflowX: "clip",
             paddingTop: "clamp(72px, 10vh, 120px)",
             paddingBottom: "clamp(24px, 4vw, 48px)",
           }}

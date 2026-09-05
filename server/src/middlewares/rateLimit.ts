@@ -5,7 +5,7 @@ import { Request, Response, NextFunction } from 'express';
 const IS_TEST = process.env.NODE_ENV === 'test';
 
 async function applyArcjet(
-  ruleType: 'auth' | 'forgotPassword',
+  ruleType: 'auth' | 'forgotPassword' | 'ai',
   req: Request,
   res: Response,
   next: NextFunction,
@@ -16,9 +16,17 @@ async function applyArcjet(
     const { default: aj } = await import('#src/config/arcjet.ts');
     const { slidingWindow } = await import('@arcjet/node');
 
-    const instance = ruleType === 'forgotPassword'
-      ? aj.withRule(slidingWindow({ mode: 'LIVE', interval: '1h', max: 5 }))
-      : aj.withRule(slidingWindow({ mode: 'LIVE', interval: '15m', max: 10 }));
+    const rule =
+      ruleType === 'forgotPassword'
+        ? slidingWindow({ mode: 'LIVE', interval: '1h', max: 5 })
+        : ruleType === 'ai'
+          // Generation endpoints call paid models. 20/hour is well above genuine
+          // use (a user writes one SOP, not twenty) and well below what a script
+          // needs to be expensive.
+          ? slidingWindow({ mode: 'LIVE', interval: '1h', max: 20 })
+          : slidingWindow({ mode: 'LIVE', interval: '15m', max: 10 });
+
+    const instance = aj.withRule(rule);
 
     const decision = await instance.protect(req);
     if (decision.isDenied()) {
@@ -45,4 +53,16 @@ export function authRateLimit(req: Request, res: Response, next: NextFunction) {
 
 export function forgotPasswordRateLimit(req: Request, res: Response, next: NextFunction) {
   return applyArcjet('forgotPassword', req, res, next);
+}
+
+/**
+ * Per-caller quota for endpoints that spend model credits (SOP, CV, resume,
+ * strategy, chat, gap analysis, career, immigration, professor search).
+ * Without it a single authenticated account can drain the AI budget in a loop.
+ */
+export function aiRateLimit(req: Request, res: Response, next: NextFunction) {
+  // Generation is always a POST. Reading back an already-generated SOP or CV
+  // costs nothing, so GETs must not consume the caller's quota.
+  if (req.method !== 'POST') return next();
+  return applyArcjet('ai', req, res, next);
 }

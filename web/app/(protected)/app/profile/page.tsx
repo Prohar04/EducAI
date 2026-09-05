@@ -7,7 +7,7 @@ import DangerZone from "./_components/DangerZone";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Edit Profile · EducAI" };
+export const metadata = { title: "Edit Profile" };
 
 export default async function ProfilePage() {
 	const session = await getSession();

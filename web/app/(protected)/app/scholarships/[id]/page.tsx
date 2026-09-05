@@ -17,7 +17,7 @@ import type { ScholarshipItem } from "@/types/auth.type";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Scholarship Detail · EducAI" };
+export const metadata = { title: "Scholarship Detail" };
 
 function countryName(code: string | null | undefined) {
 	if (!code) return null;

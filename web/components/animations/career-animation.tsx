@@ -53,6 +53,11 @@ export default function CareerAnimation({
 			rafRef.current = requestAnimationFrame(render);
 			if (now - lastFrame < INTERVAL) return;
 			lastFrame = now;
+			// Canvas has no laid-out size yet; drawing now yields negative geometry.
+			if (W <= 0 || H <= 0) {
+				init();
+				if (W <= 0 || H <= 0) return;
+			}
 			ctx.clearRect(0, 0, W, H);
 
 			if (!reduced) progress = Math.min(1, progress + 0.01);

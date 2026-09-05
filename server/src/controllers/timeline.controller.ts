@@ -67,6 +67,14 @@ function makeTaskId(monthKey: string, qualifier: string): string {
 }
 
 /** Auto-assign status at generation time: past tasks with no stored status = overdue. */
+/**
+ * Never schedule generated preparation work in the past. Keeps the day-of-month
+ * from the computed date where possible so the roadmap still reads naturally.
+ */
+function clampToToday(date: Date, now: Date): Date {
+  return date < now ? new Date(now) : date;
+}
+
 function resolveStatus(date: Date | undefined, now: Date): TaskStatus {
   if (!date) return 'pending';
   return date < now ? 'overdue' : 'pending';
@@ -336,7 +344,11 @@ function buildRoadmap(
   ];
 
   for (const phase of phases) {
-    const phaseDate = addMonths(anchorDate, phase.offsetMonths);
+    // Generic preparation phases are derived by counting backwards from the
+    // intake, so a distant intake can date them before today — the roadmap then
+    // opens on "overdue" tasks the user never had a chance to do. Real deadlines
+    // (programs, scholarships) are left alone: those genuinely can have passed.
+    const phaseDate = clampToToday(addMonths(anchorDate, phase.offsetMonths), now);
     const monthKey = toYYYYMM(phaseDate);
     for (const item of phase.items) {
       const id = makeTaskId(monthKey, item.title);

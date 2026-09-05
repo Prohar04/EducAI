@@ -633,7 +633,7 @@ export default function JobsClient() {
           <PageHeader
             animation="jobs"
             title={<>Find Your Perfect <span className="gradient-text">Job</span> Abroad</>}
-            subtitle="Live listings from Indeed, LinkedIn & more — refreshed every hour"
+            subtitle="Live listings via Adzuna and JSearch — aggregating Indeed, LinkedIn and more, refreshed hourly"
             badges={
               <>
                 <HeaderBadge>🌍 30 Countries</HeaderBadge>
