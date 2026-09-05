@@ -1,0 +1,9 @@
+# Only the bundle produced by `vercel-build` is needed at runtime. Uploading the
+# TypeScript sources and the tsc output alongside it let the runtime resolve
+# `#src/*` imports to raw .ts files, which Node cannot load — the deploy then
+# crashed with ERR_MODULE_NOT_FOUND on `src/config/logger.ts`.
+dist
+coverage
+tests
+logs
+uploads
