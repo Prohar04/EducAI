@@ -1,0 +1,156 @@
+[
+  {
+    "title": "Holland Scholarship",
+    "provider": "Dutch Ministry of Education, Culture and Science and participating institutions (Nuffic)",
+    "countryCode": "NL",
+    "level": "BSC",
+    "field": "All fields",
+    "url": "https://www.studyinnl.org/finances/holland-scholarship",
+    "description": "Scholarship for international students from outside the European Economic Area applying for a bachelor's or master's programme at a participating Dutch research university or university of applied sciences. Applications are made directly to the institution.",
+    "amount": "EUR 5,000 in the first year of study (one-off, not a full scholarship)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "bachelor", "masters", "non-eea", "first-year"],
+    "sourceUrl": "https://www.studyinnl.org/finances/holland-scholarship",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (deadline varies by institution, typically 1 Feb or 1 May)", "deadline": "2027-05-01" }
+    ]
+  },
+  {
+    "title": "Orange Tulip Scholarship",
+    "provider": "Nuffic Neso country offices and participating Dutch institutions",
+    "countryCode": "NL",
+    "level": "MSC",
+    "field": "All fields (varies by institution)",
+    "url": "https://www.nuffic.nl",
+    "description": "Country-linked scholarship programme coordinated by Nuffic Neso offices for students from selected countries, offered as a set of institution-specific awards ranging from partial tuition waivers to full tuition plus living costs.",
+    "amount": "Partial tuition waiver up to full tuition plus living costs (varies by institution)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": ["Brazil", "China", "India", "Indonesia", "Mexico", "Russia", "South Korea", "Thailand", "Vietnam", "Nigeria"],
+    "tags": ["government", "masters", "country-linked", "tuition"],
+    "sourceUrl": "https://www.upgrad.com/study-abroad/articles/orange-tulip-scholarship/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (deadline varies by institution, Jan-Apr 2027)", "deadline": "2027-04-01" }
+    ]
+  },
+  {
+    "title": "Amsterdam Merit Scholarship",
+    "provider": "University of Amsterdam",
+    "countryCode": "NL",
+    "level": "MSC",
+    "field": "All fields (eligible master's programmes)",
+    "url": "https://www.uva.nl/en/education/master-s/scholarships--tuition/scholarships-and-loans/scholarships-and-loans.html",
+    "description": "Merit-based scholarship for a limited number of excellent students from outside the EEA admitted to a master's programme at the University of Amsterdam.",
+    "amount": "EUR 3,000 up to EUR 25,000, in some cases combined with a tuition waiver",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based", "non-eea"],
+    "sourceUrl": "https://www.uva.nl/en/education/master-s/scholarships--tuition/scholarships-and-loans/scholarships-and-loans.html",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 entry", "deadline": "2027-01-15" }
+    ]
+  },
+  {
+    "title": "Radboud Scholarship Programme",
+    "provider": "Radboud University",
+    "countryCode": "NL",
+    "level": "MSC",
+    "field": "All fields (eligible English-taught master's programmes)",
+    "url": "https://www.ru.nl/en/education/scholarships/radboud-scholarship-programme",
+    "description": "Scholarship for talented non-EEA students admitted to an eligible English-taught master's programme at Radboud University, reducing tuition to the statutory (EEA) rate and adding a contribution to living costs.",
+    "amount": "Tuition reduced to the EEA statutory fee plus an allowance towards living costs, visa and insurance",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based", "non-eea"],
+    "sourceUrl": "https://www.ru.nl/en/education/scholarships/radboud-scholarship-programme",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 entry (September start)", "deadline": "2027-03-01" }
+    ]
+  },
+  {
+    "title": "University of Twente Scholarship (UTS)",
+    "provider": "University of Twente",
+    "countryCode": "NL",
+    "level": "MSC",
+    "field": "All fields (eligible master's programmes)",
+    "url": "https://www.utwente.nl/en/education/scholarship-finder/university-of-twente-scholarship/",
+    "description": "Scholarship for excellent students from both EU/EEA and non-EU/EEA countries applying for a graduate degree programme at the University of Twente.",
+    "amount": "EUR 6,000 to EUR 25,000 for one year (renewable for a second year on performance)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based"],
+    "sourceUrl": "https://www.utwente.nl/en/education/scholarship-finder/university-of-twente-scholarship/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 entry (first round)", "deadline": "2027-02-01" }
+    ]
+  },
+  {
+    "title": "Leiden University Excellence Scholarship (LExS)",
+    "provider": "Leiden University",
+    "countryCode": "NL",
+    "level": "MSC",
+    "field": "All fields (eligible master's programmes)",
+    "url": "https://www.universiteitleiden.nl/en/education/practical-information/grants-and-scholarships/leiden-university-excellence-scholarship-lexs",
+    "description": "Merit scholarship for outstanding non-EU/EEA students enrolling in a master's programme at Leiden University.",
+    "amount": "EUR 10,000, EUR 15,000 or the full tuition fee minus the statutory fee",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based", "non-eea"],
+    "sourceUrl": "https://www.universiteitleiden.nl/en/education/practical-information/grants-and-scholarships/leiden-university-excellence-scholarship-lexs",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 entry (October start)", "deadline": "2027-02-01" }
+    ]
+  },
+  {
+    "title": "Erasmus Mundus Joint Masters (Netherlands-hosted programmes)",
+    "provider": "European Commission (Erasmus+ Programme)",
+    "countryCode": "NL",
+    "level": "MSC",
+    "field": "All fields (160+ joint programmes)",
+    "url": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
+    "description": "Fully funded, integrated master's programmes run by a consortium of universities across at least three countries, many coordinated by or including Dutch institutions. Students apply to the individual programme consortium.",
+    "amount": "EUR 1,400 per month, full tuition, insurance and travel/installation allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["european-union", "fully-funded", "masters", "joint-degree", "erasmus-mundus"],
+    "sourceUrl": "https://erasmus-plus.ec.europa.eu/opportunities/opportunities-for-individuals/students/erasmus-mundus-joint-masters-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by programme, Oct 2026 - Jan 2027)", "deadline": "2027-01-15" }
+    ]
+  }
+]

@@ -1,0 +1,134 @@
+[
+  {
+    "title": "Swedish Institute Scholarships for Global Professionals (SISGP)",
+    "provider": "Swedish Institute",
+    "countryCode": "SE",
+    "level": "MSC",
+    "field": "All fields (eligible English-taught master's programmes)",
+    "url": "https://si.se/en/apply/scholarships/swedish-institute-scholarships-for-global-professionals/",
+    "description": "Fully funded scholarship for work-experienced professionals from a defined list of countries to pursue a one- or two-year master's degree in Sweden, with a leadership and networking programme for scholars.",
+    "amount": "Full tuition, SEK 12,000 per month living allowance, travel grant, insurance",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "masters", "work-experience", "flagship"],
+    "sourceUrl": "https://si.se/en/apply/scholarships/swedish-institute-scholarships-for-global-professionals/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Autumn 2027 intake (SI application window opens after university admission)", "deadline": "2027-02-13" }
+    ]
+  },
+  {
+    "title": "Swedish Institute Scholarships for the Western Balkans",
+    "provider": "Swedish Institute",
+    "countryCode": "SE",
+    "level": "MSC",
+    "field": "All fields (eligible English-taught master's programmes)",
+    "url": "https://si.se/en/apply/scholarships/",
+    "description": "Fully funded master's scholarship for citizens of the Western Balkans as part of Sweden's regional reform cooperation, including a leadership programme.",
+    "amount": "Full tuition, SEK 12,000 per month living allowance, travel grant, insurance",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": ["Albania", "Bosnia and Herzegovina", "Kosovo", "Montenegro", "North Macedonia", "Serbia"],
+    "tags": ["government", "fully-funded", "masters", "western-balkans"],
+    "sourceUrl": "https://si.se/en/apply/scholarships/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Autumn 2027 intake", "deadline": "2027-02-13" }
+    ]
+  },
+  {
+    "title": "Lund University Global Scholarship",
+    "provider": "Lund University",
+    "countryCode": "SE",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://www.lunduniversity.lu.se/admissions/tuition-fees-scholarships/lund-university-global-scholarship",
+    "description": "Merit-based tuition scholarship for highly qualified fee-paying students from outside the EU/EEA admitted to a bachelor's or master's programme at Lund University.",
+    "amount": "25%, 50%, 75% or 100% of tuition fees",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based", "tuition", "non-eea"],
+    "sourceUrl": "https://www.lunduniversity.lu.se/admissions/tuition-fees-scholarships/lund-university-global-scholarship",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Autumn 2027 intake", "deadline": "2027-01-15" }
+    ]
+  },
+  {
+    "title": "Uppsala University IPK Scholarships",
+    "provider": "Uppsala University",
+    "countryCode": "SE",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://www.uu.se/en/study/scholarships",
+    "description": "Tuition scholarships for fee-paying students from outside the EU/EEA who apply to and are admitted to a master's programme at Uppsala University, awarded on academic merit.",
+    "amount": "Full or partial tuition fee coverage",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based", "tuition", "non-eea"],
+    "sourceUrl": "https://www.uu.se/en/study/scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Autumn 2027 intake", "deadline": "2027-01-15" }
+    ]
+  },
+  {
+    "title": "KTH Royal Institute of Technology Scholarship",
+    "provider": "KTH Royal Institute of Technology",
+    "countryCode": "SE",
+    "level": "MSC",
+    "field": "Engineering, technology, architecture, science",
+    "url": "https://www.kth.se/en/studies/master/scholarships",
+    "description": "Tuition scholarship for outstanding fee-paying master's applicants from outside the EU/EEA, with a limited number also covering living costs.",
+    "amount": "Full or partial tuition; a few awards also cover living expenses",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based", "tuition", "engineering"],
+    "sourceUrl": "https://www.kth.se/en/studies/master/scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Autumn 2027 intake", "deadline": "2027-01-15" }
+    ]
+  },
+  {
+    "title": "Karolinska Institutet Global Master's Scholarship",
+    "provider": "Karolinska Institutet",
+    "countryCode": "SE",
+    "level": "MSC",
+    "field": "Health sciences, biomedicine, public health, health informatics",
+    "url": "https://education.ki.se/scholarships",
+    "description": "Tuition scholarship for fee-paying students from outside the EU/EEA admitted to a global master's programme at Karolinska Institutet, one of the world's leading medical universities.",
+    "amount": "Full tuition fee coverage (living costs not included)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based", "tuition", "health"],
+    "sourceUrl": "https://education.ki.se/scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Autumn 2027 intake", "deadline": "2027-01-15" }
+    ]
+  }
+]

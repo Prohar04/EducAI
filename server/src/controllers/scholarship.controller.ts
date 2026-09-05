@@ -10,6 +10,7 @@ import {
   getEligibleScholarships,
 } from '#src/services/scholarship.service.ts';
 import { runLiveScholarshipRefresh } from '#src/services/liveScholarship.service.ts';
+import { searchFallbackScholarships } from '#src/services/scholarshipFallback.service.ts';
 import prisma from '#src/config/database.ts';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -40,6 +41,29 @@ export async function listScholarships(req: Request & { userId?: string }, res: 
 
   const { q, countryCode, level, field, fundingType, financialNeed, page, limit } = parsed.data;
 
+  const respondWithFallback = (reason: 'empty' | 'error') => {
+    const { items, total } = searchFallbackScholarships({
+      q,
+      countryCode,
+      level,
+      field,
+      fundingType,
+      financialNeed: financialNeed === 'true' ? true : undefined,
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    res.status(200).json({
+      items,
+      total,
+      page,
+      limit,
+      personalised: false,
+      source: 'fallback',
+      fallbackReason: reason,
+      fetchedAt: new Date().toISOString(),
+    });
+  };
+
   try {
     // Optionally load user profile for personalised ranking
     const userProfile = req.userId ? await getUserProfile(req.userId) : null;
@@ -66,10 +90,21 @@ export async function listScholarships(req: Request & { userId?: string }, res: 
         }
         : null,
     });
-    res.status(200).json({ ...result, fetchedAt: new Date().toISOString() });
+
+    if (result.total === 0) {
+      respondWithFallback('empty');
+      return;
+    }
+
+    res.status(200).json({ ...result, source: 'database', fetchedAt: new Date().toISOString() });
   } catch (err) {
     logger.error('[scholarship:list]', { err });
-    res.status(500).json({ message: 'Failed to fetch scholarships' });
+    try {
+      respondWithFallback('error');
+    } catch (fallbackErr) {
+      logger.error('[scholarship:list:fallback]', { err: fallbackErr });
+      res.status(500).json({ message: 'Failed to fetch scholarships' });
+    }
   }
 }
 

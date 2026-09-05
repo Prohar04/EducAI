@@ -1,0 +1,112 @@
+[
+  {
+    "title": "Estonian Government Scholarships for Degree Students",
+    "provider": "Education and Youth Board (Harno), Estonia",
+    "countryCode": "EE",
+    "level": "MSC",
+    "field": "All fields (priority to STEM, ICT and fields aligned with Estonia's R&D strategy)",
+    "url": "https://harno.ee/en/scholarships-international",
+    "description": "State scholarships supporting international master's and doctoral students enrolled at Estonian public universities, usually combined with a tuition fee waiver from the host university.",
+    "amount": "Monthly stipend of EUR 350 (master's) to EUR 660 (doctoral), typically alongside a tuition waiver",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "masters", "phd", "merit-based"],
+    "sourceUrl": "https://harno.ee/en/scholarships-international",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (deadline varies by programme)", "deadline": "2027-03-15" }
+    ]
+  },
+  {
+    "title": "University of Tartu Tuition Waiver Scholarships",
+    "provider": "University of Tartu",
+    "countryCode": "EE",
+    "level": "MSC",
+    "field": "All fields (English-taught master's programmes)",
+    "url": "https://ut.ee/en/scholarships",
+    "description": "Merit-based tuition waivers for international students admitted to an English-taught master's programme at Estonia's leading research university, with a limited number of stipends also available.",
+    "amount": "Full or partial tuition fee waiver; selected awards add a monthly stipend",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based", "tuition"],
+    "sourceUrl": "https://ut.ee/en/scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Autumn 2027 intake", "deadline": "2027-03-15" }
+    ]
+  },
+  {
+    "title": "TalTech Scholarships for International Students",
+    "provider": "Tallinn University of Technology (TalTech)",
+    "countryCode": "EE",
+    "level": "MSC",
+    "field": "Engineering, IT, business, science, maritime studies",
+    "url": "https://taltech.ee/en/scholarships",
+    "description": "Tuition waivers and monthly stipends for high-achieving international students admitted to an English-taught master's programme at Estonia's largest technical university.",
+    "amount": "Full or partial tuition fee waiver; some awards add a stipend of around EUR 350 per month",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based", "engineering"],
+    "sourceUrl": "https://taltech.ee/en/scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Autumn 2027 intake", "deadline": "2027-04-01" }
+    ]
+  },
+  {
+    "title": "IT Academy Scholarships",
+    "provider": "Education and Youth Board of Estonia (IT Academy programme)",
+    "countryCode": "EE",
+    "level": "MSC",
+    "field": "Information and communication technology",
+    "url": "https://harno.ee/en/it-academy",
+    "description": "Scholarships for master's students in ICT curricula at Estonian universities participating in the IT Academy programme, funded to strengthen Estonia's technology sector.",
+    "amount": "Monthly stipend of around EUR 400, often alongside a tuition waiver",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "masters", "ict", "merit-based"],
+    "sourceUrl": "https://harno.ee/en/it-academy",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Autumn 2027 intake (aligned with admission)", "deadline": "2027-04-01" }
+    ]
+  },
+  {
+    "title": "Erasmus Mundus Joint Masters (Estonia-hosted programmes)",
+    "provider": "European Commission (Erasmus+ Programme)",
+    "countryCode": "EE",
+    "level": "MSC",
+    "field": "All fields (160+ joint programmes)",
+    "url": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
+    "description": "Fully funded, integrated master's programmes run by a consortium of universities across at least three countries, some coordinated by or including Estonian institutions. Students apply to the individual programme consortium.",
+    "amount": "EUR 1,400 per month, full tuition, insurance and travel/installation allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["european-union", "fully-funded", "masters", "joint-degree", "erasmus-mundus"],
+    "sourceUrl": "https://erasmus-plus.ec.europa.eu/opportunities/opportunities-for-individuals/students/erasmus-mundus-joint-masters-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by programme, Oct 2026 - Jan 2027)", "deadline": "2027-01-15" }
+    ]
+  }
+]

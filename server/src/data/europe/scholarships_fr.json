@@ -1,0 +1,156 @@
+[
+  {
+    "title": "France Excellence Eiffel Scholarship Programme",
+    "provider": "French Ministry for Europe and Foreign Affairs (managed by Campus France)",
+    "countryCode": "FR",
+    "level": "MSC",
+    "field": "Science and technology, economics and management, law and political science",
+    "url": "https://www.campusfrance.org/en/france-excellence-eiffel-scholarship-program",
+    "description": "France's flagship scholarship to attract top international students to master's and doctoral programmes at French higher education institutions. Applications are submitted only by the institution on behalf of the candidate.",
+    "amount": "Monthly allowance of EUR 1,200 (master's) or EUR 2,100 (doctorate) plus airfare, insurance and cultural activities",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "masters", "phd", "institution-submitted", "flagship"],
+    "sourceUrl": "https://www.campusfrance.org/en/actu/call-for-france-excellence-eiffel-applications-2026",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (Campus France deadline; institutions set earlier internal dates)", "deadline": "2027-01-09" }
+    ]
+  },
+  {
+    "title": "France Excellence Major Scholarship",
+    "provider": "Agency for French Education Abroad (AEFE)",
+    "countryCode": "FR",
+    "level": "BSC",
+    "field": "All fields",
+    "url": "https://www.aefe.fr/vie-du-reseau/toute-lactualite/le-programme-excellence-major",
+    "description": "Scholarship for the best foreign graduates of French lycees abroad who obtained the French baccalaureate with distinction, funding up to five years of undergraduate and master's study in France.",
+    "amount": "Monthly allowance, social security cover and, for some, tuition support, for up to 5 years",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "undergraduate", "masters", "french-lycee-alumni"],
+    "sourceUrl": "https://www.aefe.fr/vie-du-reseau/toute-lactualite/le-programme-excellence-major",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by country/lycee)", "deadline": "2027-01-31" }
+    ]
+  },
+  {
+    "title": "Emile-Boutmy Scholarship",
+    "provider": "Sciences Po",
+    "countryCode": "FR",
+    "level": "MSC",
+    "field": "Social sciences, political science, international affairs, public policy, economics",
+    "url": "https://www.sciencespo.fr/students/en/fees-funding/tuition-fees-financial-aid/emile-boutmy-scholarship.html",
+    "description": "Sciences Po's scholarship for outstanding international students from outside the EU admitted to a bachelor's or master's programme, awarded on academic merit and the family's financial situation.",
+    "amount": "Partial to full tuition (up to EUR 19,000 per year for master's) and, in some cases, a living allowance",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": true,
+    "eligibleNationalities": null,
+    "tags": ["university", "undergraduate", "masters", "merit-based", "need-based"],
+    "sourceUrl": "https://www.sciencespo.fr/students/en/fees-funding/tuition-fees-financial-aid/emile-boutmy-scholarship.html",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 entry (master's)", "deadline": "2027-01-08" }
+    ]
+  },
+  {
+    "title": "Ampere Excellence Scholarships",
+    "provider": "Ecole normale superieure de Lyon (ENS de Lyon)",
+    "countryCode": "FR",
+    "level": "MSC",
+    "field": "Exact sciences, experimental sciences, humanities and social sciences",
+    "url": "https://www.ens-lyon.fr/en/studies/admissions/ampere-excellence-scholarships",
+    "description": "Merit scholarship for outstanding international students admitted to a master's programme at ENS de Lyon, one of France's leading research-intensive grandes ecoles.",
+    "amount": "EUR 1,000 per month for up to 24 months plus one round-trip airfare",
+    "fundingType": "living",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based", "living-stipend"],
+    "sourceUrl": "https://www.ens-lyon.fr/en/studies/admissions/ampere-excellence-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake", "deadline": "2026-12-04" }
+    ]
+  },
+  {
+    "title": "Universite Paris-Saclay International Master's Scholarships",
+    "provider": "Universite Paris-Saclay",
+    "countryCode": "FR",
+    "level": "MSC",
+    "field": "All fields (eligible master's programmes)",
+    "url": "https://www.universite-paris-saclay.fr/en/admission/masters-scholarships-international-students-idex",
+    "description": "Scholarships funded by the university's IDEX initiative for high-achieving international students admitted to an eligible master's programme, aimed at students who are new to the French higher education system.",
+    "amount": "EUR 10,000 per year plus a possible mobility allowance of EUR 1,000",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based", "living-stipend"],
+    "sourceUrl": "https://www.universite-paris-saclay.fr/en/admission/masters-scholarships-international-students-idex",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (aligned with master's admission rounds)", "deadline": "2027-04-30" }
+    ]
+  },
+  {
+    "title": "Make Our Planet Great Again (MOPGA)",
+    "provider": "Campus France / French Government",
+    "countryCode": "FR",
+    "level": "PHD",
+    "field": "Climate change, earth system science, energy transition, sustainability",
+    "url": "https://www.campusfrance.org/en/make-our-planet-great-again-mopga",
+    "description": "Initiative funding international researchers, doctoral and postdoctoral candidates to carry out climate and environmental research projects hosted by French institutions.",
+    "amount": "Research funding, salary or stipend and mobility support (varies by call)",
+    "fundingType": "research",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "research", "phd", "postdoctoral", "climate"],
+    "sourceUrl": "https://www.campusfrance.org/en/make-our-planet-great-again-mopga",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 call (dates announced per edition)", "deadline": "2027-03-31" }
+    ]
+  },
+  {
+    "title": "Erasmus Mundus Joint Masters (France-hosted programmes)",
+    "provider": "European Commission (Erasmus+ Programme)",
+    "countryCode": "FR",
+    "level": "MSC",
+    "field": "All fields (160+ joint programmes)",
+    "url": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
+    "description": "Fully funded, integrated master's programmes run by a consortium of universities across at least three countries, many coordinated by or including French institutions. Students apply to the individual programme consortium.",
+    "amount": "EUR 1,400 per month, full tuition, insurance and travel/installation allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["european-union", "fully-funded", "masters", "joint-degree", "erasmus-mundus"],
+    "sourceUrl": "https://erasmus-plus.ec.europa.eu/opportunities/opportunities-for-individuals/students/erasmus-mundus-joint-masters-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by programme, Oct 2026 - Jan 2027)", "deadline": "2027-01-15" }
+    ]
+  }
+]

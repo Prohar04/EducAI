@@ -1,0 +1,90 @@
+[
+  {
+    "title": "University of Cyprus Doctoral Scholarships and Fee Waivers",
+    "provider": "University of Cyprus",
+    "countryCode": "CY",
+    "level": "PHD",
+    "field": "All fields",
+    "url": "https://www.ucy.ac.cy/graduateschool/en/",
+    "description": "Funded doctoral places at the University of Cyprus combining a tuition fee waiver with paid teaching or research assistantships, allocated by departments as part of admission.",
+    "amount": "Full tuition fee waiver plus a stipend for teaching/research assistant duties",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "fully-funded", "phd", "assistantship"],
+    "sourceUrl": "https://www.ucy.ac.cy/graduateschool/en/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (two admission rounds per year)", "deadline": "2027-03-31" }
+    ]
+  },
+  {
+    "title": "Cyprus University of Technology Scholarships",
+    "provider": "Cyprus University of Technology (CUT)",
+    "countryCode": "CY",
+    "level": "MSC",
+    "field": "Engineering, health sciences, management, communication, fine and applied arts",
+    "url": "https://www.cut.ac.cy/studies/scholarships/",
+    "description": "Merit scholarships and tuition reductions for postgraduate students at the Cyprus University of Technology in Limassol, including support for doctoral candidates through assistantships.",
+    "amount": "Partial tuition fee reduction; doctoral candidates may receive an assistantship stipend",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "phd", "merit-based"],
+    "sourceUrl": "https://www.cut.ac.cy/studies/scholarships/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (aligned with admission)", "deadline": "2027-04-30" }
+    ]
+  },
+  {
+    "title": "University of Nicosia Academic Merit Scholarships",
+    "provider": "University of Nicosia",
+    "countryCode": "CY",
+    "level": "BSC",
+    "field": "All fields",
+    "url": "https://www.unic.ac.cy/admissions/scholarships-financial-aid/",
+    "description": "Tuition-reduction scholarships for international students at the largest private university in Cyprus, awarded on academic record and, for some schemes, financial circumstances.",
+    "amount": "Up to 50% tuition fee reduction (higher for select awards)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "undergraduate", "masters", "merit-based"],
+    "sourceUrl": "https://www.unic.ac.cy/admissions/scholarships-financial-aid/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (aligned with admission)", "deadline": "2027-06-30" }
+    ]
+  },
+  {
+    "title": "Erasmus Mundus Joint Masters (Cyprus-hosted programmes)",
+    "provider": "European Commission (Erasmus+ Programme)",
+    "countryCode": "CY",
+    "level": "MSC",
+    "field": "All fields (160+ joint programmes)",
+    "url": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
+    "description": "Fully funded, integrated master's programmes run by a consortium of universities across at least three countries, some coordinated by or including Cypriot institutions. Students apply to the individual programme consortium.",
+    "amount": "EUR 1,400 per month, full tuition, insurance and travel/installation allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["european-union", "fully-funded", "masters", "joint-degree", "erasmus-mundus"],
+    "sourceUrl": "https://erasmus-plus.ec.europa.eu/opportunities/opportunities-for-individuals/students/erasmus-mundus-joint-masters-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by programme, Oct 2026 - Jan 2027)", "deadline": "2027-01-15" }
+    ]
+  }
+]

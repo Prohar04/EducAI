@@ -1,0 +1,112 @@
+[
+  {
+    "title": "Government of Ireland International Education Scholarships (GOI-IES)",
+    "provider": "Higher Education Authority (HEA), Ireland",
+    "countryCode": "IE",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://hea.ie/policy/internationalisation/goi-ies/",
+    "description": "Scholarships awarded across all Irish higher education institutions to high-calibre students from outside the EU/EEA for one year of study at bachelor's, master's or PhD level.",
+    "amount": "EUR 10,000 stipend for one year plus a full tuition fee waiver",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "masters", "phd", "merit-based", "flagship"],
+    "sourceUrl": "https://hea.ie/policy/internationalisation/goi-ies/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year (call opens January)", "deadline": "2027-03-05" }
+    ]
+  },
+  {
+    "title": "Government of Ireland Postgraduate Scholarship Programme",
+    "provider": "Irish Research Council",
+    "countryCode": "IE",
+    "level": "PHD",
+    "field": "All disciplines",
+    "url": "https://research.ie/funding/goipg/",
+    "description": "Scholarships for excellent research master's and PhD candidates of any nationality to undertake a postgraduate research degree at an eligible Irish higher education institution.",
+    "amount": "EUR 25,000 annual stipend plus a contribution to fees (up to EUR 6,000) and eligible research expenses",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "phd", "research"],
+    "sourceUrl": "https://research.ie/funding/goipg/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 call", "deadline": "2026-10-29" }
+    ]
+  },
+  {
+    "title": "Walsh Scholarship Programme",
+    "provider": "Teagasc (Agriculture and Food Development Authority)",
+    "countryCode": "IE",
+    "level": "PHD",
+    "field": "Agriculture, food science, animal and grassland science, environment, agri-economics",
+    "url": "https://www.teagasc.ie/about/research--innovation/postgraduate-opportunities/",
+    "description": "Funded master's and PhD research positions hosted jointly by Teagasc and an Irish university, advertised against specific projects throughout the year.",
+    "amount": "Approximately EUR 25,000 per year including a stipend and a contribution to university fees",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "phd", "research", "agriculture"],
+    "sourceUrl": "https://www.teagasc.ie/about/research--innovation/postgraduate-opportunities/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 (rolling, project-specific)", "deadline": "2027-06-30" }
+    ]
+  },
+  {
+    "title": "Trinity College Dublin Global Excellence Scholarships",
+    "provider": "Trinity College Dublin",
+    "countryCode": "IE",
+    "level": "MSC",
+    "field": "All fields (eligible taught master's programmes)",
+    "url": "https://www.tcd.ie/study/international/scholarships/",
+    "description": "Merit-based awards for high-achieving non-EU students accepting an offer for a taught postgraduate programme at Trinity College Dublin.",
+    "amount": "EUR 5,000 towards tuition up to a full tuition fee waiver for select awards",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based", "non-eu"],
+    "sourceUrl": "https://www.tcd.ie/study/international/scholarships/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 entry (deadline varies by course)", "deadline": "2027-03-31" }
+    ]
+  },
+  {
+    "title": "UCD Global Excellence Scholarships",
+    "provider": "University College Dublin",
+    "countryCode": "IE",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://www.ucd.ie/global/scholarships/",
+    "description": "Scholarships for outstanding international (non-EU) students commencing an undergraduate or taught master's programme at UCD, awarded as a partial to full tuition fee reduction.",
+    "amount": "Partial tuition reduction up to 100% of tuition fees for the most competitive awards",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "undergraduate", "masters", "merit-based", "non-eu"],
+    "sourceUrl": "https://www.ucd.ie/global/scholarships/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 entry (deadline varies by intake)", "deadline": "2027-04-30" }
+    ]
+  }
+]

@@ -1,0 +1,90 @@
+[
+  {
+    "title": "Romanian Government Scholarships via the Ministry of Foreign Affairs",
+    "provider": "Romanian Ministry of Foreign Affairs (through Romanian diplomatic missions)",
+    "countryCode": "RO",
+    "level": null,
+    "field": "All fields except medicine, dentistry and pharmacy for some categories",
+    "url": "https://scholarships.studyinromania.gov.ro",
+    "description": "Scholarships for non-EU citizens to pursue bachelor's, master's or doctoral study at accredited Romanian public universities. Instruction is in Romanian, preceded by a preparatory language year.",
+    "amount": "Full tuition, free accommodation in student halls and a monthly financial allowance",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "bachelor", "masters", "phd", "flagship"],
+    "sourceUrl": "https://scholarships.studyinromania.gov.ro",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2027-03-15" }
+    ]
+  },
+  {
+    "title": "Romanian State Scholarships for Ethnic Romanians Abroad",
+    "provider": "Romanian Ministry of Education",
+    "countryCode": "RO",
+    "level": null,
+    "field": "All fields",
+    "url": "https://www.edu.ro",
+    "description": "Scholarships reserved for people of Romanian ethnic origin living outside Romania to undertake bachelor's, master's or doctoral study at Romanian public universities.",
+    "amount": "Tuition-free places plus a monthly stipend and accommodation support",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "bachelor", "masters", "phd", "diaspora"],
+    "sourceUrl": "https://www.edu.ro",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2027-07-31" }
+    ]
+  },
+  {
+    "title": "University of Bucharest Institutional Scholarships for International Students",
+    "provider": "University of Bucharest",
+    "countryCode": "RO",
+    "level": "MSC",
+    "field": "All fields (English- and Romanian-taught programmes)",
+    "url": "https://unibuc.ro/international/",
+    "description": "Tuition reductions and merit scholarships for international students enrolled on a fee-paying basis at the University of Bucharest.",
+    "amount": "Partial tuition fee reduction (varies by faculty)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based"],
+    "sourceUrl": "https://unibuc.ro/international/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (aligned with admission)", "deadline": "2027-07-15" }
+    ]
+  },
+  {
+    "title": "Erasmus Mundus Joint Masters (Romania-hosted programmes)",
+    "provider": "European Commission (Erasmus+ Programme)",
+    "countryCode": "RO",
+    "level": "MSC",
+    "field": "All fields (160+ joint programmes)",
+    "url": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
+    "description": "Fully funded, integrated master's programmes run by a consortium of universities across at least three countries, several coordinated by or including Romanian institutions. Students apply to the individual programme consortium.",
+    "amount": "EUR 1,400 per month, full tuition, insurance and travel/installation allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["european-union", "fully-funded", "masters", "joint-degree", "erasmus-mundus"],
+    "sourceUrl": "https://erasmus-plus.ec.europa.eu/opportunities/opportunities-for-individuals/students/erasmus-mundus-joint-masters-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by programme, Oct 2026 - Jan 2027)", "deadline": "2027-01-15" }
+    ]
+  }
+]

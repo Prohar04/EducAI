@@ -1,0 +1,112 @@
+[
+  {
+    "title": "Ernst Mach Grant (Worldwide)",
+    "provider": "OeAD - Austria's Agency for Education and Internationalisation",
+    "countryCode": "AT",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://oead.at/en/to-austria/grants-and-scholarships/",
+    "description": "Grant for students, graduates and researchers from outside the EU to complete a study period, a full master's programme or a research stay at an Austrian university or university of applied sciences.",
+    "amount": "EUR 1,150 per month plus accident and health insurance and, in some cases, accommodation and travel support",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "masters", "phd", "research", "flagship"],
+    "sourceUrl": "https://oead.at/en/to-austria/grants-and-scholarships/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2027-03-01" }
+    ]
+  },
+  {
+    "title": "Ernst Mach Grant - ASEA-UNINET",
+    "provider": "OeAD - Austria's Agency for Education and Internationalisation",
+    "countryCode": "AT",
+    "level": "PHD",
+    "field": "All fields (doctoral and post-doctoral research)",
+    "url": "https://oead.at/en/to-austria/grants-and-scholarships/",
+    "description": "Ernst Mach Grant line for nationals of Southeast Asian partner countries in the ASEA-UNINET network to carry out doctoral or post-doctoral research at an Austrian university.",
+    "amount": "EUR 1,150 per month plus insurance and, in some cases, travel and accommodation support",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": ["Indonesia", "Malaysia", "Myanmar", "Nepal", "Pakistan", "Philippines", "Thailand", "Vietnam"],
+    "tags": ["government", "fully-funded", "phd", "research", "southeast-asia"],
+    "sourceUrl": "https://oead.at/en/to-austria/grants-and-scholarships/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2027-03-15" }
+    ]
+  },
+  {
+    "title": "ISTA PhD Programme Fellowships",
+    "provider": "Institute of Science and Technology Austria (ISTA)",
+    "countryCode": "AT",
+    "level": "PHD",
+    "field": "Biology, neuroscience, computer science, data science, mathematics, physics, chemistry, earth and climate science",
+    "url": "https://phd.pages.ist.ac.at",
+    "description": "Fully funded, English-language graduate school at a research institute near Vienna, admitting students with a bachelor's or master's degree into an interdisciplinary PhD with rotations.",
+    "amount": "Employment contract with a competitive salary (around EUR 32,000-38,000 per year), social insurance and research funding",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["research-institute", "fully-funded", "phd", "research"],
+    "sourceUrl": "https://phd.pages.ist.ac.at",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 autumn intake", "deadline": "2027-01-08" }
+    ]
+  },
+  {
+    "title": "Vienna BioCenter PhD Programme Fellowships",
+    "provider": "Vienna BioCenter PhD Programme",
+    "countryCode": "AT",
+    "level": "PHD",
+    "field": "Molecular biology, genetics, biochemistry, structural biology, neuroscience, computational biology",
+    "url": "https://www.vbc.ac.at/phd-programme",
+    "description": "International doctoral programme run jointly by research institutes and universities on the Vienna BioCenter campus, with two recruitment calls per year and fully funded positions.",
+    "amount": "Employment contract with a salary set by the Austrian Science Fund scheme, plus social insurance",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["research-institute", "fully-funded", "phd", "life-sciences"],
+    "sourceUrl": "https://www.vbc.ac.at/phd-programme",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 spring call", "deadline": "2027-01-14" }
+    ]
+  },
+  {
+    "title": "Erasmus Mundus Joint Masters (Austria-hosted programmes)",
+    "provider": "European Commission (Erasmus+ Programme)",
+    "countryCode": "AT",
+    "level": "MSC",
+    "field": "All fields (160+ joint programmes)",
+    "url": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
+    "description": "Fully funded, integrated master's programmes run by a consortium of universities across at least three countries, several coordinated by or including Austrian institutions. Students apply to the individual programme consortium.",
+    "amount": "EUR 1,400 per month, full tuition, insurance and travel/installation allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["european-union", "fully-funded", "masters", "joint-degree", "erasmus-mundus"],
+    "sourceUrl": "https://erasmus-plus.ec.europa.eu/opportunities/opportunities-for-individuals/students/erasmus-mundus-joint-masters-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by programme, Oct 2026 - Jan 2027)", "deadline": "2027-01-15" }
+    ]
+  }
+]

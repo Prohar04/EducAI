@@ -1,0 +1,200 @@
+[
+  {
+    "title": "Vanier Canada Graduate Scholarships",
+    "provider": "Government of Canada",
+    "countryCode": "CA",
+    "level": "PHD",
+    "field": "Health research, natural sciences and engineering, social sciences and humanities",
+    "url": "https://vanier.gc.ca",
+    "description": "Prestigious doctoral scholarship to attract and retain world-class doctoral students at Canadian universities, assessed on academic excellence, research potential and leadership. Students cannot apply directly; a Canadian university must nominate the candidate.",
+    "amount": "CAD 50,000 per year for three years",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "phd", "nomination-based", "flagship"],
+    "sourceUrl": "https://www.phdportal.com/scholarships/955/vanier-canada-graduate-scholarship.html",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 competition (national deadline)", "deadline": "2026-11-01" }
+    ]
+  },
+  {
+    "title": "Banting Postdoctoral Fellowships",
+    "provider": "Government of Canada",
+    "countryCode": "CA",
+    "level": null,
+    "field": "All fields",
+    "url": "https://banting.fellowships-bourses.gc.ca",
+    "description": "Fellowships to support the very best postdoctoral researchers, both nationally and internationally, who will contribute to Canada's economic, social and research-based growth. Applications are submitted jointly with a Canadian host institution.",
+    "amount": "CAD 70,000 per year for two years",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "postdoctoral", "research"],
+    "sourceUrl": "https://banting.fellowships-bourses.gc.ca",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2026-2027 competition", "deadline": "2026-09-16" }
+    ]
+  },
+  {
+    "title": "Pierre Elliott Trudeau Foundation Doctoral Scholarships",
+    "provider": "Pierre Elliott Trudeau Foundation",
+    "countryCode": "CA",
+    "level": "PHD",
+    "field": "Humanities and social sciences",
+    "url": "https://www.trudeaufoundation.ca/programs/scholarship",
+    "description": "Scholarships for outstanding doctoral candidates in the humanities and social sciences working on themes related to public policy and pressing societal issues, with an engagement and mentorship programme alongside the funding.",
+    "amount": "Up to CAD 40,000 per year plus a CAD 25,000 annual travel and networking allowance, for up to four years",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["foundation", "fully-funded", "phd", "public-policy", "social-sciences"],
+    "sourceUrl": "https://www.trudeaufoundation.ca/programs/scholarship",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 cohort", "deadline": "2026-11-17" }
+    ]
+  },
+  {
+    "title": "Lester B. Pearson International Scholarship",
+    "provider": "University of Toronto",
+    "countryCode": "CA",
+    "level": "BSC",
+    "field": "All fields",
+    "url": "https://future.utoronto.ca/pearson/",
+    "description": "The University of Toronto's most prestigious undergraduate award for international students, recognising exceptional academic achievement and creativity, and students who are recognised as leaders within their school. Candidates must be nominated by their school.",
+    "amount": "Full tuition, books, incidental fees and residence support for four years",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "undergraduate", "fully-funded", "nomination-based"],
+    "sourceUrl": "https://future.utoronto.ca/pearson/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Fall 2027 entry (school nomination deadline)", "deadline": "2026-11-07" }
+    ]
+  },
+  {
+    "title": "International Major Entrance Scholarship (IMES)",
+    "provider": "University of British Columbia",
+    "countryCode": "CA",
+    "level": "BSC",
+    "field": "All fields",
+    "url": "https://you.ubc.ca/financial-planning/scholarships-awards-international-students/",
+    "description": "Merit-based entrance scholarships for outstanding international undergraduate students entering UBC directly from secondary school, considered automatically for most applicants who submit a complete application by the award deadline.",
+    "amount": "CAD 10,000 to CAD 25,000 per year, renewable for up to four years",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "undergraduate", "merit-based", "entrance-scholarship"],
+    "sourceUrl": "https://you.ubc.ca/financial-planning/scholarships-awards-international-students/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Fall 2027 entry", "deadline": "2026-12-01" }
+    ]
+  },
+  {
+    "title": "Ontario Trillium Scholarship (OTS)",
+    "provider": "Government of Ontario",
+    "countryCode": "CA",
+    "level": "PHD",
+    "field": "All fields",
+    "url": "https://www.ontario.ca/page/ontario-trillium-scholarship",
+    "description": "Scholarship for the best international doctoral students to study at a participating university in Ontario. Each university administers its own competition and nominates recipients; applicants apply for admission to a doctoral programme and are considered by the graduate unit.",
+    "amount": "CAD 40,000 per year for up to four years",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "provincial", "fully-funded", "phd"],
+    "sourceUrl": "https://www.ontario.ca/page/ontario-trillium-scholarship",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (deadline varies by university)", "deadline": "2027-01-15" }
+    ]
+  },
+  {
+    "title": "McCall MacBain Scholarships at McGill",
+    "provider": "McGill University",
+    "countryCode": "CA",
+    "level": "MSC",
+    "field": "All fields (full-time master's or professional degrees)",
+    "url": "https://www.mccallmacbainscholars.org",
+    "description": "Canada's first comprehensive leadership scholarship for master's and professional studies, pairing full funding with a leadership programme, mentorship and coaching. Open to applicants of any nationality.",
+    "amount": "Full tuition and fees plus a living stipend; partial awards also offered",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "fully-funded", "leadership", "masters", "professional"],
+    "sourceUrl": "https://www.mccallmacbainscholars.org",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 entry (final deadline)", "deadline": "2027-01-14" }
+    ]
+  },
+  {
+    "title": "IDRC Research Awards",
+    "provider": "International Development Research Centre (Canada)",
+    "countryCode": "CA",
+    "level": null,
+    "field": "International development, economics, health, environment, governance",
+    "url": "https://idrc-crdi.ca/en/funding/idrc-research-awards",
+    "description": "Paid one-year research positions at IDRC for master's and doctoral students and recent graduates, offering hands-on experience in research management and grant administration alongside their own field research.",
+    "amount": "Paid salary plus research and travel allowances for one year",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "research", "development", "masters", "phd"],
+    "sourceUrl": "https://idrc-crdi.ca/en/funding/idrc-research-awards",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 award year", "deadline": "2026-09-10" }
+    ]
+  },
+  {
+    "title": "York University International Student Scholarship Program",
+    "provider": "York University",
+    "countryCode": "CA",
+    "level": "BSC",
+    "field": "All fields",
+    "url": "https://futurestudents.yorku.ca/scholarships/international",
+    "description": "Renewable entrance scholarships for high-achieving international undergraduate students, ranging from a set annual amount up to the full cost of tuition for the most outstanding applicants.",
+    "amount": "CAD 20,000 up to full tuition per year, renewable for up to four years",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "undergraduate", "merit-based", "entrance-scholarship"],
+    "sourceUrl": "https://futurestudents.yorku.ca/scholarships/international",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Fall 2027 entry", "deadline": "2027-02-01" }
+    ]
+  }
+]

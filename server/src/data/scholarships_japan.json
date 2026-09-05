@@ -1,0 +1,156 @@
+[
+  {
+    "title": "MEXT Scholarship (Embassy Recommendation)",
+    "provider": "Government of Japan (Ministry of Education, Culture, Sports, Science and Technology)",
+    "countryCode": "JP",
+    "level": null,
+    "field": "All fields",
+    "url": "https://www.studyinjapan.go.jp/en/planning/scholarship/",
+    "description": "Japan's flagship government scholarship, offered through Japanese embassies and consulates for undergraduate, research (master's/doctoral), specialised training and other categories. Includes tuition, a monthly stipend and round-trip airfare.",
+    "amount": "Full tuition, monthly stipend (~JPY 117,000-145,000), round-trip airfare",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "undergraduate", "masters", "phd", "flagship"],
+    "sourceUrl": "https://www.studyinjapan.go.jp/en/planning/scholarship/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by embassy)", "deadline": "2026-05-31" }
+    ]
+  },
+  {
+    "title": "MEXT Scholarship (University Recommendation)",
+    "provider": "Government of Japan (Ministry of Education, Culture, Sports, Science and Technology)",
+    "countryCode": "JP",
+    "level": "MSC",
+    "field": "All fields (graduate research)",
+    "url": "https://www.studyinjapan.go.jp/en/planning/scholarship/",
+    "description": "MEXT scholarship route in which a Japanese university nominates prospective or current international research students directly to MEXT, typically after the student has secured a prospective supervisor.",
+    "amount": "Full tuition, monthly stipend (~JPY 143,000-145,000), round-trip airfare",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "masters", "phd", "nomination-based"],
+    "sourceUrl": "https://www.studyinjapan.go.jp/en/planning/scholarship/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by university)", "deadline": "2026-12-01" }
+    ]
+  },
+  {
+    "title": "JASSO Monbukagakusho Honors Scholarship",
+    "provider": "Japan Student Services Organization (JASSO)",
+    "countryCode": "JP",
+    "level": null,
+    "field": "All fields",
+    "url": "https://www.jasso.go.jp/en/study_j/scholarships/scholarship_gakushu.html",
+    "description": "Monthly living-support scholarship for privately financed international students already enrolled at a Japanese university or Japanese-language institution, awarded on the basis of academic performance and financial need.",
+    "amount": "JPY 48,000 per month (JPY 30,000 for Japanese-language students)",
+    "fundingType": "living",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": true,
+    "eligibleNationalities": null,
+    "tags": ["government", "living-stipend", "self-financed", "enrolled-students"],
+    "sourceUrl": "https://www.jasso.go.jp/en/study_j/scholarships/scholarship_gakushu.html",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 academic year (applied via host institution)", "deadline": "2027-05-31" }
+    ]
+  },
+  {
+    "title": "ADB-Japan Scholarship Program (ADB-JSP)",
+    "provider": "Asian Development Bank / Government of Japan",
+    "countryCode": "JP",
+    "level": "MSC",
+    "field": "Economics, management, science and technology, development studies",
+    "url": "https://www.adb.org/what-we-do/adb-japan-scholarship-program/main",
+    "description": "Scholarships for citizens of ADB's developing member countries to pursue postgraduate study at designated institutions in the Asia-Pacific region, several of which are in Japan.",
+    "amount": "Full tuition, monthly living and housing allowance, books, insurance, airfare",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["international-organisation", "fully-funded", "masters", "development", "asia-pacific"],
+    "sourceUrl": "https://www.adb.org/what-we-do/adb-japan-scholarship-program/main",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by institution)", "deadline": "2026-12-31" }
+    ]
+  },
+  {
+    "title": "Japan-IMF Scholarship Program for Asia (JISPA)",
+    "provider": "International Monetary Fund / Government of Japan",
+    "countryCode": "JP",
+    "level": "MSC",
+    "field": "Macroeconomics, economic policy, public finance, monetary policy",
+    "url": "https://www.imf.org/en/About/Partners/imf-scholarship-imf-japan",
+    "description": "Scholarships for junior government officials from eligible Asia-Pacific countries to pursue a master's degree in macroeconomics or a related field at partner universities in Japan, aimed at building capacity for economic policymaking.",
+    "amount": "Full tuition, living and housing allowance, insurance, airfare, study materials",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["international-organisation", "fully-funded", "masters", "government-officials", "economics"],
+    "sourceUrl": "https://www.imf.org/en/About/Partners/imf-scholarship-imf-japan",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 partnership track", "deadline": "2026-12-31" }
+    ]
+  },
+  {
+    "title": "University of Tokyo Fellowship (UTokyo Fellowship)",
+    "provider": "University of Tokyo",
+    "countryCode": "JP",
+    "level": "PHD",
+    "field": "All fields (graduate schools)",
+    "url": "https://www.u-tokyo.ac.jp/en/prospective-students/scholarships.html",
+    "description": "Institutional fellowship providing a monthly living stipend and, for many graduate schools, tuition support to outstanding incoming graduate students. Administered by each graduate school as part of admissions.",
+    "amount": "Monthly stipend (JPY 150,000-180,000) plus tuition support in many programmes",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "fully-funded", "phd", "masters", "research"],
+    "sourceUrl": "https://www.u-tokyo.ac.jp/en/prospective-students/scholarships.html",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by graduate school)", "deadline": "2026-12-15" }
+    ]
+  },
+  {
+    "title": "Honjo International Scholarship Foundation Scholarship",
+    "provider": "Honjo International Scholarship Foundation",
+    "countryCode": "JP",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://www.hisf.or.jp/en/scholarship/",
+    "description": "Living-support scholarship for privately financed international students enrolled or planning to enrol in a graduate degree programme at a Japanese university, selected on academic ability, character and future contribution.",
+    "amount": "JPY 200,000 per month (up to JPY 180,000 for some categories)",
+    "fundingType": "living",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": true,
+    "eligibleNationalities": null,
+    "tags": ["foundation", "living-stipend", "masters", "phd"],
+    "sourceUrl": "https://www.hisf.or.jp/en/scholarship/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake", "deadline": "2026-08-31" }
+    ]
+  }
+]

@@ -1,0 +1,112 @@
+[
+  {
+    "title": "Camoes Institute Scholarships",
+    "provider": "Camoes - Instituto da Cooperacao e da Lingua",
+    "countryCode": "PT",
+    "level": "MSC",
+    "field": "Portuguese language and culture, and fields under bilateral cooperation agreements",
+    "url": "https://www.instituto-camoes.pt/en/activity-camoes/what-we-do/learn/scholarships",
+    "description": "Scholarships supporting the study of Portuguese language and culture and, under bilateral cooperation programmes, degree study at Portuguese institutions, primarily for students from Portuguese-speaking countries and states with agreements with Portugal.",
+    "amount": "Tuition support and a monthly maintenance allowance (varies by programme line)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": ["Angola", "Brazil", "Cape Verde", "East Timor", "Equatorial Guinea", "Guinea-Bissau", "Mozambique", "Sao Tome and Principe"],
+    "tags": ["government", "masters", "language", "cplp"],
+    "sourceUrl": "https://www.instituto-camoes.pt/en/activity-camoes/what-we-do/learn/scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (deadline varies by programme)", "deadline": "2027-04-30" }
+    ]
+  },
+  {
+    "title": "FCT PhD Studentships",
+    "provider": "Fundacao para a Ciencia e a Tecnologia (FCT)",
+    "countryCode": "PT",
+    "level": "PHD",
+    "field": "All scientific domains",
+    "url": "https://www.fct.pt/en/bolsas-e-contratos-de-ci/",
+    "description": "Portugal's national doctoral studentship competition, funding PhD research carried out at Portuguese higher education and research institutions, open to applicants of any nationality.",
+    "amount": "Monthly maintenance allowance of EUR 1,259.64 plus tuition fees, social security and insurance",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "phd", "research", "flagship"],
+    "sourceUrl": "https://www.fct.pt/en/bolsas-e-contratos-de-ci/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 annual call", "deadline": "2027-03-31" }
+    ]
+  },
+  {
+    "title": "University of Porto Merit Scholarships for International Students",
+    "provider": "University of Porto",
+    "countryCode": "PT",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://www.up.pt/portal/en/study/scholarships/",
+    "description": "Institutional scholarships and tuition reductions for international students admitted to a bachelor's or master's programme at the University of Porto, awarded on academic merit.",
+    "amount": "Partial tuition fee reduction (varies by faculty and programme)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based"],
+    "sourceUrl": "https://www.up.pt/portal/en/study/scholarships/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (aligned with admission)", "deadline": "2027-05-31" }
+    ]
+  },
+  {
+    "title": "NOVA University Lisbon Merit Scholarships",
+    "provider": "NOVA University Lisbon",
+    "countryCode": "PT",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://www.unl.pt/en/study/scholarships",
+    "description": "Tuition-reduction scholarships for high-achieving international students admitted to a master's programme at one of NOVA's schools.",
+    "amount": "Partial tuition fee reduction (typically 15%-50%)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based"],
+    "sourceUrl": "https://www.unl.pt/en/study/scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (aligned with admission)", "deadline": "2027-05-31" }
+    ]
+  },
+  {
+    "title": "Erasmus Mundus Joint Masters (Portugal-hosted programmes)",
+    "provider": "European Commission (Erasmus+ Programme)",
+    "countryCode": "PT",
+    "level": "MSC",
+    "field": "All fields (160+ joint programmes)",
+    "url": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
+    "description": "Fully funded, integrated master's programmes run by a consortium of universities across at least three countries, several coordinated by or including Portuguese institutions. Students apply to the individual programme consortium.",
+    "amount": "EUR 1,400 per month, full tuition, insurance and travel/installation allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["european-union", "fully-funded", "masters", "joint-degree", "erasmus-mundus"],
+    "sourceUrl": "https://erasmus-plus.ec.europa.eu/opportunities/opportunities-for-individuals/students/erasmus-mundus-joint-masters-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by programme, Oct 2026 - Jan 2027)", "deadline": "2027-01-15" }
+    ]
+  }
+]

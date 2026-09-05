@@ -1,0 +1,112 @@
+[
+  {
+    "title": "Czech Government Scholarships for Developing Countries",
+    "provider": "Ministry of Education, Youth and Sports (MSMT), Czech Republic",
+    "countryCode": "CZ",
+    "level": null,
+    "field": "All fields (Czech-taught programmes, including a one-year Czech language course)",
+    "url": "https://msmt.gov.cz/eu-and-international-affairs/government-scholarships-developing-countries",
+    "description": "Full scholarships for citizens of selected developing countries to pursue bachelor's, master's or doctoral study at Czech public universities, taught in Czech and preceded by a preparatory language year.",
+    "amount": "Full tuition, monthly living allowance, and support towards accommodation and living costs",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "bachelor", "masters", "phd", "development"],
+    "sourceUrl": "https://www.studyin.cz/plan-your-studies/scholarships/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2026-09-30" }
+    ]
+  },
+  {
+    "title": "Visegrad Scholarship Programme",
+    "provider": "International Visegrad Fund",
+    "countryCode": "CZ",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://www.visegradfund.org/apply/mobilities/visegrad-scholarship/",
+    "description": "Scholarships for master's and doctoral study or research at accredited universities in the Visegrad Four countries (including Czechia) for citizens of the V4, the Eastern Partnership and the Western Balkans.",
+    "amount": "EUR 2,500 per semester for the scholar plus a contribution to the host university",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["intergovernmental", "fully-funded", "masters", "phd", "mobility"],
+    "sourceUrl": "https://www.visegradfund.org/apply/mobilities/visegrad-scholarship/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2027-01-31" }
+    ]
+  },
+  {
+    "title": "Charles University Scholarships for International Students",
+    "provider": "Charles University",
+    "countryCode": "CZ",
+    "level": "MSC",
+    "field": "All fields (English-taught programmes)",
+    "url": "https://cuni.cz/UKEN-116.html",
+    "description": "Institutional scholarships, rector's awards and tuition reductions for talented international students at Charles University in Prague, the Czech Republic's oldest and largest university.",
+    "amount": "Partial to full tuition support and, for some awards, a one-off merit grant",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based"],
+    "sourceUrl": "https://cuni.cz/UKEN-116.html",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (deadline varies by faculty)", "deadline": "2027-04-30" }
+    ]
+  },
+  {
+    "title": "Brno Ph.D. Talent Scholarship",
+    "provider": "Brno Ph.D. Talent (JCMM, South Moravian Centre for International Mobility)",
+    "countryCode": "CZ",
+    "level": "PHD",
+    "field": "Natural sciences, technical sciences, engineering",
+    "url": "https://www.jcmm.cz/en/brno-phd-talent",
+    "description": "Top-up scholarship for first-year doctoral candidates at Brno universities in technical and natural science fields, awarded by open competition to Czech and international students.",
+    "amount": "CZK 330,000 over three years in addition to the standard doctoral stipend",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["regional", "phd", "research", "stem", "top-up"],
+    "sourceUrl": "https://www.jcmm.cz/en/brno-phd-talent",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 cohort", "deadline": "2026-10-31" }
+    ]
+  },
+  {
+    "title": "Erasmus Mundus Joint Masters (Czechia-hosted programmes)",
+    "provider": "European Commission (Erasmus+ Programme)",
+    "countryCode": "CZ",
+    "level": "MSC",
+    "field": "All fields (160+ joint programmes)",
+    "url": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
+    "description": "Fully funded, integrated master's programmes run by a consortium of universities across at least three countries, several coordinated by or including Czech institutions. Students apply to the individual programme consortium.",
+    "amount": "EUR 1,400 per month, full tuition, insurance and travel/installation allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["european-union", "fully-funded", "masters", "joint-degree", "erasmus-mundus"],
+    "sourceUrl": "https://erasmus-plus.ec.europa.eu/opportunities/opportunities-for-individuals/students/erasmus-mundus-joint-masters-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by programme, Oct 2026 - Jan 2027)", "deadline": "2027-01-15" }
+    ]
+  }
+]

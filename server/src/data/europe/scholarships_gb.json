@@ -1,0 +1,200 @@
+[
+  {
+    "title": "Chevening Scholarships",
+    "provider": "UK Government (Foreign, Commonwealth & Development Office)",
+    "countryCode": "GB",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://www.chevening.org",
+    "description": "The UK government's global scholarship programme, funding a one-year master's degree at any UK university for emerging leaders from Chevening-eligible countries who have at least two years of work experience and demonstrated leadership potential.",
+    "amount": "Full tuition, monthly living allowance, travel, arrival and departure allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "masters", "leadership", "flagship"],
+    "sourceUrl": "https://www.gov.uk/government/news/applications-open-for-2026-to-2027-chevening-scholarships-to-study-in-the-uk",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2026-11-04" }
+    ]
+  },
+  {
+    "title": "Commonwealth Master's and PhD Scholarships",
+    "provider": "Commonwealth Scholarship Commission in the UK",
+    "countryCode": "GB",
+    "level": null,
+    "field": "All fields (with development themes)",
+    "url": "https://cscuk.fcdo.gov.uk",
+    "description": "Scholarships for students from low- and middle-income Commonwealth countries to undertake full-time master's or doctoral study in the UK, funded by the FCDO. Applications are made through a national nominating agency or selected university.",
+    "amount": "Full tuition, airfare, monthly stipend, thesis and study-related allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "masters", "phd", "commonwealth", "development"],
+    "sourceUrl": "https://cscuk.fcdo.gov.uk",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (deadline varies by nominating agency)", "deadline": "2026-10-16" }
+    ]
+  },
+  {
+    "title": "GREAT Scholarships",
+    "provider": "British Council and participating UK universities",
+    "countryCode": "GB",
+    "level": "MSC",
+    "field": "All fields (varies by university)",
+    "url": "https://study-uk.britishcouncil.org/scholarships/great-scholarships",
+    "description": "Joint scholarships from the British Council's GREAT Britain Campaign and UK universities offering tuition support for one-year postgraduate courses to students from a defined list of countries. Each university runs its own application.",
+    "amount": "At least GBP 10,000 towards tuition fees",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "british-council", "masters", "tuition"],
+    "sourceUrl": "https://study-uk.britishcouncil.org/scholarships/great-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (deadline varies by university)", "deadline": "2027-05-01" }
+    ]
+  },
+  {
+    "title": "Gates Cambridge Scholarship",
+    "provider": "University of Cambridge (Gates Cambridge Trust)",
+    "countryCode": "GB",
+    "level": null,
+    "field": "All fields",
+    "url": "https://www.gatescambridge.org",
+    "description": "Full-cost scholarship for outstanding applicants from outside the UK to pursue a full-time postgraduate degree (master's or PhD) at the University of Cambridge, selected on intellectual ability, leadership potential and commitment to improving the lives of others.",
+    "amount": "Full tuition, maintenance allowance, airfare, and discretionary family and academic allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "fully-funded", "masters", "phd", "leadership", "flagship"],
+    "sourceUrl": "https://www.gatescambridge.org",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 entry (international round)", "deadline": "2026-12-03" }
+    ]
+  },
+  {
+    "title": "Rhodes Scholarship",
+    "provider": "Rhodes Trust (University of Oxford)",
+    "countryCode": "GB",
+    "level": null,
+    "field": "All fields (graduate study)",
+    "url": "https://www.rhodeshouse.ox.ac.uk",
+    "description": "The oldest international graduate scholarship, bringing exceptional young people from designated countries and regions to study at the University of Oxford. Selection considers academic excellence, character, leadership and commitment to service.",
+    "amount": "Full tuition and college fees, annual stipend, airfare, settling-in allowance",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["trust", "fully-funded", "masters", "phd", "leadership", "flagship"],
+    "sourceUrl": "https://www.rhodeshouse.ox.ac.uk",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 entry (deadline varies by constituency)", "deadline": "2026-10-01" }
+    ]
+  },
+  {
+    "title": "Clarendon Fund Scholarships",
+    "provider": "University of Oxford",
+    "countryCode": "GB",
+    "level": null,
+    "field": "All fields (graduate study)",
+    "url": "https://www.ox.ac.uk/clarendon",
+    "description": "Oxford's flagship graduate scholarship scheme, offering around 200 new awards each year to academically outstanding students from any country pursuing a full-time master's or doctoral course. Most applicants are considered automatically.",
+    "amount": "Full tuition and college fees plus a generous annual living grant",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "fully-funded", "masters", "phd", "flagship"],
+    "sourceUrl": "https://www.ox.ac.uk/clarendon",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 entry (deadline varies by course, Dec 2026 - Jan 2027)", "deadline": "2027-01-07" }
+    ]
+  },
+  {
+    "title": "Weidenfeld-Hoffmann Scholarships and Leadership Programme",
+    "provider": "University of Oxford",
+    "countryCode": "GB",
+    "level": "MSC",
+    "field": "All fields (eligible one- and two-year master's courses)",
+    "url": "https://www.oxfordweidenfeld.org",
+    "description": "Fully funded scholarship combined with a leadership and public service programme, for outstanding graduates from developing and transition-economy countries who show potential and commitment to return home and lead positive change.",
+    "amount": "Full tuition and college fees plus a living grant",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "fully-funded", "masters", "leadership", "developing-countries"],
+    "sourceUrl": "https://www.oxfordweidenfeld.org",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 entry (deadline varies by course)", "deadline": "2027-01-07" }
+    ]
+  },
+  {
+    "title": "University of Edinburgh Global Masters Scholarship",
+    "provider": "University of Edinburgh",
+    "countryCode": "GB",
+    "level": "MSC",
+    "field": "All fields (online and on-campus taught master's)",
+    "url": "https://www.ed.ac.uk/student-funding/postgraduate/international",
+    "description": "Tuition scholarships for international students accepting an offer for an eligible taught master's programme at Edinburgh, awarded on academic merit through a single application.",
+    "amount": "GBP 5,000 to GBP 10,000 towards tuition fees",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based", "tuition"],
+    "sourceUrl": "https://www.ed.ac.uk/student-funding/postgraduate/international",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 entry", "deadline": "2027-06-01" }
+    ]
+  },
+  {
+    "title": "Marshall Scholarships",
+    "provider": "Marshall Aid Commemoration Commission",
+    "countryCode": "GB",
+    "level": null,
+    "field": "All fields (graduate study)",
+    "url": "https://www.marshallscholarship.org",
+    "description": "Prestigious scholarship funding young Americans of high ability to study for a graduate degree at any UK university, financed by the UK government as a gesture of thanks for Marshall Plan aid.",
+    "amount": "Full tuition, monthly stipend, airfare, book and research grants",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": ["United States"],
+    "tags": ["government", "fully-funded", "masters", "phd", "flagship"],
+    "sourceUrl": "https://www.marshallscholarship.org",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 entry", "deadline": "2026-09-29" }
+    ]
+  }
+]

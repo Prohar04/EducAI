@@ -1,0 +1,200 @@
+[
+  {
+    "title": "Australia Awards Scholarships",
+    "provider": "Australian Government (Department of Foreign Affairs and Trade)",
+    "countryCode": "AU",
+    "level": null,
+    "field": "Development-priority fields",
+    "url": "https://www.dfat.gov.au/people-to-people/australia-awards/australia-awards-scholarships",
+    "description": "Long-term development scholarships for citizens of partner countries across the Indo-Pacific and Africa to undertake full-time undergraduate or postgraduate study at participating Australian universities, with a commitment to return home for at least two years after study.",
+    "amount": "Full tuition, return airfare, establishment allowance, contribution to living expenses, health cover",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "development", "undergraduate", "masters", "flagship"],
+    "sourceUrl": "https://www.dfat.gov.au/people-to-people/australia-awards/australia-awards-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by country, opens 1 February)", "deadline": "2026-04-30" }
+    ]
+  },
+  {
+    "title": "Research Training Program (RTP) Scholarships",
+    "provider": "Australian Government (Department of Education)",
+    "countryCode": "AU",
+    "level": "PHD",
+    "field": "All fields (higher degree by research)",
+    "url": "https://www.education.gov.au/research-block-grants/research-training-program",
+    "description": "Block-grant funding distributed by more than 40 Australian universities to support domestic and international students undertaking a Master's by Research or PhD. Each university runs its own rounds and selection.",
+    "amount": "Tuition offset, annual living stipend (~AUD 37,000-38,500), health cover and allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "phd", "research", "masters-by-research"],
+    "sourceUrl": "https://australiaawardshub.com/rtp-scholarship-australia",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake, round 2 (deadline varies by university)", "deadline": "2026-10-31" }
+    ]
+  },
+  {
+    "title": "Melbourne Research Scholarship",
+    "provider": "University of Melbourne",
+    "countryCode": "AU",
+    "level": "PHD",
+    "field": "All fields (graduate research)",
+    "url": "https://scholarships.unimelb.edu.au/awards/graduate-research-scholarships",
+    "description": "Competitive scholarship for high-achieving domestic and international students commencing a graduate research degree (PhD or Master's by Research) at the University of Melbourne. Most applicants are considered automatically on applying for admission.",
+    "amount": "Full tuition offset, living allowance (~AUD 37,000 per year), relocation and thesis allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "fully-funded", "phd", "research"],
+    "sourceUrl": "https://scholarships.unimelb.edu.au/awards/graduate-research-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 commencement", "deadline": "2026-10-31" }
+    ]
+  },
+  {
+    "title": "Melbourne International Undergraduate Scholarship",
+    "provider": "University of Melbourne",
+    "countryCode": "AU",
+    "level": "BSC",
+    "field": "All fields",
+    "url": "https://scholarships.unimelb.edu.au/awards/melbourne-international-undergraduate-scholarship",
+    "description": "Merit-based scholarship awarded automatically to the highest-achieving commencing international undergraduate students, applied as a percentage reduction of tuition fees for the duration of the course.",
+    "amount": "10%, 25%, 50% or 100% tuition fee reduction for the course duration",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "undergraduate", "merit-based", "tuition"],
+    "sourceUrl": "https://scholarships.unimelb.edu.au/awards/melbourne-international-undergraduate-scholarship",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 entry (automatic on admission)", "deadline": "2026-12-01" }
+    ]
+  },
+  {
+    "title": "University of Sydney International Scholarship (USydIS)",
+    "provider": "University of Sydney",
+    "countryCode": "AU",
+    "level": "PHD",
+    "field": "All fields (research degrees)",
+    "url": "https://www.sydney.edu.au/scholarships/international/university-of-sydney-international-scholarship.html",
+    "description": "Scholarship supporting international students undertaking a PhD or Master's by Research at the University of Sydney, covering tuition and providing a living allowance stipend.",
+    "amount": "Full tuition and a living allowance stipend (~AUD 41,700 per year) for up to 3-3.5 years",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "fully-funded", "phd", "research"],
+    "sourceUrl": "https://www.sydney.edu.au/scholarships/international/university-of-sydney-international-scholarship.html",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 Semester 1 commencement", "deadline": "2026-09-11" }
+    ]
+  },
+  {
+    "title": "Scientia PhD Scholarship Scheme",
+    "provider": "UNSW Sydney",
+    "countryCode": "AU",
+    "level": "PHD",
+    "field": "All fields (interdisciplinary research)",
+    "url": "https://www.unsw.edu.au/research/hdr/scholarships/scientia-phd-scholarship",
+    "description": "Flagship UNSW doctoral scholarship offering an enhanced stipend and a dedicated development and career support package, awarded through a targeted annual round aligned with nominated supervisory teams and projects.",
+    "amount": "Stipend of ~AUD 43,000 per year for four years, tuition cover, and AUD 10,000 per year development support",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "fully-funded", "phd", "research", "flagship"],
+    "sourceUrl": "https://www.unsw.edu.au/research/hdr/scholarships/scientia-phd-scholarship",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 round", "deadline": "2026-07-24" }
+    ]
+  },
+  {
+    "title": "ANU Chancellor's International Scholarship",
+    "provider": "Australian National University",
+    "countryCode": "AU",
+    "level": "BSC",
+    "field": "All fields",
+    "url": "https://www.anu.edu.au/study/scholarships/find-a-scholarship/anu-chancellors-international-scholarship",
+    "description": "Merit-based tuition scholarship for commencing international undergraduate and coursework postgraduate students at ANU, assessed automatically from the admission application.",
+    "amount": "25% to 50% tuition fee reduction for the duration of the course",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "undergraduate", "coursework", "merit-based", "tuition"],
+    "sourceUrl": "https://www.anu.edu.au/study/scholarships/find-a-scholarship/anu-chancellors-international-scholarship",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 entry", "deadline": "2026-12-15" }
+    ]
+  },
+  {
+    "title": "Monash International Leadership Scholarship",
+    "provider": "Monash University",
+    "countryCode": "AU",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://www.monash.edu/study/fees-scholarships/scholarships/find-a-scholarship/monash-international-leadership-scholarship",
+    "description": "Highly competitive scholarship for international students commencing an undergraduate or postgraduate coursework degree at Monash who demonstrate outstanding academic achievement and leadership potential.",
+    "amount": "100% of tuition fees for the duration of the course",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "undergraduate", "coursework", "leadership", "tuition"],
+    "sourceUrl": "https://www.monash.edu/study/fees-scholarships/scholarships/find-a-scholarship/monash-international-leadership-scholarship",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 Semester 1", "deadline": "2026-10-31" }
+    ]
+  },
+  {
+    "title": "UQ Research Training Scholarship",
+    "provider": "University of Queensland",
+    "countryCode": "AU",
+    "level": "PHD",
+    "field": "All fields (higher degree by research)",
+    "url": "https://scholarships.uq.edu.au/scholarship/uq-research-training-scholarship",
+    "description": "Scholarship for domestic and international applicants of exceptional research potential undertaking a higher degree by research at UQ, covering tuition and providing a living stipend.",
+    "amount": "Tuition cover and a living allowance (~AUD 37,000 per year) for up to 3.5 years",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "fully-funded", "phd", "research"],
+    "sourceUrl": "https://scholarships.uq.edu.au/scholarship/uq-research-training-scholarship",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 Research Quarter 2", "deadline": "2026-09-30" }
+    ]
+  }
+]

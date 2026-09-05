@@ -1,0 +1,134 @@
+[
+  {
+    "title": "Swiss Government Excellence Scholarships (ESKAS)",
+    "provider": "Swiss Confederation (Federal Commission for Scholarships for Foreign Students)",
+    "countryCode": "CH",
+    "level": "PHD",
+    "field": "All fields (research scholarships and arts scholarships)",
+    "url": "https://www.sbfi.admin.ch/sbfi/en/home/education/scholarships-and-grants/swiss-government-excellence-scholarships.html",
+    "description": "Scholarships for foreign researchers and artists holding a master's or equivalent to pursue doctoral or postdoctoral research, or an arts degree, at a Swiss public university or recognised institution. Research applicants must secure a Swiss academic supervisor before applying.",
+    "amount": "Monthly stipend (CHF 1,920 doctoral / CHF 3,500 postdoctoral), housing allowance, health insurance, travel",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "phd", "postdoctoral", "research", "flagship"],
+    "sourceUrl": "https://www.sbfi.admin.ch/en/swiss-government-excellence-scholarships-at-a-glance",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (deadline varies by country of nationality)", "deadline": "2026-11-30" }
+    ]
+  },
+  {
+    "title": "ETH Zurich Excellence Scholarship & Opportunity Programme (ESOP)",
+    "provider": "ETH Zurich",
+    "countryCode": "CH",
+    "level": "MSC",
+    "field": "Engineering, natural sciences, mathematics, computer science, management",
+    "url": "https://ethz.ch/en/studies/financial/scholarships/excellencescholarship.html",
+    "description": "ETH Zurich's most prestigious master's scholarship, for the highest-achieving applicants to a consecutive master's programme, covering study and living costs plus a tuition waiver.",
+    "amount": "CHF 12,000 per semester towards living and study costs plus a full tuition waiver",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "fully-funded", "masters", "merit-based", "flagship"],
+    "sourceUrl": "https://ethz.ch/en/studies/financial/scholarships/excellencescholarship.html",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Autumn 2027 intake", "deadline": "2026-12-15" }
+    ]
+  },
+  {
+    "title": "ETH Zurich Master Scholarship Programme (MSP)",
+    "provider": "ETH Zurich",
+    "countryCode": "CH",
+    "level": "MSC",
+    "field": "Engineering, natural sciences, mathematics, computer science, management",
+    "url": "https://ethz.ch/en/studies/financial/scholarships.html",
+    "description": "Scholarship for academically strong students entering a consecutive master's programme at ETH Zurich, offering a partial living contribution and partial tuition support.",
+    "amount": "CHF 6,000 per semester towards living costs plus a partial tuition waiver",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based"],
+    "sourceUrl": "https://ethz.ch/en/studies/financial/scholarships.html",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Autumn 2027 intake", "deadline": "2026-12-15" }
+    ]
+  },
+  {
+    "title": "EPFL Excellence Fellowships",
+    "provider": "Ecole polytechnique federale de Lausanne (EPFL)",
+    "countryCode": "CH",
+    "level": "MSC",
+    "field": "Engineering, computer and communication sciences, basic sciences, life sciences",
+    "url": "https://www.epfl.ch/education/master/master-excellence-fellowships/",
+    "description": "Merit fellowships for excellent students entering an EPFL master's programme, decided together with admission. Renewal for the second year depends on academic performance.",
+    "amount": "CHF 16,000 to CHF 32,000 per year towards living expenses",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based"],
+    "sourceUrl": "https://www.epfl.ch/education/master/master-excellence-fellowships/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Autumn 2027 intake (first round)", "deadline": "2026-12-15" }
+    ]
+  },
+  {
+    "title": "University of Geneva Excellence Master Fellowships",
+    "provider": "University of Geneva",
+    "countryCode": "CH",
+    "level": "MSC",
+    "field": "Science (biology, chemistry, physics, computer science, mathematics, earth sciences, environmental sciences)",
+    "url": "https://www.unige.ch/sciences/en/enseignements/formations/masters/bourses/",
+    "description": "Fellowships awarded by the Faculty of Science to outstanding students from any country entering a master's programme, based on academic record and motivation.",
+    "amount": "CHF 10,000 to CHF 15,000 per year for the standard duration of the master's",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based", "science"],
+    "sourceUrl": "https://www.unige.ch/sciences/en/enseignements/formations/masters/bourses/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Autumn 2027 intake", "deadline": "2027-03-15" }
+    ]
+  },
+  {
+    "title": "Geneva Graduate Institute Scholarships",
+    "provider": "Geneva Graduate Institute (IHEID)",
+    "countryCode": "CH",
+    "level": "MSC",
+    "field": "International relations, development studies, international law, international economics, political science",
+    "url": "https://www.graduateinstitute.ch/students/scholarships",
+    "description": "Need- and merit-based scholarships for master's and PhD students at the Geneva Graduate Institute, ranging from partial tuition support to full funding including a living stipend.",
+    "amount": "Partial tuition up to full tuition plus a living stipend (varies by award)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": true,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "phd", "need-based", "merit-based"],
+    "sourceUrl": "https://www.graduateinstitute.ch/students/scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 entry", "deadline": "2027-01-15" }
+    ]
+  }
+]

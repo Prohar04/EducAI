@@ -1,0 +1,90 @@
+[
+  {
+    "title": "Slovene Government Bilateral Scholarships",
+    "provider": "CMEPIUS - Centre of the Republic of Slovenia for Mobility and European Educational and Training Programmes",
+    "countryCode": "SI",
+    "level": null,
+    "field": "All fields",
+    "url": "https://studyinslovenia.si/scholarships/",
+    "description": "Short-term study and research mobility scholarships (3 to 10 months) at Slovenian higher education institutions for citizens of countries with a bilateral education agreement with Slovenia.",
+    "amount": "EUR 400 per month plus free accommodation in a student dormitory and subsidised meals",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": ["Bulgaria", "Bosnia and Herzegovina", "China", "Hungary", "India", "Israel", "Italy", "Japan", "Kosovo", "Mexico", "Montenegro", "North Macedonia", "Poland", "Serbia", "Slovakia", "Switzerland", "Turkey"],
+    "tags": ["government", "mobility", "bilateral", "short-term"],
+    "sourceUrl": "https://studyinslovenia.si/wp-content/uploads/Invitation-Slovenia-Bilateral-scholarships-2026-27.pdf",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2027-03-31" }
+    ]
+  },
+  {
+    "title": "Ad Futura Scholarships",
+    "provider": "Public Scholarship, Development, Disability and Maintenance Fund of the Republic of Slovenia",
+    "countryCode": "SI",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://www.srips-rs.si/en",
+    "description": "The Ad Futura programme provides scholarships and grants for international study, research mobility and participation in study visits and competitions, including support for foreign nationals studying in Slovenia under specific calls.",
+    "amount": "Tuition and/or living cost support (varies by call)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "masters", "research", "mobility"],
+    "sourceUrl": "https://www.srips-rs.si/en",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (deadline varies by call)", "deadline": "2027-03-31" }
+    ]
+  },
+  {
+    "title": "University of Ljubljana Institutional Scholarships",
+    "provider": "University of Ljubljana",
+    "countryCode": "SI",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://www.uni-lj.si/study/",
+    "description": "Tuition reductions and merit awards for international students admitted to a degree programme at Slovenia's largest university.",
+    "amount": "Partial tuition fee reduction (varies by faculty and programme)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based"],
+    "sourceUrl": "https://www.uni-lj.si/study/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (aligned with admission)", "deadline": "2027-05-31" }
+    ]
+  },
+  {
+    "title": "Erasmus Mundus Joint Masters (Slovenia-hosted programmes)",
+    "provider": "European Commission (Erasmus+ Programme)",
+    "countryCode": "SI",
+    "level": "MSC",
+    "field": "All fields (160+ joint programmes)",
+    "url": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
+    "description": "Fully funded, integrated master's programmes run by a consortium of universities across at least three countries, some coordinated by or including Slovenian institutions. Students apply to the individual programme consortium.",
+    "amount": "EUR 1,400 per month, full tuition, insurance and travel/installation allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["european-union", "fully-funded", "masters", "joint-degree", "erasmus-mundus"],
+    "sourceUrl": "https://erasmus-plus.ec.europa.eu/opportunities/opportunities-for-individuals/students/erasmus-mundus-joint-masters-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by programme, Oct 2026 - Jan 2027)", "deadline": "2027-01-15" }
+    ]
+  }
+]

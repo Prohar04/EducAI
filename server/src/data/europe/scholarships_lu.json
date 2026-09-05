@@ -1,0 +1,90 @@
+[
+  {
+    "title": "Guillaume Dupaix International Master's Scholarship",
+    "provider": "University of Luxembourg",
+    "countryCode": "LU",
+    "level": "MSC",
+    "field": "All fields (eligible master's programmes)",
+    "url": "https://www.uni.lu/en/scholarships/",
+    "description": "Scholarship for outstanding master's students from any country admitted to an eligible programme at the University of Luxembourg, with no application fee and no separate English test required for admission.",
+    "amount": "EUR 10,000 to EUR 11,000 per academic year for up to two years, part of which covers university residence accommodation",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based", "flagship"],
+    "sourceUrl": "https://www.uni.lu/en/scholarships/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 entry (aligned with master's admission)", "deadline": "2027-04-30" }
+    ]
+  },
+  {
+    "title": "University of Luxembourg Doctoral Positions",
+    "provider": "University of Luxembourg",
+    "countryCode": "LU",
+    "level": "PHD",
+    "field": "All fields",
+    "url": "https://www.uni.lu/fstm-en/phd/",
+    "description": "Salaried doctoral positions advertised by the University of Luxembourg's faculties and interdisciplinary centres, open to applicants of any nationality holding a relevant master's degree.",
+    "amount": "Full-time employment contract with a competitive salary (around EUR 38,000 per year gross) plus social security",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "fully-funded", "phd", "research", "salaried"],
+    "sourceUrl": "https://www.uni.lu/fstm-en/phd/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 (rolling vacancies)", "deadline": "2027-06-30" }
+    ]
+  },
+  {
+    "title": "FNR AFR PhD and Postdoc Grants",
+    "provider": "Luxembourg National Research Fund (Fonds National de la Recherche, FNR)",
+    "countryCode": "LU",
+    "level": "PHD",
+    "field": "All research domains",
+    "url": "https://www.fnr.lu/funding-instruments/afr/",
+    "description": "Grants supporting doctoral and postdoctoral researchers of any nationality to carry out their project at a Luxembourg research institution, or in a public-private partnership.",
+    "amount": "Salary/stipend funding for up to 48 months (PhD) plus a contribution to research and mobility costs",
+    "fundingType": "research",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "phd", "postdoctoral", "research"],
+    "sourceUrl": "https://www.fnr.lu/funding-instruments/afr/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 calls (two rounds per year)", "deadline": "2027-03-15" }
+    ]
+  },
+  {
+    "title": "Erasmus Mundus Joint Masters (Luxembourg-hosted programmes)",
+    "provider": "European Commission (Erasmus+ Programme)",
+    "countryCode": "LU",
+    "level": "MSC",
+    "field": "All fields (160+ joint programmes)",
+    "url": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
+    "description": "Fully funded, integrated master's programmes run by a consortium of universities across at least three countries, some coordinated by or including the University of Luxembourg. Students apply to the individual programme consortium.",
+    "amount": "EUR 1,400 per month, full tuition, insurance and travel/installation allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["european-union", "fully-funded", "masters", "joint-degree", "erasmus-mundus"],
+    "sourceUrl": "https://erasmus-plus.ec.europa.eu/opportunities/opportunities-for-individuals/students/erasmus-mundus-joint-masters-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by programme, Oct 2026 - Jan 2027)", "deadline": "2027-01-15" }
+    ]
+  }
+]

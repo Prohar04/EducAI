@@ -1,0 +1,112 @@
+[
+  {
+    "title": "Stefan Banach Scholarship Programme",
+    "provider": "Polish National Agency for Academic Exchange (NAWA) and Ministry of Foreign Affairs",
+    "countryCode": "PL",
+    "level": "MSC",
+    "field": "Engineering, agriculture, exact and natural sciences, economics",
+    "url": "https://nawa.gov.pl/en/students/foreign-students/the-banach-scholarship-programme",
+    "description": "Development-cooperation scholarship enabling citizens of selected developing and Eastern Partnership countries to undertake second-cycle (master's) studies in Polish or English at Polish public universities.",
+    "amount": "Monthly stipend of PLN 1,700 plus exemption from tuition fees",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "masters", "development", "flagship"],
+    "sourceUrl": "https://nawa.gov.pl/en/students/foreign-students/the-banach-scholarship-programme",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2027-05-08" }
+    ]
+  },
+  {
+    "title": "Poland My First Choice",
+    "provider": "Polish National Agency for Academic Exchange (NAWA)",
+    "countryCode": "PL",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://nawa.gov.pl/en/students/foreign-students",
+    "description": "Scholarship for candidates from countries with a high level of socio-economic development who plan to start full-time second-cycle studies at Polish academic institutions.",
+    "amount": "Monthly stipend of PLN 1,700 plus a full tuition fee waiver",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "masters", "merit-based"],
+    "sourceUrl": "https://nawa.gov.pl/en/nawa/news/poland-my-first-choice-nawa-2026",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2027-05-29" }
+    ]
+  },
+  {
+    "title": "Ignacy Lukasiewicz Scholarship Programme",
+    "provider": "Polish National Agency for Academic Exchange (NAWA) and Ministry of Education and Science",
+    "countryCode": "PL",
+    "level": "MSC",
+    "field": "Engineering, agriculture, exact sciences, life sciences",
+    "url": "https://nawa.gov.pl/en/students/foreign-students",
+    "description": "Development scholarship for citizens of selected developing countries to undertake full-time second-cycle studies in priority technical and scientific fields at Polish public universities.",
+    "amount": "Monthly stipend of PLN 1,700 plus a full tuition fee waiver",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "masters", "development", "stem"],
+    "sourceUrl": "https://nawa.gov.pl/en/students/foreign-students",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2027-03-31" }
+    ]
+  },
+  {
+    "title": "Lane Kirkland Scholarship Programme",
+    "provider": "Leaders of Change Foundation (with the Polish-American Freedom Foundation)",
+    "countryCode": "PL",
+    "level": null,
+    "field": "Economics, management, public administration, law, political science, social policy",
+    "url": "https://kirkland.edu.pl",
+    "description": "Two-semester non-degree study programme at Polish universities for professionals and academics from Eastern Europe, the Caucasus and Central Asia who want to contribute to democratic and economic reform in their home countries.",
+    "amount": "Monthly stipend (around PLN 2,500), accommodation, insurance, travel, study tour and materials",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": ["Ukraine", "Belarus", "Moldova", "Georgia", "Armenia", "Azerbaijan", "Kazakhstan", "Kyrgyzstan", "Tajikistan", "Uzbekistan"],
+    "tags": ["foundation", "fully-funded", "non-degree", "professional-development", "eastern-europe"],
+    "sourceUrl": "https://kirkland.edu.pl",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 edition", "deadline": "2027-03-01" }
+    ]
+  },
+  {
+    "title": "Erasmus Mundus Joint Masters (Poland-hosted programmes)",
+    "provider": "European Commission (Erasmus+ Programme)",
+    "countryCode": "PL",
+    "level": "MSC",
+    "field": "All fields (160+ joint programmes)",
+    "url": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
+    "description": "Fully funded, integrated master's programmes run by a consortium of universities across at least three countries, several coordinated by or including Polish institutions. Students apply to the individual programme consortium.",
+    "amount": "EUR 1,400 per month, full tuition, insurance and travel/installation allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["european-union", "fully-funded", "masters", "joint-degree", "erasmus-mundus"],
+    "sourceUrl": "https://erasmus-plus.ec.europa.eu/opportunities/opportunities-for-individuals/students/erasmus-mundus-joint-masters-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by programme, Oct 2026 - Jan 2027)", "deadline": "2027-01-15" }
+    ]
+  }
+]

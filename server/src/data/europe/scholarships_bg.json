@@ -1,0 +1,90 @@
+[
+  {
+    "title": "Bulgarian Government Scholarships under Bilateral Agreements",
+    "provider": "Bulgarian Ministry of Education and Science",
+    "countryCode": "BG",
+    "level": null,
+    "field": "All fields",
+    "url": "https://www.mon.bg/en/",
+    "description": "Scholarships for citizens of countries with an educational cooperation agreement with Bulgaria to undertake bachelor's, master's or doctoral study at Bulgarian state universities, taught in Bulgarian following a preparatory language year.",
+    "amount": "Tuition-free place, monthly stipend and accommodation in a student hall",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "bachelor", "masters", "phd", "bilateral"],
+    "sourceUrl": "https://www.mon.bg/en/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year (deadline varies by country)", "deadline": "2027-04-30" }
+    ]
+  },
+  {
+    "title": "Scholarships for Students of Bulgarian Origin Abroad",
+    "provider": "Bulgarian Ministry of Education and Science",
+    "countryCode": "BG",
+    "level": null,
+    "field": "All fields",
+    "url": "https://www.mon.bg/en/",
+    "description": "Dedicated places and scholarships for people of Bulgarian origin living abroad to study at Bulgarian state universities under a simplified admission procedure.",
+    "amount": "Tuition-free place and a monthly stipend for eligible students",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "bachelor", "masters", "phd", "diaspora"],
+    "sourceUrl": "https://www.mon.bg/en/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2027-06-30" }
+    ]
+  },
+  {
+    "title": "American University in Bulgaria Financial Aid",
+    "provider": "American University in Bulgaria (AUBG)",
+    "countryCode": "BG",
+    "level": "BSC",
+    "field": "Liberal arts (business, computer science, economics, political science, journalism)",
+    "url": "https://www.aubg.edu/admissions/financial-aid/",
+    "description": "Need- and merit-based financial aid for international undergraduate students at AUBG, a US-accredited liberal arts institution, covering a substantial share of tuition and, for some, living costs.",
+    "amount": "Partial to near-full tuition, awarded on demonstrated need and academic merit",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": true,
+    "eligibleNationalities": null,
+    "tags": ["university", "undergraduate", "need-based", "merit-based"],
+    "sourceUrl": "https://www.aubg.edu/admissions/financial-aid/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Fall 2027 entry", "deadline": "2027-02-01" }
+    ]
+  },
+  {
+    "title": "Erasmus Mundus Joint Masters (Bulgaria-hosted programmes)",
+    "provider": "European Commission (Erasmus+ Programme)",
+    "countryCode": "BG",
+    "level": "MSC",
+    "field": "All fields (160+ joint programmes)",
+    "url": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
+    "description": "Fully funded, integrated master's programmes run by a consortium of universities across at least three countries, some coordinated by or including Bulgarian institutions. Students apply to the individual programme consortium.",
+    "amount": "EUR 1,400 per month, full tuition, insurance and travel/installation allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["european-union", "fully-funded", "masters", "joint-degree", "erasmus-mundus"],
+    "sourceUrl": "https://erasmus-plus.ec.europa.eu/opportunities/opportunities-for-individuals/students/erasmus-mundus-joint-masters-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by programme, Oct 2026 - Jan 2027)", "deadline": "2027-01-15" }
+    ]
+  }
+]

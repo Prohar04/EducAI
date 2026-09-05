@@ -1,0 +1,134 @@
+[
+  {
+    "title": "MAEC-AECID Scholarships",
+    "provider": "Spanish Agency for International Development Cooperation (AECID)",
+    "countryCode": "ES",
+    "level": "MSC",
+    "field": "All fields (varies by programme line)",
+    "url": "https://www.aecid.es/EN/aecid/becas-y-lectorados",
+    "description": "The Spanish government's main scholarship programme for foreign citizens, offered in several lines including master's study, the Diplomatic School programme and Spanish-language study, primarily for applicants from partner developing countries.",
+    "amount": "Tuition, monthly stipend, travel and insurance (varies by programme line)",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "masters", "development", "flagship"],
+    "sourceUrl": "https://www.exteriores.gob.es/Embajadas/abuja/en/Comunicacion/Noticias/Paginas/Articulos/Call-for-MAEC-AECID-Scholarships-20252026-from-its-Diplomatic-School-Programme.aspx",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (deadline varies by programme line)", "deadline": "2027-03-31" }
+    ]
+  },
+  {
+    "title": "Fundacion Carolina Scholarships",
+    "provider": "Fundacion Carolina",
+    "countryCode": "ES",
+    "level": "MSC",
+    "field": "All fields (master's, doctoral stays and postdoctoral)",
+    "url": "https://www.fundacioncarolina.es",
+    "description": "Scholarships promoting academic and cultural cooperation between Spain and the countries of the Ibero-American Community, funding master's study, doctoral research stays and short courses at Spanish universities.",
+    "amount": "Tuition, monthly stipend, airfare, insurance and accommodation support",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": ["Argentina", "Bolivia", "Brazil", "Chile", "Colombia", "Costa Rica", "Cuba", "Dominican Republic", "Ecuador", "El Salvador", "Guatemala", "Honduras", "Mexico", "Nicaragua", "Panama", "Paraguay", "Peru", "Portugal", "Uruguay", "Venezuela"],
+    "tags": ["foundation", "fully-funded", "masters", "ibero-america"],
+    "sourceUrl": "https://www.fundacioncarolina.es",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 call (opens January)", "deadline": "2027-03-01" }
+    ]
+  },
+  {
+    "title": "la Caixa Foundation INPhINIT Doctoral Fellowships",
+    "provider": "Fundacion la Caixa",
+    "countryCode": "ES",
+    "level": "PHD",
+    "field": "STEM fields (life sciences, health, chemistry, physics, mathematics, computer science, engineering)",
+    "url": "https://fundacionlacaixa.org/en/inphinit-doctoral-fellowships",
+    "description": "Highly competitive doctoral fellowships for early-stage researchers of any nationality to carry out a PhD at accredited research centres and universities in Spain or Portugal, with a strong training programme.",
+    "amount": "Three-year employment contract with a salary starting around EUR 34,800 per year plus mobility, training and conference funds",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["foundation", "fully-funded", "phd", "research", "stem", "flagship"],
+    "sourceUrl": "https://fundacionlacaixa.org/en/inphinit-doctoral-fellowships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 call", "deadline": "2027-01-27" }
+    ]
+  },
+  {
+    "title": "la Caixa Foundation Postgraduate Fellowships (Europe)",
+    "provider": "Fundacion la Caixa",
+    "countryCode": "ES",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://fundacionlacaixa.org/en/postgraduate-fellowships",
+    "description": "Fellowships for students with Spanish or Portuguese nationality to pursue postgraduate study, some tenable at universities within the European Union including Spain. Selection is on academic and personal merit.",
+    "amount": "Tuition, monthly stipend, travel and installation allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": ["Spain", "Portugal"],
+    "tags": ["foundation", "fully-funded", "masters"],
+    "sourceUrl": "https://fundacionlacaixa.org/en/postgraduate-fellowships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 call", "deadline": "2027-02-04" }
+    ]
+  },
+  {
+    "title": "IE University International Excellence Scholarships",
+    "provider": "IE University",
+    "countryCode": "ES",
+    "level": "MSC",
+    "field": "Business, law, technology, architecture, international relations, economics",
+    "url": "https://www.ie.edu/university/admissions/financial-aid/",
+    "description": "Merit-based scholarships for international students admitted to a bachelor's or master's programme at IE University, awarded on academic record, professional achievements and the admissions assessment.",
+    "amount": "Partial tuition reduction (typically 10%-50%, occasionally higher)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based"],
+    "sourceUrl": "https://www.ie.edu/university/admissions/financial-aid/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (aligned with admission rounds)", "deadline": "2027-03-31" }
+    ]
+  },
+  {
+    "title": "Universitat de Barcelona Master's Scholarships for International Students",
+    "provider": "Universitat de Barcelona",
+    "countryCode": "ES",
+    "level": "MSC",
+    "field": "All fields (university master's programmes)",
+    "url": "https://www.ub.edu/portal/web/school-economics/grants-and-scholarships",
+    "description": "Institutional scholarships and tuition reductions for international students admitted to a university master's programme at the Universitat de Barcelona, awarded on academic merit.",
+    "amount": "Partial tuition reduction (varies by faculty and programme)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based"],
+    "sourceUrl": "https://www.ub.edu/portal/web/school-economics/grants-and-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (aligned with admission)", "deadline": "2027-05-31" }
+    ]
+  }
+]

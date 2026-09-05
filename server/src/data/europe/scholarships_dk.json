@@ -1,0 +1,112 @@
+[
+  {
+    "title": "Danish Government Scholarships under the Cultural Agreements",
+    "provider": "Danish Ministry of Higher Education and Science",
+    "countryCode": "DK",
+    "level": "MSC",
+    "field": "All fields (also Danish language and culture)",
+    "url": "https://ufm.dk/en/education/admission-to-higher-education/scholarships-for-foreign-students-and-guest-teachers",
+    "description": "Scholarships offered to citizens of countries with which Denmark has a cultural agreement, for a period of study or research at a Danish institution, or for summer courses in Danish language and culture.",
+    "amount": "Monthly stipend and, in some cases, a tuition contribution and travel support",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": ["China", "Egypt", "India", "Israel", "Japan", "Russia", "South Korea"],
+    "tags": ["government", "masters", "cultural-agreement"],
+    "sourceUrl": "https://ufm.dk/en/education/admission-to-higher-education/scholarships-for-foreign-students-and-guest-teachers",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (deadline varies by country)", "deadline": "2027-03-01" }
+    ]
+  },
+  {
+    "title": "Danish State Tuition Fee Waivers and Scholarships",
+    "provider": "Danish universities (state-funded, Ministry of Higher Education and Science)",
+    "countryCode": "DK",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://studyindenmark.dk/finance-your-stay/scholarships-and-grants",
+    "description": "A limited number of government-funded scholarships that Danish universities award to highly qualified students from outside the EU/EEA, given as a full or partial tuition fee waiver and sometimes a grant towards living costs.",
+    "amount": "Full or partial tuition fee waiver, occasionally with a living-cost grant",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "masters", "merit-based", "non-eea", "tuition"],
+    "sourceUrl": "https://studyindenmark.dk/finance-your-stay/scholarships-and-grants",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (deadline varies by university)", "deadline": "2027-01-15" }
+    ]
+  },
+  {
+    "title": "University of Copenhagen Danish Government Scholarship",
+    "provider": "University of Copenhagen",
+    "countryCode": "DK",
+    "level": "MSC",
+    "field": "All fields (eligible master's programmes)",
+    "url": "https://studies.ku.dk/masters/tuition-fees-and-scholarships/",
+    "description": "Government-funded scholarship that the University of Copenhagen awards to the most talented non-EU/EEA applicants to a full master's programme, covering tuition and part of living costs.",
+    "amount": "Full tuition fee waiver plus a monthly stipend towards living expenses",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based", "non-eea"],
+    "sourceUrl": "https://studies.ku.dk/masters/tuition-fees-and-scholarships/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 entry", "deadline": "2027-01-15" }
+    ]
+  },
+  {
+    "title": "Aarhus University Scholarships",
+    "provider": "Aarhus University",
+    "countryCode": "DK",
+    "level": "MSC",
+    "field": "All fields (eligible master's programmes)",
+    "url": "https://international.au.dk/education/admission/masters/scholarships",
+    "description": "State-funded scholarships awarded by Aarhus University to outstanding applicants from outside the EU/EEA, given as a tuition fee waiver with a limited number also including a grant.",
+    "amount": "Full or partial tuition fee waiver, some with a living-cost grant",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based", "non-eea"],
+    "sourceUrl": "https://international.au.dk/education/admission/masters/scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 entry", "deadline": "2027-01-15" }
+    ]
+  },
+  {
+    "title": "Technical University of Denmark (DTU) PhD Scholarships",
+    "provider": "Technical University of Denmark (DTU)",
+    "countryCode": "DK",
+    "level": "PHD",
+    "field": "Engineering, natural sciences, technology",
+    "url": "https://www.dtu.dk/english/education/phd",
+    "description": "Salaried PhD positions advertised on a rolling basis by DTU departments, open to applicants of any nationality holding a relevant master's degree.",
+    "amount": "Employment contract with a salary set by the Danish collective agreement, plus pension and social security",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "fully-funded", "phd", "research", "engineering"],
+    "sourceUrl": "https://www.dtu.dk/english/education/phd",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 (rolling vacancies)", "deadline": "2027-06-30" }
+    ]
+  }
+]

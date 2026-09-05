@@ -1,0 +1,90 @@
+[
+  {
+    "title": "IKY Scholarships for Foreign Nationals",
+    "provider": "State Scholarships Foundation (IKY), Greece",
+    "countryCode": "GR",
+    "level": "MSC",
+    "field": "All fields (postgraduate study, doctoral and postdoctoral research, Modern Greek language and culture)",
+    "url": "https://www.iky.gr/en/foreign-citizens-scholarships-iky/",
+    "description": "Scholarships granted by Greece's State Scholarships Foundation to foreign nationals for postgraduate study, doctoral and postdoctoral research, or courses in Modern Greek language and culture at Greek institutions.",
+    "amount": "Monthly stipend and, for degree study, a tuition contribution (varies by call)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "masters", "phd", "research", "language"],
+    "sourceUrl": "https://www.iky.gr/en/foreign-citizens-scholarships-iky/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (deadline varies by call)", "deadline": "2027-03-31" }
+    ]
+  },
+  {
+    "title": "Onassis Foundation Scholarships for Foreigners",
+    "provider": "Alexander S. Onassis Public Benefit Foundation",
+    "countryCode": "GR",
+    "level": "MSC",
+    "field": "Humanities, social sciences, political science, law, economics, architecture, fine arts, Hellenic studies",
+    "url": "https://www.onassis.org/scholarships",
+    "description": "Scholarships for non-Greek nationals to pursue master's or doctoral study, postdoctoral research, or a research stay at a Greek university or research institution, with priority given to Hellenic studies and related fields.",
+    "amount": "Monthly stipend, tuition allowance, travel allowance and, for research, a one-off installation grant",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["foundation", "fully-funded", "masters", "phd", "research", "flagship"],
+    "sourceUrl": "https://www.onassis.org/scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year (annual call, Jan-Feb)", "deadline": "2027-02-28" }
+    ]
+  },
+  {
+    "title": "Aristotle University of Thessaloniki Scholarships for International Students",
+    "provider": "Aristotle University of Thessaloniki",
+    "countryCode": "GR",
+    "level": "MSC",
+    "field": "All fields (English-taught master's programmes)",
+    "url": "https://www.auth.gr/en/studies/scholarships/",
+    "description": "Institutional tuition scholarships and fee reductions for international students admitted to an English-taught postgraduate programme at Greece's largest university.",
+    "amount": "Partial to full tuition fee reduction (varies by programme)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based"],
+    "sourceUrl": "https://www.auth.gr/en/studies/scholarships/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (aligned with admission)", "deadline": "2027-05-31" }
+    ]
+  },
+  {
+    "title": "Erasmus Mundus Joint Masters (Greece-hosted programmes)",
+    "provider": "European Commission (Erasmus+ Programme)",
+    "countryCode": "GR",
+    "level": "MSC",
+    "field": "All fields (160+ joint programmes)",
+    "url": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
+    "description": "Fully funded, integrated master's programmes run by a consortium of universities across at least three countries, several coordinated by or including Greek institutions. Students apply to the individual programme consortium.",
+    "amount": "EUR 1,400 per month, full tuition, insurance and travel/installation allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["european-union", "fully-funded", "masters", "joint-degree", "erasmus-mundus"],
+    "sourceUrl": "https://erasmus-plus.ec.europa.eu/opportunities/opportunities-for-individuals/students/erasmus-mundus-joint-masters-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by programme, Oct 2026 - Jan 2027)", "deadline": "2027-01-15" }
+    ]
+  }
+]

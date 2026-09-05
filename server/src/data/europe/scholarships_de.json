@@ -1,0 +1,200 @@
+[
+  {
+    "title": "DAAD Study Scholarships for Graduates (Master's)",
+    "provider": "German Academic Exchange Service (DAAD)",
+    "countryCode": "DE",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://www.daad.de/en/study-and-research-in-germany/scholarships/",
+    "description": "Scholarships for international graduates of all disciplines to complete a full master's degree at a German state or state-recognised university, or a limited number of non-consecutive courses.",
+    "amount": "EUR 992 per month plus payments towards health insurance, travel and, in many cases, tuition and rent subsidies",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "masters", "flagship"],
+    "sourceUrl": "https://www.daad.de/en/study-and-research-in-germany/scholarships/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (deadline varies by country, typically Oct-Nov)", "deadline": "2026-10-31" }
+    ]
+  },
+  {
+    "title": "DAAD Research Grants - Doctoral Programmes in Germany",
+    "provider": "German Academic Exchange Service (DAAD)",
+    "countryCode": "DE",
+    "level": "PHD",
+    "field": "All fields",
+    "url": "https://www.daad.de/en/study-and-research-in-germany/scholarships/",
+    "description": "Grants supporting international doctoral candidates undertaking a full doctorate or a period of doctoral research in Germany, either in an individual supervision model or a structured programme.",
+    "amount": "EUR 1,300 per month plus health insurance, travel and research allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "phd", "research"],
+    "sourceUrl": "https://www.daad.de/en/study-and-research-in-germany/scholarships/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by country)", "deadline": "2026-11-15" }
+    ]
+  },
+  {
+    "title": "DAAD EPOS - Development-Related Postgraduate Courses",
+    "provider": "German Academic Exchange Service (DAAD)",
+    "countryCode": "DE",
+    "level": "MSC",
+    "field": "Development-related fields (governance, economics, engineering, agriculture, health, environment)",
+    "url": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/",
+    "description": "Scholarships for professionals from developing countries with at least two years of relevant work experience to complete a postgraduate degree in a development-related subject at a selected German university.",
+    "amount": "Full living stipend, health insurance, travel, study and research allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "masters", "development", "work-experience"],
+    "sourceUrl": "https://www2.daad.de/deutschland/studienangebote/international-programmes/en/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 intake (deadline varies by course, Jul-Oct)", "deadline": "2026-09-30" }
+    ]
+  },
+  {
+    "title": "Deutschlandstipendium",
+    "provider": "German Federal Government and private sponsors (via participating universities)",
+    "countryCode": "DE",
+    "level": null,
+    "field": "All fields",
+    "url": "https://www.deutschlandstipendium.de",
+    "description": "Merit-based scholarship for high-achieving and committed students at participating German universities, awarded regardless of nationality or the income of the student or their parents. Applications are made directly to the university.",
+    "amount": "EUR 300 per month (half federal, half private sponsor) for at least two semesters",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "merit-based", "bachelor", "masters", "living-stipend"],
+    "sourceUrl": "https://www.deutschlandstipendium.de",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (deadline varies by university)", "deadline": "2027-07-15" }
+    ]
+  },
+  {
+    "title": "Erasmus Mundus Joint Masters (Germany-hosted programmes)",
+    "provider": "European Commission (Erasmus+ Programme)",
+    "countryCode": "DE",
+    "level": "MSC",
+    "field": "All fields (160+ joint programmes)",
+    "url": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
+    "description": "Fully funded, integrated master's programmes delivered by a consortium of universities in at least three countries, many coordinated by or including German universities. Students apply to the individual programme consortium.",
+    "amount": "EUR 1,400 per month, full tuition, insurance and travel/installation allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["european-union", "fully-funded", "masters", "joint-degree", "erasmus-mundus"],
+    "sourceUrl": "https://erasmus-plus.ec.europa.eu/opportunities/opportunities-for-individuals/students/erasmus-mundus-joint-masters-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by programme, Oct 2026 - Jan 2027)", "deadline": "2027-01-15" }
+    ]
+  },
+  {
+    "title": "Konrad-Adenauer-Stiftung Scholarships for International Students",
+    "provider": "Konrad-Adenauer-Stiftung",
+    "countryCode": "DE",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://www.kas.de/en/scholarships",
+    "description": "Scholarships from the political foundation affiliated with Germany's Christian Democratic Union for international students and doctoral candidates already studying in Germany who show strong academic performance and civic engagement.",
+    "amount": "Monthly stipend plus study, research and family allowances, and a seminar programme",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["foundation", "fully-funded", "masters", "phd", "civic-engagement"],
+    "sourceUrl": "https://www.kas.de/en/scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake", "deadline": "2027-07-15" }
+    ]
+  },
+  {
+    "title": "Heinrich Boll Foundation Scholarships",
+    "provider": "Heinrich-Boll-Stiftung",
+    "countryCode": "DE",
+    "level": null,
+    "field": "All fields",
+    "url": "https://www.boell.de/en/scholarships",
+    "description": "Scholarships for undergraduate, master's and doctoral students of all nationalities enrolled at a state or state-recognised university in Germany, with an emphasis on academic excellence, social and political engagement and alignment with the foundation's values of ecology, democracy and human rights.",
+    "amount": "Monthly stipend (up to EUR 934 for master's, EUR 1,300 for doctoral) plus allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["foundation", "fully-funded", "bachelor", "masters", "phd", "civic-engagement"],
+    "sourceUrl": "https://www.boell.de/en/scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 summer intake", "deadline": "2027-03-01" }
+    ]
+  },
+  {
+    "title": "Friedrich Ebert Stiftung Scholarships for International Students",
+    "provider": "Friedrich-Ebert-Stiftung",
+    "countryCode": "DE",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://www.fes.de/studienfoerderung",
+    "description": "Scholarships from the foundation associated with Germany's Social Democratic Party for international master's and doctoral students at German universities who demonstrate academic ability and commitment to social justice and democracy.",
+    "amount": "Monthly stipend plus study and, where applicable, family allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["foundation", "fully-funded", "masters", "phd", "social-justice"],
+    "sourceUrl": "https://www.fes.de/studienfoerderung",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by cohort)", "deadline": "2026-11-30" }
+    ]
+  },
+  {
+    "title": "Friedrich Naumann Foundation Scholarships",
+    "provider": "Friedrich Naumann Foundation for Freedom",
+    "countryCode": "DE",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://www.freiheit.org/scholarships",
+    "description": "Scholarships from the liberal political foundation for gifted international students and doctoral candidates at German universities who share a commitment to liberal values, individual freedom and civic responsibility.",
+    "amount": "Monthly stipend plus study allowance and seminar programme",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["foundation", "fully-funded", "masters", "phd", "civic-engagement"],
+    "sourceUrl": "https://www.freiheit.org/scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 spring intake", "deadline": "2026-10-31" }
+    ]
+  }
+]

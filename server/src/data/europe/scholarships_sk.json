@@ -1,0 +1,90 @@
+[
+  {
+    "title": "National Scholarship Programme of the Slovak Republic (NSP)",
+    "provider": "SAIA, n.o. / Slovak Ministry of Education, Research, Development and Youth",
+    "countryCode": "SK",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://www.scholarships.sk",
+    "description": "Scholarships for international students, PhD candidates, university teachers and researchers to complete a study, research or teaching stay at a Slovak higher education institution or research organisation.",
+    "amount": "EUR 620 per month (master's students) up to EUR 1,200 per month (researchers), plus possible travel allowance",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "masters", "phd", "research", "flagship"],
+    "sourceUrl": "https://www.scholarships.sk",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 summer semester", "deadline": "2026-10-31" }
+    ]
+  },
+  {
+    "title": "Scholarships for Talented International Students",
+    "provider": "Slovak Ministry of Education, Research, Development and Youth",
+    "countryCode": "SK",
+    "level": "BSC",
+    "field": "Fields linked to the Smart Specialisation Strategy of the Slovak Republic",
+    "url": "https://www.studyin.sk",
+    "description": "New scholarship scheme for talented international students starting full-time bachelor's or master's study at a Slovak higher education institution in priority fields.",
+    "amount": "Up to EUR 15,000 in total, paid as EUR 500 per month over the first three years of a bachelor's (or first two years of a master's)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "bachelor", "masters", "merit-based"],
+    "sourceUrl": "https://www.saia.sk/en/main/news-en/news/scholarships-for-talented-international-students",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2027-09-08" }
+    ]
+  },
+  {
+    "title": "Comenius University Bratislava Institutional Scholarships",
+    "provider": "Comenius University Bratislava",
+    "countryCode": "SK",
+    "level": "MSC",
+    "field": "All fields (English-taught programmes)",
+    "url": "https://uniba.sk/en/",
+    "description": "Merit and rector's scholarships and tuition reductions for international students at Slovakia's largest and oldest university.",
+    "amount": "Partial tuition fee reduction and one-off merit awards (varies by faculty)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based"],
+    "sourceUrl": "https://uniba.sk/en/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (aligned with admission)", "deadline": "2027-06-30" }
+    ]
+  },
+  {
+    "title": "Erasmus Mundus Joint Masters (Slovakia-hosted programmes)",
+    "provider": "European Commission (Erasmus+ Programme)",
+    "countryCode": "SK",
+    "level": "MSC",
+    "field": "All fields (160+ joint programmes)",
+    "url": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
+    "description": "Fully funded, integrated master's programmes run by a consortium of universities across at least three countries, several coordinated by or including Slovak institutions. Students apply to the individual programme consortium.",
+    "amount": "EUR 1,400 per month, full tuition, insurance and travel/installation allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["european-union", "fully-funded", "masters", "joint-degree", "erasmus-mundus"],
+    "sourceUrl": "https://erasmus-plus.ec.europa.eu/opportunities/opportunities-for-individuals/students/erasmus-mundus-joint-masters-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by programme, Oct 2026 - Jan 2027)", "deadline": "2027-01-15" }
+    ]
+  }
+]

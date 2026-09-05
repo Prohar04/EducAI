@@ -1,0 +1,112 @@
+[
+  {
+    "title": "Stipendium Hungaricum Scholarship Programme",
+    "provider": "Tempus Public Foundation / Hungarian Government",
+    "countryCode": "HU",
+    "level": null,
+    "field": "All fields (900+ degree programmes)",
+    "url": "https://stipendiumhungaricum.hu",
+    "description": "Hungary's flagship international scholarship, based on bilateral agreements, funding bachelor's, one-tier master's, master's, doctoral and non-degree study at 30+ Hungarian host universities.",
+    "amount": "Full tuition, monthly stipend (HUF 43,700 non-degree / higher for doctoral), accommodation contribution, health insurance",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "bachelor", "masters", "phd", "flagship"],
+    "sourceUrl": "https://stipendiumhungaricum.hu",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2027-01-15" }
+    ]
+  },
+  {
+    "title": "Hungarian Diaspora Scholarship",
+    "provider": "Tempus Public Foundation",
+    "countryCode": "HU",
+    "level": null,
+    "field": "All fields",
+    "url": "https://diasporascholarship.hu",
+    "description": "Scholarship for members of the Hungarian diaspora living outside Europe to pursue full or partial degree study at a Hungarian higher education institution and strengthen ties with Hungary.",
+    "amount": "Full tuition, monthly stipend, accommodation contribution and health insurance",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "bachelor", "masters", "phd", "diaspora"],
+    "sourceUrl": "https://diasporascholarship.hu",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2027-01-15" }
+    ]
+  },
+  {
+    "title": "Scholarship Programme for Christian Young People (SCYP)",
+    "provider": "Tempus Public Foundation and the Hungary Helps Programme",
+    "countryCode": "HU",
+    "level": null,
+    "field": "All fields",
+    "url": "https://scyp.hu",
+    "description": "Scholarship for young people from Christian communities facing persecution or hardship to pursue bachelor's, master's or doctoral study in Hungary, with a commitment to return home and support their community.",
+    "amount": "Full tuition, monthly stipend, accommodation contribution and health insurance",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "bachelor", "masters", "phd"],
+    "sourceUrl": "https://scyp.hu",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2027-01-31" }
+    ]
+  },
+  {
+    "title": "Semmelweis University International Merit Scholarship",
+    "provider": "Semmelweis University",
+    "countryCode": "HU",
+    "level": "MSC",
+    "field": "Medicine, dentistry, pharmacy, health sciences",
+    "url": "https://semmelweis.hu/english/",
+    "description": "Tuition-reduction scholarships for high-performing fee-paying international students in the English-language health science programmes at Semmelweis University in Budapest.",
+    "amount": "Partial tuition fee reduction based on academic performance",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "merit-based", "health", "tuition"],
+    "sourceUrl": "https://semmelweis.hu/english/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (aligned with admission)", "deadline": "2027-06-30" }
+    ]
+  },
+  {
+    "title": "Erasmus Mundus Joint Masters (Hungary-hosted programmes)",
+    "provider": "European Commission (Erasmus+ Programme)",
+    "countryCode": "HU",
+    "level": "MSC",
+    "field": "All fields (160+ joint programmes)",
+    "url": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
+    "description": "Fully funded, integrated master's programmes run by a consortium of universities across at least three countries, several coordinated by or including Hungarian institutions. Students apply to the individual programme consortium.",
+    "amount": "EUR 1,400 per month, full tuition, insurance and travel/installation allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["european-union", "fully-funded", "masters", "joint-degree", "erasmus-mundus"],
+    "sourceUrl": "https://erasmus-plus.ec.europa.eu/opportunities/opportunities-for-individuals/students/erasmus-mundus-joint-masters-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by programme, Oct 2026 - Jan 2027)", "deadline": "2027-01-15" }
+    ]
+  }
+]

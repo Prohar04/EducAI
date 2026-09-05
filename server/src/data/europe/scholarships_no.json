@@ -1,0 +1,112 @@
+[
+  {
+    "title": "NORPART - Norwegian Partnership Programme for Global Academic Cooperation",
+    "provider": "Norwegian Directorate for Higher Education and Skills (HK-dir)",
+    "countryCode": "NO",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://hkdir.no/en/programmes/norpart",
+    "description": "Programme funding student exchange between Norwegian institutions and partners in the Global South. Individual students cannot apply directly; mobility grants are administered through an active NORPART project at the student's home institution.",
+    "amount": "Mobility grant covering travel and a monthly subsistence allowance during the exchange",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "exchange", "masters", "phd", "global-south", "partner-institutions"],
+    "sourceUrl": "https://hkdir.no/en/programmes/norpart",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 exchange (applied via home institution)", "deadline": "2027-03-01" }
+    ]
+  },
+  {
+    "title": "University of Oslo PhD Research Fellowships",
+    "provider": "University of Oslo",
+    "countryCode": "NO",
+    "level": "PHD",
+    "field": "All fields",
+    "url": "https://www.uio.no/english/about/vacancies/",
+    "description": "Salaried PhD positions (stipendiat) advertised by University of Oslo faculties on a rolling basis, open to applicants of any nationality holding a relevant master's degree. In Norway doctoral candidates are employees, not students.",
+    "amount": "Full-time employment contract with a salary of roughly NOK 530,000 per year plus pension and social security",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "fully-funded", "phd", "research", "salaried"],
+    "sourceUrl": "https://www.uio.no/english/about/vacancies/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 (rolling vacancies)", "deadline": "2027-06-30" }
+    ]
+  },
+  {
+    "title": "NTNU PhD Research Fellowships",
+    "provider": "Norwegian University of Science and Technology (NTNU)",
+    "countryCode": "NO",
+    "level": "PHD",
+    "field": "Engineering, natural sciences, technology, social sciences, humanities",
+    "url": "https://www.ntnu.edu/vacancies",
+    "description": "Salaried PhD positions advertised by NTNU departments throughout the year against specific research projects, open to international applicants with a relevant master's degree.",
+    "amount": "Full-time employment contract with a salary of roughly NOK 530,000 per year plus pension and social security",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "fully-funded", "phd", "research", "salaried"],
+    "sourceUrl": "https://www.ntnu.edu/vacancies",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 (rolling vacancies)", "deadline": "2027-06-30" }
+    ]
+  },
+  {
+    "title": "BI Norwegian Business School Presidential Scholarship",
+    "provider": "BI Norwegian Business School",
+    "countryCode": "NO",
+    "level": "MSC",
+    "field": "Business, economics, finance, data science, strategic marketing",
+    "url": "https://www.bi.edu/programmes-and-individual-courses/scholarships/",
+    "description": "Merit scholarship for outstanding international applicants to a full-time Master of Science programme at BI Norwegian Business School.",
+    "amount": "50% to 100% tuition fee reduction for the two-year programme",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based", "business"],
+    "sourceUrl": "https://www.bi.edu/programmes-and-individual-courses/scholarships/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Autumn 2027 intake", "deadline": "2027-03-01" }
+    ]
+  },
+  {
+    "title": "Erasmus Mundus Joint Masters (Norway-hosted programmes)",
+    "provider": "European Commission (Erasmus+ Programme)",
+    "countryCode": "NO",
+    "level": "MSC",
+    "field": "All fields (160+ joint programmes)",
+    "url": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
+    "description": "Fully funded, integrated master's programmes run by a consortium of universities across at least three countries, several coordinated by or including Norwegian institutions. Students apply to the individual programme consortium.",
+    "amount": "EUR 1,400 per month, full tuition, insurance and travel/installation allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["european-union", "fully-funded", "masters", "joint-degree", "erasmus-mundus"],
+    "sourceUrl": "https://erasmus-plus.ec.europa.eu/opportunities/opportunities-for-individuals/students/erasmus-mundus-joint-masters-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by programme, Oct 2026 - Jan 2027)", "deadline": "2027-01-15" }
+    ]
+  }
+]

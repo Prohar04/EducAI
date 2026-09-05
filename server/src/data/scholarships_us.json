@@ -1,0 +1,222 @@
+[
+  {
+    "title": "Fulbright Foreign Student Program",
+    "provider": "U.S. Department of State (Bureau of Educational and Cultural Affairs)",
+    "countryCode": "US",
+    "level": null,
+    "field": "All fields",
+    "url": "https://foreign.fulbrightonline.org",
+    "description": "Flagship U.S. government exchange programme funding master's and doctoral study or research at U.S. universities for graduate students, young professionals and artists from more than 160 countries. Applications are managed by the binational Fulbright Commission or U.S. Embassy in each home country.",
+    "amount": "Full tuition, living stipend, airfare, health insurance",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "masters", "phd", "research", "flagship"],
+    "sourceUrl": "https://www.scholars4dev.com/2876/usa-fulbright-scholarships-for-international-students/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 cycle (deadline varies by country)", "deadline": "2026-10-15" }
+    ]
+  },
+  {
+    "title": "Knight-Hennessy Scholars",
+    "provider": "Stanford University",
+    "countryCode": "US",
+    "level": null,
+    "field": "All fields",
+    "url": "https://knight-hennessy.stanford.edu",
+    "description": "Fully funded graduate fellowship covering any full-time graduate degree at Stanford (MA, MS, MBA, JD, MD, PhD and others), paired with a leadership development programme. Open to applicants of any nationality; candidates apply separately to a Stanford graduate programme.",
+    "amount": "Full tuition, living and academic stipend, travel allowance",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "fully-funded", "leadership", "graduate", "flagship"],
+    "sourceUrl": "https://knight-hennessy.stanford.edu",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 entry", "deadline": "2026-10-08" }
+    ]
+  },
+  {
+    "title": "Hubert H. Humphrey Fellowship Program",
+    "provider": "U.S. Department of State",
+    "countryCode": "US",
+    "level": null,
+    "field": "Public policy, development, public health, agriculture, law, education, journalism",
+    "url": "https://www.humphreyfellowship.org",
+    "description": "Non-degree fellowship bringing experienced mid-career professionals from designated countries to the United States for one year of graduate-level study and professional development. Administered through binational Fulbright Commissions and U.S. Embassies.",
+    "amount": "Full programme costs, monthly stipend, airfare, health coverage, professional allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "mid-career", "non-degree", "professional-development"],
+    "sourceUrl": "https://www.humphreyfellowship.org",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 cohort (deadline varies by country)", "deadline": "2026-09-15" }
+    ]
+  },
+  {
+    "title": "AAUW International Fellowships",
+    "provider": "American Association of University Women (AAUW)",
+    "countryCode": "US",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://www.aauw.org/resources/programs/fellowships-grants/current-opportunities/international/",
+    "description": "Fellowships for women who are not U.S. citizens or permanent residents, supporting full-time master's, doctoral or postdoctoral study and research in the United States. Recipients are expected to return to their home country to pursue a professional career.",
+    "amount": "USD 20,000 (master's) to USD 50,000 (postdoctoral)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["women", "foundation", "masters", "phd", "postdoctoral"],
+    "sourceUrl": "https://www.aauw.org/resources/programs/fellowships-grants/current-opportunities/international/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2026-11-15" }
+    ]
+  },
+  {
+    "title": "Aga Khan Foundation International Scholarship Programme",
+    "provider": "Aga Khan Foundation",
+    "countryCode": "US",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://the.akdn/en/how-we-work/our-agencies/aga-khan-foundation/scholarships",
+    "description": "Need-based scholarships for outstanding students from selected developing countries who have no other means of financing their graduate studies, including at universities in the United States. Awarded as 50% grant and 50% loan.",
+    "amount": "Tuition plus living expenses (50% grant, 50% interest-free loan)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": true,
+    "eligibleNationalities": ["Bangladesh", "India", "Pakistan", "Afghanistan", "Kenya", "Tanzania", "Uganda", "Madagascar", "Mozambique", "Egypt", "Syria", "Kyrgyzstan", "Tajikistan"],
+    "tags": ["foundation", "need-based", "masters", "phd", "developing-countries"],
+    "sourceUrl": "https://the.akdn/en/how-we-work/our-agencies/aga-khan-foundation/scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (via local AKF office)", "deadline": "2027-03-31" }
+    ]
+  },
+  {
+    "title": "Joint Japan/World Bank Graduate Scholarship Program",
+    "provider": "World Bank",
+    "countryCode": "US",
+    "level": "MSC",
+    "field": "Development-related fields",
+    "url": "https://www.worldbank.org/en/programs/scholarships",
+    "description": "Scholarships for citizens of World Bank member developing countries to pursue a development-related master's degree at designated universities, several of which are in the United States. Applicants need at least three years of development-related work experience.",
+    "amount": "Full tuition, monthly living stipend, airfare, health insurance",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["international-organisation", "fully-funded", "masters", "development", "work-experience"],
+    "sourceUrl": "https://www.worldbank.org/en/programs/scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake", "deadline": "2027-05-28" }
+    ]
+  },
+  {
+    "title": "P.E.O. International Peace Scholarship",
+    "provider": "P.E.O. Sisterhood",
+    "countryCode": "US",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://www.peointernational.org/about-peo-international-peace-scholarship-ips",
+    "description": "Scholarship for selected women from outside the United States and Canada pursuing graduate study at institutions in the U.S. or Canada. Applicants must be within one year of completing their programme and demonstrate financial need.",
+    "amount": "Up to USD 12,500 per year",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": true,
+    "eligibleNationalities": null,
+    "tags": ["women", "foundation", "need-based", "masters", "phd"],
+    "sourceUrl": "https://www.peointernational.org/about-peo-international-peace-scholarship-ips",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2026-12-15" }
+    ]
+  },
+  {
+    "title": "Margaret McNamara Education Grants (MMEG)",
+    "provider": "Margaret McNamara Education Grants",
+    "countryCode": "US",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://www.mmeg.org",
+    "description": "Grants for women from developing countries who are enrolled at an accredited U.S. or Canadian institution, are at least 25 years old, and are committed to improving the lives of women and children in their home country.",
+    "amount": "Approximately USD 18,000",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": true,
+    "eligibleNationalities": null,
+    "tags": ["women", "foundation", "need-based", "masters", "developing-countries"],
+    "sourceUrl": "https://www.mmeg.org",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 grant cycle", "deadline": "2027-01-15" }
+    ]
+  },
+  {
+    "title": "Emerging Global Leader Scholarship (AU EGLS)",
+    "provider": "American University (Washington, D.C.)",
+    "countryCode": "US",
+    "level": "BSC",
+    "field": "All fields",
+    "url": "https://www.american.edu/financialaid/eagle/global-leader-scholarship.cfm",
+    "description": "Highly selective award for incoming international first-year undergraduate students who intend to return to their home country to effect positive change in an underserved community. Covers the full cost of attendance for one student and offers partial awards to others.",
+    "amount": "Full tuition, room and board (one award); partial awards up to USD 40,000 per year",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "undergraduate", "leadership", "first-year"],
+    "sourceUrl": "https://whatsgrouphub.com/educationinsurancess/top-scholarships-for-international-students-in-usa-2026/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Fall 2027 entry", "deadline": "2027-01-15" }
+    ]
+  },
+  {
+    "title": "Cornell University Tata Scholarship",
+    "provider": "Cornell University",
+    "countryCode": "US",
+    "level": "BSC",
+    "field": "All fields",
+    "url": "https://finaid.cornell.edu/types-aid/grants-scholarships/tata-scholarship",
+    "description": "Need-based scholarship funded by the Tata Education and Development Trust for undergraduate students who are citizens of India and require financial aid to attend Cornell. Up to 20 students are supported at any one time.",
+    "amount": "Financial aid covering demonstrated need (tuition and living costs)",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": true,
+    "eligibleNationalities": ["India"],
+    "tags": ["university", "undergraduate", "need-based", "india"],
+    "sourceUrl": "https://finaid.cornell.edu/types-aid/grants-scholarships/tata-scholarship",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Fall 2027 entry (Regular Decision)", "deadline": "2027-01-02" }
+    ]
+  }
+]

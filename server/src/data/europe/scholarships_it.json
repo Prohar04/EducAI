@@ -1,0 +1,156 @@
+[
+  {
+    "title": "Italian Government Scholarships for Foreign Students (MAECI)",
+    "provider": "Italian Ministry of Foreign Affairs and International Cooperation (MAECI)",
+    "countryCode": "IT",
+    "level": "MSC",
+    "field": "All fields (also PhD, AFAM courses and Italian language courses)",
+    "url": "https://studyinitaly.esteri.it/en/call-for-procedure",
+    "description": "Scholarships offered by the Italian government to foreign citizens and Italian citizens living abroad to support study, training and research at Italian institutions, promoting cultural cooperation and the internationalisation of Italy's academic system.",
+    "amount": "EUR 900 per month, tuition fee waiver at public institutions, health insurance",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "masters", "phd", "flagship"],
+    "sourceUrl": "https://studyinitaly.esteri.it/en/call-for-procedure",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2027-05-30" }
+    ]
+  },
+  {
+    "title": "Invest Your Talent in Italy (IYT)",
+    "provider": "MAECI, Italian Trade Agency (ICE) and Uni-Italia",
+    "countryCode": "IT",
+    "level": "MSC",
+    "field": "Engineering and advanced technologies, architecture and design, economics and management",
+    "url": "https://investyourtalent.esteri.it",
+    "description": "Scholarship and placement programme for master's students from selected partner countries, combining a fully funded English-taught master's at a participating Italian university with a mandatory internship at an Italian company.",
+    "amount": "EUR 9,000 per year (EUR 1,000 x 9 months) plus full tuition fee waiver and a company internship",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": ["Azerbaijan", "Bangladesh", "Brazil", "Colombia", "Egypt", "Ethiopia", "Ghana", "India", "Indonesia", "Iran", "Kazakhstan", "Kenya", "Mexico", "Nigeria", "Pakistan", "Peru", "Tunisia", "Turkey", "Vietnam"],
+    "tags": ["government", "fully-funded", "masters", "internship", "partner-countries"],
+    "sourceUrl": "https://www.unipi.it/en/education/registration/enrolment-and-registration/enrolment-for-international-students/invest-your-talent-in-italy-scholarships/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2027-05-11" }
+    ]
+  },
+  {
+    "title": "University of Bologna Study Grants for International Students",
+    "provider": "University of Bologna",
+    "countryCode": "IT",
+    "level": "MSC",
+    "field": "All fields (first- and second-cycle degree programmes)",
+    "url": "https://www.unibo.it/en/study/tuition-fees-and-funding/scholarships-and-fee-waivers/study-grants-for-international-students",
+    "description": "Merit-based study grants for international students with a qualification obtained abroad enrolling in a bachelor's or master's programme at the University of Bologna.",
+    "amount": "EUR 11,000 gross per year plus a total tuition fee waiver, renewable",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based", "living-stipend"],
+    "sourceUrl": "https://www.unibo.it/en/study/tuition-fees-and-funding/scholarships-and-fee-waivers/study-grants-for-international-students",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2027-03-25" }
+    ]
+  },
+  {
+    "title": "Politecnico di Milano Merit-Based Scholarship",
+    "provider": "Politecnico di Milano",
+    "countryCode": "IT",
+    "level": "MSC",
+    "field": "Engineering, architecture, design",
+    "url": "https://www.polimi.it/en/prospective-students/international-prospective-students/financial-aid",
+    "description": "Merit scholarship for international students admitted to a laurea magistrale (master of science) programme, awarded automatically based on the evaluation score at admission.",
+    "amount": "EUR 5,000 to EUR 10,000 per year, in some cases combined with a tuition fee waiver",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based", "engineering"],
+    "sourceUrl": "https://www.polimi.it/en/prospective-students/international-prospective-students/financial-aid",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (aligned with admission rounds)", "deadline": "2027-02-15" }
+    ]
+  },
+  {
+    "title": "Bocconi Merit and International Awards",
+    "provider": "Bocconi University",
+    "countryCode": "IT",
+    "level": "MSC",
+    "field": "Economics, management, finance, data science, political science",
+    "url": "https://www.unibocconi.it/en/programs/financial-aid",
+    "description": "Merit awards for international students admitted to a bachelor's or master of science programme at Bocconi, covering part or all of tuition; a small number of full awards also include a contribution to living costs.",
+    "amount": "Partial to full tuition fee waiver (EUR 13,000-16,000 per year), some with a living contribution",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based", "economics"],
+    "sourceUrl": "https://www.unibocconi.it/en/programs/financial-aid",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (aligned with admission rounds, Nov 2026 - Mar 2027)", "deadline": "2027-03-01" }
+    ]
+  },
+  {
+    "title": "Scuola Superiore Sant'Anna PhD Scholarships",
+    "provider": "Scuola Superiore Sant'Anna (Pisa)",
+    "countryCode": "IT",
+    "level": "PHD",
+    "field": "Biorobotics, economics and management, agricultural sciences, law, political science, data science",
+    "url": "https://www.santannapisa.it/en/phd-programmes",
+    "description": "Fully funded doctoral scholarships at one of Italy's leading research schools, awarded by open competition to Italian and international candidates.",
+    "amount": "Annual stipend of approximately EUR 16,900 plus free board and lodging and a research budget",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "fully-funded", "phd", "research"],
+    "sourceUrl": "https://www.santannapisa.it/en/phd-programmes",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 doctoral cycle (deadline varies by programme)", "deadline": "2027-06-30" }
+    ]
+  },
+  {
+    "title": "Regional Right-to-Study Scholarships (DSU/EDISU)",
+    "provider": "Regional right-to-study agencies (e.g. EDISU Piemonte, DSU Toscana, ER.GO)",
+    "countryCode": "IT",
+    "level": "BSC",
+    "field": "All fields",
+    "url": "https://www.edisu-piemonte.it",
+    "description": "Means-tested regional scholarships available to Italian and international students enrolled at a public university in that region, based on family income and assets as well as academic progress.",
+    "amount": "Annual grant (EUR 2,000-7,000) plus housing and meal benefits for eligible students",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": true,
+    "eligibleNationalities": null,
+    "tags": ["regional", "need-based", "bachelor", "masters", "right-to-study"],
+    "sourceUrl": "https://www.edisu-piemonte.it",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year (deadline varies by region)", "deadline": "2026-09-30" }
+    ]
+  }
+]

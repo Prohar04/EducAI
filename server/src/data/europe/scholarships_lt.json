@@ -1,0 +1,90 @@
+[
+  {
+    "title": "Lithuanian State Scholarships for Degree Studies and Research",
+    "provider": "Education Exchanges Support Foundation (EXF), Lithuania",
+    "countryCode": "LT",
+    "level": "MSC",
+    "field": "All fields (priority to fields set by national education agreements)",
+    "url": "https://stipendijos.lt/en/",
+    "description": "State scholarships for citizens of countries with a bilateral cooperation agreement, or from a broader eligible list, to undertake master's or doctoral study, a semester of study, or a research visit at a Lithuanian higher education institution.",
+    "amount": "Monthly stipend of around EUR 592 and, for degree study, coverage of tuition fees",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "masters", "phd", "bilateral", "flagship"],
+    "sourceUrl": "https://stipendijos.lt/en/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year (deadline varies by call)", "deadline": "2027-04-01" }
+    ]
+  },
+  {
+    "title": "Lithuanian State Scholarships for Summer Courses of Lithuanian Language and Culture",
+    "provider": "Education Exchanges Support Foundation (EXF), Lithuania",
+    "countryCode": "LT",
+    "level": null,
+    "field": "Lithuanian language and culture",
+    "url": "https://stipendijos.lt/en/",
+    "description": "Scholarships covering the cost of a four-week summer course in Lithuanian language and culture at a Lithuanian university, aimed at foreign students, Baltic-studies scholars and members of the Lithuanian diaspora.",
+    "amount": "Course fee, accommodation and a stipend towards living costs",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "language", "non-degree", "summer-course"],
+    "sourceUrl": "https://stipendijos.lt/en/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Summer 2027 courses", "deadline": "2027-04-01" }
+    ]
+  },
+  {
+    "title": "Kaunas University of Technology (KTU) Scholarships",
+    "provider": "Kaunas University of Technology",
+    "countryCode": "LT",
+    "level": "MSC",
+    "field": "Engineering, IT, science, business, design",
+    "url": "https://en.ktu.edu/studies/scholarships-and-tuition-fees/",
+    "description": "Merit scholarships and tuition reductions for international students admitted to an English-taught bachelor's or master's programme at one of Lithuania's largest technical universities.",
+    "amount": "Partial to full tuition fee reduction based on academic performance",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based", "engineering"],
+    "sourceUrl": "https://en.ktu.edu/studies/scholarships-and-tuition-fees/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Autumn 2027 intake", "deadline": "2027-05-31" }
+    ]
+  },
+  {
+    "title": "Erasmus Mundus Joint Masters (Lithuania-hosted programmes)",
+    "provider": "European Commission (Erasmus+ Programme)",
+    "countryCode": "LT",
+    "level": "MSC",
+    "field": "All fields (160+ joint programmes)",
+    "url": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
+    "description": "Fully funded, integrated master's programmes run by a consortium of universities across at least three countries, some coordinated by or including Lithuanian institutions. Students apply to the individual programme consortium.",
+    "amount": "EUR 1,400 per month, full tuition, insurance and travel/installation allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["european-union", "fully-funded", "masters", "joint-degree", "erasmus-mundus"],
+    "sourceUrl": "https://erasmus-plus.ec.europa.eu/opportunities/opportunities-for-individuals/students/erasmus-mundus-joint-masters-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by programme, Oct 2026 - Jan 2027)", "deadline": "2027-01-15" }
+    ]
+  }
+]

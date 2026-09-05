@@ -1,0 +1,156 @@
+[
+  {
+    "title": "Chinese Government Scholarship - Bilateral Program (CSC Type A)",
+    "provider": "China Scholarship Council (CSC)",
+    "countryCode": "CN",
+    "level": null,
+    "field": "All fields",
+    "url": "https://www.campuschina.org",
+    "description": "Full scholarship established under educational exchange agreements between the Chinese government and other governments, organisations and institutions. Applicants apply through the dispatching authority (usually an education ministry or embassy) in their home country.",
+    "amount": "Full tuition, on-campus accommodation, monthly stipend, comprehensive medical insurance",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "undergraduate", "masters", "phd", "flagship"],
+    "sourceUrl": "https://www.campuschina.org",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by dispatching authority)", "deadline": "2027-04-30" }
+    ]
+  },
+  {
+    "title": "Chinese Government Scholarship - Chinese University Program (CSC Type B)",
+    "provider": "China Scholarship Council (CSC)",
+    "countryCode": "CN",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://www.campuschina.org",
+    "description": "Full scholarship for graduate students, awarded through designated Chinese universities that are authorised to enrol CSC-funded international students. Applicants apply to the university's international students office directly.",
+    "amount": "Full tuition, accommodation, monthly stipend (CNY 3,000 master's / CNY 3,500 doctoral), medical insurance",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "masters", "phd", "university-channel"],
+    "sourceUrl": "https://www.campuschina.org",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by university)", "deadline": "2027-03-31" }
+    ]
+  },
+  {
+    "title": "Belt and Road Scholarship",
+    "provider": "Provincial and municipal governments of China (Ministry of Education)",
+    "countryCode": "CN",
+    "level": null,
+    "field": "All fields",
+    "url": "http://www.moe.gov.cn",
+    "description": "Scholarships offered by Chinese provinces and municipalities to students from countries along the Belt and Road, administered through partner universities in each region. Coverage varies from partial tuition to full support.",
+    "amount": "Partial to full tuition, accommodation and living stipend (varies by province)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "provincial", "undergraduate", "masters", "phd", "belt-and-road"],
+    "sourceUrl": "http://www.moe.gov.cn",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by province/university)", "deadline": "2027-05-31" }
+    ]
+  },
+  {
+    "title": "International Chinese Language Teachers Scholarship",
+    "provider": "Center for Language Education and Cooperation (Chinese International Education Foundation)",
+    "countryCode": "CN",
+    "level": "MSC",
+    "field": "Teaching Chinese to speakers of other languages, Chinese language and literature, linguistics",
+    "url": "https://cis.chinese.cn",
+    "description": "Scholarship for students, teachers and Confucius Institute recommendees to study Chinese language teaching and related fields at Chinese universities, from short-term programmes to full degree programmes.",
+    "amount": "Full tuition, accommodation, monthly living allowance, comprehensive medical insurance",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "language", "masters", "confucius-institute"],
+    "sourceUrl": "https://cis.chinese.cn",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 autumn intake", "deadline": "2027-05-10" }
+    ]
+  },
+  {
+    "title": "Schwarzman Scholars",
+    "provider": "Tsinghua University (Schwarzman College)",
+    "countryCode": "CN",
+    "level": "MSC",
+    "field": "Global affairs (public policy, economics and business, international studies)",
+    "url": "https://www.schwarzmanscholars.org",
+    "description": "Fully funded one-year master's in Global Affairs at Tsinghua University in Beijing, designed to prepare future leaders for the geopolitical landscape of the 21st century, with a strong leadership and mentoring component.",
+    "amount": "Full tuition, room and board, travel, monthly stipend, study tour",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "fully-funded", "masters", "leadership", "flagship"],
+    "sourceUrl": "https://www.schwarzmanscholars.org",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 cohort (non-China applicants)", "deadline": "2026-09-24" }
+    ]
+  },
+  {
+    "title": "Yenching Academy Scholarship",
+    "provider": "Peking University",
+    "countryCode": "CN",
+    "level": "MSC",
+    "field": "China studies (economics, history, politics, law, literature and culture)",
+    "url": "https://yenchingacademy.pku.edu.cn",
+    "description": "Fully funded interdisciplinary master's programme in China Studies at Peking University for outstanding graduates from around the world, taught in English with Chinese-language training.",
+    "amount": "Full tuition, accommodation, monthly stipend, travel allowance, research funding",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "fully-funded", "masters", "china-studies", "flagship"],
+    "sourceUrl": "https://yenchingacademy.pku.edu.cn",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (international applicants)", "deadline": "2026-12-01" }
+    ]
+  },
+  {
+    "title": "Shanghai Government Scholarship",
+    "provider": "Shanghai Municipal Education Commission",
+    "countryCode": "CN",
+    "level": null,
+    "field": "All fields",
+    "url": "http://www.study-in-shanghai.com",
+    "description": "Scholarship for international students enrolling at designated universities in Shanghai, offered at Type A (full) and Type B (partial) levels. Applications are made through the host university.",
+    "amount": "Type A: full tuition, accommodation, stipend, insurance; Type B: full or partial tuition",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "municipal", "undergraduate", "masters", "phd"],
+    "sourceUrl": "http://www.study-in-shanghai.com",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by university)", "deadline": "2027-06-30" }
+    ]
+  }
+]

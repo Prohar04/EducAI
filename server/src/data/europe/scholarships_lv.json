@@ -1,0 +1,90 @@
+[
+  {
+    "title": "Latvian State Scholarships",
+    "provider": "State Education Development Agency (VIAA), Latvia",
+    "countryCode": "LV",
+    "level": null,
+    "field": "All fields",
+    "url": "https://viaa.gov.lv/en/scholarships",
+    "description": "State scholarships for undergraduate (from the second year), master's and doctoral students, as well as researchers, from countries with a bilateral agreement or from a broader eligible list, for study or research at Latvian higher education institutions.",
+    "amount": "EUR 500 per month (bachelor's and master's) or EUR 670 per month (doctoral and research)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "masters", "phd", "bilateral", "flagship"],
+    "sourceUrl": "https://viaa.gov.lv/en/scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2027-04-01" }
+    ]
+  },
+  {
+    "title": "University of Latvia Scholarships for International Students",
+    "provider": "University of Latvia",
+    "countryCode": "LV",
+    "level": "MSC",
+    "field": "All fields (English-taught programmes)",
+    "url": "https://www.lu.lv/en/studies/fees-and-scholarships/",
+    "description": "Tuition-reduction scholarships and merit awards for international students admitted to a degree programme at Latvia's largest university.",
+    "amount": "Partial tuition fee reduction (varies by faculty and programme)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based"],
+    "sourceUrl": "https://www.lu.lv/en/studies/fees-and-scholarships/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Autumn 2027 intake", "deadline": "2027-05-31" }
+    ]
+  },
+  {
+    "title": "Riga Technical University Scholarships",
+    "provider": "Riga Technical University",
+    "countryCode": "LV",
+    "level": "MSC",
+    "field": "Engineering, IT, architecture, materials science, business",
+    "url": "https://www.rtu.lv/en",
+    "description": "Merit-based tuition reductions for international students admitted to an English-taught programme at Latvia's leading technical university.",
+    "amount": "Partial tuition fee reduction based on academic performance",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based", "engineering"],
+    "sourceUrl": "https://www.rtu.lv/en",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "Autumn 2027 intake", "deadline": "2027-05-31" }
+    ]
+  },
+  {
+    "title": "Erasmus Mundus Joint Masters (Latvia-hosted programmes)",
+    "provider": "European Commission (Erasmus+ Programme)",
+    "countryCode": "LV",
+    "level": "MSC",
+    "field": "All fields (160+ joint programmes)",
+    "url": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
+    "description": "Fully funded, integrated master's programmes run by a consortium of universities across at least three countries, some coordinated by or including Latvian institutions. Students apply to the individual programme consortium.",
+    "amount": "EUR 1,400 per month, full tuition, insurance and travel/installation allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["european-union", "fully-funded", "masters", "joint-degree", "erasmus-mundus"],
+    "sourceUrl": "https://erasmus-plus.ec.europa.eu/opportunities/opportunities-for-individuals/students/erasmus-mundus-joint-masters-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by programme, Oct 2026 - Jan 2027)", "deadline": "2027-01-15" }
+    ]
+  }
+]

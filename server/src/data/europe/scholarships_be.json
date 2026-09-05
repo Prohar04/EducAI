@@ -1,0 +1,112 @@
+[
+  {
+    "title": "Master Mind Scholarships",
+    "provider": "Government of Flanders (Flemish Ministry of Education and Training)",
+    "countryCode": "BE",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://www.studyinflanders.be/scholarships/master-mind-scholarships",
+    "description": "Scholarships to promote the inflow of international students to Flemish higher education, for outstanding students of any nationality admitted to a master's programme at a Flemish university or university college.",
+    "amount": "EUR 10,000 per year towards living costs plus a reduced tuition fee",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "masters", "merit-based", "flanders", "flagship"],
+    "sourceUrl": "https://www.studyinflanders.be/scholarships/master-mind-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2027-04-01" }
+    ]
+  },
+  {
+    "title": "VLIR-UOS Scholarships",
+    "provider": "VLIR-UOS (Flemish Interuniversity Council - University Cooperation for Development)",
+    "countryCode": "BE",
+    "level": "MSC",
+    "field": "Development-related fields",
+    "url": "https://www.vliruos.be/en/scholarships",
+    "description": "Scholarships for students from a defined list of developing countries to follow a master's programme or short training programme in Flanders, aimed at building capacity for sustainable development.",
+    "amount": "Full tuition, monthly allowance, travel, insurance and settling-in allowance",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "masters", "development"],
+    "sourceUrl": "https://www.vliruos.be/en/scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (deadline varies by programme)", "deadline": "2027-02-01" }
+    ]
+  },
+  {
+    "title": "ARES Scholarships",
+    "provider": "Academie de recherche et d'enseignement superieur (ARES, Wallonia-Brussels Federation)",
+    "countryCode": "BE",
+    "level": "MSC",
+    "field": "Development-related fields (public health, agriculture, environment, governance, engineering)",
+    "url": "https://www.ares-ac.be/fr/cooperation-au-developpement/bourses",
+    "description": "Scholarships from the French-speaking community of Belgium for professionals from partner developing countries to follow a specialised master's or training course in Wallonia or Brussels.",
+    "amount": "Full tuition, monthly allowance, travel, insurance and installation costs",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "fully-funded", "masters", "development", "french-taught"],
+    "sourceUrl": "https://www.ares-ac.be/fr/cooperation-au-developpement/bourses",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2027-02-13" }
+    ]
+  },
+  {
+    "title": "KU Leuven Global Minds / Science@Leuven Scholarships",
+    "provider": "KU Leuven",
+    "countryCode": "BE",
+    "level": "MSC",
+    "field": "Science, engineering, technology and selected other master's programmes",
+    "url": "https://www.kuleuven.be/english/education/student/tuitionfees/scholarships",
+    "description": "Institutional scholarships for outstanding international students admitted to an eligible master's programme at KU Leuven, ranging from partial to full support depending on the scheme and the applicant's background.",
+    "amount": "Partial to full tuition plus, for some awards, a living allowance",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based"],
+    "sourceUrl": "https://www.kuleuven.be/english/education/student/tuitionfees/scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (deadline varies by faculty)", "deadline": "2027-02-01" }
+    ]
+  },
+  {
+    "title": "Ghent University Special Research Fund (BOF) Doctoral Scholarships",
+    "provider": "Ghent University",
+    "countryCode": "BE",
+    "level": "PHD",
+    "field": "All fields",
+    "url": "https://www.ugent.be/en/research/funding/bof",
+    "description": "Doctoral scholarships funded by the university's Special Research Fund, including dedicated calls for candidates from developing countries, providing a full stipend and research support.",
+    "amount": "Full doctoral scholarship (tax-exempt grant) plus social security cover and a bench fee",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "fully-funded", "phd", "research"],
+    "sourceUrl": "https://www.ugent.be/en/research/funding/bof",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 calls (multiple rounds per year)", "deadline": "2027-03-01" }
+    ]
+  }
+]

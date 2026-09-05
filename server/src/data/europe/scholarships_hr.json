@@ -1,0 +1,90 @@
+[
+  {
+    "title": "Scholarships of the Republic of Croatia (Bilateral)",
+    "provider": "Ministry of Science, Education and Youth and the Agency for Mobility and EU Programmes (AMPEU)",
+    "countryCode": "HR",
+    "level": null,
+    "field": "All fields",
+    "url": "https://mzom.gov.hr",
+    "description": "Bilateral scholarships offering a study or research stay (3 to 10 months) at an accredited public Croatian higher education or research institution for citizens of countries with an education agreement with Croatia.",
+    "amount": "EUR 300 per month (undergraduate/graduate), EUR 320 (PhD) or EUR 480 (postdoctoral), plus possible accommodation support",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "mobility", "bilateral", "short-term"],
+    "sourceUrl": "https://mzom.gov.hr/highlights/calls-417/scholarships-of-the-republic-of-croatia-call-for-applications-in-the-academic-year-2026-2027/7588",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 academic year", "deadline": "2027-04-10" }
+    ]
+  },
+  {
+    "title": "Croatian Government Scholarships for the Croatian Language (Croaticum)",
+    "provider": "University of Zagreb Faculty of Humanities and Social Sciences / Ministry of Science, Education and Youth",
+    "countryCode": "HR",
+    "level": null,
+    "field": "Croatian language and culture",
+    "url": "https://croaticum.ffzg.unizg.hr/",
+    "description": "Government-funded places on the semester-long Croaticum programme of Croatian language and culture at the University of Zagreb, aimed at foreign students and members of the Croatian diaspora.",
+    "amount": "Tuition-free place plus, for some awards, a monthly allowance",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": false,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["government", "language", "non-degree"],
+    "sourceUrl": "https://croaticum.ffzg.unizg.hr/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 spring semester", "deadline": "2026-11-30" }
+    ]
+  },
+  {
+    "title": "University of Zagreb Institutional Scholarships",
+    "provider": "University of Zagreb",
+    "countryCode": "HR",
+    "level": "MSC",
+    "field": "All fields",
+    "url": "https://www.unizg.hr/homepage/",
+    "description": "Tuition reductions and merit awards for international students enrolled on a fee-paying basis at Croatia's largest and oldest university.",
+    "amount": "Partial tuition fee reduction (varies by faculty)",
+    "fundingType": "partial",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["university", "masters", "merit-based"],
+    "sourceUrl": "https://www.unizg.hr/homepage/",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027-2028 (aligned with admission)", "deadline": "2027-07-15" }
+    ]
+  },
+  {
+    "title": "Erasmus Mundus Joint Masters (Croatia-hosted programmes)",
+    "provider": "European Commission (Erasmus+ Programme)",
+    "countryCode": "HR",
+    "level": "MSC",
+    "field": "All fields (160+ joint programmes)",
+    "url": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
+    "description": "Fully funded, integrated master's programmes run by a consortium of universities across at least three countries, some coordinated by or including Croatian institutions. Students apply to the individual programme consortium.",
+    "amount": "EUR 1,400 per month, full tuition, insurance and travel/installation allowances",
+    "fundingType": "full",
+    "minGpa": null,
+    "requiresEnglishTest": true,
+    "financialNeedRequired": false,
+    "eligibleNationalities": null,
+    "tags": ["european-union", "fully-funded", "masters", "joint-degree", "erasmus-mundus"],
+    "sourceUrl": "https://erasmus-plus.ec.europa.eu/opportunities/opportunities-for-individuals/students/erasmus-mundus-joint-masters-scholarships",
+    "lastVerified": "2026-09-06",
+    "isActive": true,
+    "deadlines": [
+      { "term": "2027 intake (deadline varies by programme, Oct 2026 - Jan 2027)", "deadline": "2027-01-15" }
+    ]
+  }
+]
