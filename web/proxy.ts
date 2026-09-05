@@ -65,9 +65,21 @@ export async function proxy(req: NextRequest) {
           const data = await refreshRes.json();
           accessToken = data.accessToken;
           refreshToken = data.refreshToken;
-        } else {
-          // Refresh token expired / not found — force re-login
+        } else if (refreshRes.status === 401 || refreshRes.status === 403) {
+          // The refresh token really is invalid or revoked. Clearing the
+          // session is correct here.
           return toSignin(req, "session_expired", true);
+        } else {
+          // Anything else — 5xx, a gateway error, an API mid-redeploy — is a
+          // problem with the request, not proof that the user's session is
+          // invalid. Destroying the cookie on a transient failure logged people
+          // out at random, and because cookies are shared across tabs a single
+          // failed refresh in a stale background tab signed them out
+          // everywhere. Keep the existing tokens and let the next request try
+          // again.
+          console.warn(
+            `[proxy] token refresh failed with ${refreshRes.status}; keeping session`,
+          );
         }
       }
     } catch {
