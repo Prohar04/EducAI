@@ -17,8 +17,11 @@ import logger from '#src/config/logger.ts';
 const AI_SERVER_URL     = process.env.AI_SERVER_URL     ?? 'http://localhost:8001';
 const AI_SERVER_API_KEY = process.env.AI_SERVER_API_KEY ?? '';
 const CACHE_TTL_MS      = 24 * 60 * 60 * 1000; // 24 hours
-const AI_TIMEOUT_MS     = 120_000;
-const AI_MAX_RETRIES    = 3;
+// A cache miss used to allow 3 x 120s plus backoff — over six minutes before
+// the user saw anything. Scraping now runs behind an already-delivered result
+// (see runMatchBackground), so it gets one shorter attempt and one retry.
+const AI_TIMEOUT_MS     = 45_000;
+const AI_MAX_RETRIES    = 2;
 const AI_RETRY_BASE_MS  = 1_000;
 
 // ── Major synonym map (mirrors Python taxonomy for DB cache-hit ranking) ── //
@@ -198,6 +201,75 @@ export const runMatch = async (req: AuthRequest, res: Response) => {
 
 // ── Background worker ────────────────────────────────────────────────────── //
 
+/**
+ * Refresh the stored programme corpus for a search, without the caller waiting.
+ *
+ * Invoked only when the database already answered the user's request, so this
+ * exists purely to improve the *next* run. Every failure is swallowed and
+ * logged: nothing here can affect a match the user has already been given.
+ */
+async function refreshCorpusInBackground(
+  runId: string,
+  userId: string,
+  profile: ProfileShape,
+  ctx: {
+    targetCountries: string[];
+    intendedLevel: string;
+    intendedMajor: string;
+    cacheKey: string;
+  },
+): Promise<void> {
+  const log = (msg: string) => logger.info(`[match:${runId}] [bg-refresh] ${msg}`);
+
+  try {
+    const aiRes = await fetchAiWithRetry(`${AI_SERVER_URL}/api/v1/module1/scrape-match`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(AI_SERVER_API_KEY ? { 'X-API-KEY': AI_SERVER_API_KEY } : {}),
+      },
+      body: JSON.stringify({
+        user_id:           userId,
+        run_id:            runId,
+        target_countries:  ctx.targetCountries,
+        intended_level:    ctx.intendedLevel,
+        intended_major:    ctx.intendedMajor,
+        budget_max_usd:    profile.budgetAmountUSD
+                           ?? (profile.budgetMax != null
+                               ? (toUSD(profile.budgetMax, profile.budgetCurrency ?? 'USD') ?? 30_000)
+                               : 30_000),
+        gpa:               profile.gpa             ?? 0,
+        english_test_type: profile.englishTestType ?? null,
+        english_score:     profile.englishScore    ?? null,
+      }),
+    }, log);
+
+    if (!aiRes.ok) {
+      log(`ai-server ${aiRes.status} — corpus left as-is`);
+      return;
+    }
+
+    const aiData = (await aiRes.json()) as AiScrapeResponse;
+    const normalizedCountries = aiData.normalized?.countries ?? [];
+    if (!normalizedCountries.length) {
+      log('nothing returned to ingest');
+      return;
+    }
+
+    const counts = await performIngest(normalizedCountries, runId);
+    log(`ingest done: ${JSON.stringify(counts)}`);
+
+    await prisma.dataSourceMeta.upsert({
+      where:  { cacheKey: ctx.cacheKey },
+      create: { cacheKey: ctx.cacheKey, lastScrapedAt: new Date(), parserVersion: '1' },
+      update: { lastScrapedAt: new Date() },
+    });
+    log('cache marked fresh — next run will be served straight from the DB');
+  } catch (err) {
+    log(`non-fatal: ${err}`);
+  }
+}
+
 type ProfileShape = NonNullable<Awaited<ReturnType<typeof prisma['userProfile']['findUnique']>>>;
 
 async function runMatchBackground(runId: string, userId: string, profile: ProfileShape) {
@@ -230,15 +302,24 @@ async function runMatchBackground(runId: string, userId: string, profile: Profil
     const cacheMeta  = await prisma.dataSourceMeta.findUnique({ where: { cacheKey } });
     const isFresh    = cacheMeta && (Date.now() - cacheMeta.lastScrapedAt.getTime() < CACHE_TTL_MS);
 
-    let ranked: RankedRow[] = [];
+    // Rank from what we already hold, always and first. Scraping is what made
+    // this slow: on a cache miss the user waited out a live crawl before seeing
+    // anything, even though the database usually had a perfectly good answer.
+    // Now the stored data answers immediately and the crawl, when needed, runs
+    // behind the delivered result to improve the *next* run.
+    await setProgress(40);
+    let ranked: RankedRow[] = await rankFromDB(
+      profile, targetCountries, intendedLevel, intendedMajor,
+    );
+    await setProgress(70);
 
-    if (isFresh) {
-      log('cache hit — ranking from DB');
-      await setProgress(50);
-      ranked = await rankFromDB(profile, targetCountries, intendedLevel, intendedMajor);
-      await setProgress(90);
+    const canServeFromDB = ranked.length > 0;
+    if (canServeFromDB) {
+      log(`ranked ${ranked.length} from DB${isFresh ? ' (cache fresh)' : ' (cache stale — refreshing behind this result)'}`);
+    }
 
-    } else {
+    // Only block on the scraper when the database genuinely has nothing to show.
+    if (!isFresh && !canServeFromDB) {
       // ── Call AI scraper ────────────────────────────────────────────────
       log('cache miss — calling AI server');
       await setProgress(20);
@@ -304,11 +385,16 @@ async function runMatchBackground(runId: string, userId: string, profile: Profil
         // ── Resolve programKey → DB programId ────────────────────────────
         ranked = await mapAiRankedToIds(aiData.ranked ?? []);
       } else {
-        log('AI unavailable — falling back to cached DB ranking');
-        await setProgress(60);
-        ranked = await rankFromDB(profile, targetCountries, intendedLevel, intendedMajor);
+        log('AI unavailable and no stored programmes matched — returning empty');
         await setProgress(80);
       }
+    } else if (!isFresh) {
+      // Results are already in hand. Refresh the corpus without holding up the
+      // response; failures here are logged and never surface to the user.
+      log('scheduling background corpus refresh');
+      void refreshCorpusInBackground(runId, userId, profile, {
+        targetCountries, intendedLevel, intendedMajor, cacheKey,
+      });
     }
 
     await setProgress(95);
@@ -400,28 +486,19 @@ async function rankFromDB(
   const level = normalizeLevel(levelRaw) as ProgramLevel | null;
   if (!level) return [];
 
-  // When target countries are known, filter to those; otherwise search globally.
-  let uniIds: string[];
-  if (targetCountries.length) {
-    const countries = await prisma.country.findMany({
-      where:  { code: { in: targetCountries.map(c => c.toUpperCase()) } },
-      select: { id: true },
-    });
-    if (!countries.length) return [];
-    uniIds = (await prisma.university.findMany({
-      where:  { countryId: { in: countries.map(c => c.id) } },
-      select: { id: true },
-    })).map(u => u.id);
-  } else {
-    uniIds = (await prisma.university.findMany({ select: { id: true }, take: 500 })).map(u => u.id);
-  }
-  if (!uniIds.length) return [];
-
   const terms = getMajorTerms(major);
 
+  // Previously this made three sequential round trips — countries, then every
+  // university in them, then programs filtered by an `IN` list of hundreds of
+  // university ids. The country filter is expressed as a nested relation
+  // instead, so the database does the join once and the large `IN` list never
+  // crosses the wire. On a Vercel function talking to a remote Postgres, two
+  // saved round trips matter more than the query cost itself.
   const programs = await prisma.program.findMany({
     where: {
-      universityId: { in: uniIds },
+      ...(targetCountries.length
+        ? { university: { country: { code: { in: targetCountries.map(c => c.toUpperCase()) } } } }
+        : {}),
       level,
       // Never rank an intake the user can no longer apply to. Programs with no
       // recorded deadline are kept — missing data is not a closed deadline.
@@ -491,8 +568,9 @@ export const getLatestMatch = async (req: AuthRequest, res: Response) => {
           include: {
             program: {
               include: {
-                university: { include: { country: true } },
-                deadlines:  { orderBy: { deadline: 'asc' }, take: 3 },
+                university:   { include: { country: true } },
+                deadlines:    { orderBy: { deadline: 'asc' } },
+                requirements: true,
               },
             },
           },
@@ -528,6 +606,31 @@ export const getLatestMatch = async (req: AuthRequest, res: Response) => {
             next_deadline:           r.program.deadlines[0]?.deadline ?? null,
             next_deadline_term:      r.program.deadlines[0]?.term ?? null,
             updated_at:              r.program.updatedAt,
+
+            // Everything below already existed on the records and was simply
+            // not being returned, forcing users onto the university's own site
+            // for basics like ranking, entry requirements or the fee.
+            university_ranking:      r.program.university.ranking ?? null,
+            university_type:         r.program.university.universityType ?? null,
+            admissions_url:          r.program.university.admissionsUrl ?? null,
+            tuition_url:             r.program.university.tuitionUrl ?? null,
+            scholarships_url:        r.program.university.scholarshipsUrl ?? null,
+            international_url:       r.program.university.internationalUrl ?? null,
+            apply_url:               r.program.applicationPortalUrl
+                                     ?? r.program.university.applicationPortalUrl
+                                     ?? null,
+            application_fee_usd:     r.program.applicationFeeUSD ?? null,
+            study_mode:              r.program.studyMode ?? null,
+            language_of_instruction: r.program.languageOfInstruction ?? null,
+            last_verified_at:        r.program.lastVerifiedAt ?? null,
+            requirements:            r.program.requirements.map(q => ({
+                                       key:   q.key,
+                                       value: q.value,
+                                     })),
+            deadlines:               r.program.deadlines.map(d => ({
+                                       term:     d.term,
+                                       deadline: d.deadline,
+                                     })),
           }
         : (r.rawData as Record<string, unknown> | null),
     }));

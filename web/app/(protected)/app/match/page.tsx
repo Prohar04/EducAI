@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition, useCallback } from "react";
+import { useState, useEffect, useTransition, useCallback, Fragment } from "react";
 import Link from "next/link";
 import {
   Loader2,
@@ -15,6 +15,7 @@ import {
   Clock,
   CalendarDays,
   Database,
+  ChevronRight,
 } from "lucide-react";
 import { triggerMatchRun, getMatchLatest, getMatchRunStatus, saveProgram } from "@/lib/auth/action";
 import type { MatchLatestResponse } from "@/types/auth.type";
@@ -112,6 +113,29 @@ function ResultCard({
   const updatedAt       = raw.updated_at ?? null;
   const nextDeadline    = raw.next_deadline ?? null;
   const nextDeadlineTerm = raw.next_deadline_term as string | null ?? null;
+
+  // Everything the record holds, so the card can answer the questions that
+  // previously sent people off to the university's own website.
+  const ranking       = (raw.university_ranking as string) ?? null;
+  const uniType       = (raw.university_type as string) ?? null;
+  const appFee        = raw.application_fee_usd as number | null | undefined;
+  const studyMode     = (raw.study_mode as string) ?? null;
+  const language      = (raw.language_of_instruction as string) ?? null;
+  const applyUrl      = (raw.apply_url as string) ?? null;
+  const requirements  = (raw.requirements as { key: string; value: string }[]) ?? [];
+  const allDeadlines  = (raw.deadlines as { term: string; deadline: string }[]) ?? [];
+  const officialLinks = ([
+    ["Admissions",    raw.admissions_url],
+    ["Tuition & fees", raw.tuition_url],
+    ["Scholarships",  raw.scholarships_url],
+    ["International", raw.international_url],
+    ["University site", raw.university_website],
+  ] as [string, unknown][])
+    .filter((entry): entry is [string, string] => typeof entry[1] === "string" && entry[1].length > 0);
+
+  const hasDetail =
+    ranking || uniType || appFee != null || studyMode || language ||
+    requirements.length > 0 || allDeadlines.length > 0 || officialLinks.length > 0;
 
   const freshness   = freshnessLabel(updatedAt);
   const dlLabel     = deadlineLabel(nextDeadline);
@@ -217,6 +241,96 @@ function ResultCard({
           </div>
         )}
 
+        {/* Full detail — collapsed by default so the grid stays scannable */}
+        {hasDetail && (
+          <details className="group/det mt-3">
+            <summary className="flex cursor-pointer list-none items-center gap-1.5 text-xs font-medium text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+              <ChevronRight className="size-3 shrink-0 transition-transform group-open/det:rotate-90" />
+              Full details
+            </summary>
+
+            <div className="mt-2.5 space-y-3 rounded-xl border border-border/60 bg-muted/20 px-3 py-3">
+              {(ranking || uniType || studyMode || language || appFee != null) && (
+                <dl className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
+                  {ranking && (
+                    <><dt className="text-muted-foreground">Ranking</dt><dd className="font-medium">{ranking}</dd></>
+                  )}
+                  {uniType && (
+                    <><dt className="text-muted-foreground">Institution</dt><dd className="font-medium">{uniType}</dd></>
+                  )}
+                  {studyMode && (
+                    <><dt className="text-muted-foreground">Study mode</dt><dd className="font-medium">{studyMode}</dd></>
+                  )}
+                  {language && (
+                    <><dt className="text-muted-foreground">Taught in</dt><dd className="font-medium">{language}</dd></>
+                  )}
+                  {appFee != null && (
+                    <><dt className="text-muted-foreground">Application fee</dt><dd className="font-medium">${appFee.toLocaleString()}</dd></>
+                  )}
+                </dl>
+              )}
+
+              {requirements.length > 0 && (
+                <div>
+                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Entry requirements
+                  </p>
+                  <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+                    {requirements.map((q) => (
+                      <Fragment key={q.key}>
+                        <dt className="text-muted-foreground">{q.key}</dt>
+                        <dd className="font-medium">{q.value}</dd>
+                      </Fragment>
+                    ))}
+                  </dl>
+                </div>
+              )}
+
+              {allDeadlines.length > 0 && (
+                <div>
+                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Deadlines
+                  </p>
+                  <ul className="space-y-0.5 text-xs">
+                    {allDeadlines.map((d, i) => (
+                      <li key={`${d.term}-${i}`} className="flex justify-between gap-2">
+                        <span className="text-muted-foreground">{d.term}</span>
+                        <span className="font-medium tabular-nums">
+                          {new Date(d.deadline).toLocaleDateString(undefined, {
+                            day: "numeric", month: "short", year: "numeric",
+                          })}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {officialLinks.length > 0 && (
+                <div>
+                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Official pages
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {officialLinks.map(([label, href]) => (
+                      <a
+                        key={label}
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground"
+                      >
+                        <ExternalLink className="size-2.5" />
+                        {label}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </details>
+        )}
+
         {/* Actions */}
         <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border/60 pt-3">
           {result.programId && (
@@ -227,15 +341,15 @@ function ResultCard({
               View details
             </Link>
           )}
-          {applicationUrl && (
+          {(applyUrl ?? applicationUrl) && (
             <a
-              href={applicationUrl}
+              href={applyUrl ?? applicationUrl!}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground"
             >
               <ExternalLink className="size-3" />
-              Official page
+              {applyUrl ? "Apply" : "Official page"}
             </a>
           )}
           {result.programId && (
