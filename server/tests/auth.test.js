@@ -305,33 +305,33 @@ describe('Auth Endpoints', () => {
       mockVerifyHash.mockResolvedValue(true);
     });
 
-    it('uses default 15-day TTL without rememberMe flag', async () => {
+    it('uses default 14-day TTL without rememberMe flag', async () => {
       await request(app)
         .post('/auth/signin')
         .send({ email: 'test@example.com', password: 'Pass123!' });
 
       expect(mockGenerateTokens).toHaveBeenCalledWith(baseUser.id, {
-        refreshTtlDays: 15,
+        refreshTtlDays: 14,
       });
       expect(mockSaveRefreshToken).toHaveBeenCalledWith(
         baseUser.id,
         expect.any(String),
-        15,
+        14,
       );
     });
 
-    it('uses extended 30-day TTL when rememberMe is true', async () => {
+    it('uses 14-day TTL when rememberMe is true', async () => {
       await request(app)
         .post('/auth/signin')
         .send({ email: 'test@example.com', password: 'Pass123!', rememberMe: true });
 
       expect(mockGenerateTokens).toHaveBeenCalledWith(baseUser.id, {
-        refreshTtlDays: 30,
+        refreshTtlDays: 14,
       });
       expect(mockSaveRefreshToken).toHaveBeenCalledWith(
         baseUser.id,
         expect.any(String),
-        30,
+        14,
       );
     });
   });
@@ -469,12 +469,12 @@ describe('Auth Endpoints', () => {
       );
     });
 
-    it('falls back to 15-day TTL when stored ttlDays is null', async () => {
+    it('falls back to 14-day TTL when stored ttlDays is null', async () => {
       mockVerifyRefreshToken.mockResolvedValue(baseUser.id);
       mockFindRefreshToken.mockResolvedValue({
         token: 'hashed_old',
         userId: baseUser.id,
-        expiresAt: new Date(Date.now() + 15 * 86400_000),
+        expiresAt: new Date(Date.now() + 14 * 86400_000),
         ttlDays: null,
       });
 
@@ -484,7 +484,7 @@ describe('Auth Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(mockGenerateTokens).toHaveBeenCalledWith(baseUser.id, {
-        refreshTtlDays: 15,
+        refreshTtlDays: 14,
       });
     });
 
