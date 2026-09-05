@@ -621,6 +621,7 @@ model GapFixItem {
   aiVerifiedAt   DateTime?
 
   resourceLinks  String?  @db.Text  // JSON array: [{title, url, description}]
+  actionSteps    String?  @db.Text  // JSON array of strings: concrete steps the student should take
 
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp
   updatedAt   DateTime @updatedAt     @map("updated_at") @db.Timestamp

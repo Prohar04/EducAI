@@ -540,6 +540,67 @@ function GapCard({
 
       {expanded && (
         <>
+          {item.actionSteps?.length > 0 && (
+            <div style={{ marginTop: 16 }}>
+              <p
+                style={{
+                  fontSize: 11,
+                  color: "#3D4F6B",
+                  marginBottom: 10,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  fontWeight: 500,
+                }}
+              >
+                What to do
+              </p>
+              <ol
+                style={{
+                  margin: 0,
+                  padding: 0,
+                  listStyle: "none",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 8,
+                }}
+              >
+                {item.actionSteps.map((step, i) => (
+                  <li
+                    key={i}
+                    style={{
+                      display: "flex",
+                      gap: 10,
+                      fontSize: 13,
+                      color: "#B8C4D8",
+                      lineHeight: 1.55,
+                    }}
+                  >
+                    <span
+                      style={{
+                        flexShrink: 0,
+                        width: 20,
+                        height: 20,
+                        borderRadius: "50%",
+                        background: "rgba(74,144,217,0.12)",
+                        border: "1px solid rgba(74,144,217,0.30)",
+                        color: "#4A90D9",
+                        fontSize: 11,
+                        fontWeight: 700,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginTop: 1,
+                      }}
+                    >
+                      {i + 1}
+                    </span>
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+
           {item.resourceLinks?.length > 0 && (
             <div style={{ marginTop: 16 }}>
               <p
@@ -924,6 +985,58 @@ export default function GapFixPage() {
               </div>
             </div>
           </div>
+
+          {/* Post-analysis guidance — only present right after analyze / re-analyze */}
+          {(data.criticalGap || data.topStrength) && (
+            <div
+              style={{
+                padding: 20,
+                background: "rgba(74,144,217,0.06)",
+                border: "1px solid rgba(74,144,217,0.20)",
+                borderRadius: 14,
+                marginBottom: 28,
+              }}
+            >
+              <p
+                style={{
+                  fontSize: 11,
+                  color: "#4A90D9",
+                  marginBottom: 12,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  fontWeight: 600,
+                }}
+              >
+                What this means for your applications
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {data.overallCompetitiveness && (
+                  <p style={{ margin: 0, fontSize: 13, color: "#B8C4D8", lineHeight: 1.6 }}>
+                    <span style={{ color: "#7A8BA8" }}>Overall profile: </span>
+                    <span style={{ color: "#E8EEF8", fontWeight: 600, textTransform: "capitalize" }}>
+                      {data.overallCompetitiveness.replace(/_/g, " ")}
+                    </span>
+                  </p>
+                )}
+                {data.topStrength && (
+                  <p style={{ margin: 0, fontSize: 13, color: "#B8C4D8", lineHeight: 1.6 }}>
+                    <span style={{ color: "#3D9970", fontWeight: 600 }}>Strength: </span>
+                    {data.topStrength}
+                  </p>
+                )}
+                {data.criticalGap && (
+                  <p style={{ margin: 0, fontSize: 13, color: "#B8C4D8", lineHeight: 1.6 }}>
+                    <span style={{ color: "#C49A3C", fontWeight: 600 }}>Start here: </span>
+                    {data.criticalGap}
+                  </p>
+                )}
+              </div>
+              <p style={{ margin: "12px 0 0", fontSize: 12, color: "#7A8BA8", lineHeight: 1.6 }}>
+                Open each gap below for step-by-step actions. Your score only rises once
+                you submit evidence and the AI verifies it.
+              </p>
+            </div>
+          )}
 
           {/* Filter tabs */}
           <div

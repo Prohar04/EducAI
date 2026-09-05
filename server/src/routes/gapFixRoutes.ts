@@ -49,9 +49,17 @@ function calculateScore(items: Array<{ aiVerified: boolean; status: string; prio
   return totalWeight > 0 ? Math.round((earnedWeight / totalWeight) * 100) : 0;
 }
 
-function parseResourceLinks(raw: string | null | undefined): unknown[] {
+function parseJsonArray(raw: string | null | undefined): unknown[] {
   if (!raw) return [];
-  try { return JSON.parse(raw) as unknown[]; } catch { return []; }
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    return Array.isArray(parsed) ? parsed : [];
+  } catch { return []; }
+}
+
+// Shape a stored item for API responses: JSON string columns become arrays.
+function serializeItem<T extends { resourceLinks?: string | null; actionSteps?: string | null }>(i: T) {
+  return { ...i, resourceLinks: parseJsonArray(i.resourceLinks), actionSteps: parseJsonArray(i.actionSteps) };
 }
 
 // GET /api/gap-fix
@@ -64,7 +72,7 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
     });
     const score = calculateScore(items);
     res.json({
-      items: items.map(i => ({ ...i, resourceLinks: parseResourceLinks(i.resourceLinks) })),
+      items: items.map(serializeItem),
       score,
       totalItems: items.length,
       completedItems: items.filter(i => i.aiVerified && i.status === 'completed').length,
@@ -98,15 +106,17 @@ router.post('/analyze', async (req: Request, res: Response): Promise<void> => {
       description: string;
       priority?: string;
       resourceLinks?: unknown[];
+      actionSteps?: unknown[];
     }>) ?? [];
 
-    const saved = [];
     for (const gap of gaps) {
       const existing = await prisma.gapFixItem.findFirst({
         where: { userId, gapType: gap.gapType, title: gap.title },
       });
+      const nextSteps = JSON.stringify(Array.isArray(gap.actionSteps) ? gap.actionSteps : []);
+      const nextLinks = JSON.stringify(gap.resourceLinks ?? []);
       if (!existing) {
-        const item = await prisma.gapFixItem.create({
+        await prisma.gapFixItem.create({
           data: {
             userId,
             gapType: gap.gapType,
@@ -114,24 +124,37 @@ router.post('/analyze', async (req: Request, res: Response): Promise<void> => {
             description: gap.description,
             priority: gap.priority ?? 'medium',
             status: 'not_started',
-            resourceLinks: JSON.stringify(gap.resourceLinks ?? []),
+            resourceLinks: nextLinks,
+            actionSteps: nextSteps,
           },
         });
-        saved.push(item);
-      } else {
-        saved.push(existing);
+      } else if (
+        existing.actionSteps !== nextSteps ||
+        existing.resourceLinks !== nextLinks ||
+        existing.description !== gap.description
+      ) {
+        // Refresh the guidance on re-analysis even when the gap itself is unchanged.
+        await prisma.gapFixItem.update({
+          where: { id: existing.id },
+          data: { description: gap.description, resourceLinks: nextLinks, actionSteps: nextSteps },
+        });
       }
     }
 
-    const score = calculateScore(saved);
+    // Return the full picture (existing completed gaps included), not just this batch,
+    // so the list and score stay consistent with a later page refresh.
+    const allItems = await prisma.gapFixItem.findMany({
+      where: { userId },
+      orderBy: [{ priority: 'asc' }, { createdAt: 'asc' }],
+    });
     res.json({
-      items: saved.map(i => ({ ...i, resourceLinks: parseResourceLinks(i.resourceLinks) })),
-      score,
-      totalItems: saved.length,
-      completedItems: 0,
-      overall_competitiveness: analysis.overall_competitiveness,
-      top_strength: analysis.top_strength,
-      critical_gap: analysis.critical_gap,
+      items: allItems.map(serializeItem),
+      score: calculateScore(allItems),
+      totalItems: allItems.length,
+      completedItems: allItems.filter(i => i.aiVerified && i.status === 'completed').length,
+      overallCompetitiveness: analysis.overall_competitiveness ?? null,
+      topStrength: analysis.top_strength ?? null,
+      criticalGap: analysis.critical_gap ?? null,
     });
   } catch (err) {
     logger.error('Gap Fix analyze error:', { err });
@@ -225,7 +248,7 @@ router.post('/:id/verify', async (req: Request, res: Response): Promise<void> =>
       new_status: verification.new_status,
       score_impact: verification.score_impact,
       new_score: newScore,
-      item: { ...updated, resourceLinks: parseResourceLinks(updated.resourceLinks) },
+      item: serializeItem(updated),
     });
   } catch (err) {
     logger.error('Gap Fix verify error:', { err });

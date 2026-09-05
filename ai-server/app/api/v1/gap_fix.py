@@ -152,8 +152,13 @@ Return ONLY valid JSON with no markdown:
     {{
       "gapType": "gpa|english|gre|experience|research|publications|portfolio|references|financial|other",
       "title": "Short gap title (max 60 chars)",
-      "description": "Specific description of the gap and why it matters for applications (2-3 sentences)",
+      "description": "Explain the gap, why it matters for THIS student's target countries/field, and roughly how much of a disadvantage it is (3-4 sentences)",
       "priority": "high|medium|low",
+      "actionSteps": [
+        "A concrete, specific step the student should take next (start with a verb)",
+        "The following step, in the order they should do it",
+        "Include target numbers, timeframes and where to do it when relevant (e.g. 'Book the IELTS Academic test for a date ~8 weeks out, aim for band 7.0+')"
+      ],
       "resourceLinks": [
         {{"title": "Resource name", "url": "https://real-url.com", "description": "How this helps"}}
       ]
@@ -161,17 +166,18 @@ Return ONLY valid JSON with no markdown:
   ],
   "overall_competitiveness": "strong|competitive|below_average|weak",
   "top_strength": "The student strongest point in one sentence",
-  "critical_gap": "The single most urgent gap to fix"
+  "critical_gap": "The single most urgent gap to fix, phrased as an instruction to the student"
 }}
 
 RULES:
 - Only include REAL, SPECIFIC gaps based on actual profile data
+- actionSteps: 3-5 items per gap, ordered, each one an action the student can start now. Be concrete about numbers, timing and platforms. No vague advice like "improve your skills".
 - resourceLinks must be real, working URLs (IELTS.org, Coursera, edX, GRE official, etc.)
 - Maximum 8 gaps — only the most important
 - NEVER invent achievements or misrepresent the profile"""
 
     try:
-        raw = await generate_text(prompt, max_tokens=2000, temperature=0.2)
+        raw = await generate_text(prompt, max_tokens=3000, temperature=0.2)
         return parse_json_response(raw)
     except Exception as e:
         logger.error(f"Gap analysis error: {e}")

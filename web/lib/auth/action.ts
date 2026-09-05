@@ -975,6 +975,7 @@ export interface GapFixItemV2 {
 	aiFeedback?: string | null;
 	aiVerifiedAt?: string | null;
 	resourceLinks: GapFixItemResource[];
+	actionSteps: string[];
 }
 
 export interface GapFixDataV2 {
@@ -982,6 +983,10 @@ export interface GapFixDataV2 {
 	score: number;
 	totalItems: number;
 	completedItems: number;
+	// Present only in the response to an analyze / re-analyze call.
+	overallCompetitiveness?: string | null;
+	topStrength?: string | null;
+	criticalGap?: string | null;
 }
 
 export const getGapFixItemsAction = async (): Promise<GapFixDataV2 | null> => {
