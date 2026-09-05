@@ -379,12 +379,20 @@ async function runMatchBackground(
         // ── Resolve programKey → DB programId ────────────────────────────
         const scraped = await mapAiRankedToIds(aiData.ranked ?? []);
 
-        // A live run that comes back empty must not wipe out the ranking the
-        // database already produced — the user would lose working results in
-        // exchange for asking for fresher ones.
+        // Merge rather than replace. A crawl only covers the handful of pages
+        // it had time to read, so it typically returns a few programmes while
+        // the database holds many — swapping one for the other would answer
+        // "give me fresher results" by deleting most of them. Freshly scraped
+        // entries lead, the stored ranking fills in behind, and anything the
+        // scrape re-verified is deduplicated by programme id.
         if (scraped.length > 0) {
-          log(`scrape produced ${scraped.length} ranked programmes`);
-          ranked = scraped;
+          const seen = new Set(scraped.map(r => r.programId).filter(Boolean));
+          const merged = [
+            ...scraped,
+            ...ranked.filter(r => !r.programId || !seen.has(r.programId)),
+          ];
+          log(`scrape produced ${scraped.length}; merged with ${ranked.length} stored -> ${merged.length}`);
+          ranked = merged.slice(0, 20);
         } else if (ranked.length > 0) {
           log('scrape returned nothing usable — keeping the stored ranking');
         }
