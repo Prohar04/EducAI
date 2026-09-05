@@ -36,6 +36,7 @@ import dataSyncRoutes from './routes/dataSync.router.ts';
 import jobRoutes from './routes/jobRoutes.ts';
 import newsRoutes from './routes/newsRoutes.ts';
 import currencyRoutes from './routes/currency.router.ts';
+import publicStatsRoutes from './routes/publicStats.router.ts';
 import freshnessRoutes from './routes/freshness.router.ts';
 import cronRoutes from './routes/cron.router.ts';
 import { PrismaSessionStore } from './services/session.service.ts';
@@ -208,6 +209,7 @@ app.get('/api', (req, res) => {
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/universities', universityRoutes);
+app.use('/public', publicStatsRoutes);
 app.use('/programs', programRoutes);
 app.use('/match', matchRoutes);
 app.use('/saved-programs', savedProgramRoutes);

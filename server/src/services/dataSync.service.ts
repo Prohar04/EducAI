@@ -86,7 +86,11 @@ export interface SyncSourceHealth {
   lastStatus: SyncStatus | 'idle';
   isStale: boolean;
   staleSinceHours: number | null;
+  /** Every row held for this source, expired entries included. */
   recordCount: number;
+  /** Rows a user can still act on. Surfaced separately because reporting only
+   *  the total made this page contradict the counts shown elsewhere. */
+  activeRecordCount: number;
   lastRunId: string | null;
 }
 
@@ -699,8 +703,16 @@ export async function cancelJob(id: string): Promise<{ ok: boolean; message: str
 
 export async function getSyncStatus(): Promise<SyncStatusResponse> {
   try {
-    const [scholarshipCount, programCount, totalRuns, recentJobs, activeJobRow] = await Promise.all([
+    const [
+      scholarshipCount,
+      activeScholarshipCount,
+      programCount,
+      totalRuns,
+      recentJobs,
+      activeJobRow,
+    ] = await Promise.all([
       prisma.scholarship.count(),
+      prisma.scholarship.count({ where: { isActive: true } }),
       prisma.program.count(),
       prisma.syncJob.count(),
       prisma.syncJob.findMany({ orderBy: { createdAt: 'desc' }, take: 10 }),
@@ -739,7 +751,10 @@ export async function getSyncStatus(): Promise<SyncStatusResponse> {
           orderBy: { finishedAt: 'desc' },
         });
 
-        const recordCount = src.key === 'scholarships' ? scholarshipCount : programCount;
+        const isScholarships = src.key === 'scholarships';
+        const recordCount = isScholarships ? scholarshipCount : programCount;
+        // Programs have no active/expired distinction, so the two match there.
+        const activeRecordCount = isScholarships ? activeScholarshipCount : programCount;
         const staleCutoff = new Date(Date.now() - src.staleHours * 3_600_000);
         const lastSuccessAt = lastSuccess?.finishedAt ?? null;
         const isStale = !lastSuccessAt || lastSuccessAt < staleCutoff;
@@ -757,6 +772,7 @@ export async function getSyncStatus(): Promise<SyncStatusResponse> {
           isStale,
           staleSinceHours,
           recordCount,
+          activeRecordCount,
           lastRunId: lastJob?.id ?? null,
         };
       }),

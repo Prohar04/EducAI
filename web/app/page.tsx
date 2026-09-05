@@ -35,7 +35,7 @@ export const revalidate = 3_600;
 
 const FEATURES = [
   { icon: "🎓", title: "Program Match",     description: "AI-ranked universities by fit score across GPA, language, budget, and career goals." },
-  { icon: "💰", title: "Scholarships",      description: "28+ real scholarships with deadline alerts, eligibility pre-screening, and probability scoring." },
+  { icon: "💰", title: "Scholarships",      description: "Real scholarships with deadline alerts, eligibility pre-screening, and probability scoring." },
   { icon: "📅", title: "Timeline",          description: "Month-by-month application roadmap from your saved programs and visa milestones." },
   { icon: "♟️", title: "Strategy",          description: "AI admission strategy with chance bands, risk assessment, and concrete action plan." },
   { icon: "📝", title: "SOP Builder",       description: "Statement of purpose generated in your voice from your real academic profile." },
@@ -67,12 +67,51 @@ const STEPS = [
   },
 ] as const;
 
-const REAL_STATS = [
-  { value: "30+",  label: "Countries supported" },
-  { value: "28",   label: "Real scholarships in database" },
-  { value: "13",   label: "Features built" },
-  { value: "4",    label: "AI providers integrated" },
+/**
+ * Shown if the API is unreachable. The landing page must render regardless —
+ * the backend sleeps on its current tier and a cold start must not blank a
+ * marketing page.
+ */
+const FALLBACK_STATS = [
+  { value: "30+", label: "Countries supported" },
+  { value: "13",  label: "Features built" },
+  { value: "4",   label: "AI providers integrated" },
 ] as const;
+
+/**
+ * These counts used to be hardcoded and had drifted: the page advertised 28
+ * scholarships while the app itself showed 33 active and 65 total. Read them
+ * from the source of truth instead, so the claim cannot go stale again.
+ */
+async function getRealStats(): Promise<readonly { value: string; label: string }[]> {
+  const base = process.env.BACKEND_URL;
+  if (!base) return FALLBACK_STATS;
+
+  try {
+    const res = await fetch(`${base.replace(/\/+$/, "")}/public/stats`, {
+      next: { revalidate: 3_600 },
+      signal: AbortSignal.timeout(5_000),
+    });
+    if (!res.ok) return FALLBACK_STATS;
+
+    const d = (await res.json()) as {
+      scholarships?: number;
+      countries?: number;
+      universities?: number;
+    };
+    if (typeof d.scholarships !== "number") return FALLBACK_STATS;
+
+    return [
+      { value: d.countries ? `${d.countries}` : "30+", label: "Countries supported" },
+      { value: `${d.scholarships}`, label: "Active scholarships" },
+      { value: d.universities ? `${d.universities}` : "13", label: "Universities tracked" },
+      { value: "4", label: "AI providers integrated" },
+    ];
+  } catch {
+    // Timeout, cold start, network — the page still renders.
+    return FALLBACK_STATS;
+  }
+}
 
 const ORGANIZATION_SCHEMA = {
   "@context": "https://schema.org", "@type": "Organization",
@@ -87,6 +126,7 @@ const WEBSITE_SCHEMA = {
 };
 
 export default async function HomePage() {
+  const realStats = await getRealStats();
   const session = await getSession().catch(() => null);
   const isLoggedIn = !!session;
   const feedItems = await fetchEducationPulse().catch(() => []);
@@ -328,7 +368,7 @@ export default async function HomePage() {
         <section aria-label="Platform stats" className="below-fold" style={{ paddingTop: 80, paddingBottom: 80 }}>
           <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px" }}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 170px), 1fr))", gap: 24 }}>
-              {REAL_STATS.map((s) => (
+              {realStats.map((s) => (
                 <div key={s.label} style={{
                   textAlign: "center",
                   padding: "28px 20px",

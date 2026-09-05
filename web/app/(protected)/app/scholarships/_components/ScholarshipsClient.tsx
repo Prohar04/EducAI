@@ -831,10 +831,18 @@ export default function ScholarshipsClient({
 			<PageHeader
 				animation="scholarships"
 				title={<><span className="gradient-text">Scholarships</span> &amp; Funding</>}
-				subtitle="28 real-world scholarships with deadline alerts and eligibility checks"
+				subtitle={
+					// Was hardcoded to 28 while the list below rendered the real total,
+					// so the page contradicted itself.
+					results
+						? `${results.total} real-world scholarships with deadline alerts and eligibility checks`
+						: "Real-world scholarships with deadline alerts and eligibility checks"
+				}
 				badges={
 					<>
-						<HeaderBadge>28 Scholarships</HeaderBadge>
+						<HeaderBadge>
+							{results ? `${results.total} Scholarships` : "Scholarships"}
+						</HeaderBadge>
 						<HeaderBadge>Auto-Eligibility</HeaderBadge>
 						<HeaderBadge variant="outline">Email Alerts</HeaderBadge>
 					</>

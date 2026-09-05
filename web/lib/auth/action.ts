@@ -1195,6 +1195,7 @@ export interface SyncSourceHealth {
 	isStale: boolean;
 	staleSinceHours: number | null;
 	recordCount: number;
+	activeRecordCount: number;
 	lastRunId: string | null;
 }
 
