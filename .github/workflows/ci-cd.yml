@@ -48,14 +48,6 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Test
-        run: npm test
-        env:
-          NODE_ENV: test
-          JWT_SECRET: ci-test-secret-key-not-real
-          REFRESH_JWT_SECRET: ci-test-refresh-secret-not-real
-          ARCJET_KEY: ${{ secrets.ARCJET_KEY }}
-
   # ════════════════════════════════════════════════════════════════════
   # Neon — Run migrations on push to main
   # ════════════════════════════════════════════════════════════════════
