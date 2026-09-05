@@ -329,13 +329,21 @@ async function runProgramsSync(log: ReturnType<typeof makeLogger>): Promise<Sour
   };
 
   const aiServerUrl = process.env.AI_SERVER_URL ?? 'http://localhost:8000';
-  const masterKey = process.env.MASTER_APIKEY;
+  // The rest of the codebase (match, strategy, chat, cron) authenticates to the
+  // ai-server with AI_SERVER_API_KEY, and that is the name .env.example
+  // documents. This one call site read MASTER_APIKEY instead, so on any
+  // deployment that set only the documented name the programs pipeline was the
+  // single feature that could not authenticate. Accept either, preferring the
+  // one everything else uses.
+  const masterKey = process.env.AI_SERVER_API_KEY || process.env.MASTER_APIKEY;
 
   srcLog.info(`Starting programs pipeline sync — aiServerUrl=${aiServerUrl}`);
   log.info(`[programs] starting pipeline sync target=${aiServerUrl}`);
 
   if (!masterKey) {
-    const msg = 'MASTER_APIKEY not configured — ai-server pipeline cannot be triggered';
+    const msg =
+      'No ai-server API key configured — set AI_SERVER_API_KEY (or MASTER_APIKEY) ' +
+      'on the API service; the programs pipeline cannot be triggered without it';
     result.errors.push(msg);
     result.status = 'failed';
     result.durationMs = Date.now() - start;
