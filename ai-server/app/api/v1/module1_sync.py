@@ -34,6 +34,7 @@ async def trigger_module1_sync(
     degree: str = "MSC",
     countries: Optional[List[str]] = None,
     budget: int = 30000,
+    gpa: float = 3.0,
     user_id: str = "admin-sync",
 ) -> TaskResponse:
     """
@@ -56,20 +57,25 @@ async def trigger_module1_sync(
 
     resolved_countries = countries or ["US", "UK", "CA", "AU", "DE"]
 
+    # current_gpa is a required float on UserPreferenceInput, and passing None
+    # raised a ValidationError that surfaced to the caller as a bare 500. This
+    # endpoint builds the shared corpus rather than matching one person, so it
+    # takes a neutral default that callers can override. budget_limit_usd is
+    # declared as an int, so it is passed as one rather than a float.
     pref = UserPreferenceInput(
         user_id=user_id,
         target_degree=degree,
         major=major,
-        budget_limit_usd=float(budget),
+        budget_limit_usd=int(budget),
         preferred_countries=resolved_countries,
-        current_gpa=None,
+        current_gpa=gpa,
     )
 
     task_id = uuid.uuid4().hex
     background_tasks.add_task(edu_rag_pipeline.run, task_id, pref, None)
     logger.info(
         f"module1/sync task_id={task_id} major={major}"
-        f" degree={degree} countries={resolved_countries}"
+        f" degree={degree} countries={resolved_countries} gpa={gpa}"
     )
 
     return TaskResponse(status="processing", task_id=task_id)
