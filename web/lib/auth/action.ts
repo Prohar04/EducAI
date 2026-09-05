@@ -183,11 +183,15 @@ export const triggerProgramsRefresh = async (): Promise<{ success: boolean; mess
 
 // ─── Match Run ────────────────────────────────────────────────────────────────
 
-export const triggerMatchRun = async (): Promise<MatchRunFormState> => {
+/**
+ * @param live Scrape the web for new programmes instead of ranking the ones
+ *             already stored. Slower, and the user has to ask for it.
+ */
+export const triggerMatchRun = async (live = false): Promise<MatchRunFormState> => {
 	const response = await authFetch(`${BACKEND_URL}/match/run`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({}),
+		body: JSON.stringify({ live }),
 	});
 
 	if (!response.ok) {

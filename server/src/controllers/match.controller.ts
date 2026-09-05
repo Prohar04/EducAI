@@ -23,6 +23,13 @@ const CACHE_TTL_MS      = 24 * 60 * 60 * 1000; // 24 hours
 const AI_TIMEOUT_MS     = 20_000;
 const AI_MAX_RETRIES    = 1;
 
+/**
+ * A live run is user-initiated and the user is watching a progress bar, so it
+ * gets most of the function's 45s budget in one attempt rather than the short
+ * ceiling used when the scraper is only a fallback.
+ */
+const AI_LIVE_TIMEOUT_MS = 34_000;
+
 /** A run older than this that is still 'running' is treated as dead. */
 const STALE_RUN_MS      = 3 * 60 * 1000;
 const AI_RETRY_BASE_MS  = 1_000;
@@ -132,11 +139,16 @@ async function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function fetchAiWithRetry(url: string, init: RequestInit, log: (msg: string) => void) {
+async function fetchAiWithRetry(
+  url: string,
+  init: RequestInit,
+  log: (msg: string) => void,
+  timeoutMs: number = AI_TIMEOUT_MS,
+) {
   let lastErr: unknown;
   for (let attempt = 1; attempt <= AI_MAX_RETRIES; attempt += 1) {
     try {
-      const res = await fetch(url, { ...init, signal: AbortSignal.timeout(AI_TIMEOUT_MS) });
+      const res = await fetch(url, { ...init, signal: AbortSignal.timeout(timeoutMs) });
       if (res.ok) return res;
 
       // Retry on transient server errors
@@ -172,6 +184,8 @@ type RankedRow = {
 
 export const runMatch = async (req: AuthRequest, res: Response) => {
   const userId = req.userId!;
+  // `live` asks for a fresh crawl rather than an answer from stored data.
+  const live = (req.body as { live?: boolean } | undefined)?.live === true;
 
   const profile = await prisma.userProfile.findUnique({ where: { userId } });
   if (!profile) {
@@ -221,7 +235,7 @@ export const runMatch = async (req: AuthRequest, res: Response) => {
   // Ranking is a single query now, so the common path finishes in well under
   // the function's budget. The client contract is unchanged: it still receives
   // a runId and polls, it just finds the run already finished.
-  await runMatchBackground(run.id, userId, profile);
+  await runMatchBackground(run.id, userId, profile, live);
 
   const finished = await prisma.matchRun.findUnique({
     where:  { id: run.id },
@@ -240,7 +254,13 @@ export const runMatch = async (req: AuthRequest, res: Response) => {
 
 type ProfileShape = NonNullable<Awaited<ReturnType<typeof prisma['userProfile']['findUnique']>>>;
 
-async function runMatchBackground(runId: string, userId: string, profile: ProfileShape) {
+async function runMatchBackground(
+  runId: string,
+  userId: string,
+  profile: ProfileShape,
+  /** Scrape the web now instead of answering from stored programmes. */
+  live = false,
+) {
   const log = (msg: string) => logger.info(`[match:${runId}] ${msg}`);
 
   const setProgress = (n: number) =>
@@ -268,7 +288,10 @@ async function runMatchBackground(runId: string, userId: string, profile: Profil
     // ── 24-hour cache check ────────────────────────────────────────────────
     const cacheKey   = `${[...targetCountries].sort().join(',')}:${intendedMajor}:${intendedLevel}`;
     const cacheMeta  = await prisma.dataSourceMeta.findUnique({ where: { cacheKey } });
-    const isFresh    = cacheMeta && (Date.now() - cacheMeta.lastScrapedAt.getTime() < CACHE_TTL_MS);
+    // An explicit live run ignores the cache: the whole point is to go and
+    // fetch programmes that are not in the database yet.
+    const isFresh    = !live && cacheMeta
+                       && (Date.now() - cacheMeta.lastScrapedAt.getTime() < CACHE_TTL_MS);
 
     // Rank from what we already hold, always and first. Scraping is what made
     // this slow: on a cache miss the user waited out a live crawl before seeing
@@ -286,8 +309,11 @@ async function runMatchBackground(runId: string, userId: string, profile: Profil
       log(`ranked ${ranked.length} from DB${isFresh ? ' (cache fresh)' : ' (cache stale — refreshing behind this result)'}`);
     }
 
-    // Only block on the scraper when the database genuinely has nothing to show.
-    if (!isFresh && !canServeFromDB) {
+    // Normally the scraper is only worth waiting for when the database has
+    // nothing — stored programmes answer instantly and a crawl would just make
+    // the user wait. A live run is the deliberate exception: the user asked for
+    // fresh data and has accepted the wait.
+    if (live || (!isFresh && !canServeFromDB)) {
       // ── Call AI scraper ────────────────────────────────────────────────
       log('cache miss — calling AI server');
       await setProgress(20);
@@ -317,7 +343,7 @@ async function runMatchBackground(runId: string, userId: string, profile: Profil
             ...(AI_SERVER_API_KEY ? { 'X-API-KEY': AI_SERVER_API_KEY } : {}),
           },
           body:   JSON.stringify(aiPayload),
-        }, log);
+        }, log, live ? AI_LIVE_TIMEOUT_MS : AI_TIMEOUT_MS);
         if (!aiRes.ok) {
           const txt = await aiRes.text().catch(() => '');
           throw new Error(`AI server ${aiRes.status}: ${txt.slice(0, 200)}`);
@@ -351,9 +377,23 @@ async function runMatchBackground(runId: string, userId: string, profile: Profil
         await setProgress(80);
 
         // ── Resolve programKey → DB programId ────────────────────────────
-        ranked = await mapAiRankedToIds(aiData.ranked ?? []);
+        const scraped = await mapAiRankedToIds(aiData.ranked ?? []);
+
+        // A live run that comes back empty must not wipe out the ranking the
+        // database already produced — the user would lose working results in
+        // exchange for asking for fresher ones.
+        if (scraped.length > 0) {
+          log(`scrape produced ${scraped.length} ranked programmes`);
+          ranked = scraped;
+        } else if (ranked.length > 0) {
+          log('scrape returned nothing usable — keeping the stored ranking');
+        }
       } else {
-        log('AI unavailable and no stored programmes matched — returning empty');
+        log(
+          ranked.length > 0
+            ? 'scraper unavailable — keeping the stored ranking'
+            : 'scraper unavailable and no stored programmes matched — returning empty',
+        );
         await setProgress(80);
       }
     } else if (!isFresh) {

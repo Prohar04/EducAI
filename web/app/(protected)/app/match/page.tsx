@@ -16,6 +16,7 @@ import {
   CalendarDays,
   Database,
   ChevronRight,
+  Globe,
 } from "lucide-react";
 import { triggerMatchRun, getMatchLatest, getMatchRunStatus, saveProgram } from "@/lib/auth/action";
 import type { MatchLatestResponse } from "@/types/auth.type";
@@ -478,11 +479,16 @@ export default function MatchPage() {
     };
   }, [latestMatch?.run?.id, latestMatch?.run?.status, loadLatest]);
 
-  const handleRunMatch = () => {
+  /**
+   * @param live Fetch new programmes from the web. The default ranks what is
+   *             already stored, which is near-instant; a live run has to wait
+   *             on a crawl.
+   */
+  const handleRunMatch = (live = false) => {
     setError(null);
     setProgress(0);
     startTransition(async () => {
-      const result = await triggerMatchRun();
+      const result = await triggerMatchRun(live);
       if (!result?.success) {
         setError(result?.message ?? "Failed to start match run.");
         return;
@@ -528,23 +534,38 @@ export default function MatchPage() {
             Programs scraped and ranked live against your profile.
           </p>
         </div>
-        <Button
-          onClick={handleRunMatch}
-          disabled={isRunning}
-          className="w-full shrink-0 sm:w-auto"
-        >
-          {isRunning ? (
-            <>
-              <Loader2 className="mr-2 size-4 animate-spin" />
-              Running…
-            </>
-          ) : (
-            <>
-              <RefreshCw className="mr-2 size-4" />
-              {run ? "Re-run Match" : "Run Match"}
-            </>
-          )}
-        </Button>
+        <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row">
+          <Button
+            onClick={() => handleRunMatch(false)}
+            disabled={isRunning}
+            className="w-full sm:w-auto"
+          >
+            {isRunning ? (
+              <>
+                <Loader2 className="mr-2 size-4 animate-spin" />
+                Running…
+              </>
+            ) : (
+              <>
+                <RefreshCw className="mr-2 size-4" />
+                {run ? "Re-run Match" : "Run Match"}
+              </>
+            )}
+          </Button>
+          {/* Ranking stored programmes is instant but cannot surface anything
+              new. This goes and crawls for programmes that are not in the
+              database yet, which takes appreciably longer. */}
+          <Button
+            variant="outline"
+            onClick={() => handleRunMatch(true)}
+            disabled={isRunning}
+            title="Search the web for programmes not yet in the database. Slower."
+            className="w-full sm:w-auto"
+          >
+            <Globe className="mr-2 size-4" />
+            Fetch live data
+          </Button>
+        </div>
       </div>
 
       {/* Error banner */}
@@ -691,7 +712,7 @@ export default function MatchPage() {
               <span>Re-run the match — search results vary each run.</span>
             </li>
           </ul>
-          <Button variant="outline" onClick={handleRunMatch} disabled={isRunning} className="mt-2">
+          <Button variant="outline" onClick={() => handleRunMatch(false)} disabled={isRunning} className="mt-2">
             <RefreshCw className="mr-2 size-4" />
             Re-run Match
           </Button>
