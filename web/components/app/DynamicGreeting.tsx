@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useSyncExternalStore } from "react"
 
 interface Props {
   name?: string | null
@@ -11,16 +11,22 @@ function partOfDay(date: Date) {
   return hour < 12 ? "Morning" : hour < 17 ? "Afternoon" : "Evening"
 }
 
-export function DynamicGreeting({ name }: Props) {
-  // The server renders in its own timezone, so the greeting it produces can
-  // disagree with the browser's — a hydration mismatch (React #418) that makes
-  // React discard the server HTML and re-render. Settle on the server's value
-  // for the first paint, then correct it to the viewer's local time on mount.
-  const [timeOfDay, setTimeOfDay] = useState(() => partOfDay(new Date()))
+// The value depends on the viewer's clock, which is an external system rather
+// than React state — so there is nothing to subscribe to.
+const noopSubscribe = () => () => {}
 
-  useEffect(() => {
-    setTimeOfDay(partOfDay(new Date()))
-  }, [])
+export function DynamicGreeting({ name }: Props) {
+  // The server renders in its own timezone and would disagree with the browser,
+  // a hydration mismatch (React #418) that makes React throw away the server
+  // HTML and re-render. useSyncExternalStore is the supported way to render one
+  // thing on the server and the real local value once hydrated: the server
+  // snapshot is timezone-independent, and React swaps in the client's clock
+  // immediately after hydration without a mismatch.
+  const timeOfDay = useSyncExternalStore(
+    noopSubscribe,
+    () => partOfDay(new Date()),
+    () => null,
+  )
 
   const firstName = name?.split(" ")[0] ?? "there"
 
@@ -33,8 +39,8 @@ export function DynamicGreeting({ name }: Props) {
         textTransform: "uppercase",
         color: "#2A3A52",
         marginBottom: 10,
-      }} suppressHydrationWarning>
-        Good {timeOfDay}
+      }}>
+        {timeOfDay ? `Good ${timeOfDay}` : "Welcome back"}
       </p>
       <h1 style={{
         fontSize: "clamp(28px, 4vw, 48px)",

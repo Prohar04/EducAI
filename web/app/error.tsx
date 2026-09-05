@@ -12,6 +12,9 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
+    // A stale tab after a deploy is recoverable — reload onto the new build
+    // instead of showing an error the user cannot act on.
+    if (recoverFromChunkError(error)) return;
     console.error("[GlobalError]", error);
     // When Sentry is configured (npx @sentry/wizard -i nextjs), it auto-instruments this
     // and captures uncaught errors without any manual call needed here.
