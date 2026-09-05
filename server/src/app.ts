@@ -1,6 +1,7 @@
 import express from 'express';
 import logger from './config/logger.ts';
-import helmet from 'helmet';
+import * as helmetModule from 'helmet';
+import type { RequestHandler } from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -40,6 +41,16 @@ import publicStatsRoutes from './routes/publicStats.router.ts';
 import freshnessRoutes from './routes/freshness.router.ts';
 import cronRoutes from './routes/cron.router.ts';
 import { PrismaSessionStore } from './services/session.service.ts';
+
+// helmet publishes separate ESM and CJS type entries. Depending on how the
+// package is laid out by the installer, the specifier resolves either to the
+// callable default or to a namespace object carrying it — local installs and
+// the Vercel build disagreed, breaking the build with "not callable".
+// Normalise once so either shape works.
+type HelmetFactory = (options?: Record<string, unknown>) => RequestHandler;
+const helmet: HelmetFactory =
+  (helmetModule as unknown as { default?: HelmetFactory }).default ??
+  (helmetModule as unknown as HelmetFactory);
 
 const app = express();
 
