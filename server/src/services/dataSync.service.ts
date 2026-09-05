@@ -376,7 +376,21 @@ async function runProgramsSync(log: ReturnType<typeof makeLogger>): Promise<Sour
     srcLog.info(`User profiles sampled: ${profiles.length}`);
     log.info(`[programs] preferences=${JSON.stringify(preferences)}`);
 
-    const syncPayload = { ...preferences, triggeredBy: 'sync' };
+    // The ai-server endpoint (POST /api/v1/module1/sync) takes its scalars as
+    // query parameters and, because FastAPI routes complex types to the body,
+    // expects the countries list as a bare JSON array. Posting a single object
+    // was rejected with 422 "Input should be a valid list".
+    //
+    // The pipeline accepts one major and one degree, so the collected
+    // preferences are narrowed to their most common entry.
+    const primary = <T,>(values: T[], fallback: T): T => values[0] ?? fallback;
+    const syncQuery = new URLSearchParams({
+      major:   primary(preferences.fields, 'Computer Science').trim(),
+      degree:  primary(preferences.levels, 'MSC').trim().toUpperCase(),
+      budget:  String(30_000),
+      user_id: 'data-sync',
+    });
+    const syncPayload = preferences.countries;
 
     result.notes.push(
       `Triggering pipeline for ${preferences.countries.join(', ')} · ${preferences.fields.join(', ')} · ${preferences.levels.join(', ')}`,
@@ -395,7 +409,7 @@ async function runProgramsSync(log: ReturnType<typeof makeLogger>): Promise<Sour
     srcLog.info(`POST ${aiServerUrl}/api/v1/module1/sync`);
     log.info(`[programs] triggering ai-server pipeline`);
 
-    const response = await fetch(`${aiServerUrl}/api/v1/module1/sync`, {
+    const response = await fetch(`${aiServerUrl}/api/v1/module1/sync?${syncQuery}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
