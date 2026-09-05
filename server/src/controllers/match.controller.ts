@@ -16,22 +16,6 @@ import logger from '#src/config/logger.ts';
 
 const AI_SERVER_URL     = process.env.AI_SERVER_URL     ?? 'http://localhost:8001';
 const AI_SERVER_API_KEY = process.env.AI_SERVER_API_KEY ?? '';
-
-/**
- * Which ai-server endpoint finds programmes for a live run.
- *
- *   serper (default) — /scrape-match, the original: Serper search, Firecrawl
- *                      fetch, then a separate LLM extraction pass.
- *   gpt              — /scrape-match-gpt, one ChatGPT-search call.
- *
- * Both return identical shapes, so switching is a matter of setting
- * MATCH_SCRAPER=gpt on the API service. If the ChatGPT variant disappoints,
- * unset it and the original path resumes with no redeploy of the ai-server.
- */
-const MATCH_SCRAPE_PATH =
-  (process.env.MATCH_SCRAPER ?? 'serper').toLowerCase() === 'gpt'
-    ? '/api/v1/module1/scrape-match-gpt'
-    : '/api/v1/module1/scrape-match';
 const CACHE_TTL_MS      = 24 * 60 * 60 * 1000; // 24 hours
 // The scraper is only reached when the database holds nothing for this search,
 // and it now runs inside the request. The whole handler must fit the function's
@@ -352,7 +336,7 @@ async function runMatchBackground(
 
       let aiData: AiScrapeResponse | null = null;
       try {
-        const aiRes = await fetchAiWithRetry(`${AI_SERVER_URL}${MATCH_SCRAPE_PATH}`, {
+        const aiRes = await fetchAiWithRetry(`${AI_SERVER_URL}/api/v1/module1/scrape-match`, {
           method:  'POST',
           headers: {
             'Content-Type': 'application/json',

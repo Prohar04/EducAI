@@ -11,7 +11,6 @@ from .api.v1.module1_sync import router as module1_sync_router
 from .api.v1.news import router as news_router
 from .api.v1.recommendations import router as recommendations_router
 from .api.v1.scrape_match import router as scrape_match_router
-from .api.v1.scrape_match_gpt import router as scrape_match_gpt_router
 from .api.v1.strategy import router as strategy_router
 
 # Prisma DB
@@ -64,9 +63,6 @@ protected_router.include_router(recommendations_router, prefix="/api/v1/edu")
 protected_router.include_router(module1_sync_router, prefix="/api/v1/module1")
 # Web scraping for live university program data
 protected_router.include_router(scrape_match_router, prefix="/api/v1/module1")
-# ChatGPT-search variant of the above. Same request and response shapes, so the
-# Node service can switch between them without any other change.
-protected_router.include_router(scrape_match_gpt_router, prefix="/api/v1/module1")
 # Application strategy and planning
 protected_router.include_router(strategy_router, prefix="/api/v1/module1")
 # Job Finder: live job search for international students
