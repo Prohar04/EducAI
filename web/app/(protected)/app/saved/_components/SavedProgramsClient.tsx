@@ -31,10 +31,17 @@ const fetcher = async (url: string) => {
 };
 
 export default function SavedProgramsClient() {
-  const { data: saved, error, isLoading } = useSWR<SavedProgramItem[]>(
+  const { data, error, isLoading } = useSWR<SavedProgramItem[]>(
     "/api/saved-programs",
     fetcher,
   );
+
+  // Defend against malformed rows from the API (a saved program whose
+  // university/country relation failed to load). Rendering those threw a
+  // TypeError that tripped the error boundary ("Something went wrong").
+  const saved = Array.isArray(data)
+    ? data.filter((item) => item?.program?.university)
+    : data;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -78,6 +85,10 @@ export default function SavedProgramsClient() {
         <StaggerChildren stagger={0.07} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {saved.map((item) => {
             const { program } = item;
+            const university = program.university;
+            const location = [university.country?.name, university.city]
+              .filter(Boolean)
+              .join(", ");
             const tuition =
               program.tuitionMinUSD != null
                 ? program.tuitionMaxUSD != null
@@ -107,12 +118,13 @@ export default function SavedProgramsClient() {
                         {program.title}
                       </h2>
                       <p className="mt-0.5 break-words text-sm text-muted-foreground">
-                        {program.university.name}
+                        {university.name}
                       </p>
-                      <p className="break-words text-xs text-muted-foreground">
-                        {program.university.country.name}
-                        {program.university.city ? `, ${program.university.city}` : ""}
-                      </p>
+                      {location && (
+                        <p className="break-words text-xs text-muted-foreground">
+                          {location}
+                        </p>
+                      )}
                     </Link>
                     <div className="mt-4 flex items-center justify-between border-t border-border/60 pt-3 text-xs text-muted-foreground">
                       <span className="font-medium">{tuition}</span>
