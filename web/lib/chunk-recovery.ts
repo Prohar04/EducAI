@@ -76,3 +76,32 @@ export function clearChunkRecoveryFlag(): void {
     /* nothing to clear */
   }
 }
+
+const SOFT_RELOAD_KEY = "educai:softReloadAt";
+const SOFT_RELOAD_COOLDOWN_MS = 30_000;
+
+/**
+ * Last resort for an *unrecognised* client error that a plain reload very often
+ * clears: a stale RSC payload or Server Action id after a deploy, a hydration
+ * desync, or a chunk failure that surfaced without a recognisable name. These
+ * all present as "works after I refresh".
+ *
+ * Reloads at most once per cooldown window (self-contained — no dependency on a
+ * success flag being cleared), so a genuinely deterministic error reloads once
+ * and then falls through to the visible error boundary instead of looping.
+ */
+export function recoverWithSoftReload(): boolean {
+  if (typeof window === "undefined") return false;
+
+  try {
+    const last = Number(sessionStorage.getItem(SOFT_RELOAD_KEY) ?? "0") || 0;
+    if (Date.now() - last < SOFT_RELOAD_COOLDOWN_MS) return false;
+    sessionStorage.setItem(SOFT_RELOAD_KEY, String(Date.now()));
+  } catch {
+    // Storage blocked — cannot guarantee we won't loop, so don't reload.
+    return false;
+  }
+
+  window.location.reload();
+  return true;
+}

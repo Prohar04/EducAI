@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { recoverFromChunkError } from "@/lib/chunk-recovery";
+import { recoverFromChunkError, recoverWithSoftReload } from "@/lib/chunk-recovery";
 import Link from "next/link";
 import { AlertTriangle, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,10 @@ export default function ProtectedError({
     // instead of showing an error the user cannot act on.
     if (recoverFromChunkError(error)) return;
     console.error("[AppError]", error);
+    // Many "it works after I refresh" errors are a stale build/RSC payload that
+    // doesn't match a chunk-error signature. Reload once (rate-limited) before
+    // showing a dead end.
+    if (recoverWithSoftReload()) return;
   }, [error]);
 
   return (
@@ -31,8 +35,12 @@ export default function ProtectedError({
           An unexpected error occurred on this page. Try again or navigate to a
           different section.
         </p>
-        {error.digest && (
-          <p className="text-xs text-muted-foreground/50">ID: {error.digest}</p>
+        {(error.digest || error.message) && (
+          <p className="text-xs text-muted-foreground/50 break-words">
+            {error.digest ? `ID: ${error.digest}` : null}
+            {error.digest && error.message ? " · " : null}
+            {error.message ? error.message.slice(0, 200) : null}
+          </p>
         )}
       </div>
       <div className="flex gap-3">
