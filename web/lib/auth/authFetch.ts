@@ -1,6 +1,6 @@
-import { getSessionOrNull, deleteSession } from "./session";
-import { refreshToken as refreshAccessToken } from "./auth";
+import { getSessionOrNull } from "./session";
 import { redirect } from "next/navigation";
+import { BACKEND_URL } from "@/constants/constants";
 
 export interface FetchOptions extends RequestInit {
 	headers?: Record<string, string>;
@@ -10,6 +10,35 @@ const isAuthFailure = (message: string) =>
 	message.includes("invalid") ||
 	message.includes("expired") ||
 	message.includes("unauthorized");
+
+/**
+ * Exchange a refresh token for a fresh access token WITHOUT writing any cookies.
+ *
+ * authFetch is called from Server Component render paths (e.g. the /app layout
+ * loading the user profile). Next.js forbids mutating cookies during render, so
+ * calling the cookie-persisting refresh helper here throws and surfaces as a 500
+ * immediately after sign-in. Cookie rotation is handled by middleware (proxy.ts);
+ * here we only need a valid token for the in-flight retry.
+ */
+async function refreshAccessTokenNoPersist(
+	refreshToken: string,
+): Promise<string | null> {
+	try {
+		const res = await fetch(`${BACKEND_URL}/auth/refresh`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Cookie: `refreshToken=${refreshToken}`,
+			},
+			cache: "no-store",
+		});
+		if (!res.ok) return null;
+		const data = (await res.json()) as { accessToken?: string };
+		return data.accessToken ?? null;
+	} catch {
+		return null;
+	}
+}
 
 export const authFetch = async (
 	url: string | URL,
@@ -48,9 +77,7 @@ export const authFetch = async (
 	// from being logged out "after some time" just because the short-lived
 	// access token rotated between requests.
 	if (response.status === 401) {
-		const refreshed = await refreshAccessToken(session.refreshToken).catch(
-			() => null,
-		);
+		const refreshed = await refreshAccessTokenNoPersist(session.refreshToken);
 
 		if (refreshed) {
 			response = await doFetch(refreshed);
@@ -72,7 +99,9 @@ export const authFetch = async (
 		}
 
 		if (reason) {
-			await deleteSession();
+			// Don't delete the session cookie here — this runs during render,
+			// where cookie mutation throws. Middleware clears the stale cookie on
+			// the next protected navigation; redirecting is enough.
 			redirect(`/auth/signin?reason=${reason}`);
 		}
 	}
