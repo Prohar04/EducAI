@@ -329,7 +329,7 @@ export const resendVerification = async (req: Request, res: Response) => {
   }
 };
 
-// ── SIGNIN (with lockout + email-verified check + remember me) ─────
+// ── SIGNIN (with lockout + remember me) ─────
 
 export const signin = async (req: Request, res: Response) => {
   try {
@@ -358,13 +358,8 @@ export const signin = async (req: Request, res: Response) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Check email verified
-    if (!user.emailVerified) {
-      return res.status(403).json({
-        code: 'EMAIL_NOT_VERIFIED',
-        message: 'Please verify your email before signing in.',
-      });
-    }
+    // Email verification is not required to sign in. An account with valid
+    // credentials is allowed in regardless of emailVerified status.
 
     // Reset failed login counters on success
     await resetFailedLogin(user.id);

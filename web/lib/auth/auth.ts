@@ -209,13 +209,6 @@ export async function signIn(
 
 		const data = await response.json().catch(() => null);
 
-		if (data?.code === "EMAIL_NOT_VERIFIED") {
-			return {
-				message: "Please verify your email before signing in.",
-				code: "EMAIL_NOT_VERIFIED",
-			};
-		}
-
 		if (data?.code === "ACCOUNT_LOCKED") {
 			const mins = Math.ceil((data.retryAfterSeconds || 600) / 60);
 			return {
